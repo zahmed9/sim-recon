@@ -84,7 +84,9 @@ if($release eq "latest"){
 sub Usage()
 {
 	print "\nUsage:\n\t\tmake_release <release>\n\n";
-	
+	print "Note that giving the release name \"latest\" will cause\n";
+	print "The most current version of the code to be checked out\n";
+	print "(without any tag).\n\n";	
 	
 	exit(0);
 }
