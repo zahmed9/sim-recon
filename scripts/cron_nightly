@@ -9,6 +9,7 @@
 
 # checkout and build the Hall-D source code
 cd /group/halld/Software/builds
+rm -f latest.out
 /group/halld/Software/scripts/make_release latest > latest.out
 
 
