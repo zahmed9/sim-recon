@@ -17,11 +17,9 @@ setenv STDHEP_TRANS_DIR $HALLD_HOME/src/stdhep_translators_linux
 
 # below are fermi lab products (See above about fermi lab products)
 # and finally  set these locations
-#setenv MCFAST_DIR $HALLD_HOME/src/mcfast_v5_2_Linux+2.4
-#setenv STDHEP_DIR $HALLD_HOME/src/stdhep_v4_08_Linux+2.2
-#setenv QQ_DIR $HALLD_HOME/src/qq_v9_2b_Linux+2.2
 
 setenv MCFAST_DIR $HALLD_HOME/src/mcfast_v5_2_Linux+2.4+GCC3_2_1
+#setenv MCFAST_DIR $HALLD_HOME/src/mcfast_v5_2_Linux+2.4+GCC2_95_2
 setenv STDHEP_DIR $HALLD_HOME/src/stdhep_v5_01_Linux+2.4
 setenv QQ_DIR $HALLD_HOME/src/qq_v9_2b_Linux+2.4
 
