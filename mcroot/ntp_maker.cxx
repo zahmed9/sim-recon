@@ -300,7 +300,7 @@ int main(int argc, char **argv)
     //
     // Define some four-vectors
     TLorentzVector sum4v,X4v,P4vector[40],proton4v;
-    Double_t px=0,py=0,pz=0,E=0;
+    Double_t px=0,py=0,pz=0,E=0,x=0,y=0,z=0;
     
     
     if((nparticles=esr->GetNparticles())){
@@ -340,6 +340,10 @@ int main(int argc, char **argv)
 	  vnames->Add(label);
 	  cout<<"v{int}_z:\t\t production vertex component for each particle\n";
 	}
+	//get the smeared vertex
+	x=particle->GetX();
+	y=particle->GetY();
+	z=particle->GetZ();
 	// get the four-momentum
 	px= particle->GetPx();
 	py= particle->GetPy();
@@ -348,24 +352,39 @@ int main(int argc, char **argv)
 
 	//
 	// book smearing of the components
+	values[n_vectors++] = (x - hepParticle.GetVx())/hepParticle.GetVx();
+	values[n_vectors++] = (y - hepParticle.GetVy())/hepParticle.GetVy();
+	values[n_vectors++] = (z - hepParticle.GetVz())/hepParticle.GetVz();
+
 	values[n_vectors++] = (px - hepParticle.GetPx())/hepParticle.GetPx();
 	values[n_vectors++] = (py - hepParticle.GetPy())/hepParticle.GetPy();
 	values[n_vectors++] = (pz - hepParticle.GetPz())/hepParticle.GetPz();
 	values[n_vectors++] = (E - hepParticle.GetE())/hepParticle.GetE();
 
 	if(firstEvent){
-	    sprintf(label,"SmearP%d_x",nparts);
+	  //vertex
+	    sprintf(label,"SigmaX_%d",nparts);
 	    vnames->Add(label);
-	    cout<<"SmearP{int}_x:\t\t (px - hepParticle.GetPx())/hepParticle.GetPx() for each particle\n";
-	    sprintf(label,"SmearP%d_y",nparts);
+	    cout<<"SigmaX_{int}:\t\t (esrParticle.GetX() - hepParticle.GetX())/hepParticle.GetX() for each particle\n";
+	    sprintf(label,"SigmaY_%d",nparts);
 	    vnames->Add(label);
-	    cout<<"SmearP{int}_x:\t\t (py - hepParticle.GetPy())/hepParticle.GetPy() for each particle\n";
-	    sprintf(label,"SmearP%d_z",nparts);
+	    cout<<"SigmaY_{int}:\t\t (esrParticle.GetY() - hepParticle.GetY())/hepParticle.GetY() for each particle\n";
+	    sprintf(label,"SigmaZ_%d",nparts);
 	    vnames->Add(label);
-	    cout<<"SmearP{int}_x:\t\t (pz - hepParticle.GetPz())/hepParticle.GetPz() for each particle\n";
-	    sprintf(label,"SmearP%d_t",nparts);
+	    cout<<"SigmaZ_{int}:\t\t (esrParticle.GetZ() - hepParticle.GetZ())/hepParticle.GetZ() for each particle\n";
+	    
+	    sprintf(label,"SigmaPx_%d",nparts);
 	    vnames->Add(label);
-	    cout<<"SmearP{int}_x:\t\t (E - hepParticle.GetE())/hepParticle.GetE() for each particle\n";
+	    cout<<"SigmaPx_{int}:\t\t (px - hepParticle.GetPx())/hepParticle.GetPx() for each particle\n";
+	    sprintf(label,"SigmaPy_%d",nparts);
+	    vnames->Add(label);
+	    cout<<"SigmaPy_{int}:\t\t (py - hepParticle.GetPy())/hepParticle.GetPy() for each particle\n";
+	    sprintf(label,"SigmaPz_%d",nparts);
+	    vnames->Add(label);
+	    cout<<"SigmaPz_{int}:\t\t (pz - hepParticle.GetPz())/hepParticle.GetPz() for each particle\n";
+	    sprintf(label,"SigmaE_%d",nparts);
+	    vnames->Add(label);
+	    cout<<"SigmaE_{int}:\t\t (E - hepParticle.GetE())/hepParticle.GetE() for each particle\n";
 	  }
 
   
