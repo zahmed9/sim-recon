@@ -135,7 +135,7 @@ main_cxx.o: main_cxx.cxx
 	g++ -O -Wall -fno-rtti -fno-exceptions -fPIC -I/usr/local/root/include -g -c main_cxx.cxx
 
 read_output: read_output.c
-	gcc -I/dsk19/halld/source/stdhep/src/inc/ -I. -g -fno-builtin -ieee read_output.c -o read_output
+	gcc -I$(STDHEP_DIR)/src/inc/ -I. -g -fno-builtin -ieee read_output.c -o read_output
 
 
 # removed $(MAP) from above
@@ -165,6 +165,9 @@ clean:
 #$Id$
 #
 #$Log$
+#Revision 1.4  1998/11/19 01:15:45  eugenio
+#fix hard link
+#
 #Revision 1.3  1998/11/19 00:14:53  eugenio
 #Added some more usr_code
 #
