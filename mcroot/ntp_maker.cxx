@@ -25,13 +25,14 @@
 #include "TLorentzVector.h"
 
 #include "TMCFastHepEvt.h"
-#include "TMCFastTOF.h"
+#include "TMCFastTraceEvent.h"
 #include "TMCFastOfflineTrack.h"
 #include "TMCFastCalorimeter.h"
 #include "TLGDsmears.h"
 #include "TMCesr.h"
 #include "TNtupleUtil.h"
 
+using namespace std;
 
 //______________________________________________________________________________
 
@@ -156,7 +157,7 @@ int main(int argc, char **argv)
   //
 
   TMCFastHepEvt *hepevt = new TMCFastHepEvt();
-  TMCFastTOF *tof_trace = new TMCFastTOF();
+  TMCFastTraceEvent *traces = new TMCFastTraceEvent();
   TMCFastOfflineTrack *offtrk = new TMCFastOfflineTrack();
   TMCFastCalorimeter *bcal = new TMCFastCalorimeter();
   TLGDsmears *lgdSmears = new TLGDsmears();
@@ -175,8 +176,8 @@ int main(int argc, char **argv)
 
    if(strcmp(bname,"hepevt")==0)
      b[nbranches]->SetAddress(&hepevt);
-   if(strcmp(bname,"tof_trace")==0)
-     b[nbranches]->SetAddress(&tof_trace);
+   if(strcmp(bname,"traces")==0)
+     b[nbranches]->SetAddress(&traces);
    if(strcmp(bname,"offtrk")==0)
      b[nbranches]->SetAddress(&offtrk);
       if(strcmp(bname,"bcal")==0)
@@ -944,7 +945,7 @@ int main(int argc, char **argv)
     }
     delete esr;
     hepevt->Clear();
-    tof_trace->Clear();
+    traces->Clear();
     offtrk->Clear();
     bcal->Clear();
     lgdSmears->Clear();

@@ -4,9 +4,11 @@
 //*-- CMZ : PME 22-Feb-1999
 
 #include <stdlib.h>
-#include <iostream.h>
+#include <iostream>
 #include <string.h>
 #include <Rtypes.h>
+
+using namespace std;
 
 class TntpNames{
 private: 
