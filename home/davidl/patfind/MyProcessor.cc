@@ -20,7 +20,7 @@ using namespace std;
 #define rad2deg 57.3
 #define PI_MASS 0.139568
 
-static int colors[] = {kRed,kBlue,kMagenta,kGreen,kBlack};
+static int colors[] = {kRed,kBlue,kCyan,kGreen,kBlack};
 
 extern TCanvas *maincanvas;
 
@@ -263,10 +263,12 @@ derror_t MyProcessor::DrawHits(void)
 		float x = mccheathit->r*cos(mccheathit->phi);
 		float y = -mccheathit->r*sin(mccheathit->phi);
 		int color = colors[mccheathit->track-1];
-		int markerstyle = 20;
+		int markerstyle = 20+mccheathit->track-1;
+		if(mccheathit->system>2)continue;
 		if(mccheathit->system>2){markerstyle = 22; color+=100;}
 		markers[Nmarkers] = new TMarker(x,y,markerstyle);
 		markers[Nmarkers]->SetMarkerColor(color);
+		markers[Nmarkers]->SetMarkerSize(0.75);
 		markers[Nmarkers]->Draw();
 		if(++Nmarkers>=500)break;
 	}
