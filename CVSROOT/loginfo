@@ -17,3 +17,13 @@
 #
 # For example:
 DEFAULT		(echo ""; who am i; echo %s; date; cat) >> $CVSROOT/CVSROOT/commitlog
+^HDGeant        mail -s %s brash@uregina.ca
+^hdds           mail -s %s brash@uregina.ca
+^hddm           mail -s %s brash@uregina.ca
+^include        mail -s %s brash@uregina.ca
+^xerces-c       mail -s %s brash@uregina.ca
+^HDGeant        mail -s %s richard.t.jones@uconn.edu
+^hdds           mail -s %s richard.t.jones@uconn.edu
+^hddm           mail -s %s richard.t.jones@uconn.edu
+^include        mail -s %s richard.t.jones@uconn.edu
+^xerces-c       mail -s %s richard.t.jones@uconn.edu
