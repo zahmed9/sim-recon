@@ -32,6 +32,8 @@
 #include "TNtupleUtil.h"
 
 #include "Vec.h"
+#include "lorentz.h"
+
 
 //______________________________________________________________________________
 
@@ -43,8 +45,10 @@ void PrintUsage(char *processName)
   cerr << processName << " usage: [switches] inputfile" <<endl;
   cerr << "\t-o<name>    Save output as <name>.root (default: halld.root).\n";
   cerr << "\t-c          Book four-momenta components.\n";
+  cerr << "\t-e          Make esr from TMCFastHepEvt only\n";
   cerr << "\t-n<nevents> The number of event to read (default all).\n";
   cerr << "\t-s<nevents> The number of events to skip before reading(default=0).\n";
+  cerr<< "\t-B<energy>  Add kludged beam (default is 8 GeV)\n";
   cerr << "\t-b<bcal_zres> Add z position smearing to the BCAL(default none).\n";
   cerr<<"\t-h Print this help message\n\n";
 }
@@ -56,11 +60,12 @@ int main(int argc, char **argv)
   
   Char_t *argptr,rootfile[50],outputfile[50],ntpTitle[50];
   Int_t nevents=0;
-  Int_t skipEvents=0,Book_Four_Components=0;
+  Int_t skipEvents=0,Book_Four_Components=0,MakeHepEvtEsr=0;
   sprintf(rootfile,"Event.rdt");
   sprintf(outputfile,"halld.root");
   sprintf(ntpTitle,"Hall  Ntuple");
   Double_t bcal_zresolution=-1; // -1 = no z-position smearing
+  Double_t beamE = 8.0;
 
   /*
    * Read the command line switches
@@ -80,9 +85,16 @@ int main(int argc, char **argv)
 	  sprintf(outputfile,"%s.root",++argptr);
 	  cerr<<"Saveing output in file: "<<outputfile<<endl;
 	  break;
+	case 'e':
+	  cerr<<"Making esr from hepevt objects only!\n";
+	  MakeHepEvtEsr=1;
+	  break;
 	case 'c':
 	  Book_Four_Components=1;
 	  cerr<<"Booking four-momenta components\n";
+	  break;
+	case 'B':
+	  beamE = atof(++argptr);
 	  break;
 	case 's':
 	  skipEvents=atoi(++argptr);
@@ -133,18 +145,6 @@ int main(int argc, char **argv)
   Int_t nbranches=0;
   TTree *tree ;
   tree = (TTree*)rdtfile->Get("T");// This is the tree that HDFast created
-
-  
-  // List and link the Branches
-  cout<< "Branch list:\n";
-  TIter next(tree->GetListOfBranches());
-  TBranch *branch;
-  while((branch= (TBranch *)next())){
-    cout<< "\t"<<branch->GetName()<<endl;
-    b[nbranches++] = tree->GetBranch(branch->GetName());// link all branches
-  }
- 
-
   // HDFast objects
   //
   // These are the objects (leaves) contained in the tree
@@ -156,12 +156,31 @@ int main(int argc, char **argv)
   TMCFastCalorimeter *bcal = new TMCFastCalorimeter();
   TLGDsmears *lgdSmears = new TLGDsmears();
   // set branch addresses
-  b[0]->SetAddress(&hepevt);
-  b[1]->SetAddress(&tof_trace);
-  b[2]->SetAddress(&offtrk);
-  b[3]->SetAddress(&bcal);
-  b[4]->SetAddress(&lgdSmears);
+  cerr<<"setting Branches\n";
+ 
+  
+  // List and link the Branches
+  cout<< "Branch list:\n";
+  TIter next(tree->GetListOfBranches());
+  TBranch *branch;
+  while((branch= (TBranch *)next())){
+    cout<< "\t"<<branch->GetName()<<endl;
+    b[nbranches] = tree->GetBranch(branch->GetName());// link all branches
+    const Text_t * bname=branch->GetName();
 
+   if(strcmp(bname,"hepevt")==0)
+     b[nbranches]->SetAddress(&hepevt);
+   if(strcmp(bname,"tof_trace")==0)
+     b[nbranches]->SetAddress(&tof_trace);
+   if(strcmp(bname,"offtrk")==0)
+     b[nbranches]->SetAddress(&offtrk);
+      if(strcmp(bname,"bcal")==0)
+     b[nbranches]->SetAddress(&bcal);
+   if(strcmp(bname,"lgdSmears")==0)
+     b[nbranches]->SetAddress(&lgdSmears);
+   nbranches++;
+  }
+ 
   //
   // define a TNtuple 
   //
@@ -187,9 +206,13 @@ int main(int argc, char **argv)
   //
   // Now loop over the events in the file
   //
+  cerr<<"Looping over Events\n";
   for (Int_t ev = 1+skipEvents; ev < nevents; ev++) {
-    //read  event in memory 
-    tree->GetEvent(ev); 
+    // get only needed branches from the data tree
+    for(Int_t i=0;i<nbranches;i++)
+      b[i]->GetEvent(ev); 
+      
+    
     //  
     // OK we now have an event
     //
@@ -198,8 +221,11 @@ int main(int argc, char **argv)
     //
     // Create an event summary record from the event branches
     TMCesr *esr=0;
-    esr = new TMCesr(*hepevt,*offtrk,*lgdSmears,*bcal,bcal_zresolution);
-
+    if(MakeHepEvtEsr)
+      esr = new TMCesr(*hepevt);
+    else
+      esr = new TMCesr(*hepevt,*offtrk,*lgdSmears,*bcal,bcal_zresolution);
+    
     // some indexology
     Int_t nparts=0,n,i,j,k,l;
 
@@ -255,7 +281,7 @@ int main(int argc, char **argv)
     }
 
     // define some libpp four-vectors
-    fourVec sum4v,P4vector[20];
+    fourVec sum4v,P4vector[20],proton4v;
     Double_t px=0,py=0,pz=0,E=0;
     
     
@@ -346,7 +372,11 @@ int main(int argc, char **argv)
 	  Kminus[nKminus++] = nparts;
 	  break;
 	case 2212 /*proton*/:
+	case 2112 /*neutron*/:
 	  proton[nproton++] = nparts;
+	  break;
+	case 11: // electron
+	case -11: // positron
 	  break;
 	default:
 	  cerr<<"Unknown particle id\n"
@@ -355,24 +385,109 @@ int main(int argc, char **argv)
 	  exit(-1);
 	}
 	// set the particle four-vector
-	P4vector[nparts].set(E,threeVec(px,py,pz));
-	
-	sum4v += P4vector[nparts];
+	if(PDGid != 2212 && PDGid != 2112 ){// It's not a proton or neutron
+	  P4vector[nparts].set(E,threeVec(px,py,pz));
+	  sum4v += P4vector[nparts];
+	  //nparts++;
+	}else{
+	  proton4v.set(E,threeVec(px,py,pz));
+	  if(nproton>1){
+	    cerr<<"There is more than one proton!\n"
+		<<"Exiting!\n";
+	    exit(-1);
+	  }
+	}
 	nparts++;
       }
+    ///////////////////////
+      // t distribution
+      //////////////////////
+      fourVec beam4v(beamE,threeVec(0,0,beamE));
+      Double_t t = (beam4v - sum4v)*(beam4v - sum4v);
+      if(firstEvent){
+	sprintf(label,"t");
+	vnames->Add(label);
+      } 
+      values[n_vectors++] = -t;
+
+      //////////////////////
+      // missing xmass
+      /////////////////////
+      if(nproton==1){
+	fourVec target4v(0.938,threeVec(0,0,0));// proton target
+	Double_t mXm = (beam4v + target4v - proton4v)*
+	  (beam4v + target4v - proton4v);
+	if(firstEvent){
+	  sprintf(label,"mXm");
+	  vnames->Add(label);
+	} 
+	values[n_vectors++] = mXm;
+  
+      }
+      ///////////////////////////
+      // Let's add some GJ angles
+      ///////////////////////////
+
+      // set the boost
+      lorentzTransform L(sum4v);
+      // z GJ is the boosted beam
+      // y GJ is normal to production plane
+      // get x GJ from right handed system
+      threeVec xGJ,yGJ,zGJ;
+      beam4v *= L; // boost beam to X restframe
+      zGJ =  beam4v.V() * (1.0 /  beam4v.V().r());
+     
+      // copy and boost
+      fourVec *P4boosted = new fourVec[20];
+      threeVec X3vGJ(0,0,0);// init it
+      for(i=0; i<nparts-1;i++){// the -1 subtracts 1 for the proton
+	P4boosted[i]=  P4vector[i];
+	P4boosted[i] *= L;// boost particles to X restframe
+	values[n_vectors++] = (P4boosted[i].V() * zGJ) * (1.0/
+	  P4boosted[i].V().r()) ;// Cos theta GJ
+	if(firstEvent){
+	  sprintf(label,"cosGJ.%d",i);
+	  vnames->Add(label);
+	} 
+	X3vGJ +=P4vector[i].V();
+      }
+      
+      for(i=0; i<nparts-1;i++){
+	yGJ = (beam4v.V() / X3vGJ) * 
+	  (1.0/(beam4v.V().r() * X3vGJ.r())) ; // cross product
+	xGJ = yGJ / zGJ;
+	values[n_vectors++] = TMath::ATan2( yGJ * P4boosted[i].V(),
+					    xGJ * P4boosted[i].V());
+	if(firstEvent){
+	  sprintf(label,"phiGJ.%d",i);
+	  vnames->Add(label);
+	} 
+      }
+      
+      
+     
       
       /////////////////////////////////
       // Now book some effective masses
       /////////////////////////////////
       
-      // total mass
+      // X mass & total mass
       // note: ~(fourVec) returns the fourVec length (i.e. effective mass)
       values[n_vectors++] = ~sum4v; 
       
       if(firstEvent){
-	sprintf(label,"TotalMass");
+	sprintf(label,"XMass");
 	vnames->Add(label);
       } 
+   
+      if(nproton){
+	if(firstEvent){
+	  sprintf(label,"TotalMass");
+	  vnames->Add(label);
+	} 
+	values[n_vectors++] = ~(sum4v + P4vector[proton[0]])  ; 
+      }
+			      
       Int_t nn=0;
       Int_t mm=0;
 
@@ -731,8 +846,9 @@ int main(int argc, char **argv)
     if(nparticlesFirstEvent == nparticles)
       ntp->Fill(values);
     else{ // Warning!!
-      cerr<<"nparticlesFirstEvent != nparticles\n"
-	  <<"Event: "<<ev<<endl;
+      cerr<<"nparticlesFirstEvent != nparticles "
+	  <<nparticlesFirstEvent<<"!="<< nparticles
+	  <<" Event: "<<ev<<endl;
       
     }
     delete esr;

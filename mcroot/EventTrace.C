@@ -22,6 +22,7 @@ cout<<"Opening "<<rdtFile<<" for data input\n";
  TBranch *b3 = tree->GetBranch("offtrk");
  TBranch *b4 = tree->GetBranch("bcal");
  TBranch *b5 = tree->GetBranch("lgdSmears");
+ Double_t parms[3];
 
  // define object pointers
  TMCFastHepEvt *hepevt;
@@ -58,8 +59,8 @@ cout<<"tracing event number: "<<ev<<endl;
 
  Float_t tx[2],ty[2],tz[2];
         
- Int_t nPoints=1000;
- Float_t ctrk_z[1000],ctrk_x[1000],ctrk_y[1000];
+ Int_t nPoints=6000;
+ Float_t ctrk_z[6000],ctrk_x[6000],ctrk_y[6000];
  
  
  for(Int_t i=0;i<n_particles;i++){
@@ -130,7 +131,7 @@ cout<<"tracing event number: "<<ev<<endl;
      Int_t n=2;
      //ptrack[i] = new TPolyLine(n,tz,tx);
      Double_t Xo=tx[0],Yo=ty[0];
-     Double_t parms[3];
+     //Double_t parms[3];
      Double_t pt = TMath::Sqrt(particle->GetPx()*particle->GetPx() +
 			       particle->GetPy()*particle->GetPy());
      Double_t R = 100*(3.33)*pt/(2.24);/* in cm */ 

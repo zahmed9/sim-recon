@@ -43,6 +43,18 @@ TMCesr::TMCesr(TMCFastHepEvt &hepevt,TMCFastOfflineTrack &offtrk,
        TLGDsmears &lgdsmears,TMCFastCalorimeter &bcal,Double_t bcal_res){
   Fill(hepevt,offtrk,lgdsmears,bcal,bcal_res);
 }
+TMCesr::TMCesr(TMCFastHepEvt &hepevt){
+  Fill(hepevt);
+}
+void TMCesr::Fill(TMCFastHepEvt &hepevt){
+ fnParticles=0;
+ if(!fgParticles) fgParticles = new TClonesArray("TMCParticle",10);
+ fParticles = fgParticles;
+ SetNparticles(makeParticles(hepevt));
+ SetNLGDparticles(0);
+ SetNBCALparticles(0);
+ SetNOFFTRKparticles(0);
+}
 
 void TMCesr::Fill(TMCFastHepEvt &hepevt,TMCFastOfflineTrack &offtrk, 
        TLGDsmears &lgdsmears,TMCFastCalorimeter &bcal,
@@ -95,7 +107,12 @@ Int_t TMCesr::makeParticles(TMCFastHepEvt &hepevt,TMCFastCalorimeter &bcal,Doubl
     //
     // Scale the MCFast energies by a kludge factor.
     // Without kludge, piz mean is too small by 1/1.055
-    e *= 1.055;
+    // e *= 1.055;  THIS was need in the old MCFast calor code
+    // The new calor code needs less of a correction
+    // This value is based on the average correction needed to
+    // get the correct pizero mass at B5:m1.4 and B12M2.0
+    e *= 1.03; 
+
 
     // e is now the total measured electroMagnetic energy for this gamma   
     if(e){
@@ -158,6 +175,25 @@ int TMCesr::makeParticles(TMCFastHepEvt &hepevt,TMCFastOfflineTrack &offtrk){
   return n_made;
 }
 
+int TMCesr::makeParticles(TMCFastHepEvt &hepevt){
+  // Create TMCparticle instances
+  // from a TMCFastHepEvt &hepevt
+  // and add the instances to 
+  // the  TClonesArray fParticles
+  //
+
+  TClonesArray &parts = *fParticles;
+  Int_t n_made=0;
+
+  for(Int_t j=0;j<hepevt.GetNhep();j++){
+    
+    TMCFastHepParticle heppart = hepevt.GetHepParticle(j+1);
+    new(parts[fnParticles++]) TMCParticle(heppart);
+    n_made++;
+  }
+  return n_made;
+}
+
 
 
 
@@ -175,6 +211,27 @@ TMCesr::~TMCesr()
 {
    this->Clear();
 }
+//____________________________________________________________________________
+int  gampID(int id);
+void TMCesr::DumpGampFormat(ostream *os, Double_t kludge_beamE){
+  // Print out the esr oject in gamp ascii format
+  // which is used in PWA2000.  The format for each event is:
+  // {# nparts} //nparticles where the beam is the first particle)
+  // {gampID} {charge} {p.x} {p.y} {p.z} {p.t} // particle #0
+  // ...
+  // {gampID} {charge} {p.x} {p.y} {p.z} {p.t} // particle #(nparts-1)
+
+  *os<<this->GetNparticles()+1<<endl; // add 1 for beam
+  *os<<"1 0 0 0 "<<kludge_beamE<<" "<<kludge_beamE<<endl;
+  if(this->GetNparticles()){
+    TIter nextMC(this->GetParticles()); 
+    while( TMCParticle *p = ( TMCParticle *)nextMC())
+      *os<<gampID(p->GetIdHep())<<" "<< p->GetCharge()<<" "
+	 <<p->GetPx()<<" "<<p->GetPy()<<" "<<p->GetPz()<<" "<<p->GetE()<<endl;
+
+  }  
+}
+
 
 //____________________________________________________________________________
 void TMCesr::Print(ostream *os){

@@ -14,6 +14,34 @@
 ClassImp(TMCParticle)
 //____________________________________________________________________________
 
+TMCParticle::TMCParticle(TMCFastHepParticle &heppart){
+  
+  SetPx(heppart.GetPx());
+  SetPy(heppart.GetPy()) ;
+  SetPz(heppart.GetPz()); 
+  SetE(heppart.GetE()) ; 
+  SetX(heppart.GetVx()) ; 
+  SetY(heppart.GetVy()) ;
+  SetZ(heppart.GetVz()) ;
+  Int_t pid =heppart.GetIdhep();
+  Int_t charge=-1;
+  if(pid>0)
+    switch(pid){
+    case 22: //gamma
+    case 2112: // neutron
+      charge=0;
+      break;
+    default:
+      charge=1;
+      break;
+    }
+  SetCharge(charge);
+  SetIdHep(heppart.GetIdhep()) ;
+  SetHepIndex(heppart.GetIndex());
+  SetMaker(MADE_FROM_HEPEVT) ;
+  SetStatis(0); // currently not used
+}
+
 TMCParticle::TMCParticle(TMCFastHepParticle &heppart,TMCFastOfflineTrack &offtrk, Int_t track){
   
   SetPx(offtrk.GetPx(track));
@@ -30,6 +58,8 @@ TMCParticle::TMCParticle(TMCFastHepParticle &heppart,TMCFastOfflineTrack &offtrk
   SetStatis(0); // currently not used
 
 }
+
+
 
 TMCParticle::TMCParticle(TMCFastHepParticle &heppart,Double_t eSmeared){
   Double_t e=heppart.GetE();

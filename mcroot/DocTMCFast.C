@@ -17,7 +17,8 @@
  gHtml->MakeClass("TMCesr");
  gHtml->MakeClass("TLGDsmears"); 
  gHtml->MakeClass("TLGDparticle");
-
-
-
+ gHtml->MakeClass("TMCFastTrace");
+ gHtml->MakeClass("TMCFastHits");
+ gHtml->MakeClass("TMCFastHit");
+ gHtml->MakeClass("TMCFastCerenkov");
 }

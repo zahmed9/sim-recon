@@ -1,7 +1,7 @@
 #
 #  WARNING This makefile is currently only setup for Alpha/OSF with g++
 #
-
+ 
 
 ObjSuf        = o
 SrcSuf        = cxx
@@ -36,7 +36,7 @@ endif
 ifeq "$(UNAME)" "Linux"
 # Linux with egcs
 CXX           = g++
-CXXFLAGS      = -O2 -g -Wall -fno-rtti -fno-exceptions -fPIC -I$(ROOTSYS)/include -I/home/halld/include
+CXXFLAGS      = -O2 -g -Wall -fno-rtti -fno-exceptions -fPIC -I$(ROOTSYS)/include -I/home/halld/include 
 LD            = g++
 LDFLAGS       = -g
 SOFLAGS       = -shared
@@ -58,7 +58,11 @@ TMCFastO        = TMCFastHepEvt.o TMCFastTOF.o \
 		TCalHitTracks.o  TCalHitTracksDict.o \
 		TLGDsmears.o TLGDsmearsDict.o \
 		TLGDparticle.o TLGDparticleDict.o \
-		TMCesr.o TMCesrDict.o TMCParticle.o TMCParticleDict.o
+		TMCesr.o TMCesrDict.o TMCParticle.o TMCParticleDict.o \
+		TMCFastHits.o TMCFastHitsDict.o TMCFastHit.o TMCFastHitDict.o \
+		TMCFastTrace.o TMCFastTraceDict.o \
+		TMCFastCerenTrace.o TMCFastCerenTraceDict.o \
+		TMCFastCerenkov.o TMCFastCerenkovDict.o
 
 
 TMCFastS        = TMCFastHepEvt.cxx TMCFastTOF.cxx \
@@ -70,7 +74,11 @@ TMCFastS        = TMCFastHepEvt.cxx TMCFastTOF.cxx \
 		TCalHitTracks.cxx  TCalHitTracksDict.cxx \
 		TLGDsmears.cxx TLGDsmearsDict.cxx \
 		TLGDparticle.cxx TLGDparticleDict.cxx \
-		TMCesr.cxx TMCesrDict.cxx TMCParticle.cxx TMCParticleDict.cxx	
+		TMCesr.cxx TMCesrDict.cxx TMCParticle.cxx TMCParticleDict.cxx \
+		TMCFastHits.cxx TMCFastHitsDict.cxx TMCFastHit.cxx \
+		TMCFastHitDict.cxx TMCFastTrace.cxx TMCFastTraceDict.cxx \
+		TMCFastCerenTrace.cxx TMCFastCerenTraceDict.cxx \
+		TMCFastCerenkov.cxx TMCFastCerenkovDict.cxx
 
 TMCFast_LIB       = libTMCFast.a
 
@@ -99,13 +107,19 @@ all:            $(PROGRAMS)
 
 lib:	$(TMCFast_LIB)
 
+mv_lib: $(TMCFast_LIB)
+	mv $(TMCFast_LIB)  $(HALLD_HOME)/lib/$(UNAME)/$(TMCFast_LIB)
+
+
 $(TMCFast_LIB): $(TMCFastO)
-	ar -r  $(HALLD_HOME)/lib/$(UNAME)/$(TMCFast_LIB) $(TMCFastO) 
+	ar -r  $(TMCFast_LIB) $(TMCFastO) 
+	$(LD) $(SOFLAGS) $(LDFLAGS) $(TMCFastO) $(OutPutOpt) $(TMCFastSO)
+
+
 
 TMCFast_LIBS =  $(HALLD_HOME)/lib/$(UNAME)/$(TMCFast_LIB)
 
 dumpRdt:       $(TMCFastO) $(MAIN2O)
-		$(LD) $(SOFLAGS) $(LDFLAGS) $(TMCFastO) $(OutPutOpt) $(TMCFastSO)
 		$(LD) $(LDFLAGS) $(MAIN2O) $(MCFASTLIB) $(LIBS) $(OutPutOpt) $(TMCFast2)
 		@echo "$(TMCFast2) done"
 
@@ -121,7 +135,7 @@ ntp_maker:     $(TMCFastO) $(NTP_MAKERO) $(TMCFastO)
 
 
 clean:
-		@rm -f $(OBJS) *Dict.* core
+		@rm -f *.o *Dict.* core
 
 .SUFFIXES: .cxx .C
 
@@ -140,10 +154,17 @@ TLGDsmears.o:TLGDsmears.h
 TLGDparticle.o:TLGDparticle.h
 TMCesr.o:TMCesr.h
 TMCParticle.o:TMCParticle.h
+TMCFastHits.o:TMCFastHits.h
+TMCFastHit.o:TMCFastHit.h
+TMCFastTrace.o:TMCFastTrace.h
+TMCFastCerenTrace.o:TMCFastCerenTrace.h
+TMCFastCerenkov.o:TMCFastCerenkov.h
 
+###########################################################
 #
 # Tell make how to parse the C++ code using rootcint
 #
+###########################################################
 TMCFastHepEvtDict.cxx: TMCFastHepEvt.h TMCFastHepEvtLinkDef.h
 	@echo "Generating dictionary TMCFastHepEvtDict..."
 	@$(ROOTSYS)/bin/rootcint -f TMCFastHepEvtDict.cxx -c TMCFastHepEvt.h TMCFastHepEvtLinkDef.h
@@ -187,6 +208,27 @@ TMCParticleDict.cxx: TMCParticle.h TMCParticleLinkDef.h
 TMCesrDict.cxx: TMCesr.h TMCesrLinkDef.h
 	@echo "Generating dictionary TMCesrDict..."
 	@$(ROOTSYS)/bin/rootcint -f TMCesrDict.cxx -c TMCesr.h 
+
+TMCFastTraceDict.cxx: TMCFastTrace.h TMCFastTraceLinkDef.h
+	@echo "Generating dictionary TMCFastTraceDict..."
+	@$(ROOTSYS)/bin/rootcint -f TMCFastTraceDict.cxx -c TMCFastTrace.h  TMCFastTraceLinkDef.h
+
+TMCFastCerenTraceDict.cxx: TMCFastCerenTrace.h TMCFastCerenTraceLinkDef.h
+	@echo "Generating dictionary TMCFastCerenTraceDict..."
+	@$(ROOTSYS)/bin/rootcint -f TMCFastCerenTraceDict.cxx -c TMCFastCerenTrace.h 
+
+TMCFastHitsDict.cxx: TMCFastHits.h TMCFastHitsLinkDef.h
+	@echo "Generating dictionary TMCFastHitsDict..."
+	@$(ROOTSYS)/bin/rootcint -f TMCFastHitsDict.cxx -c TMCFastHits.h 
+
+TMCFastHitDict.cxx: TMCFastHit.h TMCFastHitLinkDef.h
+	@echo "Generating dictionary TMCFastHitDict..."
+	@$(ROOTSYS)/bin/rootcint -f TMCFastHitDict.cxx -c TMCFastHit.h 
+
+TMCFastCerenkovDict.cxx: TMCFastCerenkov.h 
+	@echo "Generating dictionary TMCFastCerenkovDict..."
+	@$(ROOTSYS)/bin/rootcint -f TMCFastCerenkovDict.cxx -c TMCFastCerenkov.h 
+
 
 .cxx.o:
 	$(CXX) $(CXXFLAGS) -c $<

@@ -1,5 +1,5 @@
 ################ JLAB Environment ##########################
-#      
+#   See Code Development at http://www.phys.cmu.edu/halld/MCS.html   
 #
 # These items are need to run root. Include them
 # in you .cshrc file.
@@ -16,8 +16,6 @@ setenv EGCS   /work/halld/local.$UNAME
 # try to keep the over so that you don't
 # end up using the wrong root or g++ executables
 set path=( $EGCS/bin  $ROOTSYS/bin $path)
-
-
 
 # set path for shared libs
 setenv LD_LIBRARY_PATH $ROOTSYS/lib:$EGCS/lib
@@ -40,6 +38,22 @@ been processed through HDFast --the simulation program based upon the Fermilab M
 
 See http://www.phys.cmu.edu/halld/MCS.html for more information on the Monte Carlo Framework.
 
-In addition to the data files,  /work/halld/stage1_physics contains example macros (*.C) and executables. See tof.C for example of opening a data file and generating histograms.  Also, EventDisplay.C is, you've guess it, an event display (still a bit crude and slow).  To run the event display type "root .x  EventDisplay.C"  The executable dumpRdt (see /work/halld/src/mcroot/ subsystem on building it) is an example of a program that opens a data file and ascii dumps the branch information. "dumpRdt -h" will provide command line help, and "dumpRdt -n1 file.rdt" will dump one event from file.rdt. 
+In addition to the data files,  /work/halld/stage1_physics contains links to example macros (*.C) and executables. To run a macro first run "root" then at the root prompt type ".x macro.C" or just execute "root .x macro.C"
 
+Macros:
+
+	tof.C -an example of opening a data file and generating histograms
+
+	EventDisplay.C -an event displayer that reads and displays the HDFast 
+		geometry and traces particles through the apparatus
+
+Executables:
+
+
+	dumpRdt -an ascii dumper of the data
+		(see /work/halld/src/mcroot/ subsystem on building it) 
+		"dumpRdt -h" will provide command line help, and 
+		"dumpRdt -n1 file.rdt" will dump one event from file.rdt 
+
+	ntuple_maker -a ntuple maker summarizing the event
 

@@ -126,12 +126,14 @@ void TMCFastOfflineTrack::Print(ostream *os){
     *os<<"\t Pt "<<GetPt(j)<<" p "<<GetP(j)<<" q "<< 
       GetQ(j)<< " mass "<<GetMass(j)<<endl;
     // line 
-    *os<<"\t cov[7][7]";
+    *os<<"\t cov[7][7] not shown..";
+    /**************
     for(Int_t k=0;k<7;k++){
       *os<<"\n\t\t";
       for(Int_t l=0;l<7;l++)
       *os<< GetCov(j,k,l)<<" ";
-    }
+      }
+    ***********/
     *os<<endl;
     // line 
     *os<<"\t Chisq: "<<GetChisq(j)<<" icov: "<<GetIcov(j)

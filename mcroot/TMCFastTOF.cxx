@@ -30,41 +30,41 @@ ClassImp(TMCFastTOF)
 
 
 //____________________________________________________________________________
-TMCFastTOF::TMCFastTOF(struct ntraces_t *trace){
+TMCFastTOF::TMCFastTOF(struct traces_t *traces){
   // Call FIll()
   //
-  Fill(trace);
+  Fill(traces);
 }
 
 //____________________________________________________________________________
-void  TMCFastTOF::Fill(struct ntraces_t *trace){
+void  TMCFastTOF::Fill(struct traces_t *traces){
   // Fill the object info using 
   //common block information
   //
-  SetNtraces(trace->ntraces);
+  SetNtraces(traces->ntraces);
   for(Int_t i=0;i< this->GetNtraces();i++){
-    SetHep(i, trace->trace_par[i].hep)  ;
-    SetType(i,trace->trace_par[i].type) ;
-    SetPlane(i,trace->trace_par[i].plane);
-    SetHits(i,trace->trace_par[i].hit) ;
-    SetPx(i,trace->trace_par[i].w.px);
-    SetPy(i,trace->trace_par[i].w.py);
-    SetPz(i,trace->trace_par[i].w.pz);
-    SetE(i,trace->trace_par[i].w.E) ;
-    SetX(i,trace->trace_par[i].w.x) ;
-    SetY(i,trace->trace_par[i].w.y) ;
-    SetZ(i,trace->trace_par[i].w.z) ;
-    SetPt(i,trace->trace_par[i].w.pt);
-    SetP(i,trace->trace_par[i].w.p) ;
-    SetQ(i,trace->trace_par[i].w.q) ;
+    SetHep(i, traces->trace[i].hep)  ;
+    SetType(i,traces->trace[i].type) ;
+    SetPlane(i,traces->trace[i].plane);
+    SetHits(i,traces->trace[i].hit) ;
+    SetPx(i,traces->trace[i].w.px);
+    SetPy(i,traces->trace[i].w.py);
+    SetPz(i,traces->trace[i].w.pz);
+    SetE(i,traces->trace[i].w.E) ;
+    SetX(i,traces->trace[i].w.x) ;
+    SetY(i,traces->trace[i].w.y) ;
+    SetZ(i,traces->trace[i].w.z) ;
+    SetPt(i,traces->trace[i].w.pt);
+    SetP(i,traces->trace[i].w.p) ;
+    SetQ(i,traces->trace[i].w.q) ;
     for(Int_t j=0;j<3;j++)
-      SetEta(i,j,trace->trace_par[i].eta[j]);
-    SetPath(i,trace->trace_par[i].path); 
-    SetTime(i,trace->trace_par[i].time); 
-    SetTau(i,trace->trace_par[i].tau) ; 
-    SetMaterial(i,trace->trace_par[i].material); 
-    SetRadl(i,trace->trace_par[i].radl);  
-    SetDedx(i,trace->trace_par[i].dedx) ; 
+      SetEta(i,j,traces->trace[i].eta[j]);
+    SetPath(i,traces->trace[i].path); 
+    SetTime(i,traces->trace[i].time); 
+    SetTau(i,traces->trace[i].tau) ; 
+    SetMaterial(i,traces->trace[i].material); 
+    SetRadl(i,traces->trace[i].radl);  
+    SetDedx(i,traces->trace[i].dedx) ; 
   } 
 }
 

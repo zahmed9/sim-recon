@@ -44,10 +44,12 @@ public:
          TMCFastOfflineTrack &offtrk, 
          TLGDsmears &lgdsmears,
 	 TMCFastCalorimeter &bcal,Double_t bcal_resolution);
+  TMCesr(TMCFastHepEvt &hepevt);
   void Fill(TMCFastHepEvt &hepevt,
        TMCFastOfflineTrack &offtrk, 
        TLGDsmears &lgdsmears,
        TMCFastCalorimeter &bcal,Double_t bcal_resolution);
+  void Fill(TMCFastHepEvt &hepevt);
   virtual ~TMCesr() ;
   void Clear();
   Int_t GetNparticles() {return fnParticles;}
@@ -64,7 +66,8 @@ public:
   //Int_t makeParticles(TMCFastHepEvt &hepevt,TMCFastCalorimeter &bcal);
   Int_t makeParticles(TMCFastHepEvt &hepevt,TMCFastCalorimeter &bcal,Double_t bcal_res);
   Int_t makeParticles(TMCFastHepEvt &hepevt,TMCFastOfflineTrack &offtrk);
-
+  Int_t makeParticles(TMCFastHepEvt &hepevt);
+  void DumpGampFormat(ostream *os,Double_t b);
   void Print(ostream *os);
   ClassDef(TMCesr,1)  //Needed by ROOT
 };

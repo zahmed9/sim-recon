@@ -89,9 +89,12 @@
   TBox *absorber[100],*absorberR[100],;
   Int_t absorberNum=0;
 
-  // Cylindrical Aclorimeter Geometry
+  // Cylindrical Calorimeter Geometry
   TBox *calor[100],*calorR[100],;
   Int_t calorNum=0;
+
+  // Cerenkov
+  TBox *cerenkov,*cerenkovR;
 
   // SiDisks Geometry
   TLine *SiLine[100],*SiLineR[100],;
@@ -192,12 +195,30 @@
        token = strtok(line," ");// num
        SiDisk[NSiDisks].index = atoi(token);
        token = strtok(NULL," ");// "name"
-       token = strtok(NULL," "); // nlayers
+       token = strtok(NULL," "); // nlayer
        token = strtok(NULL," "); // zpos
        SiDisk[NSiDisks].zpos = atof(token);
        NSiDisks++;
  
      } 
+     else if(strcmp(word,"KludgeAnnulus")==0 ){// read cerenkov parameters
+       dbFile.getline(line,sizeof(line));
+       if(Dump) cout<<line<<endl;
+       token = strtok(line," ");// "name"
+       token = strtok(NULL," "); // Rmin
+       rmin = atof(token);
+       token = strtok(NULL," "); // Rmax
+       rmax = atof(token);
+       token = strtok(NULL," "); // zLength
+       zLength = atof(token);
+       token = strtok(NULL," "); // zCenter
+       zCenter = atof(token);
+       cerenkov = new TBox(zCenter-zLength/2.0,rmin,zCenter+zLength/2.0,rmax);
+       cerenkov->SetFillColor(7);
+       cerenkovR = new TBox(zCenter-zLength/2.0,-rmin,zCenter+zLength/2.0,-rmax);
+       cerenkovR->SetFillColor(7);
+       
+     }
      else if(strcmp(word,"LayerSiDi")==0 ){// make silicon disk geometry
        // Sometimes the silicon disk geometry is used as a kludge
        // for forward planar-disk drift chambers
@@ -257,9 +278,12 @@
      }
      else if(strcmp(word,"Absorber")==0 || strcmp(word,"AbsorberBox")==0  ){
                                                    // make absorber geometry
+       Int_t color = 5; //yellow
        dbFile.getline(line,sizeof(line));
        if(Dump) cout<<line<<endl;
        token = strtok(line," ");// name
+       if(strcmp(token,"\"CERENKOV\"")==0 )
+	 color = 7; //aqua
        token = strtok(NULL," ");// shape  tube or Box only
        token = strtok(NULL," "); // type
        token = strtok(NULL," "); // rmin or xmin
@@ -292,8 +316,8 @@
        }
        absorber[absorberNum] = new TBox(z1,r1,z2,r2);
        absorberR[absorberNum] = new TBox(z1,-r1,z2,-r2);
-       absorber[absorberNum]->SetFillColor(5); 
-       absorberR[absorberNum]->SetFillColor(5); 
+       absorber[absorberNum]->SetFillColor(color); 
+       absorberR[absorberNum]->SetFillColor(color); 
        absorberNum++;
        if(Dump) cout<< "Absorber rmin: "<<rmin<<" rmax: " <<rmax
 	    <<" zCenter: "<<zCenter<<" zLength: "<<zLength
@@ -377,6 +401,8 @@
  solenoid->Draw();
  solenoidR->Draw();
  target->Draw();
+ cerenkov->Draw();
+ cerenkovR->Draw();
  for(int j=0;j< driftNum;j++){
    drift[j]->Draw();
    driftR[j]->Draw();
@@ -390,8 +416,10 @@
    calorR[j]->Draw();
  }
  for(int j=0;j< absorberNum;j++){
-   absorber[j]->Draw();
-   absorberR[j]->Draw();
+   if(absorber[j]->GetFillColor() ==5){
+     absorber[j]->Draw();
+     absorberR[j]->Draw();
+   }
  }
 
  TArrow *zRef = new TArrow(550,-225,600,-225,0.01); // 0.5 meter
@@ -423,6 +451,8 @@
  solenoid->Draw();
  solenoidR->Draw();
  target->Draw();
+ cerenkov->Draw();
+ cerenkovR->Draw();
  for(int j=0;j< driftNum;j++){
    drift[j]->Draw();
    driftR[j]->Draw();
@@ -436,8 +466,10 @@
    calorR[j]->Draw();
  }
  for(int j=0;j< absorberNum;j++){
-   absorber[j]->Draw();
-   absorberR[j]->Draw();
+   if(absorber[j]->GetFillColor() ==5){
+     absorber[j]->Draw();
+     absorberR[j]->Draw();
+   }
  }
 
  ///
@@ -463,9 +495,12 @@
  TText *bvtTag = new TText(195,1,"BVT");
  bvtTag->SetTextSize(0.025);
  bvtTag->Draw();  
- TText *fdcTag = new TText(460,50,"FDC");
+ TText *fdcTag = new TText(410,50,"FDC");
  fdcTag->SetTextSize(0.03);
- fdcTag->Draw();  
+ fdcTag->Draw(); 
+ TText *cerenkovTag = new TText(470,50,"Ceren");
+ cerenkovTag->SetTextSize(0.03);
+ cerenkovTag->Draw(); 
  TText *ftofTag = new TText(495,120,"FTOF");
  ftofTag->SetTextSize(0.03);
  ftofTag->Draw();

@@ -28,11 +28,15 @@
 #include "TMCFastCalorimeter.h"
 #include "TLGDsmears.h"
 #include "TMCesr.h"
+#include "TMCFastHits.h"
+#include "TMCFastCerenkov.h"
 
+#include"particleType.h"
 //______________________________________________________________________________
 
 TROOT dumpRdt("dumpRdt","Dump the Hall D ROOT tree");
 TFile *rdtfile;
+
 
 void PrintUsage(char *processName)
 {
@@ -40,8 +44,9 @@ void PrintUsage(char *processName)
   cerr << "\t-n<nevents> The number of event to read (default all).\n";
   cerr << "\t-s<nevents> The number of events to skip before reading(default=0).\n";
   cerr << "\t-L   List branch names of first event\n";
-  cerr << "\t-Bbranch1,branch2,... or \"all\" Dump only these branches\n";
-  cerr << "\t-Vbranch1,branch2,... Dump only these virtual branches \n";
+  cerr << "\t-Bbranch1,branch2,...  Dump  these branches\n";
+  cerr << "\t-Vbranch1,branch2,... Dump  these virtual branches \n";
+  cerr << "\t-g      Dump esr to gamp format (also use -Vesr ) \n";
   cerr<<"\t-h Print this help message\n\n";
 }
 
@@ -53,11 +58,36 @@ int main(int argc, char **argv)
     
   //   gSystem->Load("libTMCFast.so");
   
-  Char_t *argptr,*token,rootfile[50]="Event.rdt",leaf[100][25],Vleaf[100][25];
+  Char_t *argptr,*token,rootfile[500]="Event.rdt",leaf[100][25],Vleaf[100][25];
   Int_t nevents=0,listBranches=0,nleaves2save=0,nVirtualLeaves2save=0;
-  Int_t dump_hepevt=0,dump_tof_trace=0,dump_offtrk=0,dump_all=1,
-        dump_bcal=0,dump_lgdSmears=0,dump_esr=0;
+  Int_t dump_hepevt=0,dump_tof_trace=0,dump_offtrk=0,dump_all=0,
+    dump_bcal=0,dump_lgdSmears=0,dump_esr=0,dump_vtx_hits=0,
+    dump_cdc_hits=0,dump_ceren=0,dump_gamp=0;
   Int_t skipEvents=0;
+  Double_t kludge_beamE=0;
+  // MCFast objects
+  /*
+   * These are the objects (leaves) contained in the tree
+   */
+  TMCFastHepEvt *hepevt=0; //use  leaf name
+  TMCFastTOF *tof_trace=0;  
+  TMCFastOfflineTrack *offtrk=0;  
+  TMCFastCalorimeter *bcal=0;// barrel
+  TLGDsmears *lgdSmears=0;// lgd
+  TMCFastHits *vtx_hits=0;// vtx
+  TMCFastHits *cdc_hits=0;// cdc
+  TMCFastCerenkov *ceren=0;//ceren
+  TMCesr *esr=0;
+
+  hepevt = new TMCFastHepEvt();
+  tof_trace = new TMCFastTOF();
+  offtrk = new TMCFastOfflineTrack();
+  bcal = new TMCFastCalorimeter();
+  lgdSmears = new TLGDsmears();
+  vtx_hits = new TMCFastHits();
+  cdc_hits = new TMCFastHits();
+  ceren = new TMCFastCerenkov();
+
   /*
    * Read the command line switches
    */
@@ -77,12 +107,18 @@ int main(int argc, char **argv)
 	  cerr<<"Skipping "<<skipEvents<<" events\n";
 	  break;
         case 'n':
-	  nevents =atoi(++argptr);
+	  nevents =atoi(++argptr) - 1 ;
 	  cerr<<"Dumping "<<nevents<<" events\n";
 	  break;
 	case 'L':
 	    listBranches=1;
 	    break;
+	case 'g':
+	  kludge_beamE = atof(++argptr);
+	  cerr<<"Dumping Events to Gamp format ("<<kludge_beamE<<" GeV)\n";
+	  dump_all=0;
+	  dump_gamp=1;
+	  break;
 	case 'V':
 	  cerr<<"Dumping Virutal branches:\n";
 	  nVirtualLeaves2save=0;
@@ -122,25 +158,82 @@ int main(int argc, char **argv)
       }
     }
   }
+  rdtfile = new TFile(rootfile);
+  if(! rdtfile->IsOpen()){
+    cerr<<"Unable to open file: "<<rootfile<<endl<<"exiting\n";
+    exit(-1);
+  }
+  TBranch *b[10];
+  Int_t nbranches=0;
+  TTree *tree ;
+  tree = (TTree*)rdtfile->Get("T");
+
+ cerr<< "set dump branches\n";
+
   // set dump flags
   for(Int_t i=0; i<nleaves2save;i++){
-    if(strcmp(leaf[i],"hepevt")==0)
+    if(strcmp(leaf[i],"hepevt")==0){
       dump_hepevt=1;
-    if(strcmp(leaf[i],"tof_trace")==0)
+      b[nbranches] = tree->GetBranch(leaf[i]);
+      b[nbranches++]->SetAddress(&hepevt);
+    }
+    if(strcmp(leaf[i],"tof_trace")==0){
       dump_tof_trace=1;
-    if(strcmp(leaf[i],"offtrk")==0)
+      b[nbranches] = tree->GetBranch(leaf[i]);
+      b[nbranches++]->SetAddress(&tof_trace);
+    }
+    if(strcmp(leaf[i],"offtrk")==0){
       dump_offtrk=1;
-    if(strcmp(leaf[i],"bcal")==0)
+      b[nbranches] = tree->GetBranch(leaf[i]);
+      b[nbranches++]->SetAddress(&offtrk);
+    }
+    if(strcmp(leaf[i],"bcal")==0){
       dump_bcal=1;
-    if(strcmp(leaf[i],"lgdSmears")==0)
+      b[nbranches] = tree->GetBranch(leaf[i]);
+      b[nbranches++]->SetAddress(&bcal);
+    }
+    if(strcmp(leaf[i],"lgdSmears")==0){
       dump_lgdSmears=1;
-    
-    
+      b[nbranches] = tree->GetBranch(leaf[i]);
+      b[nbranches++]->SetAddress(&lgdSmears);
+    }
+    if(strcmp(leaf[i],"vtx_hits")==0){
+      dump_vtx_hits=1;    
+      b[nbranches] = tree->GetBranch(leaf[i]);
+      b[nbranches++]->SetAddress(&vtx_hits);
+    }
+    if(strcmp(leaf[i],"cdc_hits")==0){
+      dump_cdc_hits=1;    
+      b[nbranches] = tree->GetBranch(leaf[i]);
+      b[nbranches++]->SetAddress(&cdc_hits);
+    }
+    if(strcmp(leaf[i],"ceren")==0){
+      dump_ceren=1;  
+      b[nbranches] = tree->GetBranch(leaf[i]);
+      b[nbranches++]->SetAddress(&ceren);
+    }
   }
   // set dump flags for virtual leaves
   for(Int_t i=0; i<nVirtualLeaves2save;i++){
-    if(strcmp(Vleaf[i],"esr")==0)
+    if(strcmp(Vleaf[i],"esr")==0){
       dump_esr=1;
+      if(!dump_hepevt){
+	b[nbranches] = tree->GetBranch("hepevt");
+	b[nbranches++]->SetAddress(&hepevt);
+      }
+      if(!dump_offtrk){
+	b[nbranches] = tree->GetBranch("offtrk");
+	b[nbranches++]->SetAddress(&offtrk);
+      }
+      if(!dump_bcal){
+	b[nbranches] = tree->GetBranch("bcal");
+	b[nbranches++]->SetAddress(&bcal);
+      }
+      if(!dump_lgdSmears){
+	b[nbranches] = tree->GetBranch("lgdSmears");
+	b[nbranches++]->SetAddress(&lgdSmears);
+      }
+    }
     if(strcmp(Vleaf[i],"all")==0)
       dump_all=1;
   }
@@ -148,53 +241,24 @@ int main(int argc, char **argv)
   // open file and set tree branches
   cerr.flush();
   
-  rdtfile = new TFile(rootfile);
-  TBranch *b[10];
-  Int_t nbranches=0;
-  TTree *tree ;
-  tree = (TTree*)rdtfile->Get("T");
-
+  
+ cerr<< "List Branches\n";
   
   // List the Branches
-  cout<< "Branch list:\n";
+  cerr<< "Branch list:\n";
   TIter next(tree->GetListOfBranches());
   TBranch *branch;
-  while((branch= (TBranch *)next())){
-    cout<< "\t"<<branch->GetName()<<endl;
-    b[nbranches++] = tree->GetBranch(branch->GetName());
+  while(( branch = (TBranch *)next())){
+    cerr<< "\t"<<branch->GetName()<<endl;  
   }
-  cout<<"Virtual Branch list:\n"; 
-  cout<< "\tesr\tRequires(hepevt,offtrk,bcal,lgdSmears)" <<endl;
-  cout<<endl;
-
-
-  // MCFast objects
-  /*
-   * These are the objects (leaves) contained in the tree
-   */
-  TMCFastHepEvt *hepevt=0; //use  leaf name
-  TMCFastTOF *tof_trace=0;  
-  TMCFastOfflineTrack *offtrk=0;  
-  TMCFastCalorimeter *bcal=0;// barrel
-  TLGDsmears *lgdSmears=0;// lgd
-
-  hepevt = new TMCFastHepEvt();
-  tof_trace = new TMCFastTOF();
-  offtrk = new TMCFastOfflineTrack();
-  bcal = new TMCFastCalorimeter();
-  lgdSmears = new TLGDsmears();
-
-  b[0]->SetAddress(&hepevt);
-  b[1]->SetAddress(&tof_trace);
-  b[2]->SetAddress(&offtrk);
-  b[3]->SetAddress(&bcal);
-  b[4]->SetAddress(&lgdSmears);
-
+  cerr<<"Virtual Branch list:\n"; 
+  cerr<< "\tesr\tRequires(hepevt,offtrk,bcal,lgdSmears)" <<endl;
+  cerr<<endl;
 
   Int_t nentries = (Int_t)tree->GetEntries();
-  cout<<"The Tree contains "<<nentries<<" events\n";
+  cerr<<"The Tree contains "<<nentries<<" events\n";
   if(listBranches) exit(0);
-
+ 
   if(nevents == 0) 
     nevents =nentries-skipEvents;
   else
@@ -205,27 +269,33 @@ int main(int argc, char **argv)
     //read  event in memory 
     tree->GetEvent(ev);   
     // that's it we have one so now let's dump it   
-    cout<< endl;
-    cout<<"Event Number: " << ev << endl;
 
- 
-    if(dump_esr){
-      TMCesr *esr=0;
-      esr = new TMCesr(*hepevt,*offtrk,*lgdSmears,*bcal);
-      cout<< *esr;
-    }
-
-    if(dump_bcal || dump_all)
-      cout<< *bcal;
-    if(dump_lgdSmears || dump_all)
-      cout<< *lgdSmears;
+    cerr<<"Event Number: " << ev << "\r";
 
     if(dump_hepevt || dump_all)
-      cout<< *hepevt;
+      cout<<  "hepevt\n"<<*hepevt; 
+    if(dump_esr){
+      esr = new TMCesr(*hepevt,*offtrk,*lgdSmears,*bcal);
+      if(dump_gamp)
+	esr->DumpGampFormat(&cout,kludge_beamE);
+      else
+	cout<<  "esr\n"<<*esr;
+    }
+    if(dump_bcal || dump_all)
+      cout<< "bcal\n"<<*bcal;
+    if(dump_lgdSmears || dump_all)
+      cout<< "lgdSmears\n"<<*lgdSmears;
     if(dump_offtrk || dump_all)
-      cout<< *offtrk;
+      cout<< "offtrk_hits\n"<<*offtrk;
+    if(dump_vtx_hits || dump_all)
+      cout<< "vtx_hits\n"<<*vtx_hits;
+    if(dump_cdc_hits || dump_all)
+      cout<< "cdc_hits\n"<<*cdc_hits;
+    if(dump_ceren || dump_all)
+      cout<<  "cerenkov_hits\n"<<*ceren;
+
     if(dump_tof_trace || dump_all){
-      cout<< *tof_trace;
+      cout<<  "tof_hits\n"<<*tof_trace;
       // dump both forward & central TOF for each particle
       for(Int_t i=0; i< hepevt->GetNhep();i++){
 	cout << "CTOF["<<i+1<<"]: "<<tof_trace->GetCTOF(i+1)
@@ -240,10 +310,146 @@ int main(int argc, char **argv)
     tof_trace->Clear();
     offtrk->Clear();
     bcal->Clear();
+    ceren->Clear();
+    cdc_hits->Clear();
+    vtx_hits->Clear();
     lgdSmears->Clear();
+    if(dump_esr)
+      esr->Clear();
   }
-
+  cerr<<endl;
   rdtfile->Close();
   return 0;
+  
 }
 
+/********************
+ * gampID(int pdgID)
+ * The convention is that
+ * followed in StdHep 4.02
+ *******************/
+int  gampID(int id){
+  Particle_t p=Unknown;
+  switch (id) {
+  case 0:
+    p=Unknown;
+    break;
+  case 22:
+    p=Gamma;
+    break;
+  case -11:
+    p=Positron;
+    break;
+  case 11:
+    p=Electron;
+    break;
+  case 12:
+    p=Neutrino;
+    break;
+  case -13:
+    p=MuonPlus;
+    break;
+  case 13:
+    p=MuonMinus;
+    break;
+  case 111:
+    p=Pi0;
+    break;
+  case 211:
+    p=PiPlus;
+    break;
+  case -211:
+    p=PiMinus;
+    break;
+  case 130:
+    p=KLong;
+    break;
+  case 321:
+    p=KPlus;
+    break;
+  case -321:
+    p=KMinus;
+    break;
+  case 2112:
+    p=Neutron;
+    break;
+  case 2212:
+    p=Proton;
+    break;
+  case -2212:
+    p=AntiProton;
+    break;
+  case 310:
+    p=KShort;
+    break;
+  case 221:
+    p=Eta;
+    break;
+  case 3122:
+    p=Lambda;
+    break;
+  case 3222:
+    p=SigmaPlus;
+    break;
+  case 3212:
+    p=Sigma0;
+    break;
+  case 3112:
+    p=SigmaMinus;
+    break;
+  case 3322:
+    p=Xi0;
+  case 3312:
+    p=XiMinus;
+    break;
+  case 3334:
+    p=OmegaMinus;
+    break;
+  case -2112:
+    p=AntiNeutron;
+    break;
+  case -3122:
+    p=AntiLambda;
+    break;
+  case -3112:
+    p=AntiSigmaMinus;
+    break;
+  case -3212:
+    p=AntiSigma0;
+    break;
+  case -3222:
+    p=AntiSigmaPlus;
+    break;
+  case -3322:
+    p=AntiXi0;
+    break;
+  case -3312:
+    p=AntiXiPlus;
+    break;
+  case -3334:
+    p=AntiOmegaPlus;
+    break;
+  case 113:
+    p=Rho0;
+    break;  
+  case 213:
+    p=RhoPlus;
+    break;
+  case -213:
+    p=RhoMinus;
+    break;
+  case 223:
+    p=omega;
+    break;
+  case 331:
+    p=EtaPrime;
+    break;
+  case 333:
+    p=phiMeson;
+    break;
+  default:
+    p=Unknown;
+    break;
+  }
+  return((int)p);
+}

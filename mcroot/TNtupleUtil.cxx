@@ -50,7 +50,7 @@ void TntpNames::Add(Char_t *string){
   *************/
   if(fNlabels){
     sprintf(tempstr,"%s",fnames);
-    if((length+lstr+1)>1000){
+    if((length+lstr+1)>2000){
       cerr<<"You must increase TntpNames::fname array size\nExiting\n";
       exit(-1);
     }

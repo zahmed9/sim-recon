@@ -11,35 +11,14 @@
 
 #include "TObject.h"
 #include "TMCFastOfflineTrack.h"
+#include "TMCFastTrace.h"
 #include "TH1.h"
 #include "TMath.h"
 
 #include <iostream.h>
 
-// MCFast structures that map to the common blocks
-
-struct trace_t {
-  int hep;            /* Position of track in /HEPEVT/ list */
-  int type;           /* Trace type (see trace_type.inc) */
-  int plane;          /* Radial or z plane number */
-  int hit;            /* # of hits in hit track list */
-  struct wtrack_struct w;  /* Track parameters at interaction */
-  double eta[3];      /* Direction cosines of normal to plane */
-  double path;        /* Total track length up to this hit */
-  double time;        /* Time at which track made hit */
-  double tau;         /* Proper flight time to intersection */
-  int material;       /* Position in material list */
-  double radl;        /* # of radiation lengths in material */
-  double dedx;        /* dE/dx of material */
-} ;
-
 
 #define TRACE_MAX 3*(TTRK_OFF_MAX)
-
-struct ntraces_t {
-  int ntraces;      /* Number of track intersections */
-  struct trace_t *trace_par;
-} ;
 
 
 #define TTOF_TRACE_MAX TRACE_MAX
@@ -83,7 +62,7 @@ private:
 
 public:
   TMCFastTOF() { }
-  TMCFastTOF(ntraces_t *traces);
+  TMCFastTOF(traces_t *traces);
   virtual ~TMCFastTOF() ;
 
   Double_t GetCTOF(Int_t hep);
@@ -142,7 +121,7 @@ public:
   void SetDedx(Int_t i,Double_t x)  { fdedx[i]=x;}
 
    void Print(ostream *os);
-   void Fill(ntraces_t *trace);
+   void Fill(traces_t *traces);
  
    ClassDef(TMCFastTOF,1)  //Needed by ROOT
 };

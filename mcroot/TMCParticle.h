@@ -26,12 +26,13 @@
 #define MADE_FROM_BCAL 1
 #define MADE_FROM_LGD 2
 #define PDG_GAMMA 22
+#define MADE_FROM_HEPEVT -1
 
 class TMCParticle: public TObject {
   
 private:
 
-  Int_t    fmaker;         // 0=offtrk, 1=bcal, 2=lgd 
+  Int_t    fmaker;         // -1=hepevt, 0=offtrk, 1=bcal, 2=lgd 
   Int_t    fstatus;       // status (currently not used) 
   Int_t    fhepIndex;    // position of corresp. track in HEPEVT list
   Int_t    fidhep;        // PDG MC id
@@ -51,7 +52,8 @@ public:
   TMCParticle(TMCFastHepParticle &heppart,Double_t eSmeared); 
   TMCParticle(TMCFastHepParticle &heppart,Double_t eSmeared,
 	      Double_t z_resolution); 
-  TMCParticle(TLGDparticle &lgdpart);  
+  TMCParticle(TLGDparticle &lgdpart); 
+  TMCParticle(TMCFastHepParticle &heppart);
   virtual ~TMCParticle() ;
 
   Double_t GetPx() const {return fpx;}
