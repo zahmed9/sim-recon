@@ -1,0 +1,80 @@
+\section{Drift chamber class template}
+Defines drift chamber class
+
+\subsection{Drift Chambers}
+Drift chambers are the fundamental tracking entities, and are assumed to
+be planar and circular, with readout wires in only one direction.
+
+
+<<drift.h>>=
+#ifndef __DRIFT_H_
+#define __DRIFT_H_
+	<<includes>>
+	<<driftChamber definition>>
+#endif
+@
+The [[driftChamber]] definition
+
+<<driftChamber definition>>=
+class driftChamber {
+   private:
+	<<driftChamber private definitions>>
+
+   public:
+	<<driftChamber public definitions>>
+};
+@
+
+The internal representation of a driftChamber
+<<driftChamber private definitions>>=
+	threeVec _readout;
+	threeVec _normal;
+	threeVec _center;
+	double    _radius;
+	double    _dnorm;
+	double    _spacing;
+	int            _ncells;
+	void driftChamber::_init(threeVec readout,threeVec normal,threeVec center,double radius,double dnorm,double spacing);
+@
+
+<<driftChamber public definitions>>=
+	driftChamber() { this->._init(threeVec(0,0,0),threeVec(0,0,0),threeVec(0,0,0),0,0,0);};
+	driftChamber(threeVec rd,threeVec n,threeVec c,double r,double d,double s) { this->_init(rd,n,c,r,d,s); }
+	void driftChamber::set(threeVec rd,threeVec n,threeVec c,double r,double d,double s) { this->_init(rd,n,c,r,d,s); }
+	~driftChamber();
+       	int driftChamber::channel(threeVec position);
+
+@
+\section{The Code}
+The code for the methods is in the file [[drift.cc]]
+
+<<drift.cc>>=
+	<<includes and defines>>
+	<<driftChamber methods>>
+	
+
+<<includes and defines>>=
+#include <Vec.h>
+#include <drift.h>
+@
+
+<<driftChamber methods>>=
+	void driftChamber::_init(threeVec readout,threeVec normal,threeVec center,double radius,double dnorm,double spacing) {
+		this->_readout = readout;
+		this->_normal = normal;
+		this->_center = center;
+		this->_radius = radius;	
+		this->_dnorm = dnorm;
+		this->_spacing = spacing;
+	}
+	int driftChamber::channel(threeVec position) {
+		int channel = -1000;
+		threeVec Norm,A;
+		Norm = this->_dnorm * this->_normal;
+		A = Norm - this->_center;
+		if (~A < this->_radius) {
+			channel = (A * this->_readout/this->_spacing);
+		}
+		return(channel);
+	}
+@

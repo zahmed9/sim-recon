@@ -1,0 +1,342 @@
+@
+\section{Matrix class template}
+The Matrix class is defined as a template to allow use of both [[double]] and [[Complex]] matrices.
+
+
+<<matrix.h>>=
+#ifndef __MATRIX_H_
+#define __MATRIX_H_
+	<<includes>>
+	<<class template>>
+	<<matrix methods>>
+#endif
+
+
+<<includes>>=
+#include <iostream.h>
+#include <assert.h>
+#include <string.h>
+#include <math.h>
+#include <Complex.h>
+#include <Vec.h>
+
+
+@
+\subsection{The class template}
+<<class template>>=
+template <class Type>
+class matrix {
+
+    private:
+		int _nrows,_ncols;
+		Type *_f;
+
+		void _create(int,int);
+		void _destroy(void);
+		void _copy(const matrix&);
+
+    public:
+		matrix();
+		matrix(int n,int m);
+		matrix(int,int,Type*);
+		matrix(const matrix&);
+		~matrix();
+		matrix& operator=(const matrix&);
+
+		Type& el(int,int);
+		Type& element(int i,int j) { return this->el(i,j);}
+		matrix operator*(const matrix&) const;
+		matrix operator+(const matrix&) const;
+		matrix operator+=(const matrix&);
+		matrix conjugate() const;
+		matrix transpose() const;
+		matrix adjoint() const;
+		Type trace() const;
+		int nrows() const { return this->_nrows; }
+		int ncols() const { return this->_ncols; }
+		matrix zero();
+		threeVec operator*(const threeVec&) const;
+		fourVec operator*(const fourVec&) const;
+
+		friend fourVec operator*=(fourVec&,const matrix&);  //new
+
+		const matrix& print() const;
+
+};
+
+
+@
+\subsection{The class methods}
+@
+The [[trace()]] method returns the trace of a square matrix.
+<<matrix methods>>=
+template <class Type>
+Type matrix<Type>::trace() const
+{
+	Type tr = 0;
+	assert(this->_nrows == this->_ncols);
+
+	for (int i=0; i<this->_nrows; i++) {
+		tr +=  (const_cast<matrix<Type>*>(this))->el(i,i);
+	}
+	return(tr);
+}
+
+@
+The [[conjugate()]] method returns a matrix which is element by element the complex conjugate of the original.
+<<matrix methods>>=
+template <class Type>
+matrix<Type> matrix<Type>::conjugate() const
+{
+	matrix<Type> r(this->_nrows, this->_ncols);
+
+	for (int i=0; i<this->_nrows; i++) {
+		for (int j=0; j<this->_ncols; j++) {
+			r.el(i,j) = conj( (const_cast<matrix<Type>*>(this))->el(i,j) );
+		}
+	}
+	return(r);
+}
+
+
+@
+Since we want to be able to define both [[double]] and [[Complex]] matrices,  all functions used must be defined for both types.  This is generally true, but there is no [[double conj(double)]] so I provide one here.
+<<includes>>=
+	double conj(double x);
+
+<<matrix.cc>>=
+#include <matrix.h>
+
+	double conj(double x) {
+		return(x);
+	}
+
+
+@
+The [[transpose()]] method returns the transpose of the original matrix.
+<<matrix methods>>=
+template <class Type>
+matrix<Type> matrix<Type>::transpose() const
+{
+	matrix<Type> r(this->_ncols, this->_nrows);
+
+	for (int i=0; i<this->_nrows; i++) {
+		for (int j=0; j<this->_ncols; j++) {
+			r.el(j,i) = (const_cast<matrix<Type>*>(this))->el(i,j);
+		}
+	}
+	return(r);
+}
+
+@
+The [[adjoint()]] method returns the transpose of the complex conjugate matrix.
+<<matrix methods>>=
+template <class Type>
+matrix<Type> matrix<Type>::adjoint() const
+{
+	matrix<Type> r(this->_ncols, this->_nrows);
+
+	r = (this->transpose()).conjugate();
+	
+	return(r);
+}
+
+@
+The usual matrix addition (and [[+=]]. 
+<<matrix methods>>=
+template <class Type>
+matrix<Type> matrix<Type>::operator+(const matrix& M) const
+{
+	assert( (this->_ncols == M._ncols) && (this->_nrows == M._nrows) );
+	matrix<Type> r(this->_nrows, this->_ncols);
+
+	for (int i=0; i<this->_nrows; i++) {
+		for (int j=0; j<M._ncols; j++) {
+			r.el(i,j) = (const_cast<matrix<Type>*>(this))->el(i,j)+(const_cast<matrix<Type>*>(&M))->el(i,j);
+		}
+	}
+	return(r);
+}
+
+template <class Type>
+matrix<Type> matrix<Type>::operator+=(const matrix& M)
+{
+	assert( (this->_ncols == M._ncols) && (this->_nrows == M._nrows) );
+
+	for (int i=0; i<this->_nrows; i++) {
+		for (int j=0; j<M._ncols; j++) {
+			this->el(i,j) += (const_cast<matrix<Type>*>(&M))->el(i,j);
+		}
+	}
+	return(*this);
+}
+
+@
+Matrix multiplication.  The funny business with the [[const_cast<matrix<Type>*>]] is because [[el(int,int)]] is a mutator, and both [[this]] and the argumant matrix [[M]] are declared [[const]].  The [[const_cast]] ``cast away'' the [[const]] declaration.
+<<matrix methods>>=
+template <class Type>
+matrix<Type> matrix<Type>::operator*(const matrix& M) const
+{
+	assert(this->_ncols == M._nrows);
+	matrix<Type> r(this->_nrows, M._ncols);
+
+	for (int i=0; i<this->_nrows; i++) {
+		for (int j=0; j<M._ncols; j++) {
+			for (int k=0; k<this->_ncols; k++) {
+				r.el(i,j) += (const_cast<matrix<Type>*>(this))->el(i,k)*(const_cast<matrix<Type>*>(&M))->el(k,j);
+			}
+		}
+	}
+	return(r);
+}
+
+@
+The subscripting method [[el(i,j)]] returns a reference to $M_{ij}$.  By returning a reference, the returned value can be changed as well as evaluated, meaning this method replaces both [[set()]] and [[get()]].
+<<matrix methods>>=
+template <class Type>
+Type& matrix<Type>::el(int i,int j)
+{
+	assert( i<this->_nrows && j<this->_ncols );
+	return  _f[j + i*_ncols];
+}
+
+@
+The private methods [[_create]], [[_copy]], and [[_destroy]] are used by other methods such as constructors.
+<<matrix methods>>=
+template <class Type>
+void matrix<Type>::_create(int n,int m)
+{	
+	this->_nrows = n;
+	this->_ncols = m;
+	this->_f = NULL;
+	
+	if (n*m != 0) {
+		this->_f = new Type[n*m];
+		memset( this->_f, 0, n*m*sizeof(Type) );
+	}
+}
+
+template <class Type>
+void matrix<Type>::_copy(const matrix<Type>& src)
+{
+	this->_nrows = src._nrows;
+	this->_ncols = src._ncols;
+	if (this->_f)
+		delete this->_f;
+	this->_f = new Type[src._nrows*src._ncols];
+
+	memcpy(this->_f, src._f, src._nrows*src._ncols*sizeof(Type) );
+}
+
+template <class Type>
+void matrix<Type>::_destroy(void)
+{
+	if (this->_f)
+		delete this->_f;
+
+	this->_f = NULL;
+	this->_nrows = 0;
+	this->_ncols = 0;
+}
+
+@
+The constructors and destructor call these private methods with the apprpriate arguments.
+<<matrix methods>>=
+template <class Type>
+matrix<Type>::matrix() {
+	this->_create(0,0);
+}
+
+template <class Type>
+matrix<Type>::matrix(int i,int j) {
+	this->_create(i,j);
+}
+
+template <class Type>
+matrix<Type>::matrix(int i,int j,Type* p) {
+	this->_create(i,j);
+	this->_f = p;
+}
+
+template <class Type>
+matrix<Type>::matrix(const matrix<Type>& M) {
+	this->_create(M._nrows,M._ncols);
+	this->_copy(M);
+}
+
+template <class Type>
+matrix<Type>::~matrix() {
+	this->_destroy();
+}
+
+template <class Type>
+matrix<Type>& matrix<Type>::operator=(const matrix<Type>& M) {
+	this->_copy(M);
+	return(*this);
+}
+
+@
+The [[print()]] method provides ascii output.
+<<matrix methods>>=
+template <class Type>
+const matrix<Type>& matrix<Type>::print() const {
+	cout << _nrows << "x" << _ncols << endl;
+	for (int i=0; i<_nrows; i++) {
+		for (int j=0; j<_ncols; j++) {
+			cout << _f[j + i*_ncols] << "\t";
+		}
+		cout << endl;
+	}
+	return(*this);
+}
+
+@
+[[zero()]] sets all elements of the matrix to 0.
+<<matrix methods>>=
+template <class Type>
+matrix<Type> matrix<Type>::zero()
+{
+	memset( this->_f, 0, this->_nrows*this->_ncols*sizeof(Type) );
+	return(*this);
+}
+
+@
+Multiplication of a matrix times a [[threeVec]] and [[fourVec]] are defined.
+<<matrix methods>>=
+template <class Type>
+threeVec matrix<Type>::operator*(const threeVec& V) const {
+
+	threeVec R;
+
+	assert( (this->_nrows == 3) && (this->_ncols == 3) );
+
+	for ( int i = 0; i < 3; i++ ) {
+		for ( int j = 0; j < 3; j++ ) {
+			R.el(i) += (const_cast<matrix<Type>*>(this))->el(i,j)*(const_cast<threeVec*>(&V))->el(j); 
+		}
+	}
+	return(R);
+
+}
+
+template <class Type>
+fourVec matrix<Type>::operator*(const fourVec& v) const {
+
+	fourVec r;
+
+	assert( (this->_nrows == 4) && (this->_ncols == 4) );
+
+	for ( int i = 0; i < 4; i++ ) {
+		for ( int j = 0; j < 4; j++ ) {
+			r.el(i) += (const_cast<matrix<Type>*>(this))->el(i,j)*(const_cast<fourVec*>(&v))->el(j); 
+		}
+	}
+	return(r);
+
+}
+
+template <class Type>
+fourVec operator*=(fourVec& v,const matrix<Type>& M){  //new
+	v = M*v;
+	return v;
+}
