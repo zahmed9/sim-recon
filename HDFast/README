@@ -12,44 +12,65 @@ The GlueX Spectrometer for Hall D
 HDFast is a fast and flexible simulation program based upon the MCFast framework developed by the simulation group at Fermilab. MCFast consists of a set of modularized Monte Carlo library routines; it is designed to perform parameterized tracking by assembling a covariance matrix for each track that takes into account materials, efficiencies, and resolutions for all measurements planes, and use this matrix to smear the track parameters randomly. In principle, the distribution of smeared tracks produced by this method would be similar to the distribution of real tracks that were measured by a real detector(with the same parameters) and analyzed with an idealized track fitting procedure. 
 
 
-Building HDFast:
+[Before Building HDFast]
 
-The Following Environmental variables must be defined: $CRNLIB (points to your cern libs) 
-and $HALLD_HOME (points to a directory where $HALLD_HOME/src/HDFast is the HDFast cvs directory)
+		Define a  $HALLD_HOME, src, and bin directories
+				% setenv HALLD_HOME  /your/home/gluex
+				% make dir $HALLD_HOME/src
+				% make dir $HALLD_HOME/lib/
+				% make dir $HALLD_HOME/lib/`uname`
+				% make dir $HALLD_HOME/bin/
+				% make dir $HALLD_HOME/bin/`uname`
 
-Example are:
+		Get packages from Hall D cvs
+				% setenv CVSROOT $USER@cvs.jlab.org:/group/halld/cvsroot
+				% setenv CVS_RSH ssh
+				% cd $HALLD_HOME/src
+				% cvs checkout HDFast mcroot stdhep_translators genr8
+
+		Get the MCFast tarball
+				% wget  http://www.jlab.org/Hall-D/software/mcfast_v5_2.tgz  $HALLD_HOME/src/.
+				% tar zxvf mcfast_v5_2.tgz
+
+		Build the mcroot libs (Requires ROOT, See the README)
+				% cd $HALLD_HOME/src/mcroot
+				% make 
+				% make install
+		Build stdhep_translators genr8 [Note: these are not needed to build HDFast]
+				%  cd $HALLD_HOME/src/genr8
+				% make ; make install
+				%  cd $HALLD_HOME/src/stdhep_translators
+				% make ; make install
+
+
+[HDFast Build Environment]
+
+	The $CRNLIB Environmental variables must be defined pointing to your cern libs. 
+	Example:
 			% echo $CRNLIB 
 				/usr/local/cern/2000/lib	
-			% echo $HALLD_HOME
-				/home/gluex
 
 
-
-The library libTMCFast.a from the mcroot cvs repository must be built prior to building HDFast.
-
-			% cd $HALLD_HOME/src/mcroot 
-			% make all
-			% cd $HALLD_HOME/src/HDFast
-
-
-Now source 
-	$HALLD_HOME/src/HDFast/setup5_2.Linux_gcc3x 
+	Now source 
+		$HALLD_HOME/src/HDFast/setup5_2.Linux_gcc3x 
 					or
-	$HALLD_HOME/src/HDFast/setup5_2.Linux_gcc2x 
+		$HALLD_HOME/src/HDFast/setup5_2.Linux_gcc2x 
 
-			depending on your version of gcc  (see gcc --version)
+			[depending on your version of gcc  (see gcc --version)]
 
-Ready to make HDFast
+
+[Building HDFast]
 
 	
 			% make HDFast
+			% make install
 
 
 
-The HDFast run time environment:
+[HDFast Run Time Environment]
 
 	Note!! HDFast, during run time, needs certain environmental variables defined.  Therefor,
-	       it is suggested that one adds adds the following lines to cshrc (or equivalent)
+	       it is suggested that one adds the following lines to cshrc (or equivalent)
 	       for automatic sourcing.
 
 

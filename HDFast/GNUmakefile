@@ -43,8 +43,8 @@ ROOTGLIBS     = $(shell  root-config --glibs)
 
 TMCFAST_INC = -I$(HALLD_HOME)/src/mcroot
 
-#HDFASTLIBS = $(HALLD_HOME)/lib//Linux/libTMCFast.a
-HDFASTLIBS = $(HALLD_HOME)/src/mcroot/libTMCFast.a
+HDFASTLIBS = $(HALLD_HOME)/lib//Linux/libTMCFast.a
+#HDFASTLIBS = $(HALLD_HOME)/src/mcroot/libTMCFast.a
 
 # Machine dependent stuff.
 hostname = $(shell hostname)
@@ -344,11 +344,10 @@ HDFast: $(USER_OBJ)
 	$(FP_EXCEPTION) \
 	$(LIBS) $(MAP)
 
-install: HDFast HDFast_lite
+install: HDFast db
 	mv HDFast $(HALLD_HOME)/bin/$(UNAME)/.
-	mv HDFast_lite $(HALLD_HOME)/bin/$(UNAME)/.     
 	cp run_hdfast  $(HALLD_HOME)/bin/.
-	cp run_hdfast_lite  $(HALLD_HOME)/bin/.
+
 
 db:
 	@rm -f db
