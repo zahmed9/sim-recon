@@ -33,11 +33,12 @@
 #include "TMCFastCerenkov.h"
 
 
+
 struct cal_hits_t{
   int nCalHits;
-  cal_hit_t **calhits;
+  cal_hit_t **CalorHits;
 };
-
+ 
 struct event_t {
   struct traces_t traces;    // defined in TMCFastTOF.h
   struct traces_t ctraces;    // cerenkov trace points
@@ -108,7 +109,7 @@ extern "C" int usr_mcfast2root(event_t *event)
     vtx_hits = new TMCFastHits(event->devhits);
     cdc_hits = new TMCFastHits(event->devhits_cdc);
     //cerr<<"First event\n"<<*vtx_hits;
-    bcal = new TMCFastCalorimeter(event->calor0.nCalHits,event->calor0.calhits);
+    bcal = new TMCFastCalorimeter(event->calor0.nCalHits,event->calor0.CalorHits);
     //calor1 = new TMCFastCalorimeter(event->calor1.nCalHits,event->calor1.calhits);
     lgdSmears = new TLGDsmears(event->lgdSmears);
     ceren = new TMCFastCerenkov(&(event->ctraces));
@@ -153,7 +154,7 @@ extern "C" int usr_mcfast2root(event_t *event)
   
     vtx_hits->Fill(event->devhits);
     cdc_hits->Fill(event->devhits_cdc);
-    bcal->Fill(event->calor0.nCalHits,event->calor0.calhits);
+    bcal->Fill(event->calor0.nCalHits,event->calor0.CalorHits);
     //calor1->Fill(event->calor1.nCalHits,event->calor1.calhits);
     lgdSmears->Fill(event->lgdSmears);
     ceren->Fill(&(event->ctraces));

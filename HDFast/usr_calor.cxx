@@ -19,29 +19,8 @@
 #include <CalorInfo.hh>
 #include <CalorInfoTrack.hh>
 #include <CalorSignalMC.hh>
+#include <calor_hits.h>
 
-#define TRUE 1
-#define FALSE 0
-
-struct cal_hit_tracks_t {
-  int tr_num;  
-  float e_mip;
-  float e_em;  
-  float e_had; 
-};
-
-struct cal_hit_t {
-  int icr1; 
-  int icr2;  
-  int n_tracks;
-  float e_tot;
-  struct cal_hit_tracks_t *info_tr; 
-};
-  
-struct cal_hits_t {
-  int nCalHits;
-  cal_hit_t **CalorHits;
-};
 
 extern "C" void usr_calor(struct cal_hits_t *Calor)
 {

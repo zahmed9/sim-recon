@@ -18,7 +18,7 @@
 #include<offline_track.h>
 #include<trace.h>
 #include<tof.h>
-#include<cal_hit.h>
+#include<calor_hits.h>
 #include<usr_lgd.h>
 #include <dev_hit.h>
 #include <hit_track.h>
@@ -40,11 +40,12 @@ struct hepevt_t {
   int nhep;               /* The number of entries in this event */
   struct heppart_t *heppart;
 };
-
+/*
 struct cal_hits_t {
   int nCalHits;
   cal_hit **calhit;
 };
+*/
 
 struct event_t {
   struct ntraces_t traces;    /* defined in TMCFastTOF.h */
@@ -118,9 +119,11 @@ void usr_dump(void){
      * Kludge fix the hits (they are missing the the trace index)
      */
     /* for consistency use FORTRAN indexology i.e. start w/ 1 */
-    if(trace_par_c_.trace_par[i].hit != 0)
-      hit_trk_c_.hit_trk[trace_par_c_.trace_par[i].hit - 1].trace = i+1;
-
+    /**
+     * if(trace_par_c_.trace_par[i].hit != 0)
+     * hit_trk_c_.hit_trk[trace_par_c_.trace_par[i].hit - 1].trace = i+1;
+     *
+     **/
     
     /* find the TOF traces */
    
@@ -229,11 +232,11 @@ void usr_dump(void){
     usr_dumpCalor();
   usr_calor(&(event.calor0));
  
-
-  {/* This is old code and not used in HDFast after 1 Apr 1999.
+  /* 
+  { * This is old code and not used in HDFast after 1 Apr 1999.
    * It will eventually be remove after the new mcfast code
    * is well verified.
-   */
+   *
     int i,j,ical=0;
     cal_hit *hit;
     cal_hit_tracks *tr;
@@ -248,7 +251,7 @@ void usr_dump(void){
 	  fprintf(stderr," Colorimeter hit has null pointer\n");
 	  continue;
 	}
-	/**************** Now dump cal info ***************/
+	**************** Now dump cal info ***************
 	fprintf(stderr,
 		"coord1 cell#: %d coord2 cell#: %d e_mip: %f  e_em: %f  e_had: %f\n",
 		hit->icr1,hit->icr2,hit->e_mip,hit->e_em,hit->e_had);
@@ -258,7 +261,7 @@ void usr_dump(void){
 	fprintf(stderr,"\n");
       }
     }
-  }
+  }*******************/
 
 
 
@@ -282,13 +285,13 @@ void usr_dump(void){
   
   /* 
   event.calor0.nCalHits =  MCFNumHitCal[0];
-  event.calor0.calhit = MCFCalHits[0];
+  event.calor0.CalorHits = MCFCalorHitss[0];
   */
 
 
   /*
-   * event.calor1.nCalHits = MCFNumHitCal[1];
-   * event.calor1.calhit = MCFCalHits[1];  
+   * event.calor1.nCalorHitss = MCFNumHitCal[1];
+   * event.calor1.CalorHits = MCFCalorHitss[1];  
    */
   event.lgdSmears = LgdParts;
   
@@ -314,9 +317,9 @@ void usr_dump(void){
    * Free the calor pointer memory
    */
   for(i=0;i<event.calor0.nCalHits;i++){
-    free(event.calor0.calhit[i]->info_tr);
-    free(event.calor0.calhit[i]);
+    free(event.calor0.CalorHits[i]->info_tr);
+    free(event.calor0.CalorHits[i]);
   }
-  free(event.calor0.calhit);
+  free(event.calor0.CalorHits);
 }
 
