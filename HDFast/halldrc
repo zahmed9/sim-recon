@@ -26,6 +26,7 @@ setenv CRNLIB /cern/2000/lib
 #
 #
 #
+setenv XERCESCROOT $HALLD_HOME/src/xerces-c
 setenv CVSROOT  :pserver:${USER}@jlabs1.jlab.org:/group/halld/cvsroot
 
 # legacy of the current Hall D make scheme
@@ -34,8 +35,8 @@ setenv CVSROOT  :pserver:${USER}@jlabs1.jlab.org:/group/halld/cvsroot
 setenv OS_NAME `uname`
 setenv UNAME `uname`   
 setenv TOP_DIR $HALLD_HOME
-setenv BUILDS $TOP_DIR/source
-setenv CLAS_CMS $TOP_DIR/source/cms
+setenv BUILDS $TOP_DIR/src
+setenv CLAS_CMS $TOP_DIR/src/cms
 setenv HALLDLIBS $TOP_DIR/lib/$OS_NAME
 setenv HALLDLIB $HALLDLIBS
 
@@ -49,9 +50,9 @@ source $HALLD_HOME/src/HDFast/setup5_1.$OS_NAME
 # ROOT env's are setup in .cshrc
 setenv ROOTSYS $HALLD_HOME/src/root
 if( $?LD_LIBRARY_PATH) then
- setenv LD_LIBRARY_PATH  ${LD_LIBRARY_PATH}:${ROOTSYS}/lib   
+ setenv LD_LIBRARY_PATH  ${LD_LIBRARY_PATH}:${ROOTSYS}/lib:${HALLD_HOME}/src/xerces-c/lib   
 else
-  setenv LD_LIBRARY_PATH  ${ROOTSYS}/lib   
+  setenv LD_LIBRARY_PATH  ${ROOTSYS}/lib:${HALLD_HOME}/src/xerces-c/lib   
 endif
 set path=($path $ROOTSYS/bin)
 
