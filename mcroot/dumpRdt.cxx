@@ -163,8 +163,10 @@ int main(int argc, char **argv)
     cout<< "\t"<<branch->GetName()<<endl;
     b[nbranches++] = tree->GetBranch(branch->GetName());
   }
+  cout<<"Virtual Branch list:\n"; 
+  cout<< "\tesr\tRequires(hepevt,offtrk,bcal,lgdSmears)" <<endl;
   cout<<endl;
-  if(listBranches) exit(0);
+
 
   // MCFast objects
   /*
@@ -190,6 +192,9 @@ int main(int argc, char **argv)
 
 
   Int_t nentries = (Int_t)tree->GetEntries();
+  cout<<"The Tree contains "<<nentries<<" events\n";
+  if(listBranches) exit(0);
+
   if(nevents == 0) 
     nevents =nentries-skipEvents;
   else

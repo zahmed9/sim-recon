@@ -63,23 +63,23 @@ private:
   Int_t ftype[TTOF_TRACE_MAX];           // Trace type (see trace_type.inc) 
   Int_t fplane[TTOF_TRACE_MAX];          // Radial or z plane number 
   Int_t fhit[TTOF_TRACE_MAX];            // # of hits in hit track list 
-  Double_t fpx[TTOF_TRACE_MAX];           // Track parameters at interaction 
-  Double_t fpy[TTOF_TRACE_MAX];
-  Double_t fpz[TTOF_TRACE_MAX];
-  Double_t fE[TTOF_TRACE_MAX];
-  Double_t fx[TTOF_TRACE_MAX];
-  Double_t fy[TTOF_TRACE_MAX];
-  Double_t fz[TTOF_TRACE_MAX];
-  Double_t fpt[TTOF_TRACE_MAX];          // pt = sqrt(px*px+py*py) 
-  Double_t fp[TTOF_TRACE_MAX];           // momentum 
-  Double_t fq[TTOF_TRACE_MAX];           // charge 
-  Double_t feta[TTOF_TRACE_MAX][3];    // Direction cosines of normal to plane 
-  Double_t fpath[TTOF_TRACE_MAX];        // Total track length up to this hit 
-  Double_t ftime[TTOF_TRACE_MAX];        // Time at which track made hit 
-  Double_t ftau[TTOF_TRACE_MAX];         // Proper flight time to intersection 
+  Float_t fpx[TTOF_TRACE_MAX];           // Track parameters at interaction 
+  Float_t fpy[TTOF_TRACE_MAX];
+  Float_t fpz[TTOF_TRACE_MAX];
+  Float_t fE[TTOF_TRACE_MAX];
+  Float_t fx[TTOF_TRACE_MAX];
+  Float_t fy[TTOF_TRACE_MAX];
+  Float_t fz[TTOF_TRACE_MAX];
+  Float_t fpt[TTOF_TRACE_MAX];          // pt = sqrt(px*px+py*py) 
+  Float_t fp[TTOF_TRACE_MAX];           // momentum 
+  Float_t fq[TTOF_TRACE_MAX];           // charge 
+  Float_t feta[TTOF_TRACE_MAX][3];    // Direction cosines of normal to plane 
+  Float_t fpath[TTOF_TRACE_MAX];        // Total track length up to this hit 
+  Float_t ftime[TTOF_TRACE_MAX];        // Time at which track made hit 
+  Float_t ftau[TTOF_TRACE_MAX];         // Proper flight time to intersection 
   Int_t fmaterial[TTOF_TRACE_MAX];       // Position in material list 
-  Double_t fradl[TTOF_TRACE_MAX];        // # of radiation lengths in material 
-  Double_t fdedx[TTOF_TRACE_MAX];        // dE/dx of material 
+  Float_t fradl[TTOF_TRACE_MAX];        // # of radiation lengths in material 
+  Float_t fdedx[TTOF_TRACE_MAX];        // dE/dx of material 
 
 public:
   TMCFastTOF() { }
@@ -88,6 +88,7 @@ public:
 
   Double_t GetCTOF(Int_t hep);
   Double_t GetFTOF(Int_t hep);
+  Double_t GetMass(Int_t hep);
   Double_t GetR(Int_t i);
   Double_t Beta(Int_t hep);
   Double_t CTOFmass(Int_t hep);

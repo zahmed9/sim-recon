@@ -3,7 +3,7 @@
 <!--                                             -->
 <!-- Author: ROOT team (rootdev@hpsalo.cern.ch)  -->
 <!--                                             -->
-<!--   Date: Mon Feb  1 21:09:51 1999            -->
+<!--   Date: Thu Feb 11 17:24:25 1999            -->
 <!--                                             -->
 <head>
 <title>TMCFastTOF</title>
@@ -44,6 +44,7 @@
 <!--TAB6-->             <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastTOF:GetFTOF">GetFTOF</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> hep)
 <!--TAB6-->                <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastTOF:GetHep">GetHep</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
 <!--TAB6-->                <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastTOF:GetHits">GetHits</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--TAB6-->             <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastTOF:GetMass">GetMass</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> hep)
 <!--TAB6-->                <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastTOF:GetMaterial">GetMaterial</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
 <!--TAB6-->                <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastTOF:GetNtraces">GetNtraces</a><!--PLAIN-->()
 <!--TAB6-->             <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastTOF:GetP">GetP</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
@@ -58,7 +59,7 @@
 <!--TAB6-->             <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastTOF:GetRadl">GetRadl</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
 <!--TAB6-->             <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastTOF:GetTau">GetTau</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
 <!--TAB6-->             <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastTOF:GetTime">GetTime</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
-<!--TAB6-->                <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastTOF:GetType">GetType</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--TAB6-->                <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastTOF:GetType">GetType</a><!--PLAIN-->(const <a href="ListOfTypes.html#Int_t">Int_t</a> i)
 <!--TAB6-->             <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastTOF:GetX">GetX</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
 <!--TAB6-->             <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastTOF:GetY">GetY</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
 <!--TAB6-->             <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastTOF:GetZ">GetZ</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
@@ -91,28 +92,28 @@
 
 <h3><!--TAB2-->  <a name="TMCFastTOF:Data Members">Data Members</a></h3>
 <!--TAB4-->    <b>private:</b><br>
-<!--TAB6-->         <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fntraces">fntraces</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fntraces">The number of track intersections</a></i>
-<!--TAB6-->         <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fhep">fhep[60]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fhep">Position of track in /HEPEVT/ list </a></i>
-<!--TAB6-->         <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:ftype">ftype[60]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:ftype">Trace type (see trace_type.inc) </a></i>
-<!--TAB6-->         <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fplane">fplane[60]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fplane">Radial or z plane number </a></i>
-<!--TAB6-->         <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fhit">fhit[60]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fhit"># of hits in hit track list </a></i>
-<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fpx">fpx[60]</a><!--PLAIN-->   <!--TAB--><i><a name="Title:fpx">Track parameters at interaction </a></i>
-<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fpy">fpy[60]</a><!--PLAIN-->   <!--TAB--><i><a name="Title:fpy"></a></i>
-<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fpz">fpz[60]</a><!--PLAIN-->   <!--TAB--><i><a name="Title:fpz"></a></i>
-<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fE">fE[60]</a><!--PLAIN-->    <!--TAB--><i><a name="Title:fE"></a></i>
-<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fx">fx[60]</a><!--PLAIN-->    <!--TAB--><i><a name="Title:fx"></a></i>
-<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fy">fy[60]</a><!--PLAIN-->    <!--TAB--><i><a name="Title:fy"></a></i>
-<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fz">fz[60]</a><!--PLAIN-->    <!--TAB--><i><a name="Title:fz"></a></i>
-<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fpt">fpt[60]</a><!--PLAIN-->   <!--TAB--><i><a name="Title:fpt">pt = sqrt(px*px+py*py) </a></i>
-<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fp">fp[60]</a><!--PLAIN-->    <!--TAB--><i><a name="Title:fp">momentum </a></i>
-<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fq">fq[60]</a><!--PLAIN-->    <!--TAB--><i><a name="Title:fq">charge </a></i>
-<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:feta">feta[60][3]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:feta">Direction cosines of normal to plane </a></i>
-<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fpath">fpath[60]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fpath">Total track length up to this hit </a></i>
-<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:ftime">ftime[60]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:ftime">Time at which track made hit </a></i>
-<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:ftau">ftau[60]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:ftau">Proper flight time to intersection </a></i>
-<!--TAB6-->         <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fmaterial">fmaterial[60]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fmaterial">Position in material list </a></i>
-<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fradl">fradl[60]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fradl"># of radiation lengths in material </a></i>
-<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fdedx">fdedx[60]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fdedx">dE/dx of material </a></i>
+<!--TAB6-->        <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fntraces">fntraces</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fntraces">The number of track intersections</a></i>
+<!--TAB6-->        <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fhep">fhep[60]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fhep">Position of track in /HEPEVT/ list </a></i>
+<!--TAB6-->        <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:ftype">ftype[60]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:ftype">Trace type (see trace_type.inc) </a></i>
+<!--TAB6-->        <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fplane">fplane[60]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fplane">Radial or z plane number </a></i>
+<!--TAB6-->        <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fhit">fhit[60]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fhit"># of hits in hit track list </a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Float_t">Float_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fpx">fpx[60]</a><!--PLAIN-->   <!--TAB--><i><a name="Title:fpx">Track parameters at interaction </a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Float_t">Float_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fpy">fpy[60]</a><!--PLAIN-->   <!--TAB--><i><a name="Title:fpy"></a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Float_t">Float_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fpz">fpz[60]</a><!--PLAIN-->   <!--TAB--><i><a name="Title:fpz"></a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Float_t">Float_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fE">fE[60]</a><!--PLAIN-->    <!--TAB--><i><a name="Title:fE"></a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Float_t">Float_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fx">fx[60]</a><!--PLAIN-->    <!--TAB--><i><a name="Title:fx"></a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Float_t">Float_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fy">fy[60]</a><!--PLAIN-->    <!--TAB--><i><a name="Title:fy"></a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Float_t">Float_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fz">fz[60]</a><!--PLAIN-->    <!--TAB--><i><a name="Title:fz"></a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Float_t">Float_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fpt">fpt[60]</a><!--PLAIN-->   <!--TAB--><i><a name="Title:fpt">pt = sqrt(px*px+py*py) </a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Float_t">Float_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fp">fp[60]</a><!--PLAIN-->    <!--TAB--><i><a name="Title:fp">momentum </a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Float_t">Float_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fq">fq[60]</a><!--PLAIN-->    <!--TAB--><i><a name="Title:fq">charge </a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Float_t">Float_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:feta">feta[60][3]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:feta">Direction cosines of normal to plane </a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Float_t">Float_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fpath">fpath[60]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fpath">Total track length up to this hit </a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Float_t">Float_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:ftime">ftime[60]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:ftime">Time at which track made hit </a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Float_t">Float_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:ftau">ftau[60]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:ftau">Proper flight time to intersection </a></i>
+<!--TAB6-->        <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fmaterial">fmaterial[60]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fmaterial">Position in material list </a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Float_t">Float_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fradl">fradl[60]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fradl"># of radiation lengths in material </a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Float_t">Float_t</a> <!--TAB--><!--BOLD--><a name="TMCFastTOF:fdedx">fdedx[60]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fdedx">dE/dx of material </a></i>
 </pre>
 <!--END-->
 <hr>
@@ -153,13 +154,9 @@ common block information
 
  See <a href="#TMCFastTOF:GetType">GetType</a>() for information about trace types
 
-  tof = gamma * (<a href="#TMCFastTOF:GetTau">GetTau</a>(i) - <a href="#TMCFastTOF:GetTau">GetTau</a>(0))
- tof = (<a href="#TMCFastTOF:GetTau">GetTau</a>(i) - <a href="#TMCFastTOF:GetTau">GetTau</a>(0))*<a href="#TMCFastTOF:GetTime">GetTime</a>(i)/<a href="#TMCFastTOF:GetTau">GetTau</a>(i);
 
- The use of tau is need do to a bug in mcfast that forgets
- to fill t0 but does fill tau0.
+ tof = (<a href="#TMCFastTOF:GetTime">GetTime</a>(i) - <a href="#TMCFastTOF:GetTime">GetTime</a>(0));
 
- WARNING!! TOF is buggy for mcfast version 4.1 DO NOT USE!
 </pre><hr>
 <!--FUNCTION--><a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastTOF:Beta" href="src/TMCFastTOF.cxx.html#TMCFastTOF:Beta">Beta</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> hep)<br>
 <pre> Calculate beta for central
@@ -167,12 +164,21 @@ common block information
  beta = <a href="#TMCFastTOF:GetPath">GetPath</a>(hep) /( <a href="#TMCFastTOF:GetCTOF">GetCTOF</a>(hep)*kSpeedOfLight)
 
 </pre><hr>
+<!--FUNCTION--><a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastTOF:GetMass" href="src/TMCFastTOF.cxx.html#TMCFastTOF:GetMass">GetMass</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> hep)<br>
+<pre> Calculate the mass from the local four-vector
+ This is not the smeared mass.
+
+  mass = <a href="http://root.cern.ch/root/html/TMath.html#TMath:Sqrt">TMath::Sqrt</a>((<a href="#TMCFastTOF:GetE">GetE</a>(i)*<a href="#TMCFastTOF:GetE">GetE</a>(i)) - (<a href="#TMCFastTOF:GetP">GetP</a>(i)*<a href="#TMCFastTOF:GetP">GetP</a>(i)));
+ where <a href="#TMCFastTOF:GetHep">GetHep</a>(i)==hep
+</pre><hr>
 <!--FUNCTION--><a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastTOF:CTOFmass" href="src/TMCFastTOF.cxx.html#TMCFastTOF:CTOFmass">CTOFmass</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> hep)<br>
 <pre> Calculate time-of-flight mass
  Currently there is no smearing!!!!! (but soon should be implemented)
 
   m = p/(beta*gamma)
-  mass = <a href="#TMCFastTOF:GetP">GetP</a>(i)*<a href="http://root.cern.ch/root/html/TMath.html#TMath:Sqrt">TMath::Sqrt</a>(1/beta*beta - 1.0);
+
+  beta = (<a href="#TMCFastTOF:GetPath">GetPath</a>(i)/tof)*(1/kSpeedOfLight);
+  tof = (<a href="#TMCFastTOF:GetTime">GetTime</a>(i) - <a href="#TMCFastTOF:GetTime">GetTime</a>(0));
 
 </pre><hr>
 <!--FUNCTION--><a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastTOF:CTOFmass" href="src/TMCFastTOF.cxx.html#TMCFastTOF:CTOFmass">CTOFmass</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> hep, <a href="./TMCFastOfflineTrack.html">TMCFastOfflineTrack</a> &amp;offtrk)<br>
@@ -181,7 +187,9 @@ common block information
  (but soon it should be implemented)
 
   m = p/(beta*gamma)
-  mass = <a href="#TMCFastTOF:GetP">GetP</a>(i)*<a href="http://root.cern.ch/root/html/TMath.html#TMath:Sqrt">TMath::Sqrt</a>(1/beta*beta - 1.0);
+
+ beta = (<a href="#TMCFastTOF:GetPath">GetPath</a>(i)/tof)*(1/kSpeedOfLight);
+ tof = (<a href="#TMCFastTOF:GetTime">GetTime</a>(i) - <a href="#TMCFastTOF:GetTime">GetTime</a>(0));
 
 </pre><hr>
 <!--FUNCTION--><a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastTOF:GetFTOF" href="src/TMCFastTOF.cxx.html#TMCFastTOF:GetFTOF">GetFTOF</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> hep)<br>
@@ -193,18 +201,17 @@ common block information
 
  See <a href="#TMCFastTOF:GetType">GetType</a>() for information about trace types
 
-  tof = gamma * (<a href="#TMCFastTOF:GetTau">GetTau</a>(i) - <a href="#TMCFastTOF:GetTau">GetTau</a>(0))
- tof = (<a href="#TMCFastTOF:GetTau">GetTau</a>(i) - <a href="#TMCFastTOF:GetTau">GetTau</a>(0))*<a href="#TMCFastTOF:GetTau">GetTau</a>(i)/<a href="#TMCFastTOF:GetTime">GetTime</a>(i);
 
- The use of tau is need do to a bug in mcfast that forgets
- to fill t0 but does fill tau0.
- WARNING!! TOF is buggy for mcfast version 4.1 DO NOT USE!
+ tof = (<a href="#TMCFastTOF:GetTime">GetTime</a>(i) - <a href="#TMCFastTOF:GetTime">GetTime</a>(0));
 </pre><hr>
 <!--FUNCTION--><a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastTOF:FTOFmass" href="src/TMCFastTOF.cxx.html#TMCFastTOF:FTOFmass">FTOFmass</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> hep, <a href="./TMCFastOfflineTrack.html">TMCFastOfflineTrack</a> &amp;offtrk)<br>
 <pre> Calculate time-of-flight mass
  Currently there is no smearing of time!!! (but soon should be implemented)
   m = p/(beta*gamma)
-  mass = <a href="#TMCFastTOF:GetP">GetP</a>(i)*<a href="http://root.cern.ch/root/html/TMath.html#TMath:Sqrt">TMath::Sqrt</a>(1/beta*beta - 1.0);
+  mass = offtrk.GetHepEvtP(i)*<a href="http://root.cern.ch/root/html/TMath.html#TMath:Sqrt">TMath::Sqrt</a>(1/beta*beta - 1.0);
+
+ beta = (<a href="#TMCFastTOF:GetPath">GetPath</a>(i)/tof)*(1/kSpeedOfLight);
+ tof = (<a href="#TMCFastTOF:GetTime">GetTime</a>(i) - <a href="#TMCFastTOF:GetTime">GetTime</a>(0));
 
 </pre><hr>
 <!--FUNCTION--><a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastTOF:FTOFmass" href="src/TMCFastTOF.cxx.html#TMCFastTOF:FTOFmass">FTOFmass</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> hep)<br>
@@ -240,7 +247,7 @@ common block information
 <!--INLINE FUNCTION--><!--TAB6-->         <a href="./TMCFastTOF.html">TMCFastTOF</a> <a name="TMCFastTOF:TMCFastTOF" href="TMCFastTOF.h">TMCFastTOF</a>(ntraces_t* traces)
 <!--INLINE FUNCTION--><!--TAB6-->              <a href="ListOfTypes.html#Int_t">Int_t</a> <a name="TMCFastTOF:GetNtraces" href="TMCFastTOF.h">GetNtraces</a>()
 <!--INLINE FUNCTION--><!--TAB6-->              <a href="ListOfTypes.html#Int_t">Int_t</a> <a name="TMCFastTOF:GetHep" href="TMCFastTOF.h">GetHep</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
-<!--INLINE FUNCTION--><!--TAB6-->              <a href="ListOfTypes.html#Int_t">Int_t</a> <a name="TMCFastTOF:GetType" href="TMCFastTOF.h">GetType</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--INLINE FUNCTION--><!--TAB6-->              <a href="ListOfTypes.html#Int_t">Int_t</a> <a name="TMCFastTOF:GetType" href="TMCFastTOF.h">GetType</a>(const <a href="ListOfTypes.html#Int_t">Int_t</a> i)
 <!--INLINE FUNCTION--><!--TAB6-->              <a href="ListOfTypes.html#Int_t">Int_t</a> <a name="TMCFastTOF:GetPlane" href="TMCFastTOF.h">GetPlane</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
 <!--INLINE FUNCTION--><!--TAB6-->              <a href="ListOfTypes.html#Int_t">Int_t</a> <a name="TMCFastTOF:GetHits" href="TMCFastTOF.h">GetHits</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
 <!--INLINE FUNCTION--><!--TAB6-->           <a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastTOF:GetPx" href="TMCFastTOF.h">GetPx</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
