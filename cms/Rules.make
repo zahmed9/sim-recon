@@ -43,7 +43,7 @@ XINCLUDE:= $(XINCLUDE_$(OS_NAME))
 # INCLUDE defines the location of all general purpose include files
 #
 
-INCLUDE_SunOS =	-I. -I../include -I$(CLAS_PACK)/include -I$(CLAS_PACK)/inc_derived
+INCLUDE_SunOS =	-I. -I../include -I$(BUILDS)/include
 INCLUDE_HP-UX		:= $(INCLUDE_SunOS)
 INCLUDE_AIX		:= $(INCLUDE_SunOS)
 INCLUDE_Linux		:= $(INCLUDE_SunOS)
@@ -132,7 +132,6 @@ CFLAGS:= $(CFLAGS_$(OS_NAME))
 # C++ stuff
 #
 
-
 CCFLAGS:= $(CCFLAGS_$(OS_NAME))
 
 #
@@ -194,9 +193,9 @@ ifndef ACPP
 ACPP=$(ACPP_default)
 endif
 
-CC_default:=		cc
+CC_default:=		gcc
 CC_Linux:=		gcc
-CC_SunOS:=		cc
+CC_SunOS:=		gcc
 CC_HP-UX:= 	        cc
 CC_IRIX:=               cc
 CC_OSF1:=               gcc
@@ -209,9 +208,9 @@ ifndef CC
 CC=$(CC_default)
 endif
 
-C++_default:=		CC
+C++_default:=		g++
 C++_Linux:=		g++
-C++_SunOS:=		CC
+C++_SunOS:=		g++
 C++_HP-UX:= 	        	CC
 C++_IRIX:=               		CC
 C++_OSF1:=               	g++
