@@ -1,5 +1,15 @@
 #!/usr/bin/perl
-
+############################################
+#
+# run_mcfast: perl script for running
+#  the stdhep translaters and mcfast
+#
+#  Paul M Eugenio
+#  Carnegie Mellon University
+#
+#  created: some time in Sept 1998
+#  last modified by: PME 19-Nov-98
+##########################################
 select((select(STDOUT),$|=1)[$[]);
 
 &printusage($0) if($#ARGV == -1);
