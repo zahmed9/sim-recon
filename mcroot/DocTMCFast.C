@@ -10,4 +10,14 @@
  gHtml->MakeClass("TMCFastHepParticle");
  gHtml->MakeClass("TMCFastOfflineTrack");
  gHtml->MakeClass("TMCFastTOF");
+ gHtml->MakeClass("TMCFastCalorHits");
+ gHtml->MakeClass("TMCFastCalorimeter");
+ gHtml->MakeClass("TCalHitTracks");
+ gHtml->MakeClass("TMCParticle");
+ gHtml->MakeClass("TMCesr");
+ gHtml->MakeClass("TLGDsmears"); 
+ gHtml->MakeClass("TLGDparticle");
+
+
+
 }
