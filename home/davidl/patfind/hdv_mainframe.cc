@@ -46,7 +46,7 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 	phi_vs_z	= new TGTextButton(this,"&Phi vs. Z",	7);
 	slope		= new TGTextButton(this,"&Slope", 		5);
 	offset	= new TGTextButton(this,"&Offset",		6);
-	gifs		= new TGTextButton(this,"&GIFs",			8);
+	gifs		= new TGTextButton(this,"&EPS",			8);
 	hits		= new TGTextButton(this,"&Hits",			9);
 	quit		= new TGTextButton(this,"&Quit",			1);
 	quit->SetCommand(".q");
@@ -69,7 +69,9 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 
 	maincanvas = emcanvas->GetCanvas();
 	maincanvas->cd(0);
-	maincanvas->Range(-300.0,-300.0,300.0, 300.0);	
+	maincanvas->Range(-300.0,-300.0,300.0, 300.0);
+	maincanvas->SetTickx();
+	maincanvas->SetTicky();
 }
 
 //-------------------
@@ -125,28 +127,29 @@ void hdv_mainframe::MakeGIFs(void)
 	static int event=1;
 	
 	char fname[256];
+	char *suffix="eps";
 	
-	sprintf(fname,"patfind_lines_%02d.gif",event);
+	sprintf(fname,"patfind_lines_%02d.%s",event,suffix);
 	myproc->evnt(0);
 	maincanvas->SaveAs(fname);
 
-	sprintf(fname,"patfind_density_%02d.gif",event);
+	sprintf(fname,"patfind_density_%02d.%s",event,suffix);
 	myproc->densityPlot();
 	maincanvas->SaveAs(fname);
 
-	sprintf(fname,"patfind_slope_%02d.gif",event);
+	sprintf(fname,"patfind_slope_%02d.%s",event,suffix);
 	myproc->PlotSlope();
 	maincanvas->SaveAs(fname);
 
-	sprintf(fname,"patfind_offset_%02d.gif",event);
+	sprintf(fname,"patfind_offset_%02d.%s",event,suffix);
 	myproc->PlotOffset();
 	maincanvas->SaveAs(fname);
 
-	sprintf(fname,"patfind_phi_vs_z_%02d.gif",event);
+	sprintf(fname,"patfind_phi_vs_z_%02d.%s",event,suffix);
 	myproc->PlotPhiVsZ();
 	maincanvas->SaveAs(fname);
 
-	sprintf(fname,"patfind_hits_%02d.gif",event);
+	sprintf(fname,"patfind_hits_%02d.%s",event,suffix);
 	myproc->DrawHits();
 	maincanvas->SaveAs(fname);
 
