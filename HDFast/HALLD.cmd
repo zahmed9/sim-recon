@@ -4,7 +4,7 @@
 max_ev    25000                    !Max number of events
 !max_ev    25                    !Max number of events
 max_print 4                      !max # events to print
-! Change the geofile location below to the value of $HDMS_MCFAST_DIR 
+! Change the geofile location below to the value of $HDFAST_DIR 
 ! note that mcfast needs that actual name and not the env var.
 !file_geo $HDFAST_DIR/HDFast.geo       !Geometry file
 file_geo /home/eugenio/gluex/src/HDFast/HDFast.db       !Geometry file

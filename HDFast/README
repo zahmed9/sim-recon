@@ -59,6 +59,15 @@ HDFast is a fast and flexible simulation program based upon the MCFast framework
 			[depending on your version of gcc  (see gcc --version)]
 
 
+	Modify the geometry location in the file "HDFast/HALLD.cmd" file. Unfortunately, the mcfast
+	cmd file reader does not precess environmental variables.
+		HALLD.cmd File:
+			! Change the geofile location given below to point to your HDFast geo file.
+			! Note: mcfast needs that actual name and not an environmental variable
+			!file_geo $HALLD_HOME/src/HDFast/HDFast.geo       !Geometry file
+			file_geo /home/gluex/src/HDFast/HDFast.db       !Your Geometry file
+
+
 [Building HDFast]
 
 	
