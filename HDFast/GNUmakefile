@@ -4,7 +4,7 @@
 #
 #
 # Created  1998/12/16  eugenio
-# Last Modified 1-Nov-1999  eugenio
+# Last Modified 29-Mar-2000  eugenio
 #
 # This makefile is currently working 
 # for OSF1 and Linux only. Contact Paul Eugenio (CMU)
@@ -26,16 +26,22 @@ DllSuf        = so
 MCFASTLIB      = $(TMCFastO)
 OutPutOpt     = -o
 
+# root libs for ver 2.22
+#ROOTLIBS      = -L$(ROOTSYS)/lib -lNew -lBase -lCint -lClib -lCont -lFunc \
+#                -lGraf -lGraf3d -lHist -lHtml -lMatrix -lMeta -lMinuit -lNet \
+#                -lPostscript -lProof -lTree -lUnix -lZip
+#ROOTGLIBS     = -lGpad -lGui -lGX11 -lX3d
 
-ROOTLIBS      = -L$(ROOTSYS)/lib -lNew -lBase -lCint -lClib -lCont -lFunc \
-                -lGraf -lGraf3d -lHist -lHtml -lMatrix -lMeta -lMinuit -lNet \
-                -lPostscript -lProof -lTree -lUnix -lZip
-ROOTGLIBS     = -lGpad -lGui -lGX11 -lX3d
+ROOTLIBS      = $(shell root-config --libs)
+ROOTGLIBS     = $(shell  root-config --glibs)
+    
+
+
 
 TMCFAST_INC = -I$(HALLD_HOME)/src/mcroot
 
 #HDFASTLIBS = -L$(HALLD_HOME)/lib/$(UNAME)  -lTMCFast
-HDFASTLIBS = $(HALLDLIBS)/libTMCFast.a
+HDFASTLIBS = /home/halld/lib/Linux/libTMCFast.a
 
 #HDFASTLIBS =    TMCFastHepEvt.o  TMCFastHepEvtDict.o TMCFastTOF.o TMCFastTOFDict.o \
 #		TMCFastOfflineTrack.o  TMCFastOfflineTrackDict.o \
@@ -109,8 +115,9 @@ ifeq "$(UNAME)" "Linux"
   FP_EXCEPTION = -L/usr/lib
   LOPTION= -O0 -W1,-taso
 
- ABLIBS = $(HALLDLIBS)
-  LIBS := -L$(ABLIBS) -lU77 -lV77 -lf77math -lfio   #ABSOFT run time 
+# ABLIBS = $(HALLDLIBS)
+ F90LIBS = $(HALLD_HOME/src/f90_libs
+  LIBS := -L$(F90LIBS) -lU77 -lV77 -lf77math -lfio    
 #  LIBS += -L/usr/local/packages/egcs/lib/gcc-lib/i586-pc-linux-gnu/egcs-2.91.57
   LIBS += -lg2c                                          #g77 runtime
   LIBS += -lm    
@@ -180,16 +187,17 @@ PWD   := $(shell /bin/pwd)
 SRCDIR := $(PWD)
 BLDDIR := $(PWD)
 
-# User .o files are listed here
+# User .o files are listed here removed usr_mcfio_out.o
 USER_OBJ = usr_main.o main_args.o usr_analysis.o usr_init.o usr_fill_event.o \
-        usr_summary.o usr_hbsummary.o usr_mcfio_out.o usr_dump.o \
+        usr_summary.o usr_hbsummary.o  usr_dump.o \
         usr_mcfast2root.o usr_lgd.o usr_hits.o usr_dumpCalor.o \
         usr_calor.o  prgeom.o
 
 TEST_OBJ = usr_main.o main_args.o usr_test.o
 
 USR_LITE_OBJ = usr_main.o main_args.o usr_analysis_lite.o usr_fill_event.o \
-	usr_init.o usr_summary.o prgeom.o usr_mcfio_out.o
+	usr_init.o usr_summary.o prgeom.o 
+#usr_mcfio_out.o
 
 # List of files for which to build the depend information: all .c, .cc
 # and .F files in this directory.
@@ -269,7 +277,7 @@ HDFast_Lite: $(USR_LITE_OBJ)
 	-lmathlib \
 	-lpacklib \
 	$(FP_EXCEPTION) \
-	$(LIBS) $(MAP)
+	$(LIBS) $(MAP) 
 
 
 mctest: $(TEST_OBJ)
