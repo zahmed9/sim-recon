@@ -1,4 +1,4 @@
-int GeoDraw(char *geoFile="../HDFast/HDFast.db"){
+int GeoDraw(char *geoFile="../HDFast/HDFast.db", float x1=-200, float y1=-250, float x2=650, float y2=250){
 /**********************************************************
  *
  * This ia a simple macro to read in and display
@@ -36,7 +36,7 @@ int GeoDraw(char *geoFile="../HDFast/HDFast.db"){
   //  
   TCanvas *c1 = new TCanvas("c1","MCFast GeoReader",100,10,800,700);
   c1->SetFillColor(18);
-  c1->Range(-200,-250,650,250); // Set to Experimental coordinates
+  c1->Range(x1,y1,x2,y2); // Set to Experimental coordinates
 
   // Make center line with mark at zero
   TLine *centerLine = new TLine(-200,0,500,0);
@@ -198,8 +198,14 @@ int GeoDraw(char *geoFile="../HDFast/HDFast.db"){
        token = strtok(NULL," "); // rmax
        rmax =  atof(token);
 
-       z1= SiDisk[ptr-1].zpos +  zCenter - rthick;
-       z2= SiDisk[ptr-1].zpos +  zCenter + rthick;
+       // hdds-mcfast lists sidisk info. in reverse order
+       float zpos = -1000.0;
+		 for(int ii=0;ii<NSiDisks;ii++){
+		 	if(SiDisk[ii].index == ptr)zpos = SiDisk[ii].zpos;
+		 }
+
+       z1= zpos +  zCenter - rthick/2.0;
+       z2= zpos +  zCenter + rthick/2.0;
        r1= rmin;
        r2= rmax; 
        
@@ -208,7 +214,7 @@ int GeoDraw(char *geoFile="../HDFast/HDFast.db"){
        SiLineR[NsiLayer] = new TLine(z1,-r1,z1,-r2);
        NsiLayer++;
      
-       cout<<"SiBox["<<NsiLayer<<"] ("
+       cout<<ptr<<" "<<"SiBox["<<NsiLayer<<"] ("
 	   <<z1<<","<<r1<<";"<<z2<<","<<r2<<")"<<endl;
      }
      else if(strcmp(word,"BeamVrtx")==0 ){// make kludged target
