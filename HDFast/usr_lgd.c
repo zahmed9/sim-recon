@@ -74,30 +74,35 @@ int usr_lgd(void){
 	 * the same for the gammas; else
 	 * use center-of-target(x,y,z)= (0,0,50) cm
 	 */ 
-	if(trk_off1_.trk_off_num){ z= 487.5 - hepevt_.vhep[0][2];/* vhep[part#][x,y,z,t]*/
+	if(trk_off1_.trk_off_num){ /* vhep[part#][x,y,z,t]*/
 	  vx=hepevt_.vhep[0][0];
 	  vy=hepevt_.vhep[0][1];
 	  vz=hepevt_.vhep[0][2];
 	}
-	else{
+	else{/* All neutrals use target center for production vertex */
 	  vx=0.0;
 	  vy=0.0;
-	  vz=487.5-50.0;/* lgd_z - target */
+	  vz=50.0;/* target center */
 	}
+	/*
+	 * Get the triangular lengths.
+	 */
 	z =  487.5 - vz;/* lgd_z - production_z */
-	x = vx - z*p[0]/p[2];
-	y = vy - z*p[1]/p[2];
-	if(x*x <  LGD_X_LIMIT*LGD_X_LIMIT && 
-	   y*y <  LGD_Y_LIMIT*LGD_Y_LIMIT && 
-	   x*x > LGD_BEAMHOLE*LGD_BEAMHOLE && 
-	   y*y > LGD_BEAMHOLE*LGD_BEAMHOLE){
+	x = z*p[0]/p[2];/* px/pz should equal x/z */
+	y = z*p[1]/p[2];
+	if((x+vx)*(x+vx) <  LGD_X_LIMIT*LGD_X_LIMIT && 
+	   (y+vy)*(y+vy) <  LGD_Y_LIMIT*LGD_Y_LIMIT && 
+	   (x+vx)*(x+vx) > LGD_BEAMHOLE*LGD_BEAMHOLE && 
+	   (y+vy)*(y+vy) > LGD_BEAMHOLE*LGD_BEAMHOLE){
 	  /*
 	   * Reject gamma if it also hits the barrel calorimeter
 	   */
 	  for(j=0,dumpGamma=0;j<MCFNumHitCal[0];j++)/* loop over cal hits */
 	    for(k=0;k<MCFCalHits[0][j]->n_tracks; k++) /* loop over hit info's */
-	      if( i+1 ==  (MCFCalHits[0][j]->info_tr)->tr_num)
+	      if( i+1 ==  MCFCalHits[0][j]->info_tr[k].tr_num){
 		dumpGamma=1;
+		
+	      }
 	  if(!dumpGamma){
 	    smearLGDgamma(p);
 	    smearedGammaIndex[nSmearedGammas] = i+1;
@@ -169,7 +174,7 @@ int usr_lgd(void){
     /* check if Barrel Calorimeter detected the Hep gamma*/
     for(j=0;j<MCFNumHitCal[0];j++)
       for(k=0;k<MCFCalHits[0][j]->n_tracks; k++)
-	if(hepGammaIndex[i]== (MCFCalHits[0][j]->info_tr)->tr_num){
+	if(hepGammaIndex[i]== MCFCalHits[0][j]->info_tr[k].tr_num){
 	  found =1;
 	  if(Debug==5)
 	    fprintf(stderr,"hepGammaIndex[%d] found in MCFCalHits[0][%d]->tr_num: %d\n",
@@ -209,12 +214,17 @@ void smearLGDgamma(double *p){
 
 double Gauss(double mean,double sigma){
   /*
-   * This gaussian is lifted from ROOT's TRandom::Gauss()
+   * This gaussian is lifted from ROOT's TRandom::Gauss() see:
+   * http://root.cern.ch/root/html/src/TRandom.cxx.html#TRandom:Gaus .
+   *
+   * The random number generator was seeded in usr_main.cxx
+   * using srand48(long now = time(NULL)))
    */
+
   double x,y,z,result;
-  y=1.0*((double)(random()))/((double)(RAND_MAX));
-  if(!y) y = 1.0*((double)(random()))/((double)(RAND_MAX));
-  z=1.0*((double)(random()))/((double)(RAND_MAX));
+  y=drand48();
+  if(!y) y = drand48();/* what are the chances of two 0's in a row...*/
+  z=drand48();
   x=z*6.283185;
   result = mean+sigma*sin(x)*sqrt(-2.0*log(y));
 

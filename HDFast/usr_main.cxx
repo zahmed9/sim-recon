@@ -18,6 +18,7 @@
 #include <iostream.h>
 #include <fstream.h>
 #include <stdlib.h>
+#include <time.h>
 #include <TROOT.h>
 #include <TFile.h>
 #include <TRandom.h>
@@ -85,11 +86,16 @@ int main(int argc, char **argv)
         }
       }
     }
+    /*
+     * Seed drand48() ; we use it outside of MCFast in usr_lgd.cxx .
+     */
+    long now =time(NULL);
+    srand48(now);
 
     /*
      *  Open the data file.
      */
-    Int_t comp   = 1;       // by default file is compressed
+    Int_t comp   = 5;       // 0=no 1=min(but fast) , ... 9=max(but slow) compression 
     TFile *rdtfile=0;
     if(! SaveUsingMCFIO){
       rdtfile = new TFile(outputfile,"RECREATE","TTree Hall D ROOT file");

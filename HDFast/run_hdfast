@@ -36,6 +36,13 @@ $REMOVE=1;
 $dbFile=0;
 $UseOldOutput = 0;
 $DEBUG =0;
+$ManyMode = 0;
+#
+# Used in ManyMode
+@Beams=(6,8,10);
+@Xmasses=(1.4,1.7,2.0);
+@Xwidths=(0.25);
+
 
 
 for (@ARGV) {
@@ -43,12 +50,19 @@ for (@ARGV) {
     if(/^-d/)  { $REMOVE = 0;}
     if(/^-D(.+)/)  { $DEBUG = $1;}
     if(/^-n(.+)/)  { $nparts = $1;}
-    if(/^-t(.+)/)  { $tag = $1;}
+    if(/^-t(.+)/)  { $tag0 = $1;}
+    if(/^-M/)  { $ManyMode = 1;}
     if(/^-N(.+)/)  { $nevents = $1;}
     if(/^-I(.+)/)  { $tail = ".itape";$stdhep_it="itape2stdhep";$unstdhep_it="stdhep2itape"}
     if(/^-A(.+)/)  { $tail = ".ascii";}
     if(/^-u/)  { $UseOldOutput = 1;}
     if(/^-B(.+)/)  { $beamp = $1;}
+}
+
+if($ManyMode==0){
+@Beams=(-1);
+@Xmasses=(1);
+@Xwidths=(1);
 }
 
 
@@ -57,6 +71,20 @@ print "dbFile: ".$dbFile,"\n";
 if($#ARGV > 0){
     $dcmd="\$HDFAST_DIR/HALLD.cmd";
     
+foreach $beamZ (@Beams){
+    foreach $Xmass (@Xmasses){
+	foreach $Xwidth (@Xwidths){
+#
+# Create name tag which is used to make I/O file names
+#
+	    if($beamZ == -1){
+		$key="";
+	    }else{
+		$key=":B".$beamZ."M".$Xmass."W".$Xwidth;
+	    }
+	    $tag = $tag0.$key;
+	    print "Using nametag of ".$tag."\n";
+
 # Run ascii2stdhep
     
     $syscomm = "ascii2stdhep -i".$tag.".ascii -o".$tag.".evt -n".$nparts." -N".$nevents ;
@@ -148,7 +176,9 @@ if($#ARGV > 0){
         system($syscomm);
 	
     }
-  
+	}
+    }
+ }
 
 }
 
@@ -160,7 +190,7 @@ sub printusage {
     -t<tag>     tag used to create files like <tag>.ascii
     -n#          number of particles in an event 
     -D#           debug level (default: 0)
-       
+    -M          many mode -- loop over masses and widths (must edit me)   
     -u          use old mcfast output (*.evt file)
     -G<dbFile>  use a nonstardard geo file(mostly used for debugging)     
     -d          don't remove files(used for debuging)

@@ -56,7 +56,7 @@ hostname = $(shell hostname)
 MAP = 
 COM = g++
 F77bb = f77mcf
-CFLAG =
+CFLAG = -g
 DPG	:= get_c_dep
 FDPG	:= mdep
 DEPFILE  := GNUmakefile.depend
@@ -264,7 +264,7 @@ test:
 	$(F77bb) $(ABSOFT) -f77 "$(FFLAG)" -cpp "$(FINC)" $<
 
 .c.o:
-	cc -c -I. $(FINC) $(CFLAG) $<
+	gcc -c -I. $(FINC) $(CFLAG) $<
 
 .cc.o:
 	g++ -c $(CFLAG) $<
