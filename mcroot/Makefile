@@ -107,7 +107,7 @@ all:            $(PROGRAMS)
 
 lib:	$(TMCFast_LIB)
 
-mv_lib: $(TMCFast_LIB)
+lib_install: $(TMCFast_LIB)
 	mv $(TMCFast_LIB)  $(HALLD_HOME)/lib/$(UNAME)/$(TMCFast_LIB)
 
 
