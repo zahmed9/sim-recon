@@ -125,7 +125,6 @@ Bool_t hdv_mainframe::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
 	
 	SetEvent(eventloop->eventnumber);
 	maincanvas->Update();
-	cout<<__FILE__<<":"<<__LINE__<<endl;
 }
 
 //-------------------
