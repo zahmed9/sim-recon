@@ -110,6 +110,15 @@ void set_cal_hit_showering_(int ical,
 
 void add_cal_hit_( int ical, int icr1, int icr2, 
                    float e, int mode, int tr_num, int istart ) ;
+
+int   num_tracks_cal_hit_( int ical, int icr1, int icr2 ) ;
+
+void  info_track_cal_hit_( int ical, int icr1, int icr2, int itrack,
+                           int* hep, float* percent_e_tot ) ;
+
+float e_mip_cal_hit_( int ical, int icr1, int icr2 ) ;
+float e_em_cal_hit_(  int ical, int icr1, int icr2 ) ;
+
     		  
 #if defined(c_plusplus) || defined(__cplusplus)
 }
