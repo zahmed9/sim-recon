@@ -237,7 +237,7 @@ MCFIO = $(MCFAST_DIR)/lib.$(UNAME)/libFmcfio.a
 #-----------------
 :all
 
-all:  HDFast HDFast_lite mctest
+all:  HDFast HDFast_lite db 
 
 HDFast_lite: $(USR_LITE_OBJ)
 	make  HDFast_Lite "HDFAST_LITE=on"
@@ -275,7 +275,7 @@ HDFast_Lite: $(USR_LITE_OBJ)
 	-L$(CRNLIB) \
 	-lpacklib \
 	-lmathlib \
-	-lpacklib \
+	-lpacklib -lnsl \
 	$(FP_EXCEPTION) \
 	$(LIBS) $(MAP) 
 
@@ -313,7 +313,7 @@ mctest: $(TEST_OBJ)
 	-L$(CRNLIB) \
 	-lpacklib \
 	-lmathlib \
-	-lpacklib \
+	-lpacklib -lnsl \
 	$(FP_EXCEPTION) \
 	$(LIBS) $(MAP)
 
@@ -352,9 +352,13 @@ HDFast: $(USER_OBJ)
 	-L$(CRNLIB) \
 	-lpacklib \
 	-lmathlib \
-	-lpacklib \
+	-lpacklib -lnsl \
 	$(FP_EXCEPTION) \
 	$(LIBS) $(MAP)
+
+install: HDFast HDFast_lite
+	mv HDFast $(HALLD_HOME)/bin/$(UNAME)/.
+	mv HDFast_lite $(HALLD_HOME)/bin/$(UNAME)/.     
 
 db:
 	@rm -f db
