@@ -359,6 +359,8 @@ HDFast: $(USER_OBJ)
 install: HDFast HDFast_lite
 	mv HDFast $(HALLD_HOME)/bin/$(UNAME)/.
 	mv HDFast_lite $(HALLD_HOME)/bin/$(UNAME)/.     
+	cp run_hdfast  $(HALLD_HOME)/bin/.
+	cp run_hdfast_lite  $(HALLD_HOME)/bin/.
 
 db:
 	@rm -f db
