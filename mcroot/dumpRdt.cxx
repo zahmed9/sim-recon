@@ -10,8 +10,8 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include <stdlib.h>
-#include <iostream.h>
-#include <string.h>
+#include <iostream>
+#include <string>
 
 #include "TROOT.h"
 #include "TFile.h"
@@ -23,14 +23,14 @@
 #include "TSystem.h"
 
 #include "TMCFastHepEvt.h"
-#include "TMCFastTOF.h"
+//#include "TMCFastTOF.h"
 #include "TMCFastOfflineTrack.h"
 #include "TMCFastCalorimeter.h"
 #include "TLGDsmears.h"
 #include "TMCesr.h"
-#include "TMCFastHits.h"
-#include "TMCFastCerenkov.h"
-
+//#include "TMCFastHits.h"
+//#include "TMCFastTraceParticle.h"
+#include "TMCFastTraceEvent.h"
 
 //______________________________________________________________________________
 
@@ -60,9 +60,9 @@ int main(int argc, char **argv)
   
   Char_t *argptr,*token,rootfile[500]="Event.rdt",leaf[100][25],Vleaf[100][25];
   Int_t nevents=0,listBranches=0,nleaves2save=0,nVirtualLeaves2save=0;
-  Int_t dump_hepevt=0,dump_tof_trace=0,dump_offtrk=0,dump_all=0,
+  Int_t dump_hepevt=0,dump_offtrk=0,dump_all=0,
     dump_bcal=0,dump_lgdSmears=0,dump_esr=0,dump_vtx_hits=0,
-    dump_cdc_hits=0,dump_ceren=0,dump_gamp=0;
+    dump_cdc_hits=0,dump_trace=0,dump_gamp=0;
   Int_t skipEvents=0;
   Double_t kludge_beamE=0;
   // MCFast objects
@@ -70,23 +70,23 @@ int main(int argc, char **argv)
    * These are the objects (leaves) contained in the tree
    */
   TMCFastHepEvt *hepevt=0; //use  leaf name
-  TMCFastTOF *tof_trace=0;  
+  //  TMCFastTOF *tof_trace=0;  
   TMCFastOfflineTrack *offtrk=0;  
   TMCFastCalorimeter *bcal=0;// barrel
   TLGDsmears *lgdSmears=0;// lgd
-  TMCFastHits *vtx_hits=0;// vtx
-  TMCFastHits *cdc_hits=0;// cdc
-  TMCFastCerenkov *ceren=0;//ceren
+  //  TMCFastHits *vtx_hits=0;// vtx
+  //TMCFastHits *cdc_hits=0;// cdc
+  TMCFastTraceEvent *tr_evt=0;//traces
   TMCesr *esr=0;
 
   hepevt = new TMCFastHepEvt();
-  tof_trace = new TMCFastTOF();
+  //tof_trace = new TMCFastTOF();
   offtrk = new TMCFastOfflineTrack();
   bcal = new TMCFastCalorimeter();
   lgdSmears = new TLGDsmears();
-  vtx_hits = new TMCFastHits();
-  cdc_hits = new TMCFastHits();
-  ceren = new TMCFastCerenkov();
+  //vtx_hits = new TMCFastHits();
+  //cdc_hits = new TMCFastHits();
+  tr_evt = new TMCFastTraceEvent();
 
   /*
    * Read the command line switches
@@ -177,11 +177,11 @@ int main(int argc, char **argv)
       b[nbranches] = tree->GetBranch(leaf[i]);
       b[nbranches++]->SetAddress(&hepevt);
     }
-    if(strcmp(leaf[i],"tof_trace")==0){
-      dump_tof_trace=1;
-      b[nbranches] = tree->GetBranch(leaf[i]);
-      b[nbranches++]->SetAddress(&tof_trace);
-    }
+    //if(strcmp(leaf[i],"tof_trace")==0){
+    //dump_tof_trace=1;
+    //b[nbranches] = tree->GetBranch(leaf[i]);
+    //b[nbranches++]->SetAddress(&tof_trace);
+    //}
     if(strcmp(leaf[i],"offtrk")==0){
       dump_offtrk=1;
       b[nbranches] = tree->GetBranch(leaf[i]);
@@ -194,23 +194,23 @@ int main(int argc, char **argv)
     }
     if(strcmp(leaf[i],"lgdSmears")==0){
       dump_lgdSmears=1;
-      b[nbranches] = tree->GetBranch(leaf[i]);
-      b[nbranches++]->SetAddress(&lgdSmears);
+    b[nbranches] = tree->GetBranch(leaf[i]);
+    b[nbranches++]->SetAddress(&lgdSmears);
     }
-    if(strcmp(leaf[i],"vtx_hits")==0){
-      dump_vtx_hits=1;    
+    //if(strcmp(leaf[i],"vtx_hits")==0){
+    //  dump_vtx_hits=1;    
+    //  b[nbranches] = tree->GetBranch(leaf[i]);
+    //  b[nbranches++]->SetAddress(&vtx_hits);
+    //}
+    //if(strcmp(leaf[i],"cdc_hits")==0){
+    //  dump_cdc_hits=1;    
+    //  b[nbranches] = tree->GetBranch(leaf[i]);
+    //  b[nbranches++]->SetAddress(&cdc_hits);
+    // }
+    if(strcmp(leaf[i],"traces")==0){
+      dump_trace=1;  
       b[nbranches] = tree->GetBranch(leaf[i]);
-      b[nbranches++]->SetAddress(&vtx_hits);
-    }
-    if(strcmp(leaf[i],"cdc_hits")==0){
-      dump_cdc_hits=1;    
-      b[nbranches] = tree->GetBranch(leaf[i]);
-      b[nbranches++]->SetAddress(&cdc_hits);
-    }
-    if(strcmp(leaf[i],"ceren")==0){
-      dump_ceren=1;  
-      b[nbranches] = tree->GetBranch(leaf[i]);
-      b[nbranches++]->SetAddress(&ceren);
+      b[nbranches++]->SetAddress(&tr_evt);
     }
   }
   // set dump flags for virtual leaves
@@ -287,32 +287,32 @@ int main(int argc, char **argv)
       cout<< "lgdSmears\n"<<*lgdSmears;
     if(dump_offtrk || dump_all)
       cout<< "offtrk_hits\n"<<*offtrk;
-    if(dump_vtx_hits || dump_all)
-      cout<< "vtx_hits\n"<<*vtx_hits;
-    if(dump_cdc_hits || dump_all)
-      cout<< "cdc_hits\n"<<*cdc_hits;
-    if(dump_ceren || dump_all)
-      cout<<  "cerenkov_hits\n"<<*ceren;
+    //if(dump_vtx_hits || dump_all)
+    //  cout<< "vtx_hits\n"<<*vtx_hits;
+    //if(dump_cdc_hits || dump_all)
+    //  cout<< "cdc_hits\n"<<*cdc_hits;
+    if(dump_trace || dump_all)
+      cout<<  "event traces\n"<<*tr_evt;
 
-    if(dump_tof_trace || dump_all){
-      cout<<  "tof_hits\n"<<*tof_trace;
+    //if(dump_tof_trace || dump_all){
+    //  cout<<  "tof_hits\n"<<*tof_trace;
       // dump both forward & central TOF for each particle
-      for(Int_t i=0; i< hepevt->GetNhep();i++){
-	cout << "CTOF["<<i+1<<"]: "<<tof_trace->GetCTOF(i+1)
-	  <<"\tmass: "<<tof_trace->CTOFmass(i+1)
-	    << " FTOF["<<i+1<<"]: "<< tof_trace->GetFTOF(i+1) 
-	      <<"\tmass: "<< tof_trace->FTOFmass(i+1)
-		<<endl;
-      }
-    }
+      //for(Int_t i=0; i< hepevt->GetNhep();i++){
+    //cout << "CTOF["<<i+1<<"]: "<<tof_trace->GetCTOF(i+1)
+    //  <<"\tmass: "<<tof_trace->CTOFmass(i+1)
+    //    << " FTOF["<<i+1<<"]: "<< tof_trace->GetFTOF(i+1) 
+    //      <<"\tmass: "<< tof_trace->FTOFmass(i+1)
+    //	<<endl;
+    //}
+    //}
     
     hepevt->Clear();
-    tof_trace->Clear();
+    //   tof_trace->Clear();
     offtrk->Clear();
     bcal->Clear();
-    ceren->Clear();
-    cdc_hits->Clear();
-    vtx_hits->Clear();
+    tr_evt->Clear();
+    //cdc_hits->Clear();
+    //vtx_hits->Clear();
     lgdSmears->Clear();
     if(dump_esr)
       esr->Clear();

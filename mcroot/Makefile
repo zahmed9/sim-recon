@@ -41,9 +41,9 @@ endif
 
 #------------------------------------------------------------------------------
 
-TMCFastO        = TMCFastHepEvt.o TMCFastTOF.o \
+TMCFastO        = TMCFastHepEvt.o  \
 		   TMCFastOfflineTrack.o TMCFastHepParticle.o \
-                TMCFastHepEvtDict.o TMCFastTOFDict.o \
+                TMCFastHepEvtDict.o  \
 		TMCFastOfflineTrackDict.o TMCFastHepParticleDict.o\
 		TMCFastCalorimeter.o TMCFastCalorimeterDict.o \
 		TMCFastCalorHits.o TMCFastCalorHitsDict.o \
@@ -51,15 +51,17 @@ TMCFastO        = TMCFastHepEvt.o TMCFastTOF.o \
 		TLGDsmears.o TLGDsmearsDict.o \
 		TLGDparticle.o TLGDparticleDict.o \
 		TMCesr.o TMCesrDict.o TMCParticle.o TMCParticleDict.o \
-		TMCFastHits.o TMCFastHitsDict.o TMCFastHit.o TMCFastHitDict.o \
-		TMCFastTrace.o TMCFastTraceDict.o \
-		TMCFastCerenTrace.o TMCFastCerenTraceDict.o \
-		TMCFastCerenkov.o TMCFastCerenkovDict.o
+		TMCFastTracePoint.o TMCFastTracePointDict.o \
+		TMCFastTraceParticle.o TMCFastTraceParticleDict.o \
+		TMCFastTraceEvent.o TMCFastTraceEventDict.o
+#		TMCFastHits.o TMCFastHitsDict.o TMCFastHit.o TMCFastHitDict.o \
+#		TMCFastCerenkov.o TMCFastCerenkovDict.o  \
+#		TMCFastCerenTrace.o TMCFastCerenTraceDict.o \
+#		TMCFastTOF.o TMCFastTOFDict.o 
 
-
-TMCFastS        = TMCFastHepEvt.cxx TMCFastTOF.cxx \
+TMCFastS        = TMCFastHepEvt.cxx  \
 		TMCFastOfflineTrack.cxx TMCFastHepParticle.cxx\
-                TMCFastHepEvtDict.cxx TMCFastTOFDict.cxx \
+                TMCFastHepEvtDict.cxx  \
 		TMCFastOfflineTrackDict.cxx TMCFastHepParticleDict.cxx \
 		TMCFastCalorimeter.cxx TMCFastCalorimeterDict.cxx \
 		TMCFastCalorHits.cxx TMCFastCalorHitsDict.cxx \
@@ -67,10 +69,15 @@ TMCFastS        = TMCFastHepEvt.cxx TMCFastTOF.cxx \
 		TLGDsmears.cxx TLGDsmearsDict.cxx \
 		TLGDparticle.cxx TLGDparticleDict.cxx \
 		TMCesr.cxx TMCesrDict.cxx TMCParticle.cxx TMCParticleDict.cxx \
-		TMCFastHits.cxx TMCFastHitsDict.cxx TMCFastHit.cxx \
+		TMCFastTracePoint.cxx TMCFastTracePointDict.cxx \
 		TMCFastHitDict.cxx TMCFastTrace.cxx TMCFastTraceDict.cxx \
-		TMCFastCerenTrace.cxx TMCFastCerenTraceDict.cxx \
-		TMCFastCerenkov.cxx TMCFastCerenkovDict.cxx
+		TMCFastTraceParticle.cxx TMCFastTraceParticleDict.cxx \
+		TMCFastTraceEvent.cxx TMCFastTraceEventDict.cxx 
+#		TMCFastHits.cxx TMCFastHitsDict.cxx TMCFastHit.cxx \
+#		TMCFastCerenTrace.cxx TMCFastCerenTraceDict.cxx \
+#		TMCFastCerenkov.cxx TMCFastCerenkovDict.cxx \
+#		 TMCFastTOF.cxx TMCFastTOFDict.cxx  
+
 
 TMCFast_LIB       = libTMCFast.a
 
@@ -153,9 +160,11 @@ TMCesr.o:TMCesr.h
 TMCParticle.o:TMCParticle.h
 TMCFastHits.o:TMCFastHits.h
 TMCFastHit.o:TMCFastHit.h
-TMCFastTrace.o:TMCFastTrace.h
-TMCFastCerenTrace.o:TMCFastCerenTrace.h
-TMCFastCerenkov.o:TMCFastCerenkov.h
+TMCFastTracePoint.o:TMCFastTracePoint.h
+#TMCFastCerenTrace.o:TMCFastCerenTrace.h
+#TMCFastCerenkov.o:TMCFastCerenkov.h
+TMCFastTraceEvent.o:TMCFastTraceEvent.h
+TMCFastTraceParticle.o:TMCFastTraceParticle.h
 
 ###########################################################
 #
@@ -206,13 +215,13 @@ TMCesrDict.cxx: TMCesr.h TMCesrLinkDef.h
 	@echo "Generating dictionary TMCesrDict..."
 	@$(ROOTSYS)/bin/rootcint -f TMCesrDict.cxx -c TMCesr.h 
 
-TMCFastTraceDict.cxx: TMCFastTrace.h TMCFastTraceLinkDef.h
-	@echo "Generating dictionary TMCFastTraceDict..."
-	@$(ROOTSYS)/bin/rootcint -f TMCFastTraceDict.cxx -c TMCFastTrace.h  TMCFastTraceLinkDef.h
+TMCFastTracePointDict.cxx: TMCFastTracePoint.h TMCFastTracePointLinkDef.h
+	@echo "Generating dictionary TMCFastTracePointDict..."
+	@$(ROOTSYS)/bin/rootcint -f TMCFastTracePointDict.cxx -c TMCFastTracePoint.h  TMCFastTracePointLinkDef.h
 
-TMCFastCerenTraceDict.cxx: TMCFastCerenTrace.h TMCFastCerenTraceLinkDef.h
-	@echo "Generating dictionary TMCFastCerenTraceDict..."
-	@$(ROOTSYS)/bin/rootcint -f TMCFastCerenTraceDict.cxx -c TMCFastCerenTrace.h 
+#TMCFastCerenTraceDict.cxx: TMCFastCerenTrace.h TMCFastCerenTraceLinkDef.h
+#	@echo "Generating dictionary TMCFastCerenTraceDict..."
+#	@$(ROOTSYS)/bin/rootcint -f TMCFastCerenTraceDict.cxx -c TMCFastCerenTrace.h 
 
 TMCFastHitsDict.cxx: TMCFastHits.h TMCFastHitsLinkDef.h
 	@echo "Generating dictionary TMCFastHitsDict..."
@@ -222,10 +231,17 @@ TMCFastHitDict.cxx: TMCFastHit.h TMCFastHitLinkDef.h
 	@echo "Generating dictionary TMCFastHitDict..."
 	@$(ROOTSYS)/bin/rootcint -f TMCFastHitDict.cxx -c TMCFastHit.h 
 
-TMCFastCerenkovDict.cxx: TMCFastCerenkov.h 
-	@echo "Generating dictionary TMCFastCerenkovDict..."
-	@$(ROOTSYS)/bin/rootcint -f TMCFastCerenkovDict.cxx -c TMCFastCerenkov.h 
+#TMCFastCerenkovDict.cxx: TMCFastCerenkov.h 
+#	@echo "Generating dictionary TMCFastCerenkovDict..."
+#	@$(ROOTSYS)/bin/rootcint -f TMCFastCerenkovDict.cxx -c TMCFastCerenkov.h 
 
+TMCFastTraceEventDict.cxx: TMCFastTraceEvent.h 
+	@echo "Generating dictionary TMCFastTraceEventDict..."
+	@$(ROOTSYS)/bin/rootcint -f TMCFastTraceEventDict.cxx -c TMCFastTraceEvent.h 
+
+TMCFastTraceParticleDict.cxx: TMCFastTraceParticle.h 
+	@echo "Generating dictionary TMCFastTraceParticleDict..."
+	@$(ROOTSYS)/bin/rootcint -f TMCFastTraceParticleDict.cxx -c TMCFastTraceParticle.h 
 
 .cxx.o:
 	$(CXX) $(CXXFLAGS) -c $<

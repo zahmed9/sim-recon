@@ -21,8 +21,8 @@
 #include "TMCFastCalorimeter.h"
 #include "TMCParticle.h"
 
-#include <iostream.h>
-
+#include <iostream>
+using namespace std;
 
 class TMCesr: public TObject {
   

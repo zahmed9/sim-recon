@@ -15,8 +15,8 @@
 #include "TMath.h"
 
 
-#include <iostream.h>
-
+#include <iostream>
+using namespace std;
 
 
 typedef struct  {

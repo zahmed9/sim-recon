@@ -14,9 +14,11 @@
 #include "TMCFastOfflineTrack.h"
 #include "TMath.h"
  
-#include <iostream.h>
+#include <iostream>
+using namespace std;
 
 // MCFast structures that map to the common blocks
+#define TRACE_TYPE_PRODUCTION 4
 
 struct trace_t {
   int hep;            /* Position of track in /HEPEVT/ list */

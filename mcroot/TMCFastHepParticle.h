@@ -14,7 +14,8 @@
 #include "TH1.h"
 #include "TMath.h"
 
-#include <iostream.h>
+#include <iostream>
+using namespace std;
 
 struct heppart_t {
   int isthep;     /* The particle status */

@@ -10,7 +10,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "TObject.h"
-#include <iostream.h>
+#include <iostream>
+using namespace std;
 
 struct cal_hit_tracks_t {
   Int_t tr_num; /* The track number, refering to the HEP evt list */

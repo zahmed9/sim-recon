@@ -20,7 +20,8 @@
 #include "TMCFastHepParticle.h"
 #include "TLGDparticle.h"
 
-#include <iostream.h>
+#include <iostream>
+using namespace std;
 
 #define MADE_FROM_OFFTRK 0
 #define MADE_FROM_BCAL 1

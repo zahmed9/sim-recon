@@ -15,7 +15,8 @@
 #include "TMath.h"
 
 #include "TMCFastHepParticle.h"
-#include <iostream.h>
+#include <iostream>
+using namespace std;
 
 class TMCFastHepEvt: public TObject {
   

@@ -15,7 +15,8 @@
 #include "TMath.h"
 
 
-#include <iostream.h>
+#include <iostream>
+using namespace std;
 
 // C style structures imported from mcfast code cal_hit.[ch]
 

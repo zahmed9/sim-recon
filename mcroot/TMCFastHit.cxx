@@ -95,7 +95,7 @@ Double_t TMCFastHit::GetdX(){
   // cell radial center.
   //
   Double_t cell_height = 1.0;
-  TMCFastTrace *tr = GetTrace();
+  TMCFastTracePoint *tr = GetTrace();
   Double_t Rnorm = TMath::Sqrt((tr->GetX())*(tr->GetX())+(tr->GetY())*(tr->GetY()));
   Double_t cosine = ((tr->GetX()*tr->GetPx()) + (tr->GetY()*tr->GetPy()))/
     (tr->GetP() * Rnorm);
@@ -175,7 +175,7 @@ void TMCFastHit::Print(ostream *os){
      <<this->GetWireInfo(2)<<","
      <<endl;
   *os<<"\tADC signal: "<<GetADCsignal()<<" dX: "<<GetdX() <<" dEdX: "<<GetdEdX()<<endl;
-  *os<<"\tTrace Point: "<< ftrace<<endl;
+  *os<<"\tTracePoint Point: "<< ftrace<<endl;
 
 }
 

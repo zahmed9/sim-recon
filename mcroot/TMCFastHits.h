@@ -12,7 +12,8 @@
 #include "TObject.h"
 #include "TClonesArray.h"
 #include "TMCFastHit.h"
-#include <iostream.h>
+#include <iostream>
+using namespace std;
 
 struct dev_hits_t{
   Int_t nhits;

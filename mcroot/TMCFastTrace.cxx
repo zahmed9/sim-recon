@@ -192,11 +192,11 @@ Double_t TMCFastTrace::TraceTo(Double_t &Rmin, Double_t &Rmax, Double_t &Zmax){
   if (debug) 
     cerr<<"Starting Trace at: X Y Z R_sq: "<<X<<" "<<Y<<" "<<Z<<" "<<R_sq<<endl;
   if(!Betaz>0){
-    cerr<<"Particle is moving forward! Exiting in TMCFastCerenTrace::TraceTo()!\n";
+    cerr<<"Particle is moving forward! Exiting in TMCFastTrace::TraceTo()!\n";
     exit(-1);
   }
   if(!( (X<Rmax_sq && Y<Rmax_sq) || Z>Zmax))
-    cerr<<"Warning in TMCFastCerenTrace::TraceTo()!!"
+    cerr<<"Warning in TMCFastTrace::TraceTo()!!"
 	<<" Initial track position is out of bounds\n";
 
   while(R_sq<Rmax_sq && Z<Zmax){
@@ -244,11 +244,11 @@ void TMCFastTrace::TraceTo(Double_t &Rmin, Double_t &Rmax, Double_t &Zmax,
   if (debug) 
     cerr<<"Starting Trace at: X Y Z R_sq: "<<X<<" "<<Y<<" "<<Z<<" "<<R_sq<<endl;
   if(!Betaz>0){
-    cerr<<"Particle is moving forward! Exiting in TMCFastCerenTrace::TraceTo()!\n";
+    cerr<<"Particle is moving forward! Exiting in TMCFastTrace::TraceTo()!\n";
     exit(-1);
   }
   if(!( (X<Rmax_sq && Y<Rmax_sq) || Z>Zmax))
-    cerr<<"Warning in TMCFastCerenTrace::TraceTo()!!"
+    cerr<<"Warning in TMCFastTrace::TraceTo()!!"
 	<<" Initial track position is out of bounds\n";
 
   while(R_sq<Rmax_sq && Z<Zmax){

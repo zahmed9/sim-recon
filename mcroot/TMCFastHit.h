@@ -10,9 +10,10 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "TObject.h"
-#include "TMCFastTrace.h"
+#include "TMCFastTracePoint.h"
 
-#include <iostream.h>
+#include <iostream>
+using namespace std;
 
 struct dev_hit_t{
   Int_t layer;
@@ -25,7 +26,7 @@ class TMCFastHit: public TObject {
 private:
   Int_t flayer;            // Layer # (or Plane #) in device
   Int_t fWireInfo[3];      // Wire info within the layer
-  TMCFastTrace ftrace;    // Trace point of the device hit
+  TMCFastTracePoint ftrace;    // Trace point of the device hit
   void SetTrace(trace_t *trace) { ftrace.Fill(trace);}
   void Fill(dev_hit_t *devhit);
 public:

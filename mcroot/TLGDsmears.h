@@ -14,7 +14,8 @@
 #include "TH1.h"
 #include "TMath.h"
 #include "TLGDparticle.h"
-#include <iostream.h>
+#include <iostream>
+using namespace std;
 
 class TLGDsmears: public TObject {
   

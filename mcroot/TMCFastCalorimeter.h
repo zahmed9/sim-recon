@@ -16,7 +16,8 @@
 
 #include "TMCFastCalorHits.h"
 #include "TCalHitTracks.h"
-#include <iostream.h>
+#include <iostream>
+using namespace std;
 
 class TMCFastCalorimeter: public TObject {
   
