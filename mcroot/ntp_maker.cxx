@@ -1,5 +1,5 @@
-//*-- Author :    Paul Eugenio  22-Feb-199
-
+//*-- Author :    Paul Eugenio  22-Feb-1999
+//Modified:         Paul Eugenio  13-May-2004  FSU
 ////////////////////////////////////////////////////////////////////////
 //
 //             Make an Ntuple from a Hall D rdt file
@@ -10,7 +10,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include <stdlib.h>
-#include <iostream.h>
+#include <iostream>
 #include <string.h>
 
 #include "TROOT.h"
@@ -22,6 +22,7 @@
 #include "TStopwatch.h"
 #include "TSystem.h"
 #include "TNtuple.h"
+#include "TLorentzVector.h"
 
 #include "TMCFastHepEvt.h"
 #include "TMCFastTOF.h"
@@ -31,9 +32,6 @@
 #include "TMCesr.h"
 #include "TNtupleUtil.h"
 
-#include "Vec.h"
-#include "lorentz.h"
-
 
 //______________________________________________________________________________
 
@@ -42,7 +40,7 @@ TFile *rdtfile;
 
 void PrintUsage(char *processName)
 {
-  cerr << processName << " usage: [switches] inputfile" <<endl;
+  cerr << processName << " usage: [switches] inputfile > ntuple-labels.txt" <<endl;
   cerr << "\t-o<name>    Save output as <name>.root (default: halld.root).\n";
   cerr << "\t-c          Book four-momenta components.\n";
   cerr << "\t-e          Make esr from TMCFastHepEvt only\n";
@@ -50,7 +48,10 @@ void PrintUsage(char *processName)
   cerr << "\t-s<nevents> The number of events to skip before reading(default=0).\n";
   cerr<< "\t-B<energy>  Add kludged beam (default is 8 GeV)\n";
   cerr << "\t-b<bcal_zres> Add z position smearing to the BCAL(default none).\n";
+  cerr<<"\t-D Print DEBUG information\n";
   cerr<<"\t-h Print this help message\n\n";
+  cerr<<"\tNote: The Ntuple label definitions are sent to the stdout for \n\t"
+      <<"redirecting into a label.txt file.\n\n\n";
 }
 
 
@@ -60,6 +61,7 @@ int main(int argc, char **argv)
   
   Char_t *argptr,rootfile[50],outputfile[50],ntpTitle[50];
   Int_t nevents=0;
+  Int_t debug =0;
   Int_t skipEvents=0,Book_Four_Components=0,MakeHepEvtEsr=0;
   sprintf(rootfile,"Event.rdt");
   sprintf(outputfile,"halld.root");
@@ -81,6 +83,9 @@ int main(int argc, char **argv)
       if ((*argptr == '-') && (strlen(argptr) > 1)) {
         argptr++;
         switch (*argptr) {
+	case 'D':
+	  debug =1;
+	  break;
 	case 'o':
 	  sprintf(outputfile,"%s.root",++argptr);
 	  cerr<<"Saveing output in file: "<<outputfile<<endl;
@@ -195,20 +200,24 @@ int main(int argc, char **argv)
   Bool_t firstEvent=kTRUE;
 
 
-  Int_t nparticlesFirstEvent=0; // used to create Ntuple labels
+  Int_t nparticlesFirstEvent=0; // for creating Ntuple labels
   Int_t nparticles = 0;
 
   if(nevents == 0) 
     nevents =nentries-skipEvents;
   else
     nevents +=skipEvents+1; 
-  // I skipped the 1st because of missing TCloneArray problem
+  //  skipping the 1st because of missing TCloneArray problem
  
   //
   // Now loop over the events in the file
   //
   cerr<<"Looping over Events\n";
+  int ecounter=0;
   for (Int_t ev = 1+skipEvents; ev < nevents; ev++) {
+    if(ecounter++%100==0)
+      cerr<<"Events Processed: "<<ecounter<<"\r";
+
     // get only needed branches from the data tree
     for(Int_t i=0;i<nbranches;i++)
       b[i]->GetEvent(ev); 
@@ -247,15 +256,20 @@ int main(int argc, char **argv)
     values[n_vectors++] = esr->GetNBCALparticles();
     values[n_vectors++] = esr->GetNOFFTRKparticles();
     if(firstEvent){
+      cout<<"\n\n\nNTuple label definitions\n\n";
       nparticlesFirstEvent=esr->GetNparticles();
       sprintf(label,"eventNo");
       vnames->Add(label);
+      cout<<"eventNo:\t\t Event Number\n";
       sprintf(label,"Nlgd");
       vnames->Add(label);
+      cout<<"Nlgd:\t\t Number of LGD hits\n";
       sprintf(label,"Nbcal");
       vnames->Add(label);
-      sprintf(label,"Nofftrk");
+      cout<<"Nbcal:\t\t Number of BCAL hits\n";
+      sprintf(label,"Nchtrk");
       vnames->Add(label);
+      cout<<"Nchtrk:\t\t Number of charged particle tracks\n";
     }
     //
     // Book the number of BCAL particle hits per cell 
@@ -279,10 +293,12 @@ int main(int argc, char **argv)
     if(firstEvent){
       sprintf(label,"bcal_tracks_per_hit");
       vnames->Add(label);
+      cout<<"bcal_tracks_per_hit:\t\t  number of BCAL particle hits per cell \n";
     }
 
-    // define some libpp four-vectors
-    fourVec sum4v,P4vector[20],proton4v;
+    //
+    // Define some four-vectors
+    TLorentzVector sum4v,X4v,P4vector[40],proton4v;
     Double_t px=0,py=0,pz=0,E=0;
     
     
@@ -297,6 +313,7 @@ int main(int argc, char **argv)
 	if(firstEvent){
 	  sprintf(label,"DETid%d",nparts);
 	  vnames->Add(label);
+	  cout<<"DETid{int}:\t\t Particle maker's ID(i.e.: lgd gamma, bcal gamma, or charged track\n";
 	}
 
 	// book particle ID
@@ -305,18 +322,22 @@ int main(int argc, char **argv)
 	if(firstEvent){
 	  sprintf(label,"PDGid%d",nparts);
 	  vnames->Add(label);
+	  cout<<"PDGid{int}:\t\t PDG Geant ID for the {int}th particle\n";
 	}
 	// book vertex info for each particle
 	values[n_vectors++] = particle->GetX();
 	values[n_vectors++] = particle->GetY();
 	values[n_vectors++] = particle->GetZ();
 	if(firstEvent){
-	  sprintf(label,"v%d.x",nparts);
+	  sprintf(label,"v%d_x",nparts);
 	  vnames->Add(label);
-	  sprintf(label,"v%d.y",nparts);
+	  cout<<"v{int}_x:\t\t production vertex component for each particle\n";
+	  sprintf(label,"v%d_y",nparts);
 	  vnames->Add(label);
-	  sprintf(label,"v%d.z",nparts);
+	  cout<<"v{int}_y:\t\t production vertex component for each particle\n";
+	  sprintf(label,"v%d_z",nparts);
 	  vnames->Add(label);
+	  cout<<"v{int}_z:\t\t production vertex component for each particle\n";
 	}
 	// get the four-momentum
 	px= particle->GetPx();
@@ -332,14 +353,18 @@ int main(int argc, char **argv)
 	values[n_vectors++] = (E - hepParticle.GetE())/hepParticle.GetE();
 
 	if(firstEvent){
-	    sprintf(label,"SmearP%d.x",nparts);
+	    sprintf(label,"SmearP%d_x",nparts);
 	    vnames->Add(label);
-	    sprintf(label,"SmearP%d.y",nparts);
+	    cout<<"SmearP{int}_x:\t\t (px - hepParticle.GetPx())/hepParticle.GetPx() for each particle\n";
+	    sprintf(label,"SmearP%d_y",nparts);
 	    vnames->Add(label);
-	    sprintf(label,"SmearP%d.z",nparts);
+	    cout<<"SmearP{int}_x:\t\t (py - hepParticle.GetPy())/hepParticle.GetPy() for each particle\n";
+	    sprintf(label,"SmearP%d_z",nparts);
 	    vnames->Add(label);
-	    sprintf(label,"SmearP%d.t",nparts);
+	    cout<<"SmearP{int}_x:\t\t (pz - hepParticle.GetPz())/hepParticle.GetPz() for each particle\n";
+	    sprintf(label,"SmearP%d_t",nparts);
 	    vnames->Add(label);
+	    cout<<"SmearP{int}_x:\t\t (E - hepParticle.GetE())/hepParticle.GetE() for each particle\n";
 	  }
 
   
@@ -354,19 +379,21 @@ int main(int argc, char **argv)
 //	  cout << "pz: " << pz << endl;
 	  values[n_vectors++] = E;
 	  if(firstEvent){
-	    sprintf(label,"p%d.p",nparts);
+	    sprintf(label,"p%d_p",nparts);
 	    vnames->Add(label);
-	    //	  cout << "px:"<< px << endl;
-	    sprintf(label,"p%d.x",nparts);
+	    cout<<"p{int}_p:\t\t particle's momentum magnitude\n";
+	    sprintf(label,"p%d_x",nparts);
 	    vnames->Add(label);
-	    //	  cout << "py:" << py << endl;	    
-	    sprintf(label,"p%d.y",nparts);
+	    cout<<"p{int}_x:\t\t particle's \"x\" momentum component\n";
+	    sprintf(label,"p%d_y",nparts);
 	    vnames->Add(label);
-	    //	  cout << "pz:" << pz << endl;
-	    sprintf(label,"p%d.z",nparts);
+	    cout<<"p{int}_y:\t\t particle's \"y\" momentum component\n";
+	    sprintf(label,"p%d_z",nparts);
 	    vnames->Add(label);
-	    sprintf(label,"p%d.E",nparts);
+	    cout<<"p{int}_z:\t\t particle's \"z\" momentum component\n";
+	    sprintf(label,"p%d_E",nparts);
 	    vnames->Add(label);
+	    cout<<"p{int}_E:\t\t particle's energy\n";
 	  }
 	 }
 
@@ -404,11 +431,11 @@ int main(int argc, char **argv)
 	}
 	// set the particle four-vector
 	if(PDGid != 2212 && PDGid != 2112 ){// It's not a proton or neutron
-	  P4vector[nparts].set(E,threeVec(px,py,pz));
-	  sum4v += P4vector[nparts];
+	  P4vector[nparts].SetXYZT(px,py,pz,E);
+	  X4v += P4vector[nparts];
 	  //nparts++;
 	}else{
-	  proton4v.set(E,threeVec(px,py,pz));
+	  proton4v.SetXYZT(px,py,pz,E);
 	  if(nproton>1){
 	    cerr<<"There is more than one proton!\n"
 		<<"Exiting!\n";
@@ -420,11 +447,13 @@ int main(int argc, char **argv)
     ///////////////////////
       // t distribution
       //////////////////////
-      fourVec beam4v(beamE,threeVec(0,0,beamE));
-      Double_t t = (beam4v - sum4v)*(beam4v - sum4v);
+      TLorentzVector beam4v(0,0,beamE,beamE);
+      TLorentzVector target4v(0,0,0,0.938);// proton target
+      Double_t t = (beam4v - X4v).Mag2();
       if(firstEvent){
 	sprintf(label,"t");
 	vnames->Add(label);
+	cout<<"t:\t\t four-momentum transfer(absolute value)\n";
       } 
       values[n_vectors++] = -t;
 
@@ -432,78 +461,39 @@ int main(int argc, char **argv)
       // missing xmass
       /////////////////////
       if(nproton==1){
-	fourVec target4v(0.938,threeVec(0,0,0));// proton target
-	Double_t mXm = (beam4v + target4v - proton4v)*
-	  (beam4v + target4v - proton4v);
+	Double_t mXm = (beam4v + target4v - proton4v).Mag2();
+
 	if(firstEvent){
 	  sprintf(label,"mXm");
 	  vnames->Add(label);
+	  cout<<"mXm:\t\t missing X mass^2 = (beam4v + target4v - proton4v).Mag2()\n";
 	} 
 	values[n_vectors++] = mXm;
   
       }
-      ///////////////////////////
-      // Let's add some GJ angles
-      ///////////////////////////
 
-      // set the boost
-      lorentzTransform L(sum4v);
-      // z GJ is the boosted beam
-      // y GJ is normal to production plane
-      // get x GJ from right handed system
-      threeVec xGJ,yGJ,zGJ;
-      beam4v *= L; // boost beam to X restframe
-      zGJ =  beam4v.V() * (1.0 /  beam4v.V().r());
-     
-      // copy and boost
-      fourVec *P4boosted = new fourVec[20];
-      threeVec X3vGJ(0,0,0);// init it
-      for(i=0; i<nparts-1;i++){// the -1 subtracts 1 for the proton
-	P4boosted[i]=  P4vector[i];
-	P4boosted[i] *= L;// boost particles to X restframe
-	values[n_vectors++] = (P4boosted[i].V() * zGJ) * (1.0/
-	  P4boosted[i].V().r()) ;// Cos theta GJ
-	if(firstEvent){
-	  sprintf(label,"cosGJ.%d",i);
-	  vnames->Add(label);
-	} 
-	X3vGJ +=P4vector[i].V();
-      }
-      
-      for(i=0; i<nparts-1;i++){
-	yGJ = (beam4v.V() / X3vGJ) * 
-	  (1.0/(beam4v.V().r() * X3vGJ.r())) ; // cross product
-	xGJ = yGJ / zGJ;
-	values[n_vectors++] = TMath::ATan2( yGJ * P4boosted[i].V(),
-					    xGJ * P4boosted[i].V());
-	if(firstEvent){
-	  sprintf(label,"phiGJ.%d",i);
-	  vnames->Add(label);
-	} 
-      }
-      
-      
-     
-      
+
+ 
       /////////////////////////////////
       // Now book some effective masses
       /////////////////////////////////
       
       // X mass & total mass
-      // note: ~(fourVec) returns the fourVec length (i.e. effective mass)
-      values[n_vectors++] = ~sum4v; 
+      values[n_vectors++] = X4v.Mag();; 
       
       if(firstEvent){
 	sprintf(label,"XMass");
 	vnames->Add(label);
+	cout<<"XMass:\t\t Meson System Mass = Total effective mass excluding protons and/or neutrons\n";
       } 
    
       if(nproton){
 	if(firstEvent){
 	  sprintf(label,"TotalMass");
 	  vnames->Add(label);
+	  cout<<"TotalMass:\t\t (X4v + recoil-baryon4v).Mag()\n"; 
 	} 
-	values[n_vectors++] = ~(sum4v + P4vector[proton[0]])  ; 
+	values[n_vectors++] = (X4v + proton4v).Mag(); 
       }
 			      
       Int_t nn=0;
@@ -517,41 +507,45 @@ int main(int argc, char **argv)
       if (ngamma > 1) {
 	//
 	// total gamma mass 
-	sum4v=fourVec(0.0,threeVec(0.0,0.0,0.0));
+	sum4v.SetXYZT(0.0,0.0,0.0,0.0);
 	for (i = 0; i < ngamma; ++i) 
 	  sum4v += P4vector[gamma[i]];
-	values[n_vectors++] = ~sum4v;
+	values[n_vectors++] = sum4v.Mag();
 	if(firstEvent){
 	  sprintf(label,"TotalGamma");
 	  vnames->Add(label);
+	  cout<<"TotalGamma:\t\t Mass(all gammas)\n";
 	}
 	//
 	// total gamma + 1 pi+ mass
 	for(k=0;k<npiplus;k++){
-	  values[n_vectors++] = ~(sum4v + P4vector[piplus[k]]);
+	  values[n_vectors++] = (sum4v + P4vector[piplus[k]]).Mag();
 	  if(firstEvent){
-	    sprintf(label,"totg1pip.%d",k);
+	    sprintf(label,"totg1pip_%d",k);
 	    vnames->Add(label);
+	    cout<<"totg1pip_{int}:\t\t Mass(all gammas + 1 piplus) \n";
 	  } 
 	}
 	//
 	//  total gamma + pi- mass
 	for(k=0;k<npiminus;k++){
-	  values[n_vectors++] = ~(sum4v + P4vector[piminus[k]]);
+	  values[n_vectors++] = (sum4v + P4vector[piminus[k]]).Mag();
 	  if(firstEvent){
-	    sprintf(label,"totg1pim.%d",k);
+	    sprintf(label,"totg1pim_%d",k);
 	    vnames->Add(label);
+	    cout<<"totg1pim_{int}:\t\t Mass(all gammas + 1 piminus)\n ";
 	  } 
 	}
 	// total gamma +  pi+ pi- mass
 	for(k=0;k<npiminus;k++)
 	  for(l=0;l<npiplus;l++){
-	    values[n_vectors++] = ~(sum4v + 
+	    values[n_vectors++] = (sum4v + 
 				    P4vector[piminus[k]]
-				    + P4vector[piplus[l]]);
+				    + P4vector[piplus[l]]).Mag();
 	    if(firstEvent){
-	      sprintf(label,"totg1pim1pip.%d",nn++);
+	      sprintf(label,"totg1pim1pip_%d",nn++);
 	      vnames->Add(label);
+	      cout<<"totg1pim1pip_{int}:\t\t Mass(all gammas + piplus piminus \n";
 	    } 
 	  }
 	//
@@ -560,13 +554,14 @@ int main(int argc, char **argv)
 	  for(k=0;k<npiminus;k++)
 	    for(l=0;l<npiplus-1;++l)
 	      for(Int_t m = l+1;m<npiplus;++m){
-		values[n_vectors++] = ~(sum4v + 
+		values[n_vectors++] = (sum4v + 
 					P4vector[piminus[k]]
 					+ P4vector[piplus[l]]
-					+ P4vector[piplus[m]]);
+					+ P4vector[piplus[m]]).Mag();
 		if(firstEvent){
-		  sprintf(label,"totg1pim2pip.%d",mm++);
+		  sprintf(label,"totg1pim2pip_%d",mm++);
 		  vnames->Add(label);
+		  cout<<"totg1pim2pip_{int}:\t\t Mass(all gammas + 2 piplus piminus \n";
 		} 
 	      }
 	
@@ -574,44 +569,48 @@ int main(int argc, char **argv)
 	
 	//
 	// 2gamma masses
-	sum4v=fourVec(0.0,threeVec(0.0,0.0,0.0));
+	sum4v.SetXYZT(0.0,0.0,0.0,0.0);
 	n=0;
 	nn=0;
 	mm=0;
 	for (i = 0; i < ngamma - 1; ++i){
 	  for (j = i + 1; j < ngamma; ++j){ 
 	    sum4v = P4vector[gamma[i]] + P4vector[gamma[j]];
-	    values[n_vectors++] = ~sum4v;
+	    values[n_vectors++] = sum4v.Mag();
 	    if(firstEvent){
-	      sprintf(label,"2g.%d",n++);
+	      sprintf(label,"2g_%d",n++);
 	      vnames->Add(label);
+	      cout<<"2g_{int}:\t\t Mass(2 gamma)  \n";
 	    } 
 	    //
 	    // 2gamma pi+ mass
 	    for(k=0;k<npiplus;k++){
-	      values[n_vectors++] = ~(sum4v + P4vector[piplus[k]]);
+	      values[n_vectors++] = (sum4v + P4vector[piplus[k]]).Mag();
 	      if(firstEvent){
-		sprintf(label,"2g1pip.%d",k);
+		sprintf(label,"2g1pip_%d",k);
 		vnames->Add(label);
+		cout<<"2g1pip_{int}:\t\t Mass(2 gamma + 1 piplus)  \n";
 	      } 
 	    }
 	    // 2gamma pi- mass
 	    for(k=0;k<npiminus;k++){
-	      values[n_vectors++] = ~(sum4v + P4vector[piminus[k]]);
+	      values[n_vectors++] = (sum4v + P4vector[piminus[k]]).Mag();
 	      if(firstEvent){
-		sprintf(label,"2g1pim.%d",k);
+		sprintf(label,"2g1pim_%d",k);
 		vnames->Add(label);
+		cout<<"2g1pim_{int}:\t\t Mass(2gamma + 1 piminus)  \n";
 	      } 
 	    }
 	    // 2 gamma pi+ pi- mass
 	    for(k=0;k<npiminus;k++)
 	      for(l=0;l<npiplus;l++){
-		values[n_vectors++] = ~(sum4v + 
+		values[n_vectors++] = (sum4v + 
 					P4vector[piminus[k]]
-					+ P4vector[piplus[l]]);
+					+ P4vector[piplus[l]]).Mag();
 		if(firstEvent){
-		  sprintf(label,"2g1pim1pip.%d",nn++);
+		  sprintf(label,"2g1pim1pip_%d",nn++);
 		  vnames->Add(label);
+		  cout<<"2g1pim1pip_{int}:\t\t Mass(2gamma + piplus piminus)\n";
 		} 
 	      }
 	    // 2gamma 2pi+ pi-
@@ -619,13 +618,14 @@ int main(int argc, char **argv)
 	      for(k=0;k<npiminus;k++)
 		for(l=0;l<npiplus-1;++l)
 		  for(Int_t m = l+1;m<npiplus;++m){
-		    values[n_vectors++] = ~(sum4v + 
+		    values[n_vectors++] = (sum4v + 
 					    P4vector[piminus[k]]
 					    + P4vector[piplus[l]]
-					    + P4vector[piplus[m]]);
+					    + P4vector[piplus[m]]).Mag();
 		    if(firstEvent){
-		      sprintf(label,"2g1pim2pip.%d",mm++);
+		      sprintf(label,"2g1pim2pip_%d",mm++);
 		      vnames->Add(label);
+		      cout<<"2g1pim2pip_{int}:\t\t Mass(2gamma + 2piplus piminus) \n";
 		    } 
 		  }
 	    
@@ -645,11 +645,12 @@ int main(int argc, char **argv)
       nn=0;
       for(k=0;k<npiminus;k++)
 	for(l=0;l<npiplus;l++){
-	  values[n_vectors++] = ~(P4vector[piminus[k]]
-				  + P4vector[piplus[l]]);
+	  values[n_vectors++] = (P4vector[piminus[k]]
+				  + P4vector[piplus[l]]).Mag();
 	  if(firstEvent){
-	    sprintf(label,"1pim1pip.%d",nn++);
+	    sprintf(label,"1pim1pip_%d",nn++);
 	    vnames->Add(label);
+	    cout<<"1pim1pip_{int}:\t\t Mass(1 piplus + 1 piminus) \n";
 	  } 
 	}
       //
@@ -658,12 +659,13 @@ int main(int argc, char **argv)
 	for(k=0;k<npiminus;k++)
 	  for(l=0;l<npiplus-1;++l)
 	    for(Int_t m = l+1;m<npiplus;++m){
-	      values[n_vectors++] = ~(  P4vector[piminus[k]]
+	      values[n_vectors++] = (  P4vector[piminus[k]]
 				      + P4vector[piplus[l]]
-				      + P4vector[piplus[m]]);
+				      + P4vector[piplus[m]]).Mag();
 	      if(firstEvent){
-		sprintf(label,"1pim2pip.%d",mm++);
+		sprintf(label,"1pim2pip_%d",mm++);
 		vnames->Add(label);
+		cout<<"1pim2pip_{int}:\t\t Mass(2 piplus + 1 piminus)  \n";
 	      } 
 	    }
 	//
@@ -672,12 +674,13 @@ int main(int argc, char **argv)
 	for(k=0;k<npiplus;k++)
 	  for(l=0;l<npiminus-1;++l)
 	    for(Int_t m = l+1;m<npiminus;++m){
-	      values[n_vectors++] = ~(P4vector[piplus[k]]
+	      values[n_vectors++] = (P4vector[piplus[k]]
 				      + P4vector[piminus[l]]
-				      + P4vector[piminus[m]]);
+				      + P4vector[piminus[m]]).Mag();
 	      if(firstEvent){
-		sprintf(label,"2pim1pip.%d",mm++);
+		sprintf(label,"2pim1pip_%d",mm++);
 		vnames->Add(label);
+		cout<<"2pim1pip_{int}:\t\t Mass(1 piplus + 2 piminus)  \n";
 	      } 
 	    }
 	//
@@ -687,13 +690,14 @@ int main(int argc, char **argv)
 	  for(k=j+1;k<npiplus-1;k++)
 	    for(l=0;l<npiminus-1;++l)
 	      for(Int_t m = l+1;m<npiminus;++m){
-		values[n_vectors++] = ~( P4vector[piplus[j]]
+		values[n_vectors++] = ( P4vector[piplus[j]]
 					+ P4vector[piplus[k]]
 					+ P4vector[piminus[l]]
-					+ P4vector[piminus[m]]);
+					+ P4vector[piminus[m]]).Mag();
 		if(firstEvent){
-		  sprintf(label,"2pim2pip.%d",mm++);
+		  sprintf(label,"2pim2pip_%d",mm++);
 		  vnames->Add(label);
+		  cout<<"2pim2pip_{int}:\t\t Mass(2 piplus + 2 piminus) \n";
 		} 
 	      }
 	
@@ -708,11 +712,12 @@ int main(int argc, char **argv)
       nn=0;
       for(k=0;k<nKminus;k++)
 	for(l=0;l<nKplus;l++){
-	  values[n_vectors++] = ~(P4vector[Kminus[k]]
-				  + P4vector[Kplus[l]]);
+	  values[n_vectors++] = (P4vector[Kminus[k]]
+				  + P4vector[Kplus[l]]).Mag();
 	  if(firstEvent){
-	    sprintf(label,"1Km1Kp.%d",nn++);
+	    sprintf(label,"1Km1Kp_%d",nn++);
 	    vnames->Add(label);
+	    cout<<"1Km1Kp_{int}:\t\t Mass(1 Kminus + 1 Kplus)\n";
 	  } 
 	}
       //
@@ -721,12 +726,13 @@ int main(int argc, char **argv)
       for(k=0;k<nKminus;k++)
 	for(l=0;l<nKplus-1;++l)
 	  for(Int_t m = l+1;m<nKplus;++m){
-	    values[n_vectors++] = ~(P4vector[Kminus[k]]
+	    values[n_vectors++] = (P4vector[Kminus[k]]
 				    + P4vector[Kplus[l]]
-				    + P4vector[Kplus[m]]);
+				    + P4vector[Kplus[m]]).Mag();
 	    if(firstEvent){
-	      sprintf(label,"1Km2Kp.%d",mm++);
+	      sprintf(label,"1Km2Kp_%d",mm++);
 	      vnames->Add(label);
+	      cout<<"1Km2Kp_{int}:\t\t Mass(1 Kminus + 2 Kplus)\n";
 	    } 
 	  }
       //
@@ -735,12 +741,13 @@ int main(int argc, char **argv)
       for(k=0;k<nKplus;k++)
 	for(l=0;l<nKminus-1;++l)
 	  for(Int_t m = l+1;m<nKminus;++m){
-	    values[n_vectors++] = ~( P4vector[Kplus[k]]
+	    values[n_vectors++] = ( P4vector[Kplus[k]]
 				     + P4vector[Kminus[l]]
-				     + P4vector[Kminus[m]]);
+				     + P4vector[Kminus[m]]).Mag();
 	    if(firstEvent){
-	      sprintf(label,"2Km1Kp.%d",mm++);
+	      sprintf(label,"2Km1Kp_%d",mm++);
 	      vnames->Add(label);
+	      cout<<"2Km1Kp_{int}:\t\t Mass(2 Kminus + 1 Kplus)\n";
 	    } 
 	  }
       //
@@ -750,13 +757,14 @@ int main(int argc, char **argv)
 	for(k=j+1;k<nKplus-1;k++)
 	  for(l=0;l<nKminus-1;++l)
 	    for(Int_t m = l+1;m<nKminus;++m){
-	      values[n_vectors++] = ~(P4vector[Kplus[j]]
+	      values[n_vectors++] = (P4vector[Kplus[j]]
 				      + P4vector[Kplus[k]]
 				      + P4vector[Kminus[l]]
-				      + P4vector[Kminus[m]]);
+				      + P4vector[Kminus[m]]).Mag();
 	      if(firstEvent){
-		sprintf(label,"2Km2Kp.%d",mm++);
+		sprintf(label,"2Km2Kp_%d",mm++);
 		vnames->Add(label);
+		cout<<"2Km2Kp_{int}:\t\t Mass(2 Kminus + 2 Kplus)\n";
 	      } 
 	    }
       
@@ -771,11 +779,12 @@ int main(int argc, char **argv)
       nn=0;
       for(k=0;k<npiminus;k++)
 	for(l=0;l<nKplus;l++){
-	  values[n_vectors++] = ~(P4vector[piminus[k]]
-				  + P4vector[Kplus[l]]);
+	  values[n_vectors++] = (P4vector[piminus[k]]
+				  + P4vector[Kplus[l]]).Mag();
 	  if(firstEvent){
-	    sprintf(label,"1pim1Kp.%d",nn++);
+	    sprintf(label,"1pim1Kp_%d",nn++);
 	    vnames->Add(label);
+	    cout<<"1pim1Kp_{int}:\t\t Mass(1 Kplus + 1 piminus) \n";
 	  } 
 	}
       //
@@ -783,11 +792,12 @@ int main(int argc, char **argv)
       nn=0;
       for(k=0;k<nKminus;k++)
 	for(l=0;l<npiplus;l++){
-	  values[n_vectors++] = ~(P4vector[Kminus[k]]
-				  + P4vector[piplus[l]]);
+	  values[n_vectors++] = (P4vector[Kminus[k]]
+				  + P4vector[piplus[l]]).Mag();
 	  if(firstEvent){
-	    sprintf(label,"1Km1pip.%d",nn++);
+	    sprintf(label,"1Km1pip_%d",nn++);
 	    vnames->Add(label);
+	    cout<<"1Km1pip_{int}:\t\t Mass(1 piplus + 1 Kminus) \n";
 	  } 
 	}
       //
@@ -796,12 +806,13 @@ int main(int argc, char **argv)
       for(k=0;k<nKminus;k++)
 	for(l=0;l<npiplus-1;++l)
 	  for(Int_t m = l+1;m<npiplus;++m){
-	    values[n_vectors++] = ~(P4vector[Kminus[k]]
+	    values[n_vectors++] = (P4vector[Kminus[k]]
 				    + P4vector[piplus[l]]
-				    + P4vector[piplus[m]]);
+				    + P4vector[piplus[m]]).Mag();
 	    if(firstEvent){
-	      sprintf(label,"1Km2pip.%d",mm++);
+	      sprintf(label,"1Km2pip_%d",mm++);
 	      vnames->Add(label);
+	      cout<<"1Km2pip_{int}:\t\t Mass(1 Kminus + 2 piplus)  \n";
 	    } 
 	  }
       //
@@ -810,12 +821,13 @@ int main(int argc, char **argv)
       for(k=0;k<nKplus;k++)
 	for(l=0;l<npiminus-1;++l)
 	  for(Int_t m = l+1;m<npiminus;++m){
-	    values[n_vectors++] = ~(P4vector[Kplus[k]]
+	    values[n_vectors++] = (P4vector[Kplus[k]]
 				    + P4vector[piminus[l]]
-				    + P4vector[piminus[m]]);
+				    + P4vector[piminus[m]]).Mag();
 	    if(firstEvent){
-	      sprintf(label,"2pim1Kp.%d",mm++);
+	      sprintf(label,"2pim1Kp_%d",mm++);
 	      vnames->Add(label);
+	      cout<<"2pim1Kp_{int}:\t\t Mass(1 Kplus + 2 piminus)  \n";
 	    } 
 	  }
       //
@@ -825,15 +837,75 @@ int main(int argc, char **argv)
 	for(k=0;k<npiplus;k++)
 	  for(l=0;l<nKminus;++l)
 	    for(Int_t m = 0;m<npiminus;++m){
-	      values[n_vectors++] = ~(P4vector[Kplus[j]]
+	      values[n_vectors++] = (P4vector[Kplus[j]]
 				      + P4vector[piplus[k]]
 				      + P4vector[Kminus[l]]
-				      + P4vector[piminus[m]]);
+				      + P4vector[piminus[m]]).Mag();
 	      if(firstEvent){
-		sprintf(label,"KmKppimpip.%d",mm++);
+		sprintf(label,"KmKppimpip_%d",mm++);
 		vnames->Add(label);
+		cout<<"KmKppimpip_{int}:\t\t Mass(Kplus Kminus piplus piminus) \n";
 	      } 
 	    }
+      
+
+      ///////////////////////////
+      // 
+      //  Physics Angles
+      //
+      ///////////////////////////
+
+      
+      TVector3 x,y,z;
+      //Boost to CM frame
+      TLorentzVector CM4v = beam4v + target4v ;
+      TLorentzVector beam4v_temp = beam4v;
+      TVector3 beta;
+      
+      beta = CM4v.BoostVector();
+      CM4v.Boost(-beta);
+      if(debug){
+	cerr<<"Dumping CM after boost to CM\n";
+	CM4v.Dump();
+      }
+      for(int i=0;i<nparts;i++)
+	P4vector[i].Boost(-beta);
+      beam4v.Boost(-beta);
+      X4v.Boost(-beta);
+      
+      // now boost to X Rest frame
+      beta = X4v.BoostVector();
+      y = ((beam4v.Vect()).Cross(X4v.Vect())).Unit();
+      X4v.Boost(-beta);// this should be at rest now
+      if(debug){
+	cerr<<"Dumping X after boost to X RF\n";
+	X4v.Dump();
+      }
+      beam4v.Boost(-beta);
+      for(int i=0;i<nparts;i++)
+	P4vector[i].Boost(-beta);
+      z = (beam4v.Vect()).Unit();
+      x = y.Cross(z); // right handed system
+      double costheta = z *  P4vector[0].Vect().Unit();
+      
+      
+      values[n_vectors++] = costheta;
+      if(firstEvent){
+	sprintf(label,"cosGJ_%d",0);
+	vnames->Add(label);
+	cout<<"cosGJ_{int}:\t\t GJ Cos(theta) using particle {int} as the analyzer \n";
+      } 
+      
+      double phiTY =  TMath::ATan2( y *  P4vector[0].Vect(),
+				    x *  P4vector[0].Vect());
+      values[n_vectors++] =  phiTY;
+      if(firstEvent){
+	sprintf(label,"phiGJ_%d",0);
+	vnames->Add(label);
+	cout<<"phiTY_{int}:\t\t GJ phi using particle {int} as the analyzer \n";
+      } 
+      
+      
       
       
       
@@ -882,6 +954,7 @@ int main(int argc, char **argv)
   rdtfile->Close();
   ntpfile->Write();
   ntpfile->Close();
+  cerr<<endl;
   return 0;
 }
 
