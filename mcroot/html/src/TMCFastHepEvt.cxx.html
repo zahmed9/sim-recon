@@ -3,7 +3,7 @@
 <!--                                             -->
 <!-- Author: ROOT team (rootdev@hpsalo.cern.ch)  -->
 <!--                                             -->
-<!--   Date: Thu Jan  7 15:35:15 1999            -->
+<!--   Date: Mon Feb  1 21:09:46 1999            -->
 <!--                                             -->
 <head>
 <title>TMCFastHepEvt - source file</title>
@@ -65,13 +65,13 @@ TClonesArray *TMCFastHepEvt::fgParticles = 0;
 
 
 <b>//____________________________________________________________________________</b>
-<a name="TMCFastHepEvt:AddHepParticle"> </a><a href="../ListOfTypes.html#void">void</a> <a href=".././TMCFastHepEvt.html#TMCFastHepEvt:AddHepParticle">TMCFastHepEvt::AddHepParticle</a>(struct heppart_t *part){
+<a name="TMCFastHepEvt:AddHepParticle"> </a><a href="../ListOfTypes.html#void">void</a> <a href=".././TMCFastHepEvt.html#TMCFastHepEvt:AddHepParticle">TMCFastHepEvt::AddHepParticle</a>(struct heppart_t *part,<a href="../ListOfTypes.html#Int_t">Int_t</a> index){
 <b>  // Create a <a href=".././TMCFastHepParticle.html">TMCFastHepParticle</a> instance</b>
 <b>  // from the c struct heppart_t and add the instance to </b>
 <b>  // the  <a href="http://root.cern.ch/root/html/TClonesArray.html">TClonesArray</a> <a href=".././TMCFastHepEvt.html#TMCFastHepEvt:fHepParticle">fHepParticle</a></b>
 <b>  //</b>
   <a href="http://root.cern.ch/root/html/TClonesArray.html">TClonesArray</a> &amp;partilces = *<a href=".././TMCFastHepEvt.html#TMCFastHepEvt:fHepParticle">fHepParticle</a>;
-  new(partilces[<a href=".././TMCFastHepEvt.html#TMCFastHepEvt:fnhep">fnhep</a>++]) <a href=".././TMCFastHepParticle.html">TMCFastHepParticle</a>(part);
+  new(partilces[<a href=".././TMCFastHepEvt.html#TMCFastHepEvt:fnhep">fnhep</a>++]) <a href=".././TMCFastHepParticle.html">TMCFastHepParticle</a>(part,index);
 }
 
 
@@ -84,7 +84,7 @@ TClonesArray *TMCFastHepEvt::fgParticles = 0;
   <a href="#TMCFastHepEvt:SetNevhep">SetNevhep</a>(evt-&gt;nevhep);
   <a href=".././TMCFastHepEvt.html#TMCFastHepEvt:fnhep">fnhep</a>=0;
   for(<a href="../ListOfTypes.html#Int_t">Int_t</a> i =0; i&lt; evt-&gt;nhep;i++)
-    <a href="#TMCFastHepEvt:AddHepParticle">AddHepParticle</a>(&amp;(evt-&gt;heppart[i]));
+    <a href="#TMCFastHepEvt:AddHepParticle">AddHepParticle</a>(&amp;(evt-&gt;heppart[i]),i+1);
   if(evt-&gt;nhep != <a href="#TMCFastHepEvt:GetNhep">GetNhep</a>()){
     cerr&lt;&lt; "ERROR!! <a href="http://root.cern.ch/root/html/TClonesArray.html">TClonesArray</a> <a href=".././TMCFastHepParticle.html">TMCFastHepParticle</a> != evt-&gt;nhep elementsn";
   }
@@ -98,7 +98,28 @@ TClonesArray *TMCFastHepEvt::fgParticles = 0;
    <a href=".././TMCFastHepEvt.html#TMCFastHepEvt:fHepParticle">fHepParticle</a>-&gt;<a href="http://root.cern.ch/root/html/TClonesArray.html#TClonesArray:Clear">Clear</a>();
 }
 
-
+<a name="TMCFastHepEvt:GetHepParticle"> </a><a href=".././TMCFastHepParticle.html">TMCFastHepParticle</a> <a href=".././TMCFastHepEvt.html#TMCFastHepEvt:GetHepParticle">TMCFastHepEvt::GetHepParticle</a>(<a href="../ListOfTypes.html#Int_t">Int_t</a> HepEvtIndex){
+<b>  // return the <a href=".././TMCFastHepParticle.html">TMCFastHepParticle</a> which</b>
+<b>  // has the HepEvtIndex</b>
+<b>  //</b>
+  <a href="../ListOfTypes.html#Int_t">Int_t</a> found=0,n=0;
+  <a href=".././TMCFastHepParticle.html">TMCFastHepParticle</a> particle;
+  
+  <a href="http://root.cern.ch/root/html/TIter.html">TIter</a> next(this-&gt;<a href="#TMCFastHepEvt:GetHepParticles">GetHepParticles</a>());
+  while( <a href=".././TMCFastHepParticle.html">TMCFastHepParticle</a> *p = (<a href=".././TMCFastHepParticle.html">TMCFastHepParticle</a> *)next()){
+    n++;
+    if(n == HepEvtIndex){
+      found=1;
+      particle = *p; 
+    }
+  }
+  if(!found){
+    cerr&lt;&lt;"Failed to  <a href="#TMCFastHepEvt:GetHepParticle">GetHepParticle</a>("&lt;&lt;HepEvtIndex&lt;&lt;")n";
+    exit(-1);
+  }
+  else
+    return particle;
+}
 <b>//____________________________________________________________________________</b>
 <a name="TMCFastHepEvt:~TMCFastHepEvt"> </a><a href=".././TMCFastHepEvt.html">TMCFastHepEvt</a>::~<a href=".././TMCFastHepEvt.html">TMCFastHepEvt</a>()
 {
@@ -116,15 +137,17 @@ TClonesArray *TMCFastHepEvt::fgParticles = 0;
 <b>  // cout &lt;&lt; hepevt;</b>
 <b>  // </b>
 <b>  // where hepevt is an instance of <a href=".././TMCFastHepEvt.html">TMCFastHepEvt</a></b>
+  <a href="../ListOfTypes.html#Int_t">Int_t</a> index=1;
 
-  *os&lt;&lt;" Nevhep: "&lt;&lt; this-&gt;<a href="#TMCFastHepEvt:GetNevhep">GetNevhep</a>()&lt;&lt;endl;
-  *os&lt;&lt;"t Nhep: "&lt;&lt; this-&gt;<a href="#TMCFastHepEvt:GetNhep">GetNhep</a>()&lt;&lt;endl;
+  *os&lt;&lt;" HepEvt number: "&lt;&lt; this-&gt;<a href="#TMCFastHepEvt:GetNevhep">GetNevhep</a>();
+  *os&lt;&lt;"t Number of Particles: "&lt;&lt; this-&gt;<a href="#TMCFastHepEvt:GetNhep">GetNhep</a>()&lt;&lt;endl;
 
 <b>  // Now Print the Particles</b>
 
   <a href="http://root.cern.ch/root/html/TIter.html">TIter</a> next(this-&gt;<a href="#TMCFastHepEvt:GetHepParticles">GetHepParticles</a>());
   
   while( <a href=".././TMCFastHepParticle.html">TMCFastHepParticle</a> *particle = (<a href=".././TMCFastHepParticle.html">TMCFastHepParticle</a> *)next()){
+    *os&lt;&lt;"tHepEvt Index: "&lt;&lt;index++;
     particle-&gt;<a href="#TMCFastHepEvt:Print">Print</a>(os);
   }
 }

@@ -35,7 +35,8 @@ struct hepevt_t {
 class TMCFastHepParticle: public TObject{
 private:
   Int_t fisthep;     // The Particle status
-  Int_t fidhep;      // The particle id (PDG pid) 
+  Int_t fidhep;      // The particle id (PDG pid)
+  Int_t findex;      // The HEPEVT index
   Int_t fjmohep[2];    // The position of the mother particles 
   Int_t fjdahep[2];    // Position of the first daughter... 
   Double_t  fphep[5];    // 4-Momentum (Px,Py,Pz,E), mass
@@ -43,10 +44,11 @@ private:
 
 public:
   TMCFastHepParticle() { }
-  TMCFastHepParticle(struct heppart_t *part);
+  TMCFastHepParticle(struct heppart_t *part,Int_t index);
   virtual ~TMCFastHepParticle() ;
   Int_t  GetIsthep() const { return fisthep; }
   Int_t  GetIdhep() const { return fidhep; }
+  Int_t GetIndex() const {return findex;}
   Int_t  GetJmohep(Int_t j) const { return fjmohep[j]; }
   Int_t  GetJdahep(Int_t j) const { return fjdahep[j]; }
   Double_t GetMass() const {return fphep[4];}
@@ -62,6 +64,7 @@ public:
 
   void SetIsthep( Int_t n)  { fisthep=n; }
   void SetIdhep( Int_t n)  { fidhep=n; }
+  void SetIndex(Int_t n) {findex=n;}
   void SetJmohep(Int_t j,Int_t n)  { fjmohep[j]=n; }
   void SetJdahep(Int_t j,Int_t n)  { fjdahep[j]=n; }
   void SetMass( Double_t x)  { fphep[4]=x;}
@@ -75,7 +78,7 @@ public:
   void SetVt(Double_t x)  { fvhep[3]=x;}
 
   void Print(ostream *os);
-  void Fill(struct heppart_t *part);
+  void Fill(struct heppart_t *part,Int_t index);
   ClassDef(TMCFastHepParticle,1)  //Needed by ROOT
 };
 

@@ -3,7 +3,7 @@
 <!--                                             -->
 <!-- Author: ROOT team (rootdev@hpsalo.cern.ch)  -->
 <!--                                             -->
-<!--   Date: Thu Jan  7 10:01:40 1999            -->
+<!--   Date: Mon Feb  1 21:09:48 1999            -->
 <!--                                             -->
 <head>
 <title>TMCFastHepParticle - source file</title>
@@ -43,31 +43,31 @@ http://www-pat.fnal.gov/stdhep.html </a>
 
 ClassImp(TMCFastHepParticle)
 <b>//____________________________________________________________________________</b>
-<a name="TMCFastHepParticle:TMCFastHepParticle"> </a><a href=".././TMCFastHepParticle.html#TMCFastHepParticle:TMCFastHepParticle">TMCFastHepParticle::TMCFastHepParticle</a>(struct heppart_t *part){
+<a name="TMCFastHepParticle:TMCFastHepParticle"> </a><a href=".././TMCFastHepParticle.html#TMCFastHepParticle:TMCFastHepParticle">TMCFastHepParticle::TMCFastHepParticle</a>(struct heppart_t *part,<a href="../ListOfTypes.html#Int_t">Int_t</a> index){
 <b>  //  This Calls <a href="#TMCFastHepParticle:Fill">Fill</a>()</b>
-  <a href="#TMCFastHepParticle:Fill">Fill</a>(part);
+  <a href="#TMCFastHepParticle:Fill">Fill</a>(part,index);
 }
 <b>//____________________________________________________________________________</b>
-<a name="TMCFastHepParticle:Fill"> </a><a href="../ListOfTypes.html#void">void</a>  <a href=".././TMCFastHepParticle.html#TMCFastHepParticle:Fill">TMCFastHepParticle::Fill</a>(struct heppart_t *part){
+<a name="TMCFastHepParticle:Fill"> </a><a href="../ListOfTypes.html#void">void</a>  <a href=".././TMCFastHepParticle.html#TMCFastHepParticle:Fill">TMCFastHepParticle::Fill</a>(struct heppart_t *part,<a href="../ListOfTypes.html#Int_t">Int_t</a> index){
 <b>  //Fill the object information using a c struct map </b>
 <b>  //of the Fortran common block used in mcfast  </b>
 <b>  //</b>
-
-    <a href="#TMCFastHepParticle:SetIsthep">SetIsthep</a>(part-&gt;isthep);
-    <a href="#TMCFastHepParticle:SetIdhep">SetIdhep</a>(part-&gt;idhep);
-    for(<a href="../ListOfTypes.html#Int_t">Int_t</a> j=0; j&lt; 2; j++){
-      <a href="#TMCFastHepParticle:SetJmohep">SetJmohep</a>(j,part-&gt;jmohep[j]);
-      <a href="#TMCFastHepParticle:SetJdahep">SetJdahep</a>(j,part-&gt;jmohep[j]);
-    }
-    <a href="#TMCFastHepParticle:SetMass">SetMass</a>(part-&gt;phep[4]);
-    <a href="#TMCFastHepParticle:SetPx">SetPx</a>(part-&gt;phep[0]);
-    <a href="#TMCFastHepParticle:SetPy">SetPy</a>(part-&gt;phep[1]);
-    <a href="#TMCFastHepParticle:SetPz">SetPz</a>(part-&gt;phep[2]);
-    <a href="#TMCFastHepParticle:SetE">SetE</a>(part-&gt;phep[3]);
-    <a href="#TMCFastHepParticle:SetVx">SetVx</a>(part-&gt;vhep[0]);
-    <a href="#TMCFastHepParticle:SetVy">SetVy</a>(part-&gt;vhep[1]);
-    <a href="#TMCFastHepParticle:SetVz">SetVz</a>(part-&gt;vhep[2]);
-    <a href="#TMCFastHepParticle:SetVt">SetVt</a>(part-&gt;vhep[3]);  
+  <a href="#TMCFastHepParticle:SetIndex">SetIndex</a>(index);
+  <a href="#TMCFastHepParticle:SetIsthep">SetIsthep</a>(part-&gt;isthep);
+  <a href="#TMCFastHepParticle:SetIdhep">SetIdhep</a>(part-&gt;idhep);
+  for(<a href="../ListOfTypes.html#Int_t">Int_t</a> j=0; j&lt; 2; j++){
+    <a href="#TMCFastHepParticle:SetJmohep">SetJmohep</a>(j,part-&gt;jmohep[j]);
+    <a href="#TMCFastHepParticle:SetJdahep">SetJdahep</a>(j,part-&gt;jmohep[j]);
+  }
+  <a href="#TMCFastHepParticle:SetMass">SetMass</a>(part-&gt;phep[4]);
+  <a href="#TMCFastHepParticle:SetPx">SetPx</a>(part-&gt;phep[0]);
+  <a href="#TMCFastHepParticle:SetPy">SetPy</a>(part-&gt;phep[1]);
+  <a href="#TMCFastHepParticle:SetPz">SetPz</a>(part-&gt;phep[2]);
+  <a href="#TMCFastHepParticle:SetE">SetE</a>(part-&gt;phep[3]);
+  <a href="#TMCFastHepParticle:SetVx">SetVx</a>(part-&gt;vhep[0]);
+  <a href="#TMCFastHepParticle:SetVy">SetVy</a>(part-&gt;vhep[1]);
+  <a href="#TMCFastHepParticle:SetVz">SetVz</a>(part-&gt;vhep[2]);
+  <a href="#TMCFastHepParticle:SetVt">SetVt</a>(part-&gt;vhep[3]);  
 }
 
 
@@ -93,7 +93,8 @@ ClassImp(TMCFastHepParticle)
 <b>  // where heppart is an instance of <a href=".././TMCFastHepParticle.html">TMCFastHepParticle</a></b>
 
 
-    *os&lt;&lt;"t\t Ishep: "&lt;&lt; this-&gt;<a href="#TMCFastHepParticle:GetIsthep">GetIsthep</a>()&lt;&lt;" Idhep: "&lt;&lt; 
+    *os&lt;&lt;"t Index: "&lt;&lt;this-&gt;<a href="#TMCFastHepParticle:GetIndex">GetIndex</a>()
+      &lt;&lt;" Ishep: "&lt;&lt; this-&gt;<a href="#TMCFastHepParticle:GetIsthep">GetIsthep</a>()&lt;&lt;" Idhep: "&lt;&lt; 
       this-&gt;<a href="#TMCFastHepParticle:GetIdhep">GetIdhep</a>();
     *os&lt;&lt;" Mass: "&lt;&lt;  this-&gt;<a href="#TMCFastHepParticle:GetMass">GetMass</a>()&lt;&lt;endl;
     *os&lt;&lt;"t\t Px: "&lt;&lt;  this-&gt;<a href="#TMCFastHepParticle:GetPx">GetPx</a>();

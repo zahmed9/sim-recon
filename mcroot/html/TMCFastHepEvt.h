@@ -33,11 +33,12 @@ public:
   Int_t  GetNevhep() const { return fnevhep; }
   Int_t  GetNhep() const { return fnhep; }
   TClonesArray *GetHepParticles() const { return fHepParticle; }
+  TMCFastHepParticle GetHepParticle(Int_t HepEvtIndex);
   void SetNevhep(Int_t n)  { fnevhep=n; }
   void SetNhep(Int_t n)  { fnhep=n; }
   void Print(ostream *os);
   void Fill(struct hepevt_t *evt);
-  void AddHepParticle(struct heppart_t *part);
+  void AddHepParticle(struct heppart_t *part,Int_t index);
   
   ClassDef(TMCFastHepEvt,1)  //Needed by ROOT
 };
