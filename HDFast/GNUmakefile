@@ -116,7 +116,7 @@ ifeq "$(UNAME)" "Linux"
   LOPTION= -O0 -W1,-taso
 
 # ABLIBS = $(HALLDLIBS)
- F90LIBS = $(HALLD_HOME/src/f90_libs
+ F90LIBS = $(HALLD_HOME)/src/f90_libs
   LIBS := -L$(F90LIBS) -lU77 -lV77 -lf77math -lfio    
 #  LIBS += -L/usr/local/packages/egcs/lib/gcc-lib/i586-pc-linux-gnu/egcs-2.91.57
   LIBS += -lg2c                                          #g77 runtime
