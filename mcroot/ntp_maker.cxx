@@ -194,6 +194,7 @@ int main(int argc, char **argv)
   cout<<"The Tree contains "<<nentries<<" events\n";
   Bool_t firstEvent=kTRUE;
 
+
   Int_t nparticlesFirstEvent=0; // used to create Ntuple labels
   Int_t nparticles = 0;
 
@@ -322,12 +323,14 @@ int main(int argc, char **argv)
 	py= particle->GetPy();
 	pz= particle->GetPz();
 	E= particle->GetE();
+
 	//
 	// book smearing of the components
 	values[n_vectors++] = (px - hepParticle.GetPx())/hepParticle.GetPx();
 	values[n_vectors++] = (py - hepParticle.GetPy())/hepParticle.GetPy();
 	values[n_vectors++] = (pz - hepParticle.GetPz())/hepParticle.GetPz();
 	values[n_vectors++] = (E - hepParticle.GetE())/hepParticle.GetE();
+
 	if(firstEvent){
 	    sprintf(label,"SmearP%d.x",nparts);
 	    vnames->Add(label);
@@ -339,25 +342,33 @@ int main(int argc, char **argv)
 	    vnames->Add(label);
 	  }
 
-	if(Book_Four_Components){
-	  values[n_vectors++] = particle->GetP();	
+  
+       	if(Book_Four_Components){
+
+	  values[n_vectors++] = particle->GetP();
 	  values[n_vectors++] = px;
+//	  cout << "px: " << px << endl;
 	  values[n_vectors++] = py;
+//	  cout << "py: " << py << endl;
 	  values[n_vectors++] = pz;
+//	  cout << "pz: " << pz << endl;
 	  values[n_vectors++] = E;
 	  if(firstEvent){
-	    sprintf(label,"p%d",nparts);
+	    sprintf(label,"p%d.p",nparts);
 	    vnames->Add(label);
+	    //	  cout << "px:"<< px << endl;
 	    sprintf(label,"p%d.x",nparts);
 	    vnames->Add(label);
+	    //	  cout << "py:" << py << endl;	    
 	    sprintf(label,"p%d.y",nparts);
 	    vnames->Add(label);
+	    //	  cout << "pz:" << pz << endl;
 	    sprintf(label,"p%d.z",nparts);
 	    vnames->Add(label);
-	    sprintf(label,"E%d",nparts);
+	    sprintf(label,"p%d.E",nparts);
 	    vnames->Add(label);
 	  }
-	}
+	 }
 
 	//
 	// Fill the particle list
@@ -848,6 +859,7 @@ int main(int argc, char **argv)
       ntpfile->cd();// create the ntuple in this file
       ntp = new TNtuple("ntp",ntpTitle,vectorNames);
       firstEvent=kFALSE;
+	  
     }
     
     if(nparticlesFirstEvent == nparticles)
