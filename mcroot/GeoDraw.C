@@ -1,4 +1,4 @@
-int GeoDraw(char *geoFile="tmp.db"){
+int GeoDraw(char *geoFile="../HDFast/HDFast.db"){
 /**********************************************************
  *
  * This ia a simple macro to read in and display
@@ -101,7 +101,7 @@ int GeoDraw(char *geoFile="tmp.db"){
  // Read geo file and look to detector description
  dbFile >>word;
  while(strcmp(word,"end") != 0 ){ // not EOF
-   if(strcmp(word,"make")==0|| strcmp(word,"!%")==0||){
+   if(strcmp(word,"make")==0|| strcmp(word,"!%")==0){
      if(strcmp(word,"!%")==0)
        dbFile >>word;
      dbFile >>word;
