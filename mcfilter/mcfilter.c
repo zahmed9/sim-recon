@@ -10,13 +10,21 @@
 #include <esr.h>
 
 #define ITAPE_BUF_SIZE 100000
+#define RAD2DEG (180.0/3.14159)
+
+typedef struct {
+  float c_low; /* charged angle cut in theta*/
+  float p_high; /* gamma angle cut in theta (high side)*/
+  float p_low; /* gamma angle cut in theta (low side)*/
+} cuts_t;
 
 void PrintUsage(char *processName);
-int ProcessEvent(itape_header_t *event, float theta_cut, float p_theta_cut);
+int ProcessEvent(itape_header_t *event, cuts_t cuts);
 int GetData(FILE *finput, itape_header_t *buffer);
 void print_particle(FILE *fp, esr_particle_t p);
+int angular_acceptance(esr_nparticle_t *esr, cuts_t cuts);
 
-int debug;
+int debug = 0;
 
 void PrintUsage(char *processName)
 {
@@ -25,7 +33,9 @@ void PrintUsage(char *processName)
   fprintf(stderr,"\t-o<outfile>\tOutput file name def: stdout\n");
   fprintf(stderr,"\t-M[#]\t\tProcess only # number of events\n");
   fprintf(stderr,"\t-t[#]\t\tcharged theta cut in degrees\n");
-  fprintf(stderr,"\t-p[#]\t\tneutral theta cut in degrees\n");
+  fprintf(stderr,"\t-p[l,h]\t\tneutral theta cut in degrees\n");
+  fprintf(stderr,"\t   l[#]\t\t- low angle gamma cut\n");
+  fprintf(stderr,"\t   h[#]\t\t- high angle gamma cut\n");
   fprintf(stderr,"\t-d\t\tdebug mode\n");
   fprintf(stderr,"\t-h\t\tPrint this message.\n\n");
   exit(0);
@@ -45,10 +55,12 @@ void main(int argc, char *argv[])
   char *outFile=NULL;
   FILE *fpOUT=NULL;
   char *inFile=NULL;
-  float theta_cut = 0.0, p_theta_cut = 0.0;
+  cuts_t cuts;
   int nwrite = 0;
   
-  debug = 0;
+  cuts.p_low = cuts.c_low = 0.0;
+  cuts.p_high = 180.0;
+
   if(argc==1)PrintUsage(argv[0]);
 
   for(i=1;i<argc;i++){
@@ -63,10 +75,22 @@ void main(int argc, char *argv[])
 	debug = 1;
 	break;
       case 't':
-	theta_cut = atof(++argptr);
+	cuts.c_low = atof(++argptr);
 	break;
       case 'p':
-	p_theta_cut = atof(++argptr);
+	switch(*(++argptr)){
+	case 'l':
+	  cuts.p_low = atof(++argptr);
+	  fprintf(stderr, "low angle gamma cut of %f deg\n", cuts.p_low);
+	  break;
+	case 'h':
+	  cuts.p_high = atof(++argptr);
+	  fprintf(stderr, "high angle gamma cut of %f deg\n", cuts.p_high);
+	  break;
+	default:
+	  PrintUsage(argv[0]);
+	  break;
+	}
 	break;
       case 'o':
 	outFile = ++argptr;
@@ -109,7 +133,7 @@ void main(int argc, char *argv[])
 	printf("reading data from: %s\n",inFile);
 	/* do stuff */
 	while( (maxevents ? maxevents>nevents:1) && (GetData(fpIN, event) )){
-	  if(ProcessEvent(event, theta_cut, p_theta_cut)){
+	  if(ProcessEvent(event, cuts)){
 	    data_write(fileno(fpOUT), event); /*NO ERROR CHECKING AT THE MOMENT...*/
 	    nwrite++;
 	  }
@@ -129,43 +153,51 @@ void main(int argc, char *argv[])
   fclose(fpOUT);
 }
 
-#define RAD2DEG (180.0/3.14159)
-int ProcessEvent(itape_header_t *event, float theta_cut, float p_theta_cut){
+
+int ProcessEvent(itape_header_t *event, cuts_t cuts){
   esr_nparticle_t *esr = data_getGroup(event, GROUP_ESR_NPARTICLE_MC);
   int i;
 
   if (!esr) esr = data_getGroup(event, GROUP_ESR_NPARTICLE); 
-
+  
   if (esr){
+    vector4_t sum = {0,0,0,0};
     if (debug) fprintf(stderr, "next event\n");
-    for (i = 0; i < esr->nparticles; i++){
-      float theta, phi;
-      v3dir(esr->p[i].p.space, &theta, &phi);
-      switch (abs(esr->p[i].particleType)){
-      case Gamma:
-	if (theta*RAD2DEG > p_theta_cut) return 0;	
-	break;
-      case PiPlus:
-      case PiMinus:
-      case KPlus:
-      case KMinus:
-	if(debug) fprintf(stderr, "theta: %f, theta_deg: %f, theta_cut: %f\n", theta, theta*RAD2DEG, theta_cut);
-	if (theta*RAD2DEG < theta_cut) {
-	  return 0;	
-	}
-	break;
-      case Neutron:
-      case Proton:
-	break;
-      default:
-	fprintf(stderr, "ERROR unknown particle type: %d\n",esr->p[i].particleType);
-	break;
-      }
-	
-    }
+    if (!(angular_acceptance(esr, cuts))) return 0;
     return 1;
   }
   return 0;
+}
+
+/* returns 1 if all particles pass angle cuts 0 if any one fails*/
+int angular_acceptance(esr_nparticle_t *esr, cuts_t cuts){
+  int i;
+  
+  for (i = 0; i < esr->nparticles; i++){
+    float theta, phi;
+    v3dir(esr->p[i].p.space, &theta, &phi);
+    switch (abs(esr->p[i].particleType)){
+    case Gamma:
+      if (theta*RAD2DEG > cuts.p_high) return 0;	
+      if (theta*RAD2DEG < cuts.p_low ) return 0;	
+      break;
+    case PiPlus:
+    case PiMinus:
+    case KPlus:
+    case KMinus:
+      if(debug) fprintf(stderr, "theta: %f, theta_deg: %f, theta_cut: %f\n", theta, theta*RAD2DEG, cuts.c_low);
+      if ( theta*RAD2DEG < cuts.c_low ) return 0;
+      break;
+    case Neutron:
+    case Proton:
+      break;
+    default:
+      fprintf(stderr, "ERROR unknown particle type: %d\n",esr->p[i].particleType);
+      break;
+    }
+    
+  }
+  return 1;
 }
 
 void print_particle(FILE *fp, esr_particle_t p){
