@@ -1,0 +1,11 @@
+#!/bin/tcsh
+
+#
+# This script is run as a weekly cron job from davidl account.
+# The crontab file is kept in the scripts directory under
+# CVS control as is this one. See the file crontab.halld for
+# more details.
+#
+
+# This script does nothing for now and is only a placeholder.
+echo "Hi Dave. Your weekly cron job does nothing."

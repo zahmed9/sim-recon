@@ -1,0 +1,14 @@
+#!/bin/tcsh
+
+#
+# This script is run as a nightly cron job from davidl account.
+# The crontab file is kept in the scripts directory under
+# CVS control as is this one. See the file crontab.halld for
+# more details.
+#
+
+# checkout and build the Hall-D source code
+cd /group/halld/Software/builds
+/group/halld/Software/scripts/make_release latest > latest.out
+
+
