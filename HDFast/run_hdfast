@@ -12,7 +12,8 @@
 ##########################################
 select((select(STDOUT),$|=1)[$[]);
 
-$GeoFile= $ENV{"HDFAST_DIR"}."/halld_strawman.db";
+#$GeoFile= $ENV{"HDFAST_DIR"}."/halld_strawman.db";
+$GeoFile= $ENV{"HDFAST_DIR"}."/HDFast.db";
 if(! -e $GeoFile){
     print "GEO FILE:".$GeoFile." DOES NOT EXITS!\n\n";
     
@@ -34,13 +35,15 @@ $stdhep_it="ascii2stdhep";
 $unstdhep_it="stdhep2ascii";
 $REMOVE=1;
 $dbFile=0;
-$UseOldOutput = 0;
+$SaveBadEvents = 0;
 $DEBUG =0;
 $ManyMode = 0;
 #
 # Used in ManyMode
-@Beams=(6,8,10);
+#@Beams=(5,6,8,10,12);
+@Beams=(5,8,12);
 @Xmasses=(1.4,1.7,2.0);
+#@Xmasses=(1.4);
 @Xwidths=(0.25);
 
 
@@ -48,6 +51,7 @@ $ManyMode = 0;
 for (@ARGV) {
     if(/^-G(.+)/)  { $dbFile = $1;}
     if(/^-d/)  { $REMOVE = 0;}
+    if(/^-g(.+)/)  { $gamp_flag = " -g"; $gamp_kludge=$1; }
     if(/^-D(.+)/)  { $DEBUG = $1;}
     if(/^-n(.+)/)  { $nparts = $1;}
     if(/^-t(.+)/)  { $tag0 = $1;}
@@ -55,7 +59,8 @@ for (@ARGV) {
     if(/^-N(.+)/)  { $nevents = $1;}
     if(/^-I(.+)/)  { $tail = ".itape";$stdhep_it="itape2stdhep";$unstdhep_it="stdhep2itape"}
     if(/^-A(.+)/)  { $tail = ".ascii";}
-    if(/^-u/)  { $UseOldOutput = 1;}
+    if(/^-v/)  { $SaveOldFormat = 1;}
+    if(/^-u/)  { $SaveBadEvents = 1;}
     if(/^-B(.+)/)  { $beamp = $1;}
 }
 
@@ -66,7 +71,7 @@ if($ManyMode==0){
 }
 
 
-print "dbFile: ".$dbFile,"\n";
+print "dbFile: ".$dbFile."gamp flag".$gamp_flag.$gamp_kludge,"\n";
 
 if($#ARGV > 0){
     $dcmd="\$HDFAST_DIR/HALLD.cmd";
@@ -87,7 +92,7 @@ foreach $beamZ (@Beams){
 
 # Run ascii2stdhep
     
-    $syscomm = "ascii2stdhep -i".$tag.".ascii -o".$tag.".evt -n".$nparts." -N".$nevents ;
+    $syscomm = "ascii2stdhep -i".$tag.".ascii -o".$tag.".evt -n".$nparts." -N".$nevents.$gamp_flag ;
     print $syscomm."\n";
     system($syscomm);
 
@@ -109,6 +114,7 @@ foreach $beamZ (@Beams){
     $syscomm =  $syscomm." ".$dcmd." >".$tag.".cmd";
     print  $syscomm."\n";
     system($syscomm);
+    
     $syscomm =  "sed \"s/output.evt/".$tag.".mcfasted.evt/g\" " ;
     $syscomm =  $syscomm." ".$tag.".cmd > tmp";
     print  $syscomm."\n";
@@ -132,14 +138,13 @@ foreach $beamZ (@Beams){
 # create HDFast command
 #
     $RdtFile = $tag.".rdt ";
-     if($UseOldOutput){
-	 $RdtFile = "-";
-     }
-  
-
+    
     $syscomm = "HDFast -f ".$tag.".cmd -o ".$RdtFile." -l ".$tag.".log -hb ".$tag.".hbook";
-    if($UseOldOutput){
+    if($SaveBadEvents){
 	$syscomm = $syscomm." -u -";
+    }
+     if($SaveOldFormat){
+	$syscomm = $syscomm." -v -";
     }
     if($DEBUG){
 	$syscomm = $syscomm." -d ".$DEBUG." ";
@@ -162,8 +167,8 @@ foreach $beamZ (@Beams){
 #
 # Run stdhep2ascii
 # 
-    if($UseOldOutput){
-    $syscomm = "stdhep2ascii -i".$tag.".mcfasted.evt -o".$tag.".mcfasted.ascii -n".$nparts." -N".$nevents ;
+    if($SaveBadEvents || $SaveOldFormat){
+    $syscomm = "stdhep2ascii -i".$tag.".mcfasted.evt -o".$tag.".mcfasted.ascii -n".$nparts." -N".$nevents." ".$gamp_flag.$gamp_kludge ;
     print  $syscomm."\n";
     system($syscomm);
    }
@@ -190,8 +195,10 @@ sub printusage {
     -t<tag>     tag used to create files like <tag>.ascii
     -n#          number of particles in an event 
     -D#           debug level (default: 0)
-    -M          many mode -- loop over masses and widths (must edit me)   
-    -u          use old mcfast output (*.evt file)
+    -M          many mode -- loop over masses and widths (must edit me) 
+    -g<beamE>   use gamp input file format
+    -v          save old event format (*.evt file)
+    -u          save broken events (*.evt file do not use w/ -v )
     -G<dbFile>  use a nonstardard geo file(mostly used for debugging)     
     -d          don't remove files(used for debuging)
 
