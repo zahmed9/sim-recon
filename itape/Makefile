@@ -7,6 +7,8 @@ DATA_COBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(DATA_CSRCS))
 
 libs: libdata$(ADD_DEBUG).a
 
+lib: libdata$(ADD_DEBUG).a
+
 libdata$(ADD_DEBUG).a: $(DATA_COBJS)
 	ar rv $@ $^
 	$(VDIR) $(HALLDLIB)
