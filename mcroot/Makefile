@@ -124,7 +124,7 @@ $(TMCFast_LIB): $(TMCFastO)
 TMCFast_LIBS =  $(HALLD_HOME)/lib/$(UNAME)/$(TMCFast_LIB)
 
 dumpRdt:       $(TMCFastO) $(MAIN2O)
-		$(LD) $(LDFLAGS) $(MAIN2O) $(MCFASTLIB) $(LIBS) $(OutPutOpt) $(TMCFast2)
+		$(LD) $(LDFLAGS) $(MAIN2O) $(MCFASTLIB) $(LIBS) $(OutPutOpt) dumpRdt
 		@echo "$(TMCFast2) done"
 
 tof2:     $(TMCFastO) $(TOF2O) 
