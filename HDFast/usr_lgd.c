@@ -87,7 +87,7 @@ int usr_lgd(void){
 	 * the same for the gammas; else
 	 * use center-of-target(x,y,z)= (0,0,50) cm
 	 */ 
-	if(trk_off1_.trk_off_num){ /* 
+	if(trk_off_c_.trk_off_num){ /* 
 				    * vhep[part#][x,y,z,t]
 				    * HEPEVT units are in mm and not cm 
 				    */

@@ -80,18 +80,18 @@ void usr_analysis_(void){
   }
    if(Debug==1 )
      fprintf(stderr,"trk_off_num: %d  trk_gen_num: %d\n",
-	     trk_off1_.trk_off_num,trk_gen_c_.trk_gen_num);
+	     trk_off_c_.trk_off_num,trk_gen_c_.trk_gen_num);
 
   /* 
    * Only look at events where all tracks were found.
    */
-  if( trk_off1_.trk_off_num ==  trk_gen_c_.trk_gen_num) {
+  if( trk_off_c_.trk_off_num ==  trk_gen_c_.trk_gen_num) {
     Nsmeared++;
     /*
      * dump offline track into the hepevt structure
      */
     if(!SaveBrokenEvents){
-      usr_fill_event(trk_off1_.trk_off_num);
+      usr_fill_event(trk_off_c_.trk_off_num);
       usr_mcfio_out_();
     }
   }else{

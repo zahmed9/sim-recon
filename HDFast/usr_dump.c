@@ -100,11 +100,11 @@ void usr_dump(void){
   /*
    * Allocate mem and copy the trk_off1_ common block
    */
-  trk_off_num=trk_off1_.trk_off_num;
+  trk_off_num=trk_off_c_.trk_off_num;
   trk_off = malloc(sizeof(struct offline_track_struct)*trk_off_num);
 		   
   for(i=0;i<trk_off_num;i++)
-    trk_off[i] = trk_off2_.trk_off[i];
+    trk_off[i] = trk_off_c_.trk_off[i];
 
 
   /*

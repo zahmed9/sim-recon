@@ -108,15 +108,16 @@ void usr_analysis_(void){
   /* 
     * Only save events where all particles are foundtrk_off1_.
    */
+  /* renamed trk_off1_ to trk_off_c_  for mcfast v5.0*/
   if(Debug==1)
     fprintf(stderr,"trk_off_num: %d  trk_gen_num: %d\n",
-	  trk_off1_.trk_off_num,trk_gen_c_.trk_gen_num);
+	  trk_off_c_.trk_off_num,trk_gen_c_.trk_gen_num);
 
   /* fprintf(stderr,"Analyzing event: %d\r",count);
    * fflush(stderr);
    */
 
-  if(trk_off1_.trk_off_num ==  trk_gen_c_.trk_gen_num && foundAllGammas
+  if(trk_off_c_.trk_off_num ==  trk_gen_c_.trk_gen_num && foundAllGammas
      /* for Ke3 studies -> "&& trk_gen_c_.trk_gen_num>3" */){
     Nsmeared++;
 
@@ -129,7 +130,7 @@ void usr_analysis_(void){
        * Use old file format
        */
       /* fprintf(stderr,"Saving %d particles\n",trk_off1_.trk_off_num);*/
-      usr_fill_event(trk_off1_.trk_off_num);/* for chrg. part. only */
+      usr_fill_event(trk_off_c_.trk_off_num);/* for chrg. part. only */
       usr_mcfio_out_();
     }else
        usr_dump(); 

@@ -66,31 +66,36 @@ void usr_fill_event(int nparts){
 int fill_parts(int nparts, mc_part_t *part){
   int i,k,id,hb_nt=1;
   float value,weight=1.0 ,nTuple_values[100];
-  extern struct trk_off2 trk_off2_ ;
+  extern struct trk_off_c trk_off_c_ ;
   double tmpdf,stmpdf;
   extern int Debug;
 
   for(i=0;i<nparts;i++){ 
+
+    /* 28 Mar 2000 
+     * replaced all trk_off2_ with trk_off_c_
+     */
+
     /*
      * dump common block
      */
     if(Debug==1){
       fprintf(stderr,"i= %d 
-trk_off2_.trk_off[i].hep =%d
-hepevt_.idhep[trk_off2_.trk_off[i].hep -1] = %d
-hepevt_.isthep[trk_off2_.trk_off[i].hep -1]= %d
-trk_off2_.trk_off[i].mass = %f
-trk_off2_.trk_off[i].w.px = %f
-trk_off2_.trk_off[i].w.py = %f
-trk_off2_.trk_off[i].w.pz = %f
-trk_off2_.trk_off[i].w.e = %f\n",i,trk_off2_.trk_off[i].hep  ,
-	      hepevt_.idhep[trk_off2_.trk_off[i].hep -1 ],
-	      hepevt_.isthep[trk_off2_.trk_off[i].hep -1],
-	      trk_off2_.trk_off[i].mass,
-	      trk_off2_.trk_off[i].w.px,
-	      trk_off2_.trk_off[i].w.py,
-	      trk_off2_.trk_off[i].w.pz,
-	      trk_off2_.trk_off[i].w.e
+trk_off_c_.trk_off[i].hep =%d
+hepevt_.idhep[trk_off_c_.trk_off[i].hep -1] = %d
+hepevt_.isthep[trk_off_c_.trk_off[i].hep -1]= %d
+trk_off_c_.trk_off[i].mass = %f
+trk_off_c_.trk_off[i].w.px = %f
+trk_off_c_.trk_off[i].w.py = %f
+trk_off_c_.trk_off[i].w.pz = %f
+trk_off_c_.trk_off[i].w.e = %f\n",i,trk_off_c_.trk_off[i].hep  ,
+	      hepevt_.idhep[trk_off_c_.trk_off[i].hep -1 ],
+	      hepevt_.isthep[trk_off_c_.trk_off[i].hep -1],
+	      trk_off_c_.trk_off[i].mass,
+	      trk_off_c_.trk_off[i].w.px,
+	      trk_off_c_.trk_off[i].w.py,
+	      trk_off_c_.trk_off[i].w.pz,
+	      trk_off_c_.trk_off[i].w.e
 
 );
       
@@ -99,31 +104,31 @@ trk_off2_.trk_off[i].w.e = %f\n",i,trk_off2_.trk_off[i].hep  ,
     /*
      * fill the particle structure
      */
-    part[i].pid = hepevt_.idhep[trk_off2_.trk_off[i].hep -1 ];
+    part[i].pid = hepevt_.idhep[trk_off_c_.trk_off[i].hep -1 ];
     /* the -1 is because fortran starts counting at 1 */
-    part[i].statusCode = hepevt_.isthep[trk_off2_.trk_off[i].hep -1];
-    part[i].mass = trk_off2_.trk_off[i].mass;
-    part[i].p.space.x = trk_off2_.trk_off[i].w.px;
-    part[i].p.space.y = trk_off2_.trk_off[i].w.py;
-    part[i].p.space.z = trk_off2_.trk_off[i].w.pz;
-    part[i].p.t = trk_off2_.trk_off[i].w.e;
-    part[i].v.x = trk_off2_.trk_off[i].w.x;
-    part[i].v.y = trk_off2_.trk_off[i].w.y;
-    part[i].v.z = trk_off2_.trk_off[i].w.z;
+    part[i].statusCode = hepevt_.isthep[trk_off_c_.trk_off[i].hep -1];
+    part[i].mass = trk_off_c_.trk_off[i].mass;
+    part[i].p.space.x = trk_off_c_.trk_off[i].w.px;
+    part[i].p.space.y = trk_off_c_.trk_off[i].w.py;
+    part[i].p.space.z = trk_off_c_.trk_off[i].w.pz;
+    part[i].p.t = trk_off_c_.trk_off[i].w.e;
+    part[i].v.x = trk_off_c_.trk_off[i].w.x;
+    part[i].v.y = trk_off_c_.trk_off[i].w.y;
+    part[i].v.z = trk_off_c_.trk_off[i].w.z;
 
     /* 
      * fill some histograms and a ntuple
      */
-    value = part[i].p.space.x - hepevt_.phep[trk_off2_.trk_off[i].hep -1][0];
+    value = part[i].p.space.x - hepevt_.phep[trk_off_c_.trk_off[i].hep -1][0];
     id =10;
     hf1_(&id,&value,&weight);
-    value = part[i].p.space.y - hepevt_.phep[trk_off2_.trk_off[i].hep -1][1];
+    value = part[i].p.space.y - hepevt_.phep[trk_off_c_.trk_off[i].hep -1][1];
     id =11;
     hf1_(&id,&value,&weight);
-    value = part[i].p.space.z - hepevt_.phep[trk_off2_.trk_off[i].hep -1][2];
+    value = part[i].p.space.z - hepevt_.phep[trk_off_c_.trk_off[i].hep -1][2];
     id =12;
     hf1_(&id,&value,&weight);
-    value = part[i].p.t - hepevt_.phep[trk_off2_.trk_off[i].hep -1][3];
+    value = part[i].p.t - hepevt_.phep[trk_off_c_.trk_off[i].hep -1][3];
     id =13;
     hf1_(&id,&value,&weight);
     
@@ -131,15 +136,15 @@ trk_off2_.trk_off[i].w.e = %f\n",i,trk_off2_.trk_off[i].hep  ,
     /*
      * generated events
      */
-    nTuple_values[k++]= hepevt_.phep[trk_off2_.trk_off[i].hep -1][3]; /* E */
-    nTuple_values[k++]= hepevt_.phep[trk_off2_.trk_off[i].hep -1][0]; /* px */
-    nTuple_values[k++]= hepevt_.phep[trk_off2_.trk_off[i].hep -1][1]; /* py */
-    nTuple_values[k++]= hepevt_.phep[trk_off2_.trk_off[i].hep -1][2]; /* pz */
+    nTuple_values[k++]= hepevt_.phep[trk_off_c_.trk_off[i].hep -1][3]; /* E */
+    nTuple_values[k++]= hepevt_.phep[trk_off_c_.trk_off[i].hep -1][0]; /* px */
+    nTuple_values[k++]= hepevt_.phep[trk_off_c_.trk_off[i].hep -1][1]; /* py */
+    nTuple_values[k++]= hepevt_.phep[trk_off_c_.trk_off[i].hep -1][2]; /* pz */
     nTuple_values[k++] = sqrt( (double) 
-	    (hepevt_.phep[trk_off2_.trk_off[i].hep -1][0]*
-	    hepevt_.phep[trk_off2_.trk_off[i].hep -1][0] +
-	    hepevt_.phep[trk_off2_.trk_off[i].hep -1][1]*
-	    hepevt_.phep[trk_off2_.trk_off[i].hep -1][1])) ; /* pt */
+	    (hepevt_.phep[trk_off_c_.trk_off[i].hep -1][0]*
+	    hepevt_.phep[trk_off_c_.trk_off[i].hep -1][0] +
+	    hepevt_.phep[trk_off_c_.trk_off[i].hep -1][1]*
+	    hepevt_.phep[trk_off_c_.trk_off[i].hep -1][1])) ; /* pt */
 
     /*
      * smeared events
