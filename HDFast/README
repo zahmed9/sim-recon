@@ -122,6 +122,7 @@ events through the HDFast simulation.
 [Viewing and Using HDFast Simulation Output]
 
 	Viewing HDFast output(An ascii dump of the data)
+
 		// list the data groups(data branches). See "dumpRdt -h" for usage.
 		% dumpRdt -L  n_3pi.rdt
 			Opening n_3pi.rdt for input
@@ -148,8 +149,16 @@ events through the HDFast simulation.
 	See the text file "n_3pi.ntuple_labels" for the definitions of the automatically
 	generated ntuple label names.  The ROOT ntuple is contained in the
 	n_3pi n_3pi.root file. 
+
 		// See "ntp_maker -h" for usage
-		% ntp_maker -on_3pi n_3pi.rdt > n_3pi.ntuple_labels				...
+		% ntp_maker -on_3pi n_3pi.rdt > n_3pi.ntuple_labels
+	
+		// Start ROOT and open tree viewer
+		% root
+			root [0] TFile f("n_3pi.root");
+			root [1] TTree *tree =(TTree *) gROOT->FindObject("ntp");
+			root [2] tree->StartViewer();
+			...
 
 
 
