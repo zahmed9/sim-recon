@@ -1,0 +1,90 @@
+#!/apps/bin/perl
+
+# release must be passed as an argument
+$release = $ARGV[0];
+if($#ARGV<0){&Usage();}
+
+$halld_home = $ENV{"PWD"}."/$release";
+$ENV{"HALLD_HOME"} = $halld_home;
+print "\nMaking release \"$release\" ($halld_home)\n\n";
+
+# Check if we are checking out an existing tag or just grabbing the latest
+if($release eq "latest"){
+	print "\"latest\" specified, no tag will be used for checkout.\n";
+}else{
+	$tags = "-r $release";
+}
+
+# Move old "$release" out of the way (if it exists) and make new one
+if(-e $release){
+	print `mkdir -p junk`;
+	print `rm -rf junk/$release`;
+	print `mv -f $release junk`;
+}
+mkdir $release;
+chdir $release;
+
+# Checkout release to new directory
+system("cvs -d /group/halld/Repositories/cvsroot co $tags release");
+
+# For now, just move these things by hand. They should be moved
+# in the repository itself eventually
+system("mkdir -p src/programs/Simulation");
+system("mv HDFast HDGeant genr8 mcroot stdhep_translators hdds src/programs/Simulation");
+system("mv hddm src/programs/Analysis");
+system("mv include src");
+
+# Regenerate hddm files from schema
+print "\nBuilding HDDM tools ...\n\n";
+chdir "src/programs/Analysis/hddm";
+system("make install");
+print "\n...generating hddm C/C++ source ...\n";
+system("rm -f event.xml");
+system("schema-hddm event.xsd > event.xml");
+system("hddm-c event.xml");
+system("cp hddm_s.h hddm_s.hpp ../../../libraries/include");
+
+# Build libraries
+print "\nBuilding Libraries ...\n\n";
+chdir "$halld_home/src/libraries";
+system("make");
+
+# Build executables
+print "\nBuilding executables ...\n\n";
+chdir "$halld_home/src/programs/Analysis/hd_ana";
+system("make");
+chdir "$halld_home/src/programs/Analysis/hd_dump";
+system("make");
+chdir "$halld_home/src/programs/Simulation/genr8";
+system("make install");
+chdir "$halld_home/src/programs/Simulation/hdds";
+system("make");
+chdir "$halld_home/src/programs/Simulation/stdhep_translators";
+system("make install");
+chdir "$halld_home/src/programs/Simulation/mcroot";
+system("make install");
+chdir "$halld_home/src/programs/Simulation/HDFast";
+system("make install");
+
+
+# HDGeant
+chdir "$halld_home/src/programs/Simulation/HDGeant/gelhad";
+system("make");
+chdir "$halld_home/src/programs/Simulation/HDGeant";
+system("make");
+
+# Rebuild documentation
+chdir "$halld_home/src/doc";
+system("make clean ; make");
+if($release eq "latest"){
+	system("make install");
+}
+
+# Print usage statement and exit
+sub Usage()
+{
+	print "\nUsage:\n\t\tmake_release <release>\n\n";
+	
+	
+	exit(0);
+}
