@@ -8,7 +8,6 @@
 
 #include "DEventProcessor.h"
 #include "DEventLoop.h"
-#include "DTrkHit.h"
 
 #include <TFile.h>
 #include <TH1.h>
