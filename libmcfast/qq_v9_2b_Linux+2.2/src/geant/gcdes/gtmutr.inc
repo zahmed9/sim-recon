@@ -1,0 +1,20 @@
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:24  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1994/04/05  21:31:35  lkg
+* Beta version of GEANT in CLEO CVS format
+*
+*
+*
+* gtmutr.inc
+*
+*
+      INTEGER NCVOLS,NSHIFT,KSHIFT,ICUBE,NAIN,JJJ,NIET,IVOOLD,
+     +        IWPOIN,IHPOIN,IVECVO,IOLDSU,ICGP,IPORNT
+      REAL    GXMIN,GXMAX,GYMIN,GYMAX,GZMIN,GZMAX,GXXXX,GYYYY,GZZZZ
+      REAL    CLIPMI,CLIPMA,ABCD,BMIN,BMAX,CGB,CGB1,GBOOM
+      REAL    PORGX,PORGY,PORGZ,POX,POY,POZ,PORMIR,PORMAR

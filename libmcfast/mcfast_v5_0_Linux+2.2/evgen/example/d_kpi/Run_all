@@ -1,0 +1,7 @@
+#! /bin/csh
+#
+# Run all test jobs.
+#
+Run_evgen pythia pythia_kpi d_kpi.dec
+Run_evgen isajet isajet_kpi d_kpi.dec
+Run_evgen herwig herwig_kpi d_kpi.dec

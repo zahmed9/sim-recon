@@ -1,0 +1,11 @@
+template Mixture(20)
+  char name           ! mixture name
+  int nmat            ! number of materials
+  material matnames(5)    ! material names
+  real prop(5)        ! prop by volume
+end template
+
+!               name        nmat     material names                       prop by volume
+
+make Mixture "ARGON-ETHAN"   2  "ARGON"  "C2H6"  "-" "-" "-"       0.65  0.35  0.00  0.00  0.00
+

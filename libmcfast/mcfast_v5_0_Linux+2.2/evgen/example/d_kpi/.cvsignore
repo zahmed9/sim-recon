@@ -1,0 +1,11 @@
+LUND_RAN
+pythia_exam
+herwig_exam
+isajet_exam
+*.lpt
+*.log
+*.rz
+*.evt
+*.f
+*.o
+*.map

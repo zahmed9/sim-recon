@@ -1,0 +1,413 @@
+/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks
+gmake[3]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks'
+creating cache ./config.cache
+checking for cleo_f77... no
+checking for f77... f77
+checking for cleo_cc... no
+checking for cc... cc
+checking for cleo_makedepend... no
+checking for makedepend... makedepend
+checking how to run the C preprocessor... cc -E
+updating cache ./config.cache
+creating ./config.status
+creating Makefile
+creating lunmgr/Makefile
+creating mesrep/Makefile
+creating Makefile.cleoks
+creating typscn/Makefile
+creating typscn/typscn/Makefile
+creating typscn/typsio/Makefile
+creating typscn/typsio_c/Makefile
+creating typscn/typsub/Makefile
+creating Makefile
+creating lunmgr/Makefile
+creating mesrep/Makefile
+creating Makefile.cleoks
+creating typscn/Makefile
+creating typscn/typscn/Makefile
+creating typscn/typsio/Makefile
+creating typscn/typsio_c/Makefile
+creating typscn/typsub/Makefile
+gmake[4]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks'
+gmake[5]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks'
+/bin/sh: /home/cern/prod/qq/v9_2b/Linux+2.2/bin/version: No such file or directory
+gmake[6]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks'
+/bin/sh: /home/cern/prod/qq/v9_2b/Linux+2.2/bin/version: No such file or directory
+gmake[7]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks'
+gmake[8]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/mesrep'
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/mesbnk.F, line 49: cannot find include file "seq/clbank/czbank.inc"
+	not in seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clbank/czbank.inc
+	not in /cleoks/seq/clbank/czbank.inc
+	not in /./seq/clbank/czbank.inc
+	not in /usr/local/lib/gcc-include/seq/clbank/czbank.inc
+	not in /usr/include/seq/clbank/czbank.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clbank/czbank.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/mescon.F, line 48: cannot find include file "seq/clever/cldtype.inc"
+	not in seq/clever/cldtype.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clever/cldtype.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/cldtype.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/cldtype.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clever/cldtype.inc
+	not in /cleoks/seq/clever/cldtype.inc
+	not in /./seq/clever/cldtype.inc
+	not in /usr/local/lib/gcc-include/seq/clever/cldtype.inc
+	not in /usr/include/seq/clever/cldtype.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clever/cldtype.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/mesleh.F, line 45: cannot find include file "seq/clbank/czbank.inc"
+	not in seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clbank/czbank.inc
+	not in /cleoks/seq/clbank/czbank.inc
+	not in /./seq/clbank/czbank.inc
+	not in /usr/local/lib/gcc-include/seq/clbank/czbank.inc
+	not in /usr/include/seq/clbank/czbank.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clbank/czbank.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/mesleh.F, line 49: cannot find include file "seq/clever/descseq.inc"
+	not in seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clever/descseq.inc
+	not in /cleoks/seq/clever/descseq.inc
+	not in /./seq/clever/descseq.inc
+	not in /usr/local/lib/gcc-include/seq/clever/descseq.inc
+	not in /usr/include/seq/clever/descseq.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clever/descseq.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/meslet.F, line 46: cannot find include file "seq/clbank/czbank.inc"
+	not in seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clbank/czbank.inc
+	not in /cleoks/seq/clbank/czbank.inc
+	not in /./seq/clbank/czbank.inc
+	not in /usr/local/lib/gcc-include/seq/clbank/czbank.inc
+	not in /usr/include/seq/clbank/czbank.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clbank/czbank.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/meslet.F, line 47: cannot find include file "seq/clever/descseq.inc"
+	not in seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clever/descseq.inc
+	not in /cleoks/seq/clever/descseq.inc
+	not in /./seq/clever/descseq.inc
+	not in /usr/local/lib/gcc-include/seq/clever/descseq.inc
+	not in /usr/include/seq/clever/descseq.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clever/descseq.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/meslog.F, line 50: cannot find include file "seq/zfiles/quest.inc"
+	not in seq/zfiles/quest.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/zfiles/quest.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/zfiles/quest.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/zfiles/quest.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/zfiles/quest.inc
+	not in /cleoks/seq/zfiles/quest.inc
+	not in /./seq/zfiles/quest.inc
+	not in /usr/local/lib/gcc-include/seq/zfiles/quest.inc
+	not in /usr/include/seq/zfiles/quest.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/zfiles/quest.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/meslsh.F, line 42: cannot find include file "seq/clbank/czbank.inc"
+	not in seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clbank/czbank.inc
+	not in /cleoks/seq/clbank/czbank.inc
+	not in /./seq/clbank/czbank.inc
+	not in /usr/local/lib/gcc-include/seq/clbank/czbank.inc
+	not in /usr/include/seq/clbank/czbank.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clbank/czbank.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/meslsh.F, line 44: cannot find include file "seq/clever/descseq.inc"
+	not in seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clever/descseq.inc
+	not in /cleoks/seq/clever/descseq.inc
+	not in /./seq/clever/descseq.inc
+	not in /usr/local/lib/gcc-include/seq/clever/descseq.inc
+	not in /usr/include/seq/clever/descseq.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clever/descseq.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/meslst.F, line 46: cannot find include file "seq/clbank/czbank.inc"
+	not in seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clbank/czbank.inc
+	not in /cleoks/seq/clbank/czbank.inc
+	not in /./seq/clbank/czbank.inc
+	not in /usr/local/lib/gcc-include/seq/clbank/czbank.inc
+	not in /usr/include/seq/clbank/czbank.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clbank/czbank.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/meslst.F, line 48: cannot find include file "seq/clever/descseq.inc"
+	not in seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clever/descseq.inc
+	not in /cleoks/seq/clever/descseq.inc
+	not in /./seq/clever/descseq.inc
+	not in /usr/local/lib/gcc-include/seq/clever/descseq.inc
+	not in /usr/include/seq/clever/descseq.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clever/descseq.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/mestae.F, line 49: cannot find include file "seq/clbank/czbank.inc"
+	not in seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clbank/czbank.inc
+	not in /cleoks/seq/clbank/czbank.inc
+	not in /./seq/clbank/czbank.inc
+	not in /usr/local/lib/gcc-include/seq/clbank/czbank.inc
+	not in /usr/include/seq/clbank/czbank.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clbank/czbank.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/mestal.F, line 47: cannot find include file "seq/clbank/czbank.inc"
+	not in seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clbank/czbank.inc
+	not in /cleoks/seq/clbank/czbank.inc
+	not in /./seq/clbank/czbank.inc
+	not in /usr/local/lib/gcc-include/seq/clbank/czbank.inc
+	not in /usr/include/seq/clbank/czbank.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clbank/czbank.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/mestal.F, line 49: cannot find include file "seq/clever/descseq.inc"
+	not in seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clever/descseq.inc
+	not in /cleoks/seq/clever/descseq.inc
+	not in /./seq/clever/descseq.inc
+	not in /usr/local/lib/gcc-include/seq/clever/descseq.inc
+	not in /usr/include/seq/clever/descseq.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clever/descseq.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/mestas.F, line 44: cannot find include file "seq/clbank/czbank.inc"
+	not in seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clbank/czbank.inc
+	not in /cleoks/seq/clbank/czbank.inc
+	not in /./seq/clbank/czbank.inc
+	not in /usr/local/lib/gcc-include/seq/clbank/czbank.inc
+	not in /usr/include/seq/clbank/czbank.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clbank/czbank.inc
+gmake[8]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/mesrep'
+gmake[8]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/lunmgr'
+gmake[8]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/lunmgr'
+gmake[8]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn'
+gmake[9]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn'
+gmake[10]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn/typscn'
+gmake[10]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn/typscn'
+gmake[10]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn/typsub'
+gmake[10]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn/typsub'
+gmake[10]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn/typsio'
+gmake[10]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn/typsio'
+gmake[10]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn/typsio_c'
+gmake[10]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn/typsio_c'
+gmake[9]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn'
+gmake[8]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn'
+gmake[7]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks'
+gmake[6]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks'
+gmake[5]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks'
+gmake[4]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks'
+gmake[3]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks'
+gmake[3]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks'
+gmake[4]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks'
+/bin/sh: /home/cern/prod/qq/v9_2b/Linux+2.2/bin/version: No such file or directory
+gmake[5]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks'
+/bin/sh: /home/cern/prod/qq/v9_2b/Linux+2.2/bin/version: No such file or directory
+gmake[6]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks'
+gmake[7]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/mesrep'
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/mesbnk.F, line 49: cannot find include file "seq/clbank/czbank.inc"
+	not in seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clbank/czbank.inc
+	not in /cleoks/seq/clbank/czbank.inc
+	not in /./seq/clbank/czbank.inc
+	not in /usr/local/lib/gcc-include/seq/clbank/czbank.inc
+	not in /usr/include/seq/clbank/czbank.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clbank/czbank.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/mescon.F, line 48: cannot find include file "seq/clever/cldtype.inc"
+	not in seq/clever/cldtype.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clever/cldtype.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/cldtype.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/cldtype.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clever/cldtype.inc
+	not in /cleoks/seq/clever/cldtype.inc
+	not in /./seq/clever/cldtype.inc
+	not in /usr/local/lib/gcc-include/seq/clever/cldtype.inc
+	not in /usr/include/seq/clever/cldtype.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clever/cldtype.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/mesleh.F, line 45: cannot find include file "seq/clbank/czbank.inc"
+	not in seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clbank/czbank.inc
+	not in /cleoks/seq/clbank/czbank.inc
+	not in /./seq/clbank/czbank.inc
+	not in /usr/local/lib/gcc-include/seq/clbank/czbank.inc
+	not in /usr/include/seq/clbank/czbank.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clbank/czbank.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/mesleh.F, line 49: cannot find include file "seq/clever/descseq.inc"
+	not in seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clever/descseq.inc
+	not in /cleoks/seq/clever/descseq.inc
+	not in /./seq/clever/descseq.inc
+	not in /usr/local/lib/gcc-include/seq/clever/descseq.inc
+	not in /usr/include/seq/clever/descseq.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clever/descseq.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/meslet.F, line 46: cannot find include file "seq/clbank/czbank.inc"
+	not in seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clbank/czbank.inc
+	not in /cleoks/seq/clbank/czbank.inc
+	not in /./seq/clbank/czbank.inc
+	not in /usr/local/lib/gcc-include/seq/clbank/czbank.inc
+	not in /usr/include/seq/clbank/czbank.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clbank/czbank.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/meslet.F, line 47: cannot find include file "seq/clever/descseq.inc"
+	not in seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clever/descseq.inc
+	not in /cleoks/seq/clever/descseq.inc
+	not in /./seq/clever/descseq.inc
+	not in /usr/local/lib/gcc-include/seq/clever/descseq.inc
+	not in /usr/include/seq/clever/descseq.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clever/descseq.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/meslog.F, line 50: cannot find include file "seq/zfiles/quest.inc"
+	not in seq/zfiles/quest.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/zfiles/quest.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/zfiles/quest.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/zfiles/quest.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/zfiles/quest.inc
+	not in /cleoks/seq/zfiles/quest.inc
+	not in /./seq/zfiles/quest.inc
+	not in /usr/local/lib/gcc-include/seq/zfiles/quest.inc
+	not in /usr/include/seq/zfiles/quest.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/zfiles/quest.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/meslsh.F, line 42: cannot find include file "seq/clbank/czbank.inc"
+	not in seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clbank/czbank.inc
+	not in /cleoks/seq/clbank/czbank.inc
+	not in /./seq/clbank/czbank.inc
+	not in /usr/local/lib/gcc-include/seq/clbank/czbank.inc
+	not in /usr/include/seq/clbank/czbank.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clbank/czbank.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/meslsh.F, line 44: cannot find include file "seq/clever/descseq.inc"
+	not in seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clever/descseq.inc
+	not in /cleoks/seq/clever/descseq.inc
+	not in /./seq/clever/descseq.inc
+	not in /usr/local/lib/gcc-include/seq/clever/descseq.inc
+	not in /usr/include/seq/clever/descseq.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clever/descseq.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/meslst.F, line 46: cannot find include file "seq/clbank/czbank.inc"
+	not in seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clbank/czbank.inc
+	not in /cleoks/seq/clbank/czbank.inc
+	not in /./seq/clbank/czbank.inc
+	not in /usr/local/lib/gcc-include/seq/clbank/czbank.inc
+	not in /usr/include/seq/clbank/czbank.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clbank/czbank.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/meslst.F, line 48: cannot find include file "seq/clever/descseq.inc"
+	not in seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clever/descseq.inc
+	not in /cleoks/seq/clever/descseq.inc
+	not in /./seq/clever/descseq.inc
+	not in /usr/local/lib/gcc-include/seq/clever/descseq.inc
+	not in /usr/include/seq/clever/descseq.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clever/descseq.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/mestae.F, line 49: cannot find include file "seq/clbank/czbank.inc"
+	not in seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clbank/czbank.inc
+	not in /cleoks/seq/clbank/czbank.inc
+	not in /./seq/clbank/czbank.inc
+	not in /usr/local/lib/gcc-include/seq/clbank/czbank.inc
+	not in /usr/include/seq/clbank/czbank.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clbank/czbank.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/mestal.F, line 47: cannot find include file "seq/clbank/czbank.inc"
+	not in seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clbank/czbank.inc
+	not in /cleoks/seq/clbank/czbank.inc
+	not in /./seq/clbank/czbank.inc
+	not in /usr/local/lib/gcc-include/seq/clbank/czbank.inc
+	not in /usr/include/seq/clbank/czbank.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clbank/czbank.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/mestal.F, line 49: cannot find include file "seq/clever/descseq.inc"
+	not in seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clever/descseq.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clever/descseq.inc
+	not in /cleoks/seq/clever/descseq.inc
+	not in /./seq/clever/descseq.inc
+	not in /usr/local/lib/gcc-include/seq/clever/descseq.inc
+	not in /usr/include/seq/clever/descseq.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clever/descseq.inc
+makedepend: warning:  /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/mestas.F, line 44: cannot find include file "seq/clbank/czbank.inc"
+	not in seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/mesrep/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/cleoks/seq/clbank/czbank.inc
+	not in /home/cern/prod/qq/v9_2b/Linux+2.2/src/./seq/clbank/czbank.inc
+	not in /cleoks/seq/clbank/czbank.inc
+	not in /./seq/clbank/czbank.inc
+	not in /usr/local/lib/gcc-include/seq/clbank/czbank.inc
+	not in /usr/include/seq/clbank/czbank.inc
+	not in /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/seq/clbank/czbank.inc
+gmake[7]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/mesrep'
+gmake[7]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/lunmgr'
+gmake[7]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/lunmgr'
+gmake[7]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn'
+gmake[8]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn'
+gmake[9]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn/typscn'
+gmake[9]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn/typscn'
+gmake[9]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn/typsub'
+gmake[9]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn/typsub'
+gmake[9]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn/typsio'
+gmake[9]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn/typsio'
+gmake[9]: Entering directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn/typsio_c'
+gmake[9]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn/typsio_c'
+gmake[8]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn'
+gmake[7]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks/typscn'
+gmake[6]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks'
+gmake[5]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks'
+gmake[4]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks'
+gmake[3]: Leaving directory `/home/cern/prod/qq/v9_2b/Linux+2.2/src/Build/Linux/cleoks'

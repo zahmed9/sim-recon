@@ -1,0 +1,16 @@
+!B production: 2000 GeV pbar on p
+! These can also be assigned using command line arguments.
+!file_lpt herwig_exam.lpt   !Output file
+!file_evt_wrt herwig_exam.evt   !Output event file
+maxev 200                  !Max events to generate
+maxpr 5                    !Max number of events to print
+ranseed  0 0               !Random seed set to time of day
+iproc 1705                 !bbar quark production
+part1 P                    !Particle 1 ==> Proton
+part2 PBAR                 !Particle 2 ==> Antiproton
+pbeam1 1000.               !Beam energy for proton
+pbeam2 1000.
+ptmin 0.                   !Pt range
+ptmax 1000.
+qq
+qq_user_file   b_psiks.dec       !QQ user decay file

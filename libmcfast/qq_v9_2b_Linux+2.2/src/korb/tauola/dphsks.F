@@ -1,0 +1,183 @@
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:31  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1994/11/22  16:57:03  zfiles
+* first version of korb in CVS
+*
+*
+#include "sys/CLEO_machine.h"
+#include "pilot.h"
+*CMZ :  2.00/00 21/01/93  15.42.32  by  Alan Weinstein
+*-- Author :
+      SUBROUTINE DPHSKS(DGAMT,HV,PN,PKS,PKK,PPI,JKST)
+C ----------------------------------------------------------------------
+C IT SIMULATES KAON* DECAY IN TAU REST FRAME WITH
+C Z-AXIS ALONG KAON* MOMENTUM
+C     JKST=10 FOR K* --->K0 + PI+-
+C     JKST=20 FOR K* --->K+- + PI0
+C ----------------------------------------------------------------------
+      COMMON / DECPAR / GFERMI,GV,GA,CCABIB,SCABIB,GAMEL
+      REAL*4            GFERMI,GV,GA,CCABIB,SCABIB,GAMEL
+      COMMON / PARMAS / AMTAU,AMNUTA,AMEL,AMNUE,AMMU,AMNUMU
+     *                 ,AMPIZ,AMPI,AMRO,GAMRO,AMA1,GAMA1
+     *                 ,AMK,AMKZ,AMKST,GAMKST
+C
+      REAL*4            AMTAU,AMNUTA,AMEL,AMNUE,AMMU,AMNUMU
+     *                 ,AMPIZ,AMPI,AMRO,GAMRO,AMA1,GAMA1
+     *                 ,AMK,AMKZ,AMKST,GAMKST
+      REAL  HV(4),PT(4),PN(4),PKS(4),PKK(4),PPI(4),QQ(4)
+      COMPLEX BWIGS
+      DATA PI /3.141592653589793238462643/
+C
+      DATA ICONT /0/
+C THREE BODY PHASE SPACE NORMALISED AS IN BJORKEN-DRELL
+      PHSPAC=1./2**11/PI**5
+C TAU MOMENTUM
+      PT(1)=0.
+      PT(2)=0.
+      PT(3)=0.
+      PT(4)=AMTAU
+      CALL RANMAR(RR1,1)
+C HERE BEGIN THE K0,PI+_ DECAY
+      IF(JKST.EQ.10)THEN
+C     ==================
+C MASS OF (REAL/VIRTUAL) K*
+        AMS1=(AMPI+AMKZ)**2
+        AMS2=(AMTAU-AMNUTA)**2
+C FLAT PHASE SPACE
+C       AMX2=AMS1+   RR1*(AMS2-AMS1)
+C       AMX=SQRT(AMX2)
+C       PHSPAC=PHSPAC*(AMS2-AMS1)
+C PHASE SPACE WITH SAMPLING FOR K* RESONANCE
+        ALP1=ATAN((AMS1-AMKST**2)/AMKST/GAMKST)
+        ALP2=ATAN((AMS2-AMKST**2)/AMKST/GAMKST)
+        ALP=ALP1+RR1*(ALP2-ALP1)
+        AMX2=AMKST**2+AMKST*GAMKST*TAN(ALP)
+        AMX=SQRT(AMX2)
+        PHSPAC=PHSPAC*((AMX2-AMKST**2)**2+(AMKST*GAMKST)**2)
+     &                /(AMKST*GAMKST)
+        PHSPAC=PHSPAC*(ALP2-ALP1)
+C
+C TAU-NEUTRINO MOMENTUM
+        PN(1)=0
+        PN(2)=0
+        PN(4)=1./(2*AMTAU)*(AMTAU**2+AMNUTA**2-AMX**2)
+        PN(3)=-SQRT((PN(4)-AMNUTA)*(PN(4)+AMNUTA))
+C
+C K* MOMENTUM
+        PKS(1)=0
+        PKS(2)=0
+        PKS(4)=1./(2*AMTAU)*(AMTAU**2-AMNUTA**2+AMX**2)
+        PKS(3)=-PN(3)
+        PHSPAC=PHSPAC*(4*PI)*(2*PKS(3)/AMTAU)
+C
+CAM
+        ENPI=( AMX**2+AMPI**2-AMKZ**2 ) / ( 2*AMX )
+        PPPI=SQRT((ENPI-AMPI)*(ENPI+AMPI))
+        PHSPAC=PHSPAC*(4*PI)*(2*PPPI/AMX)
+C CHARGED PI MOMENTUM IN KAON* REST FRAME
+        CALL SPHERA(PPPI,PPI)
+        PPI(4)=ENPI
+C NEUTRAL KAON MOMENTUM IN K* REST FRAME
+        DO 20 I=1,3
+20      PKK(I)=-PPI(I)
+        PKK(4)=( AMX**2+AMKZ**2-AMPI**2 ) / ( 2*AMX )
+        EXE=(PKS(4)+PKS(3))/AMX
+C PION AND K  BOOSTED FROM K* REST FRAME TO TAU REST FRAME
+        CALL BOSTR3(EXE,PPI,PPI)
+        CALL BOSTR3(EXE,PKK,PKK)
+        DO 30 I=1,4
+30      QQ(I)=PPI(I)-PKK(I)
+C QQ transverse to PKS
+        PKSD =PKS(4)*PKS(4)-PKS(3)*PKS(3)-PKS(2)*PKS(2)-PKS(1)*PKS(1)
+        QQPKS=PKS(4)* QQ(4)-PKS(3)* QQ(3)-PKS(2)* QQ(2)-PKS(1)* QQ(1)
+        DO 31 I=1,4
+31      QQ(I)=QQ(I)-PKS(I)*QQPKS/PKSD
+C AMPLITUDE
+        PRODPQ=PT(4)*QQ(4)
+        PRODNQ=PN(4)*QQ(4)-PN(1)*QQ(1)-PN(2)*QQ(2)-PN(3)*QQ(3)
+        PRODPN=PT(4)*PN(4)
+        QQ2= QQ(4)**2-QQ(1)**2-QQ(2)**2-QQ(3)**2
+        BRAK=(GV**2+GA**2)*(2*PRODPQ*PRODNQ-PRODPN*QQ2)
+     &      +(GV**2-GA**2)*AMTAU*AMNUTA*QQ2
+C A SIMPLE BREIT-WIGNER IS CHOSEN FOR K* RESONANCE
+        FKS=CABS(BWIGS(AMX2,AMKST,GAMKST))**2
+        AMPLIT=(GFERMI*SCABIB)**2*BRAK*2*FKS
+        DGAMT=1/(2.*AMTAU)*AMPLIT*PHSPAC
+        DO 40 I=1,3
+ 40     HV(I)=2*GV*GA*AMTAU*(2*PRODNQ*QQ(I)-QQ2*PN(I))/BRAK
+C
+C HERE BEGIN THE K+-,PI0 DECAY
+      ELSEIF(JKST.EQ.20)THEN
+C     ======================
+C MASS OF (REAL/VIRTUAL) K*
+        AMS1=(AMPIZ+AMK)**2
+        AMS2=(AMTAU-AMNUTA)**2
+C FLAT PHASE SPACE
+C       AMX2=AMS1+   RR1*(AMS2-AMS1)
+C       AMX=SQRT(AMX2)
+C       PHSPAC=PHSPAC*(AMS2-AMS1)
+C PHASE SPACE WITH SAMPLING FOR K* RESONANCE
+        ALP1=ATAN((AMS1-AMKST**2)/AMKST/GAMKST)
+        ALP2=ATAN((AMS2-AMKST**2)/AMKST/GAMKST)
+        ALP=ALP1+RR1*(ALP2-ALP1)
+        AMX2=AMKST**2+AMKST*GAMKST*TAN(ALP)
+        AMX=SQRT(AMX2)
+        PHSPAC=PHSPAC*((AMX2-AMKST**2)**2+(AMKST*GAMKST)**2)
+     &                /(AMKST*GAMKST)
+        PHSPAC=PHSPAC*(ALP2-ALP1)
+C
+C TAU-NEUTRINO MOMENTUM
+        PN(1)=0
+        PN(2)=0
+        PN(4)=1./(2*AMTAU)*(AMTAU**2+AMNUTA**2-AMX**2)
+        PN(3)=-SQRT((PN(4)-AMNUTA)*(PN(4)+AMNUTA))
+C KAON* MOMENTUM
+        PKS(1)=0
+        PKS(2)=0
+        PKS(4)=1./(2*AMTAU)*(AMTAU**2-AMNUTA**2+AMX**2)
+        PKS(3)=-PN(3)
+        PHSPAC=PHSPAC*(4*PI)*(2*PKS(3)/AMTAU)
+C
+CAM
+        ENPI=( AMX**2+AMPIZ**2-AMK**2 ) / ( 2*AMX )
+        PPPI=SQRT((ENPI-AMPIZ)*(ENPI+AMPIZ))
+        PHSPAC=PHSPAC*(4*PI)*(2*PPPI/AMX)
+C NEUTRAL PI MOMENTUM IN K* REST FRAME
+        CALL SPHERA(PPPI,PPI)
+        PPI(4)=ENPI
+C CHARGED KAON MOMENTUM IN K* REST FRAME
+        DO 50 I=1,3
+50      PKK(I)=-PPI(I)
+        PKK(4)=( AMX**2+AMK**2-AMPIZ**2 ) / ( 2*AMX )
+        EXE=(PKS(4)+PKS(3))/AMX
+C PION AND K  BOOSTED FROM K* REST FRAME TO TAU REST FRAME
+        CALL BOSTR3(EXE,PPI,PPI)
+        CALL BOSTR3(EXE,PKK,PKK)
+        DO 60 I=1,4
+60      QQ(I)=PKK(I)-PPI(I)
+C QQ transverse to PKS
+        PKSD =PKS(4)*PKS(4)-PKS(3)*PKS(3)-PKS(2)*PKS(2)-PKS(1)*PKS(1)
+        QQPKS=PKS(4)* QQ(4)-PKS(3)* QQ(3)-PKS(2)* QQ(2)-PKS(1)* QQ(1)
+        DO 61 I=1,4
+61      QQ(I)=QQ(I)-PKS(I)*QQPKS/PKSD
+C AMPLITUDE
+        PRODPQ=PT(4)*QQ(4)
+        PRODNQ=PN(4)*QQ(4)-PN(1)*QQ(1)-PN(2)*QQ(2)-PN(3)*QQ(3)
+        PRODPN=PT(4)*PN(4)
+        QQ2= QQ(4)**2-QQ(1)**2-QQ(2)**2-QQ(3)**2
+        BRAK=(GV**2+GA**2)*(2*PRODPQ*PRODNQ-PRODPN*QQ2)
+     &      +(GV**2-GA**2)*AMTAU*AMNUTA*QQ2
+C A SIMPLE BREIT-WIGNER IS CHOSEN FOR THE K* RESONANCE
+        FKS=CABS(BWIGS(AMX2,AMKST,GAMKST))**2
+        AMPLIT=(GFERMI*SCABIB)**2*BRAK*2*FKS
+        DGAMT=1/(2.*AMTAU)*AMPLIT*PHSPAC
+        DO 70 I=1,3
+ 70     HV(I)=2*GV*GA*AMTAU*(2*PRODNQ*QQ(I)-QQ2*PN(I))/BRAK
+      ENDIF
+      RETURN
+      END

@@ -1,0 +1,45 @@
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:35  eugenio
+* Initial revision
+*
+# Revision 1.1.1.1  1994/10/08  02:21:34  zfiles
+# first version of qqlib in CVS
+#
+*
+*CMZ :          12/03/91  12.03.24  by  CLEO II Librarian
+*CMZ :  1.01/05 27/02/91  01.11.24  by  CLEO II Librarian
+*CMZ :  1.01/04 26/02/91  00.02.56  by  Paul Avery
+*CMZ :  1.01/03 18/02/91  16.49.38  by  CLEO II Librarian
+*CMZ :  1.01/02 04/12/90  15.56.36  by  CLEO II Librarian
+*CMZ :  1.01/01 08/11/90  08.26.46  by  Paul Avery
+*CMZ :  1.01/00 06/11/90  08.58.58  by  Paul Avery
+*-- Author :    Paul Avery   06/11/90
+*
+*::>          VERSION  1.01/06   910312 12.03
+*PCK #
+*          Mafde changes  in rotuines DECAY and QQRNGT
+*
+*::>          VERSION  1.01/05   910227  1.11
+*
+*
+*
+*::>          VERSION  1.01/04   910226 00. 2
+* PRA#
+*        Added routine QQPART in QQLIB/LIB.
+*
+*::>          VERSION  1.01/03   910218 16.49
+* TS#
+*        Bug fix in QED042.
+*
+*::>          VERSION  1.01/02   901204 15.56
+* PRA#
+*        Cp violation fixed
+*
+*::>          VERSION  1.01/01   901108  8.26
+* PRA# Changed install procedure.
+*
+*::>          VERSION  1.01/00   901106  8.58
+* PRA# DECAY.DEC invented. Add mixing, helicity, CP, spin, parity, C parity.

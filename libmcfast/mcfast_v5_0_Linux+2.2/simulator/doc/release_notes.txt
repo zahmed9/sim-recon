@@ -1,0 +1,361 @@
+v5.0 Features
+
+The first change makes it impossible to read old mcfast output data 
+files with new mcfast code; and vice versa!
+
+1) Many common blocks and structures were modified to ensure that
+   all data items are aligned on natural byte boundaries.  This meant
+   inserting padding in various places.  The fix is necessary for Linux.
+   One side effect of this is that output files are no longer 
+   forward/backwards compatible: old files must be read with v4_4
+   or earlier while new files must be read with v5_0 or higher.
+
+   The hit_track structure was expanded to an additional DFLOAT 3-vector.
+   This is needed to deal with pixels with an arbitrary orientation.
+   Same side effect as above - so this was a natural time to do it.
+
+2) Some unused commons were removed from the output DST.
+
+3) The code which selects the number of background events which 
+   accompany the signal event was fixed.  It was previously selecting
+   too few events.
+
+4) Many structural changes to the ftrk kalman filter code in order
+   to make it easy to use outside of mcfast.  MCFast users should see no
+   changes.  However people using the standalone kalman filter code
+   must upgrade or stick with MCFast v4_4.
+
+5) Forward tracking system now supports rotated chambers.  Silicon strip
+   planes implemented as siz_rect devices may also be rotated.
+   See the geometry writeup for details.
+
+*******************************************************************************
+v4.4 Features
+
+1) Command files and geometry files now recognize tabs as whitespace.
+
+2) Hooks are in place to use the absoft fortran compiler for Linux.
+   The compiler is expected to be a product - see $MCFAST_DIR/ups/INSTALL_NOTE.
+   
+3) New calorimetry library.  Add -lcalorimetry to your link library list after 
+   the -lshowering entry.
+
+4) Changes and bug fixes in the showering and tracing libraries.
+
+5) mdep has been improved
+
+*************************************************************************************
+v4.3 Features
+
+1) The kalman filter for ctk tracks is now working.
+   The computation of residuals is not yet in.
+
+2) Many small bug fixes.
+
+*************************************************************************************
+v4.2 Features
+
+1) Internal to the hit generation and the Kalman filter, strip detectors
+   are handled separately from pixel detectors.  This is necessary to
+   avoid some convergence problems with the fit.  In all other places
+   strip detectors are still just pixel detectors in which there is only
+   one pixel in one of the dimensions.
+
+2) Silicon planes can be entered as individual tiles and/or as single planes.
+   The tiled siz_rect pixel detectors now work correctly with a window type gap.
+   
+3) The Kalman filter works correctly with the siz_rect pixel detectors.
+
+*************************************************************************************
+v4.0 Features
+
+1) New tracing.
+   The new tracing code is does a full simulation of multitple scattering and
+   energy loss, even in a detector which has mixed central and forward elements.
+   This is needed in order for multiple scattering and energy loss to be
+   included in the generation of hits in a mixed detector.   
+   The new tracing code is written in c++.
+
+   To create an executable with the new code:
+   gmake TYPE="c++"
+
+   To deselect the new code at run time, give the following command in the .cmd file:
+   trace_integrated F
+
+2) Along with the new tracing code, substantial improvements have been made in
+   the algorithms to deposit shower energy in calorimeters and in non-instrumented
+   absorbing materials.
+
+3) When hits have been generated using multiple scattering, a kalman filter can
+   be used to determined the reconstruced track parameters.  This lays the groundwork
+   for the simulation of errors in pattern recognition.  This code is enabled by
+   the command:
+   use_kalman T
+   The default is False. At present (July 3/98) the kalman filter works for the
+   forward detectors but not for the central ones.  This will be fixed shortly.
+
+
+*************************************************************************************
+v2.6 Features
+
+1) Tracing updates 
+
+Updates to tracing to allow the option of including of  multiple scattering,
+dedx and bremsstrahlung during the trace.  By default, these options are turned
+OFF.  
+
+If any of these options are enabled the  tracing can only be done in planar or
+cylindrical
+geometries, and not in mixed geometries.   These "non-ideal" traces generated
+by any of these options can be used for hit based studies.  They are not also
+not compatible with fctl_offline that is
+provided in v2_6 of MCFast.  This feature will be available in v3_0 of MCFast.
+
+Forward tracking disks are included in the geometry structures, but not yet
+used in fctl_offline.
+
+
+2) Calorimeter and Absorber Updates
+
+Absorbers and calorimeters can now be box shaped as well as cylindrical.
+   
+Absorbers are now treated as calorimeters without hit generation.  That is,
+showers can be generated inside absorbers.
+
+The number of layers in each calorimeter is now required in the db file.  Be
+sure to update your geometry.db files!    
+
+*************************************************************************************
+V2.5 Features 
+
+Modifications and bug fixes to tracing, tracking and hit making routines.
+
+Modifiations to calorimeters and calorimeter hit generation.
+
+stable.dec is now defaults to $MCFAST_DIR/examples/mcfast
+
+
+*************************************************************************************
+             
+V2.4 Features                                P. McBride   6/1/96
+
+Tracking for forward detectors and central detectors is supported.  
+
+Supported Geometries:
+
+CENTRAL:  Tracking devices with Cylindrical symmetries 
+
+             barrel silicon
+             Central Drift Chambers
+             Cylindrical Volumes and boundaries for scattering material
+             
+-- contact P. McBride, P. Avery             
+
+FORWARD:  Planar Tracking devices (perp. to Z axis)
+             xy planar silicon
+             forward tracking chambers
+             Box Shaped Volumes and boundaries for scattering material
+-- contact K. Sterner, M. Procario 
+
+CALORIMETERS:  EM showers and hadronic showers in EM calorimeters implemented 
+              
+-- contact J. Yarba
+
+VERTEX ROUTINES:  in solenoid, dipole (x or y field) and no field
+-- contact A. Boehnlein
+
+DBIN:          input files
+-- contact J. Yarba, T. Wenaus, P. McBride            
+             
+
+Combined Cylindrical and Planar Geometries are now available.                        
+             
+*************************************************************************************
+             
+V2.3 Features                                P. McBride   4/11/96
+
+Tracking for forward detectors and central detectors is supported.  
+
+Supported Geometries:
+
+CENTRAL:  Tracking devices with Cylindrical symmetries 
+
+             barrel silicon
+             Central Drift Chambers
+             Cylindrical Volumes and boundaries for scattering material
+             
+-- contact P. McBride, P. Avery             
+
+FORWARD:  Planar Tracking devices (perp. to Z axis)
+             xy planar silicon
+             forward tracking chambers
+             Box Shaped Volumes and boundaries for scattering material
+-- contact K. Sterner, M. Procario 
+
+CALORIMETERS:  EM showers in EM calorimeters implemented 
+             Hadronic showers will be available in the next version
+             Clustering available in next release
+-- contact J. Yarba
+
+VERTEX ROUTINES:  in solenoid and no field
+-- contact A. Boehnlein
+
+DBIN:          input files
+-- contact J. Yarba, T. Wenaus, P. McBride            
+             
+
+Combined Cylindrical and Planar Geometries are now available.                        
+             
+*************************************************************************************
+
+V2.0 Features                                P. McBride   4/6/95
+
+Tracking for forward detectors and central detectors is supported.  The 
+forward tracking is a new feature and central tracking and tracing have 
+been completely changed since v1.4.1.
+
+Supported Geometries:
+
+CENTRAL:  Tracking devices with Cylindrical symmetries 
+
+             barrel silicon
+             Central Drift Chambers
+             Cylindrical Volumes and boundaries for scattering material
+             
+-- contact P. McBride, P. Avery             
+
+FORWARD:  Planar Tracking devices (perp. to Z axis)
+             xy planar silicon
+             forward tracking chambers
+             Box Shaped Volumes and boundaries for scattering material
+-- contact K. Sterner, M. Procario 
+
+Combined Cylindrical and Planar Geometries will be available with the next
+version.                        
+             
+----------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
+Command file
+
+Commands that are accepted:
+max_event       0         ! number of events to be processed
+max_print       0         ! number of STDHEP events to be printed
+ 
+file_geometry  file.geo          ! geometry file
+file_in  file.evt or @file.fil   ! data file or file containing list of data
+files
+background_in  back.evt          ! background data file(s)
+file_out       file.out          ! name of output files
+
+ranseed        0 0        ! random number seed -- get from time of day:     0 0 
+                          !                    -- or input two integers:  200 12
+                          
+int_crossing              ! number of interactions per crossing
+generate_internal         ! generate particles internally
+end generate
+
+fcon           R          ! user defined  -- real
+icon           I          ! user defined  -- integer
+luminosity    1.E32       ! luminosity  -- not currently used
+runtime       1.E7        ! run time    -- not currently used
+
+trigger                   ! input trigger commands -- 
+end trigger               ! see ~mcfast/doc/mcfast_trigger.doc
+
+
+dbg_trace  subsytem   F   ! debug trace flag
+dbg_hist subsytem     F   ! debug histogram flag
+
+make_decays           T   ! generate decays in flight
+make_pair_convert     T   ! generate pair conversions
+make_hits             T   ! make hits -- default
+
+
+
+----------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
+
+
+Geometry input
+
+There have been major changes to the geometry files since v1.4.1:
+
+PLEASE USE geometry files in ~bphyslib/test/example
+and READ the comments at the top of the files.
+
+-- contact J. Yarba
+
+----------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
+
+Vertex routines
+
+To use the fitting routines, the user fills the track_kine bank 
+(~bphyslib/test/inc/track_kine.inc) with tracks (either from 
+offline tracks or HEP tracks) and calls the fitting routines.  
+
+Source exists in ~bphyslib/mcfast/v2.0/src/vertex
+See ~bphyslib/v2.0/doc/vertex.doc
+
+-- contact A. Boehnlein, P. Avery
+----------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
+
+Machine independent Input and Output of structures
+-- contact P. Lebrun/A. Boehnlein
+ 
+Switches have been added to MCFAST to enable the input of MCFIO events
+from the framework as well as to initialize and close MCFIO output files.
+This implementation only uses the STDHEP common for input and output and
+only opens a single stream for output.  The MCFIO package is much more
+comprehensive than is currently represented in MCFAST. For documention
+on the MCFIO package see "MCFio: A machine independent i/o system for
+Monte-Carlo studies", P. Lebrun.
+
+For output:
+
+in your .CMD file, add the following command:
+mcfio_out my_output_filename
+
+This will alert MCFAST to open the file expecting one block.
+
+Currently, MCFAST does not handle the actual writing out of events expecting
+instead that the user would prefer to output the events conditionally.
+A usable example of writing out the events can be found in the routine
+
+~bphyslib/mcfast/dev/src/user/usr_mcfio_out.F 
+
+This routine is used in the following way and will output the STDHEP block.
+
+  if(condition.and.mcfio_out) then
+    call usr_mcfio_out
+  endif
+
+The file will automatically be closed at the end of the job.
+
+For input:
+
+for signal files: 
+
+in your .CMD file add the following lines
+
+file_type 1
+file_in my_input_filename  OR
+file_in @my_filelist.fil
+
+The file_type command alerts MCFAST to expect MCFIO input (file_type 0
+is for STDHEP standard input and is the default).
+
+Remember to turn off vertex smearing in the .GEO file if you are using
+as input a file written from MCFAST.  Additionally, if tracking will be
+re-done on the events, remember to turn off conversions and decays in your
+.CMD file:
+
+make_pair_convert false
+make_decay false
+
+For background files:
+
+background_type 1
+background_in my_background_filename
+background_in @my_background_list.fil

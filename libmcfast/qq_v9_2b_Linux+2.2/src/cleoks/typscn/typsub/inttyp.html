@@ -1,0 +1,108 @@
+<HEAD>
+<TITLE>cleoks/typscn/typsub/inttyp.F</TITLE>
+</HEAD>
+<BODY>
+<PRE>
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:20  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1995/08/01  18:00:21  nk
+* Consolidation
+*
+* Revision 1.1  1995/07/31 19:42:31  nk
+* Added typscn
+*
+* Revision 1.1.1.1  1994/10/05  13:45:40  zfiles
+* first version of typscn in CVS
+*
+*
+#include &QUOT<A HREF="../../../sys/CLEO_machine.html">sys/CLEO_machine.h</A>&QUOT
+#include &QUOT<A HREF="../../../pilot.html">pilot.h</A>&QUOT
+*CMZ :  1.00/00 12/05/89  16.55.33  by  Ian C. Brock
+*-- Author :
+C
+C------------------------------------------------------------------------
+C Find an integer
+C
+*=*=*=*= INTTYP.html =*=*=*=*
+
+</PRE>
+
+<A HREF="http://w4.lns.cornell.edu/Harvest/brokers/w4-public/">Search Keyword</A>
+<H1>INTEGER FUNCTION INTTYP</H1>
+
+<PRE>
+
+      INTEGER FUNCTION <A NAME=inttyp>INTTYP</A>(<A HREF="../../../cleoks/typscn/typsub/inttyp.html#lwait">LWAIT</A>,<A HREF="../../../cleoks/typscn/typsub/inttyp.html#idelim">IDELIM</A>)
+      SAVE
+C
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typpar.html">cleoks/typscn/typcde/typpar.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typchr.html">cleoks/typscn/typcde/typchr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typscn.html">cleoks/typscn/typcde/typscn.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typstr.html">cleoks/typscn/typcde/typstr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typctl.html">cleoks/typscn/typcde/typctl.inc</A>&QUOT
+C
+      INTEGER <A NAME=intscn>INTSCN</A>
+      INTEGER <A NAME=idelim>IDELIM</A>
+      LOGICAL <A NAME=lwait>LWAIT</A>
+C
+      <A HREF="../../../cleoks/typscn/typcde/typstr.html#ctypnm">CTYPNM</A> = 'INTEGER'
+      CALL <A NAME=INTTYP_GETLIN_1  HREF="../../../cleoks/typscn/typsub/getlin.html">GETLIN</A>(<A HREF="../../../cleoks/typscn/typsub/inttyp.html#lwait">LWAIT</A>)
+      <A NAME=INTTYP_INTTYP_1  HREF="../../../cleoks/typscn/typsub/inttyp.html#inttyp">INTTYP</A> = <A NAME=INTTYP_INTSCN_1  HREF="../../../cleoks/typscn/typsub/inttyp.html#intscn">INTSCN</A>(<A HREF="../../../avehst/seq/avehstin.html#ipoint">IPOINT</A>,<A HREF="../../../cleoks/typscn/typcde/typscn.html#nchars">NCHARS</A>,<A HREF="../../../cleoks/typscn/typsub/inttyp.html#idelim">IDELIM</A>)
+      RETURN
+      END
+</PRE>
+<H1>Cross references</H1>
+<PRE>
+Called from <A HREF="../../../avehst/avehst/hstun2.html#HSTUN2_INTTYP_1>hstun2_1</A>
+Called from <A HREF="../../../avehst/avehst/hstun2.html#HSTUN2_INTTYP_2>hstun2_2</A>
+Called from <A HREF="../../../avehst/avehst/hstun2.html#HSTUN2_INTTYP_3>hstun2_3</A>
+Called from <A HREF="../../../avehst/avehst/hstun2.html#HSTUN2_INTTYP_4>hstun2_4</A>
+Called from <A HREF="../../../avehst/avehst/hstun2.html#HSTUN2_INTTYP_5>hstun2_5</A>
+Called from <A HREF="../../../avehst/avehst/hstun2.html#HSTUN2_INTTYP_6>hstun2_6</A>
+Called from <A HREF="../../../avehst/avehst/hstun2.html#HSTUN2_INTTYP_7>hstun2_7</A>
+Called from <A HREF="../../../avehst/avehst/hstun2.html#HSTUN2_INTTYP_8>hstun2_8</A>
+Called from <A HREF="../../../avehst/avehst/hstun2.html#HSTUN2_INTTYP_9>hstun2_9</A>
+Called from <A HREF="../../../avehst/avehst/hstunp.html#HSTUNP_INTTYP_1>hstunp_1</A>
+Called from <A HREF="../../../avehst/avehst/hstunp.html#HSTUNP_INTTYP_2>hstunp_2</A>
+Called from <A HREF="../../../cabsfort/fortint/anal10_f.html#ANAL10_FORT_INTTYP_1>anal10_inttyp_1</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_INTTYP_1>dvcmnd_1</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_INTTYP_10>dvcmnd_10</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_INTTYP_11>dvcmnd_11</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_INTTYP_2>dvcmnd_2</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_INTTYP_3>dvcmnd_3</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_INTTYP_4>dvcmnd_4</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_INTTYP_5>dvcmnd_5</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_INTTYP_6>dvcmnd_6</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_INTTYP_7>dvcmnd_7</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_INTTYP_8>dvcmnd_8</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_INTTYP_9>dvcmnd_9</A>
+Called from <A HREF="../../../dvlib/evlist/dlglin.html#DLGLIN_INTTYP_1>dlglin_1</A>
+Called from <A HREF="../../../dvlib/evlist/dlglin.html#DLGLIN_INTTYP_2>dlglin_2</A>
+Called from <A HREF="../../../ftlib/ftgeom/fgetln.html#FGETLN_INTTYP_1>fgetln_1</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgetln.html#FGETLN_INTTYP_1>fgetln_1</A>
+Called from <A HREF="../../../mctr/tprs/mgtint.html#MGTINT_INTTYP_1>mgtint_1</A>
+Called from <A HREF="../../../mctr/tprs/mprs1.html#MPRS1_INTTYP_1>mprs1_1</A>
+Called from <A HREF="../../../qqlib/decay/qqrgln.html#QQRGLN_INTTYP_1>qqrgln_1</A>
+Called from <A HREF="../../../roarlib/wrroar/wrcnst.html#WRCNST_INTTYP_1>wrcnst_1</A>
+Called from <A HREF="../../../roarlib/wrroar/wrcnst.html#WRCNST_INTTYP_2>wrcnst_2</A>
+Called from <A HREF="../../../roarlib/wrroar/wrcnst.html#WRCNST_INTTYP_3>wrcnst_3</A>
+Called from <A HREF="../../../roarlib/wrroar/wrcnst.html#WRCNST_INTTYP_4>wrcnst_4</A>
+Called from <A HREF="../../../roarlib/wrroar/wrcnst.html#WRCNST_INTTYP_5>wrcnst_5</A>
+Called from <A HREF="../../../roarlib/wrroar/wrcnst.html#WRCNST_INTTYP_6>wrcnst_6</A>
+Called from <A HREF="../../../roarlib/wrroar/wrcnst.html#WRCNST_INTTYP_7>wrcnst_7</A>
+Called from <A HREF="../../../roarlib/wrroar/wrcnst.html#WRCNST_INTTYP_8>wrcnst_8</A>
+Called from <A HREF="../../../roarlib/wrroar/wrcnst.html#WRCNST_INTTYP_9>wrcnst_9</A>
+Called from <A HREF="../../../rpuser/lib/rpcmd.html#RPCMD_INTTYP_1>rpcmd_1</A>
+Called from <A HREF="../../../rpuser/lib/rpcmd.html#RPCMD_INTTYP_2>rpcmd_2</A>
+</PRE>
+<ADDRESS>
+<A HREF="http://w4.lns.cornell.edu/cgi-bin/mail?nk">nk@lns62.lns.cornell.edu</A>
+</ADDRESS>
+
+</BODY>
+

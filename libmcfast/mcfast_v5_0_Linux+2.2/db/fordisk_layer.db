@@ -1,0 +1,13 @@
+
+template LayerFoDi(50)
+  int det
+  parent ForDisk
+  int lyr
+  int nslice
+  child FDSlice
+  real z_local     ! local z of layer
+  real thick       ! layer thickness
+  real phi(2)      ! phi coverage of layer
+  real dphi        ! size of each wedge in phi
+  int type         ! type 2 = phi measurement
+end template

@@ -1,0 +1,7 @@
+#! /bin/csh
+#
+# Run all test jobs.
+#
+Run_evgen pythia pythia_min_bias
+Run_evgen isajet isajet_min_bias
+Run_evgen herwig herwig_min_bias

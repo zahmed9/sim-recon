@@ -1,0 +1,18 @@
+
+template Wafer(200)
+  char speci
+  int det
+  parent LayerSiB
+  int lyr
+  int nwaf     ! used only for speci=SPC, but ALWAYS present.
+  real tilt
+  int nstrip
+  real c0x
+  real c0y
+  real pitch
+  real stereo
+  real eff_hit
+  real siga
+  real sigb
+  real sigc
+end template

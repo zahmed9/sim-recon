@@ -1,0 +1,18 @@
+#! /bin/csh
+#
+# Find a file in a list of directories.
+#
+# usage: find_src file.inc
+#        find_src file.h
+#        find_src file.F
+#        find_src file.f
+#        find_src file.c
+#        find_src file.cc
+#
+
+# This list is for mcfast and evgen.
+set dirlist = "$MCFAST_DIR $STDHEP_DIR/src $QQ_DIR/src $LUND_DIR/src $HERWIG_DIR/src . "
+
+find $dirlist \( -name \*.F -o -name \*.c \) \
+     -exec grep $1 {} \;  -print
+

@@ -1,0 +1,130 @@
+DetDisplay
+%%------------ DESCRIPTION ------------
+This module displays the detector geometry.  The input file can be
+a dbin file or an McFast file with Geometery.
+Be sure to have defined a soft link to the db directory containing the
+templates in the area from which you will be getting your .db files.
+ln -s $MCFAST_DIR/db db
+
+After the geometry has been read in, the list of objects will appear in the
+scrolled list box.  The name will be of the form DEVXXX_NAME. 
+Many devices are displayed as more than one object.  For example, each layer of
+silicon associated with a single silicon detector will appear as a separate
+device.  To edit a device, select that device by clicking on it in the scrolled
+list.  The current display parameters for that device will
+appear on the widgets.  The detector display will remain in the Render, but the
+modifications will not be displayed.  Multiple items can be selected.
+Modify the display parameters as desired, using the Explorer Color Editor 
+module to define the colors and the panel widgets to define the other
+properties.  Modify as many detectors as desired remember to click on each
+detector before you modify it.  When modifications are complete, click on
+display.
+%%------------ INPUTS ------------
+%PORT Color
+%TYPE Parameter
+%OPTIONAL 
+This port is used with the Explorer Color Map
+Widget to allow the user to select the color of each detector.
+%PORT DetName
+%TYPE Parameter
+%OPTIONAL 
+When this port is wired to the DetPick module output port "DetLabel", a picked
+detector will automatically be selected for updating.
+%%------------ WIDGETS ------------
+%PORT geom_filename
+%TYPE File Browser
+Input the file here.  The default is $DETECTOR which can be
+defined using setenv prior to starting Explorer.  Otherwise 
+enter the pathname and select the file.
+%PORT Transparency
+%TYPE Dial
+This widget allows the user to set the transparency for each object.  0 is fully
+opaque and 1 is transparent to the point of invisibility.  Use the outer dial
+for coarse adjustment and the inner dial for fine adjustment
+%PORT Visibility
+%TYPE Radio Box
+%MENUITEM not shown
+%MENUITEM solid
+%MENUITEM wireframe
+This widget allows the user to select the Visibility for each object.  Select
+not shown to make an object disappear from view.
+%PORT List
+%TYPE Scroll List
+This holds the list of detector objects for modification
+%PORT Display
+%TYPE Button
+This button is used to redisplay the detector after modification.
+%PORT CutAngleEnd
+%TYPE Dial
+This dial describes the angle in degrees for the end of a cut 
+to show a detector cross section.  Use the outer dial for coarse adjustment and
+the inner dial for fine adjustment.
+%PORT CutAngleStart
+%TYPE Dial
+This dial describes the angle in degrees for the beginning of a cut to 
+show a detector cross section.  Use the outer dial for coarse adjustment and
+the inner dial for fine adjustment.
+%PORT Cutaway
+%TYPE Radio Box
+%MENUITEM cut
+%MENUITEM solid
+%MENUITEM wedge
+These buttons toggle between cross section and solid views.  Some detectors, 
+such as silicon wedges, are always displayed as cut cross sections 
+so apply this cut judiciously.
+%PORT Nsides
+%TYPE Text
+This text widget allows the user to specify how many sides on a polygon is used
+to represent conical objects
+%PORT Red
+%TYPE Slider
+This slider shows the RED component of the selected detector.  It is not used
+as input, only as information.  Please use the color editor to change detector 
+colors
+%PORT Green
+%TYPE Slider
+This slider shows the GREEN component of the selected detector.  It is not used
+as input.  Please use the color editor to change detector colors
+%PORT Blue
+%TYPE Slider
+This slider shows the BLUE component of the selected detector.  It is not used
+as input.  Please use the color editor to change detector colors
+%PORT RWconfig
+%TYPE Radio Box
+%MENUITEM Read Configuration File
+%MENUITEM Write Configuration File
+Select whether to read or write a configuration file.  A selection of read or
+write must be made to enable the configuration file browser.
+%PORT ConfigFile
+%TYPE File Browser
+Use to enter or select configuration file for reading or writing.  Widget is
+disabled unless the reading or writing has been selected.  Code is insensitive
+on write to whether the configuration file already exists.  
+%PORT Nodisplay
+%TYPE Button
+Turn off display of the detector.  Useful when module is used with TraceLat
+module for displaying traces.
+%PORT ColorWin
+%TYPE Drawing Area
+Displays the color of the selected object
+%PORT ModByType
+%TYPE Radio Box
+%MENUITEM By Selected --modifies only the selected items in the scrolled list
+%MENUITEM By Type -- modifies all objects of the type selected
+(select one silicon barrel but modify all silicon barrels) 
+%%------------ OUTPUTS ------------
+%PORT geom
+%TYPE Geometry
+This output port is used to send the geometery to the render for display.
+%%------------ PROBLEMS ------------
+Current implementation: The ntuple code used for configuration file reading and
+writing is buggy and crashes.  DBin input also displays occasional
+crashes.  Configuration file will overwrite files of the same name without 
+warning.
+
+Normals to surface should be added to make the detectors look rounder.
+ 
+%%------------ SEEALSO ------------
+Render
+Coloreditor
+DetPick

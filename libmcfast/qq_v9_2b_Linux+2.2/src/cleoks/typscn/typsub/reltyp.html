@@ -1,0 +1,114 @@
+<HEAD>
+<TITLE>cleoks/typscn/typsub/reltyp.F</TITLE>
+</HEAD>
+<BODY>
+<PRE>
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:21  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1995/08/01  18:00:23  nk
+* Consolidation
+*
+* Revision 1.1  1995/07/31 19:42:40  nk
+* Added typscn
+*
+* Revision 1.1.1.1  1994/10/05  13:45:40  zfiles
+* first version of typscn in CVS
+*
+*
+#include &QUOT<A HREF="../../../sys/CLEO_machine.html">sys/CLEO_machine.h</A>&QUOT
+#include &QUOT<A HREF="../../../pilot.html">pilot.h</A>&QUOT
+*CMZ :  1.00/00 12/05/89  16.55.33  by  Ian C. Brock
+*-- Author :
+C**************************************************************************
+C
+C Fixed up for VAX-KL-IBM use by C.Bebek 22-March-85
+C
+C Uses character strings wherever appropriate.
+C Notes:
+C     1. Calls to ZERTYP and WAITYP can have special case character
+C        string arguments '.TRUE.' and '.FALSE.' instead of .TRUE.
+C        and .FALSE..  The former method is preferred because it
+C        is transportable under FORTRAN-77.  The latter method makes
+C        use of a trick on the VAX for backwards compatibility.
+C     2. The third argument for ICMTYP must be a character array.
+C        No more than three arguments are accepted by the subroutine.
+C        The end of the character array is delimited by a blank string.
+C        A -1 is returned for a terminator-only or a blank string
+C        type-in.  For asynchrnous operation, a -2 is returned if
+C        there has been no keyboard activity.
+C
+C What's what
+C     NCHACC  number of read characters
+C     NCHARS  number of characters remaining (-1 means done with string)
+C     IPOINT  positioned before next character to scan
+C     KCHARS  number of characters remaining at beginning of last scan
+C     KPOINT  positioned before character of last scan
+C
+C***************************************************************************
+C
+C All TYPE level TYPSCN function subprograms are here,
+C namely RELTYP, INTTYP, IOCTYP, IHXTYP, ICMTYP, ICHTYP, ISTTYP
+C
+C***************************************************************************
+C Find real number
+C
+*=*=*=*= RELTYP.html =*=*=*=*
+
+</PRE>
+
+<A HREF="http://w4.lns.cornell.edu/Harvest/brokers/w4-public/">Search Keyword</A>
+<H1>REAL FUNCTION RELTYP</H1>
+
+<PRE>
+
+      REAL FUNCTION <A NAME=reltyp>RELTYP</A>(<A HREF="../../../cleoks/typscn/typsub/reltyp.html#lwait">LWAIT</A>,<A HREF="../../../cleoks/typscn/typsub/reltyp.html#idelim">IDELIM</A>)
+      SAVE
+C
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typpar.html">cleoks/typscn/typcde/typpar.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typchr.html">cleoks/typscn/typcde/typchr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typscn.html">cleoks/typscn/typcde/typscn.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typstr.html">cleoks/typscn/typcde/typstr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typctl.html">cleoks/typscn/typcde/typctl.inc</A>&QUOT
+C
+      INTEGER <A NAME=idelim>IDELIM</A>
+      LOGICAL <A NAME=lwait>LWAIT</A>
+      REAL    <A NAME=relscn>RELSCN</A>
+C
+      <A HREF="../../../cleoks/typscn/typcde/typstr.html#ctypnm">CTYPNM</A> = 'REAL'
+      CALL <A NAME=RELTYP_GETLIN_1  HREF="../../../cleoks/typscn/typsub/getlin.html">GETLIN</A>(<A HREF="../../../cleoks/typscn/typsub/reltyp.html#lwait">LWAIT</A>)
+      <A NAME=RELTYP_RELTYP_1  HREF="../../../cleoks/typscn/typsub/reltyp.html#reltyp">RELTYP</A> = <A NAME=RELTYP_RELSCN_1  HREF="../../../cleoks/typscn/typsub/reltyp.html#relscn">RELSCN</A>(<A HREF="../../../avehst/seq/avehstin.html#ipoint">IPOINT</A>,<A HREF="../../../cleoks/typscn/typcde/typscn.html#nchars">NCHARS</A>,<A HREF="../../../cleoks/typscn/typsub/reltyp.html#idelim">IDELIM</A>)
+      RETURN
+      END
+</PRE>
+<H1>Cross references</H1>
+<PRE>
+Called from <A HREF="../../../avehst/avehst/hstun2.html#HSTUN2_RELTYP_1>hstun2_1</A>
+Called from <A HREF="../../../avehst/avehst/hstun2.html#HSTUN2_RELTYP_2>hstun2_2</A>
+Called from <A HREF="../../../avehst/avehst/hstun2.html#HSTUN2_RELTYP_3>hstun2_3</A>
+Called from <A HREF="../../../avehst/avehst/hstun2.html#HSTUN2_RELTYP_4>hstun2_4</A>
+Called from <A HREF="../../../avehst/avehst/hstun2.html#HSTUN2_RELTYP_5>hstun2_5</A>
+Called from <A HREF="../../../avehst/avehst/hstun2.html#HSTUN2_RELTYP_6>hstun2_6</A>
+Called from <A HREF="../../../avehst/avehst/hstun2.html#HSTUN2_RELTYP_7>hstun2_7</A>
+Called from <A HREF="../../../avehst/avehst/hstunp.html#HSTUNP_RELTYP_1>hstunp_1</A>
+Called from <A HREF="../../../avehst/avehst/hstunp.html#HSTUNP_RELTYP_2>hstunp_2</A>
+Called from <A HREF="../../../avehst/avehst/hstunp.html#HSTUNP_RELTYP_3>hstunp_3</A>
+Called from <A HREF="../../../ftlib/ftgeom/fgetln.html#FGETLN_RELTYP_1>fgetln_1</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgetln.html#FGETLN_RELTYP_1>fgetln_1</A>
+Called from <A HREF="../../../qqlib/decay/qqrgln.html#QQRGLN_RELTYP_1>qqrgln_1</A>
+Called from <A HREF="../../../roarlib/wrroar/wrcnst.html#WRCNST_RELTYP_1>wrcnst_1</A>
+Called from <A HREF="../../../rpuser/lib/rpcmd.html#RPCMD_RELTYP_1>rpcmd_1</A>
+Called from <A HREF="../../../rpuser/lib/rpcmd.html#RPCMD_RELTYP_2>rpcmd_2</A>
+Called from <A HREF="../../../rpuser/lib/rpcmd.html#RPCMD_RELTYP_3>rpcmd_3</A>
+Called from <A HREF="../../../rpuser/lib/rpcmd.html#RPCMD_RELTYP_4>rpcmd_4</A>
+</PRE>
+<ADDRESS>
+<A HREF="http://w4.lns.cornell.edu/cgi-bin/mail?nk">nk@lns62.lns.cornell.edu</A>
+</ADDRESS>
+
+</BODY>
+

@@ -1,0 +1,59 @@
+#!/usr/local/bin/perl
+######################################################################## 
+# get_outlib flagfile outfile   
+# 
+# search flagfile for instances of _OUTLIB_
+# concatenate those files into outfile
+#
+# Created Jan. 9, 1997 - Lynn Garren
+#
+######################################################################## 
+
+# describe command syntax if insufficient arguments are given
+if ( $ARGV[1] eq "" ) {
+    print("get_outlib flagfile outfile\n");
+    print(" \n");
+    print("   concatenate files listed in flagfile into outfile\n");
+    print(" \n");
+    die "get_outlib: specify filenames\n";
+}
+
+# read command line arguments
+$flagfile = $ARGV[0];
+$outfile = $ARGV[1];
+
+# search flagfile for instances of _OUTLIB_
+open( INFILE, $flagfile ) || die "get_outlib: cannot open $flagfile \n";
+$count = 0;
+while($line = <INFILE> ) {
+    chop($line);		# this is the filename
+    if( $count > 0 ) {		# check for duplicate entries
+        $good = "true";
+        foreach $file ( @filelist ) {
+	    if( $file eq $line ) {
+	       $good = "false";
+            }
+        }
+	if( $good eq "true" ) {
+            ##print "adding $line to filelist\n";
+	    $filelist[$count] = $line;
+	    $count++;
+        }
+    } else {
+        ##print "adding first file ($line) to filelist\n";
+	$filelist[$count] = $line;
+	$count++;
+    }
+}
+close INFILE;
+
+open( OUTFILE, ">$outfile" ) || die "get_outlib: cannot create $outfile \n";
+foreach $file ( @filelist ) {			# include each file
+    ##print "get_outlib: including $file in $outfile\n";
+    open( INFILE, $file ) || die "get_outlib: cannot open $file \n";
+    while($line = <INFILE> ) {
+        print OUTFILE "$line";
+    }
+    close INFILE;
+}
+close OUTFILE;

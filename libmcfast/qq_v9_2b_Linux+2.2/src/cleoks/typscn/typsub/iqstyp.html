@@ -1,0 +1,80 @@
+<HEAD>
+<TITLE>cleoks/typscn/typsub/iqstyp.F</TITLE>
+</HEAD>
+<BODY>
+<PRE>
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:21  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1995/08/01  18:00:21  nk
+* Consolidation
+*
+* Revision 1.1  1995/07/31 19:42:33  nk
+* Added typscn
+*
+* Revision 1.1.1.1  1994/10/05  13:45:41  zfiles
+* first version of typscn in CVS
+*
+*
+#include &QUOT<A HREF="../../../sys/CLEO_machine.html">sys/CLEO_machine.h</A>&QUOT
+#include &QUOT<A HREF="../../../pilot.html">pilot.h</A>&QUOT
+*CMZ :  1.00/06 26/02/90  22.26.30  by  Ian C. Brock
+*CMZ :  1.00/07 13/02/90  17.47.24  by  Ian C. Brock
+*CMZ :  1.00/06 19/01/90  16.21.58  by  Ian C. Brock
+*-- Author :
+C
+*=*=*=*= IQSTYP.html =*=*=*=*
+
+</PRE>
+
+<A HREF="http://w4.lns.cornell.edu/Harvest/brokers/w4-public/">Search Keyword</A>
+<H1>INTEGER FUNCTION IQSTYP</H1>
+
+<PRE>
+
+      INTEGER FUNCTION <A NAME=iqstyp>IQSTYP</A>(<A HREF="../../../cleoks/typscn/typsub/iqstyp.html#lwait">LWAIT</A>,<A HREF="../../../cleoks/typscn/typsub/iqstyp.html#idelim">IDELIM</A>,<A HREF="../../../avehst/seq/hsttmp.html#string">STRING</A>)
+      SAVE
+C
+C     IQSTYP gets a quoted string from the current TYPSCN buffer
+C     STRING is output character string
+C     IQSTYP is the length of the string
+C     No upper case conversion is done
+C     If the string is not delimited by '' then it is returned up to
+C     the next delimiter. If it is in quotes the string without the
+C     quotes is returned. To get a ' inside '...' use ''.
+C
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typpar.html">cleoks/typscn/typcde/typpar.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typchr.html">cleoks/typscn/typcde/typchr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typscn.html">cleoks/typscn/typcde/typscn.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typstr.html">cleoks/typscn/typcde/typstr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typctl.html">cleoks/typscn/typcde/typctl.inc</A>&QUOT
+C
+      CHARACTER*(*) <A NAME=string>STRING</A>
+      INTEGER <A NAME=idelim>IDELIM</A>
+      LOGICAL <A NAME=lwait>LWAIT</A>
+      INTEGER <A NAME=iqsscn>IQSSCN</A>
+C
+      <A HREF="../../../cleoks/typscn/typcde/typstr.html#ctypnm">CTYPNM</A> = 'COMMAND'
+C     signals waiting for TTY input
+      <A NAME=IQSTYP_IQSTYP_1  HREF="../../../cleoks/typscn/typsub/iqstyp.html#iqstyp">IQSTYP</A> = -2
+      <A HREF="../../../cleoks/typscn/typsub/iqstyp.html#string">STRING</A> = ' '
+
+      CALL <A NAME=IQSTYP_GETLIN_1  HREF="../../../cleoks/typscn/typsub/getlin.html">GETLIN</A>(<A HREF="../../../cleoks/typscn/typsub/iqstyp.html#lwait">LWAIT</A>)
+C
+      IF (.NOT.<A HREF="../../../cleoks/typscn/typcde/typctl.html#lasync">LASYNC</A>) THEN
+          <A NAME=IQSTYP_IQSTYP_2  HREF="../../../cleoks/typscn/typsub/iqstyp.html#iqstyp">IQSTYP</A> = <A NAME=IQSTYP_IQSSCN_1  HREF="../../../cleoks/typscn/typsub/iqstyp.html#iqsscn">IQSSCN</A>(<A HREF="../../../avehst/seq/avehstin.html#ipoint">IPOINT</A>,<A HREF="../../../cleoks/typscn/typcde/typscn.html#nchars">NCHARS</A>,<A HREF="../../../cleoks/typscn/typsub/iqstyp.html#idelim">IDELIM</A>,<A HREF="../../../cleoks/typscn/typsub/iqstyp.html#string">STRING</A>)
+      END IF
+C
+      RETURN
+      END
+</PRE>
+<ADDRESS>
+<A HREF="http://w4.lns.cornell.edu/cgi-bin/mail?nk">nk@lns62.lns.cornell.edu</A>
+</ADDRESS>
+
+</BODY>
+

@@ -1,0 +1,16 @@
+template Drift(10)
+  int num
+  char name
+  int num_anode
+  child LayerDRFAno
+  child OffsetDRFAno
+  int num_cathode
+  child LayerDRFCatho
+  real rmin
+  real rmax
+  real z0
+  real zlen
+  material material
+  real thick_boun(4)  ! rmin, rmax, zmin, zmax
+  material mat_boun(4)    ! rmin, rmax, zmin, zmax
+end template

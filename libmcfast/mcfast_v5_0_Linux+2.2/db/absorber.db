@@ -1,0 +1,10 @@
+template Absorber(25)
+  char name
+  char shape
+  int type       ! 1=barrel, 2=forward
+  real rmin(2)   ! lo z, hi z
+  real rmax(2)   ! lo z, hi z
+  real z0
+  real zlen
+  material material
+end template

@@ -1,0 +1,31 @@
+dnl Process this file with autoconf to produce a configure script
+AC_INIT(TITLE.qqlib)
+AC_PROGRAMS_CHECK(FC, cleo_f77 f77)
+AC_PROGRAMS_CHECK(MAKEDEPEND, cleo_makedepend makedepend)
+AC_PROG_CPP
+case "$MACHINE" in
+  ULTRIX) CPP="/usr/bin/cpp -P -C -E";;
+esac
+AC_SUBST(CPP)
+dnl AC_PROG_INSTALL
+INSTALL="cp -f"
+INSTALL_PROGRAM="\$(INSTALL)"
+INSTALL_DATA="\$(INSTALL)"
+AC_SUBST(INSTALL)
+AC_SUBST(INSTALL_PROGRAM)
+AC_SUBST(INSTALL_DATA)
+MACHINE="`uname`"
+AC_SUBST(MACHINE)
+case "$MACHINE" in
+  ULTRIX) FFLAGS="$FFLAGS -static -w1 -G 0 ";OPT_FFLAGS=" -O2";DBG_FFLAGS=" -g";;
+  OSF1) FFLAGS="$FFLAGS -static -w1 -G 0 ";OPT_FFLAGS=" -O4";DBG_FFLAGS=" -g";;
+  AIX) FFLAGS="$FFLAGS -qextname -qrndsngl  ";OPT_FFLAGS=" -O";DBG_FFLAGS=" -g";;
+  IRIX) FFLAGS="$FFLAGS -static -w1 -G 0 ";OPT_FFLAGS=" -O2";DBG_FFLAGS=" -g";;
+  HP-UX) FFLAGS="$FFLAGS -K +U77 +ppu ";OPT_FFLAGS=" -O2";DBG_FFLAGS=" -g";;
+  SunOS) FFLAGS="$FFLAGS -Bstatic ";OPT_FFLAGS=" -O3";DBG_FFLAGS=" -g";;
+  Linux) FFLAGS="$FFLAGS -fno-automatic -fno-second-underscore";OPT_FFLAGS=" -O";DBG_FFLAGS=" -g -fdebug-kludge";;
+esac
+AC_SUBST(FFLAGS)
+AC_SUBST(OPT_FFLAGS)
+AC_SUBST(DBG_FFLAGS)
+AC_OUTPUT( Makefile user/Makefile.obj qq/Makefile libu/Makefile bkqed/Makefile qdecay/Makefile qcd/Makefile decay/Makefile usrdum/Makefile Makefile.qqlib Makefile.noncleo jetset/Makefile 2phot/Makefile psirad/Makefile onlycleo/Makefile noncleo/Makefile )

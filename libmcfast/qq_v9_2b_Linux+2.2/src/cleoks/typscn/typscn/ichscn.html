@@ -1,0 +1,75 @@
+<HEAD>
+<TITLE>cleoks/typscn/typscn/ichscn.F</TITLE>
+</HEAD>
+<BODY>
+<PRE>
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:18  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1995/08/01  18:00:06  nk
+* Consolidation
+*
+* Revision 1.1  1995/07/31 19:39:16  nk
+* Added typscn
+*
+* Revision 1.1.1.1  1994/10/05  13:45:39  zfiles
+* first version of typscn in CVS
+*
+*
+#include &QUOT<A HREF="../../../sys/CLEO_machine.html">sys/CLEO_machine.h</A>&QUOT
+#include &QUOT<A HREF="../../../pilot.html">pilot.h</A>&QUOT
+*CMZ :  1.00/00 12/05/89  16.52.47  by  Ian C. Brock
+*-- Author :
+C****************************************************************************
+C SCNSUB routines
+C****************************************************************************
+C Casual user routines
+C
+C All SCAN level helper function subprograms here,
+C namely ICHSCN, CCHSCN, ICMLST, LCHSCN, NCHSCN, NCHLFT
+C
+*****************************************************************************
+C Returns value of next character.
+C
+*=*=*=*= ICHSCN.html =*=*=*=*
+
+</PRE>
+
+<A HREF="http://w4.lns.cornell.edu/Harvest/brokers/w4-public/">Search Keyword</A>
+<H1>INTEGER FUNCTION ICHSCN</H1>
+
+<PRE>
+
+      INTEGER FUNCTION <A NAME=ichscn>ICHSCN</A>(<A HREF="../../../cleoks/typscn/typscn/ichscn.html#jpoint">JPOINT</A>,<A HREF="../../../cleoks/typscn/typscn/ichscn.html#jchars">JCHARS</A>)
+      SAVE
+C
+      INTEGER  <A NAME=jchars>JCHARS</A>
+      INTEGER  <A NAME=jpoint>JPOINT</A>
+C
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typpar.html">cleoks/typscn/typcde/typpar.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typchr.html">cleoks/typscn/typcde/typchr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typscn.html">cleoks/typscn/typcde/typscn.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typstr.html">cleoks/typscn/typcde/typstr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typctl.html">cleoks/typscn/typcde/typctl.inc</A>&QUOT
+C
+      <A HREF="../../../cleoks/typscn/typscn/ichscn.html#jchars">JCHARS</A> = <A HREF="../../../cleoks/typscn/typscn/ichscn.html#jchars">JCHARS</A> - 1
+      <A HREF="../../../cleoks/typscn/typscn/ichscn.html#jpoint">JPOINT</A> = <A HREF="../../../cleoks/typscn/typscn/ichscn.html#jpoint">JPOINT</A> + 1
+      IF (<A HREF="../../../cleoks/typscn/typscn/ichscn.html#jchars">JCHARS</A>.GE.0) THEN
+      <A NAME=ICHSCN_ICHSCN_1  HREF="../../../cleoks/typscn/typscn/ichscn.html#ichscn">ICHSCN</A> = <A HREF="../../../cleoks/typscn/typscn/ichscn.html#ichar">ICHAR</A>(<A HREF="../../../cleoks/typscn/typcde/typstr.html#ctydat">CTYDAT</A>(<A HREF="../../../cleoks/typscn/typscn/ichscn.html#jpoint">JPOINT</A>:<A HREF="../../../cleoks/typscn/typscn/ichscn.html#jpoint">JPOINT</A>))
+      ELSE
+      <A NAME=ICHSCN_ICHSCN_2  HREF="../../../cleoks/typscn/typscn/ichscn.html#ichscn">ICHSCN</A> = -1
+      END IF
+C
+      RETURN
+      END
+</PRE>
+<ADDRESS>
+<A HREF="http://w4.lns.cornell.edu/cgi-bin/mail?nk">nk@lns62.lns.cornell.edu</A>
+</ADDRESS>
+
+</BODY>
+

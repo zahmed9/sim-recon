@@ -1,0 +1,49 @@
+C
+C $Id$
+C
+C $Log$
+C Revision 1.1  2000/06/19 20:00:45  eugenio
+C Initial revision
+C
+C Revision 1.2  1994/10/19  20:46:31  zfiles
+C Changed comment leader.
+C
+C Revision 1.1  1994/10/19  20:28:18  zfiles
+C Renamed files appropriately.
+C
+C Revision 1.1.1.1  1994/10/08  02:21:36  zfiles
+C first version of qqlib in CVS
+C
+C
+CMZ :  1.03/73 13/12/93  11.33.25  by  Peter C Kim
+CMZ :  1.03/72 06/12/93  17.45.08  by  Peter C Kim
+CMZ :  1.03/58 22/02/93  18.14.19  by  Peter C Kim
+C-- Author :    Peter C Kim   22/02/93
+C =======================================================================
+C    This is an example of generating e+e- --> mu+mu- events
+C    using the original QQ, following Berends/Kleiss.
+C
+C    MODEL = 3
+C
+C        (Variables are defined as CHARCTER*6 strings.)
+C =======================================================================
+LIST
+C
+NDO     10
+NDUMP   5
+IRAN    0
+C                                           Default DECAY.DEC
+C  DEFDEC  'C$RUNFIL:DECAY.DEC'   on VAX
+C  DEFDEC  '$C_RUNFIL/decay.dec'  on UNIX
+C
+ECM     10.58
+SPREAD  0.0041
+ENRGMN  10.40
+ENRGMX  10.70
+C
+MODEL   3
+C               BMRAD is turned off, since rad. correction is done
+C               properly in the Berends/Kleiss model.
+BMRAD   F
+C
+END

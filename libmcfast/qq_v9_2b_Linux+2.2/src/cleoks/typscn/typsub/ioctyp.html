@@ -1,0 +1,72 @@
+<HEAD>
+<TITLE>cleoks/typscn/typsub/ioctyp.F</TITLE>
+</HEAD>
+<BODY>
+<PRE>
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:21  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1995/08/01  18:00:21  nk
+* Consolidation
+*
+* Revision 1.1  1995/07/31 19:42:32  nk
+* Added typscn
+*
+* Revision 1.1.1.1  1994/10/05  13:45:40  zfiles
+* first version of typscn in CVS
+*
+*
+#include &QUOT<A HREF="../../../sys/CLEO_machine.html">sys/CLEO_machine.h</A>&QUOT
+#include &QUOT<A HREF="../../../pilot.html">pilot.h</A>&QUOT
+*CMZ :  1.00/03 29/11/89  17.44.12  by  J. D. Lewis
+*CMZ :  1.00/00 12/05/89  16.55.33  by  Ian C. Brock
+*-- Author :
+C
+C---------------------------------------------------------------------------
+C Find octal number
+C
+*=*=*=*= IOCTYP.html =*=*=*=*
+
+</PRE>
+
+<A HREF="http://w4.lns.cornell.edu/Harvest/brokers/w4-public/">Search Keyword</A>
+<H1>INTEGER FUNCTION IOCTYP</H1>
+
+<PRE>
+
+      INTEGER FUNCTION <A NAME=ioctyp>IOCTYP</A>(<A HREF="../../../cleoks/typscn/typsub/ioctyp.html#lwait">LWAIT</A>,<A HREF="../../../cleoks/typscn/typsub/ioctyp.html#idelim">IDELIM</A>)
+      SAVE
+C
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typpar.html">cleoks/typscn/typcde/typpar.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typchr.html">cleoks/typscn/typcde/typchr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typscn.html">cleoks/typscn/typcde/typscn.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typstr.html">cleoks/typscn/typcde/typstr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typctl.html">cleoks/typscn/typcde/typctl.inc</A>&QUOT
+C
+      INTEGER <A NAME=iocscn>IOCSCN</A>
+      INTEGER <A NAME=idelim>IDELIM</A>
+      LOGICAL <A NAME=lwait>LWAIT</A>
+C
+      <A HREF="../../../cleoks/typscn/typcde/typstr.html#ctypnm">CTYPNM</A> = 'OCTAL'
+      CALL <A NAME=IOCTYP_GETLIN_1  HREF="../../../cleoks/typscn/typsub/getlin.html">GETLIN</A>(<A HREF="../../../cleoks/typscn/typsub/ioctyp.html#lwait">LWAIT</A>)
+      <A NAME=IOCTYP_IOCTYP_1  HREF="../../../cleoks/typscn/typsub/ioctyp.html#ioctyp">IOCTYP</A> = <A NAME=IOCTYP_IOCSCN_1  HREF="../../../cleoks/typscn/typsub/ioctyp.html#iocscn">IOCSCN</A>(<A HREF="../../../avehst/seq/avehstin.html#ipoint">IPOINT</A>,<A HREF="../../../cleoks/typscn/typcde/typscn.html#nchars">NCHARS</A>,<A HREF="../../../cleoks/typscn/typsub/ioctyp.html#idelim">IDELIM</A>)
+      RETURN
+      END
+</PRE>
+<H1>Cross references</H1>
+<PRE>
+Called from <A HREF="../../../ftlib/ftgeom/fgetln.html#FGETLN_IOCTYP_1>fgetln_1</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgetln.html#FGETLN_IOCTYP_1>fgetln_1</A>
+Called from <A HREF="../../../mctr/tprs/mgtoct.html#MGTOCT_IOCTYP_1>mgtoct_1</A>
+Called from <A HREF="../../../qqlib/decay/qqrgln.html#QQRGLN_IOCTYP_1>qqrgln_1</A>
+</PRE>
+<ADDRESS>
+<A HREF="http://w4.lns.cornell.edu/cgi-bin/mail?nk">nk@lns62.lns.cornell.edu</A>
+</ADDRESS>
+
+</BODY>
+

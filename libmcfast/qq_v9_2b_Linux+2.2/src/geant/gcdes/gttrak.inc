@@ -1,0 +1,18 @@
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:24  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1994/04/05  21:31:34  lkg
+* Beta version of GEANT in CLEO CVS format
+*
+*
+*
+* gttrak.inc
+*
+      INTEGER NMEC,LMEC,NAMEC,NSTEP ,MAXNST,IGNEXT,INWVOL,ISTOP,MAXMEC
+     + ,IGAUTO,IEKBIN,ILOSL, IMULL,INGOTO,NLDOWN,NLEVIN,NLVSAV,ISTORY
+      REAL  VECT,GETOT,GEKIN,VOUT,DESTEP,DESTEL,SAFETY,SLENG ,STEP
+     + ,SNEXT,SFIELD,TOFG  ,GEKRAT,UPWGHT

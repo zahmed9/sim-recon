@@ -1,0 +1,7 @@
+
+template SiDisk(32)
+  int num
+  char name
+  int nlyr
+  real zpos
+end template

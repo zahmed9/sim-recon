@@ -1,0 +1,14 @@
+!Minimum bias events: 2000 GeV pbar on p
+!The following can also be specified on the command line.
+!file_lpt herwig_exam.lpt       !Output file
+!file_evt_wrt herwig_exam.evt   !Output event file
+maxev 200                  !Max events to generate
+maxpr 5                    !Max number of events to print
+ranseed  0 0               !Random seed set to time of day
+iproc 8000                 !Minimum bias events
+part1 P                    !Particle 1 ==> Proton
+part2 PBAR                 !Particle 2 ==> Antiproton
+pbeam1 1000.               !Beam energy for proton
+pbeam2 1000.
+ptmin 0.                   !Pt range
+ptmax 1000.

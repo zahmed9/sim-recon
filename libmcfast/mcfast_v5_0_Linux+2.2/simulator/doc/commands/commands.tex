@@ -1,0 +1,404 @@
+\documentstyle[12pt,epsf]{article}
+
+
+%\pagestyle{empty}
+\parindent 0pt
+\parskip 5mm
+
+% declarations for front matter
+
+\begin{document}
+\begin{titlepage}
+
+
+
+
+\begin{center}
+{\LARGE \sc MCFast Commands}\\
+\end{center}
+
+\begin{abstract}
+This document contains a description of MCFast commands and command files.    
+\\
+
+\end{abstract}
+\begin{center}
+MCFast v2\_5\_1 and v2\_6 and above \\
+\end{center}
+\end{titlepage}
+
+\section{Running MCFast}
+
+The fast Monte Carlo ``MCFast''is executed by typing
+
+\centerline{         mcfast [-f command\_file] [-l lpt\_file] [-hb Hbook\_file]}
+
+where 
+ 
+\centerline{        command\_file = name of file containing job directives}
+\centerline{        lpt\_file     = name of ASCII output file}
+\centerline{        Hbook\_file   = name of output Hbook file}
+
+Note: if the command file is not specified, mcfast accepts
+directives from the terminal, terminated by a $\wedge$D (end of file).
+This is very convenient when running multiple jobs in batch.
+
+You can get online help on running mcfast by typing
+
+\centerline{        mcfast -h}
+
+with no other arguments.
+
+During execution, mcfast checks the user's terminal every
+event to see if anything has been typed. This feature can
+be disabled for batch jobs by entering the line
+
+\centerline{  batch ON}
+
+in the command file.  Commands can be
+abbreviated to the minimum necessary for uniqueness. Type
+``help'' during execution to get a list of commands. Note
+that if you type ``user'', the routine usr\_command is
+called. You can provide this routine to print out any
+information you want while the program is running.  
+
+\filbreak
+ List of commands that MCFast recognizes during execution(can be abbreviated):
+
+\begin{description}
+\item[ continue ]        Continue after a pause
+\item[ exit/quit/stop ]  Stop reading data and finish
+\item[ help   ]          Print this message
+\item[ hcdir $<dir>$ ]     Change Hbook directory
+\item[ hldir  ]          List contents of current Hbook directory
+\item[ htype $<\#>$ ]       Type Hbook histogram in current directory
+\item[ next ]            Analyze next event and pause
+\item[ pause ]           Pause and wait for further commands
+\item[ skip $\rm <n>$ ]        Read in but do not analyze the next n events
+\item[ status  ]         Print a brief status message to terminal
+\item[ user  ]           Call ``usr\_command'' (supplied by user)
+\end{description}
+
+\filbreak
+
+\section{MCFast Command Files}
+
+The ommand file format is as follows:
+
+  input file format:\\
+            keyword $value$\\
+        or  keyword $value1\ \ value2$\\
+
+    where keyword is one of the variables that can be set.
+
+A whole series of reals, integers and strings can be read in. See the
+routine {\it cmd\_getitems} for more details.
+
+A sample command file for the C0 detector follows:
+
+
+
+! C0 command file -- no transverse shower development, no xdr output\\
+!\\
+! use a ! to start a comment\\
+!\\
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\\
+max\_ev 20000           ! Max number of events to analyze\\
+max\_print 2            ! max \# events to print in lpt file\\
+file\_geo c0.db         ! Geometry file\\
+ranseed  0              ! Random seeds-- if 0 then use time of day\\
+file\_type 1            ! file\_type 1 is the default from evgen\\
+file\_in @psiks.fil     ! @filename is the file containing a list of data files\\
+\\
+!Example of simple trigger control\\
+!\\
+trigger\\
+l1 define 0 track\_trigger\_1 use\\
+l1 term track require num 1 pt 0.25 eta 1.5 5.0\\
+\\
+l1 define 1 track\_trigger\_2 use\\
+l1 term track require num 1 pt 0.25 eta -5.0 -1.5\\
+\\
+l1 define 8 muon\_trig\_1 use\\
+l1 term muon require num 1 pt 0.25 eta 1.5 5.0\\
+\\
+l1 define 9 muon\_trig\_2 use\\
+l1 term muon require num 1 pt 0.25 eta -5.0 -1.5\\
+end trigger\\
+\\
+\\
+! program control   \\  
+! use TRUE,  .TRUE.,  T, ON,  YES, Y\\
+! or  FALSE, .FALSE., F, OFF, NO,  N\\
+
+control\_shower\\
+  shw\_trans    OFF   ! DO NOT generate shw.trans.prof. as shw propagates \\ 
+  e\_thresh     0.05  ! \% of remaining energy to stop tracing shw. -- default  \\ 
+  e\_vis\_min    0.002 ! minimum energy to read out in CAL cell  -- default  \\    
+  max\_hit\_step   25  ! max \# of hits to generate per step  -- default   \\       
+end control\_shower \\ 
+ \\ 
+ \\ 
+! The following 3 quantities are set True by default in MCFast \\ 
+make\_decays       T    ! do decays in flight \\ 
+make\_pair\_convert T    ! do pair conversions \\ 
+make\_hits     T        ! do generate hits \\ 
+
+
+\filbreak
+\section{MCFast Command Definitions}
+The following terms are recognized by MCFast and can be entered in the command file.
+\begin{description}
+\item[max\_event]  -- Maximum number of event to be processed
+\item[max\_print]  -- Maximum number of event to be printed in lpt file
+\item[batch]      -- set ON for batch jobs; default = OFF
+\item[file\_in]   @{\it filename} -- file containing list of signal files
+\item[background\_in]@{\it filename} -- file containing list of background
+\item[file\_out]  {\it filename}  -- output events in OLD STDHEP format-- obsolete
+\item[file\_type] 1 --  input signal data file format; default = 1
+\item[background\_type] -- input background data file format; default = 1
+\item[ranseed]  --  enter 2 seeds for random number generator (RANECU); default = 0.0 0.0 (
+if first seed is zero then MCFast uses time of day for seeds)
+\item[int\_crossing] --  \# of interactions per crossing
+\item[generate\_internal] --  initiate particle gun
+\item[fcon] $<\#>$  {\it value} -- User defined floating point constant (500 allowed)
+\item[icon] $<\#>$  {\it value} -- User defined integer constant (500 allowed)
+\item[file\_geometry] {\it filename.db} -- geometry file name 
+\item[luminosity] --     default = $10^{32}$ 
+\item[runtime] -- default = $10^{7}$
+\item[trigger] -- initiate trigger definitions
+\item[dbg\_trace] -- include debug statements in MCFast; default = OFF -- see section on
+DEBUG commands below
+\item[dbg\_hist]  -- include debug histograms in MCFast; default = OFF -- see section on
+DEBUG commands below
+\item[qq\_user\_file] -- change QQ user file for decays in flight; default =
+\$MCFAST\_DIR/examples/mcfast/stable.dec   
+\item[make\_decays]  -- control flag for decays in flight;  default = ON
+\item[make\_pair\_convert] -- control flag for pair conversions;  default = ON
+\item[make\_hits]       -- control flag for hit generation; default = ON
+\item[use\_mult\_scat]   -- contral flag for multiple scattering in trace
+(v2\_6); default = OFF
+\item[use\_energy\_loss] -- contral flag for  dedx in trace (v2\_6) default = OFF
+\item[control\_shower] -- initiate shower control parameters
+\item[step\_max\_distance]  -- maximum distance between trace points (for
+graphics) default = 1.e10
+\item[step\_max\_angle] --  maximum angle between trace points (for graphics)1.e10
+\item[step\_max\_dedx]  -- maximum step for dedx (v2\_6) default = 1.e10
+\item[step\_max\_mscat] -- maximum step for scattering (v2\_6) default = 1.e10
+\item[trk\_max\_turns] -- maximum number of turns per step -- default = 0.5
+\item[trk\_min\_kinetic] -- minimum kinetic energy for track -- default = 1.e6 MeV
+\item[mcfio\_out]  -- mcfio output file name
+\item[geomview\_out] -- geomview output file name -- this is obsolete.
+\end{description}
+
+
+\filbreak
+
+\section{Particle Gun Command Definitions}
+\begin{description}
+\item[multiplicity] $<\#>$--  average multiplicity; default = 1
+\item[fix\_multiplicity] ON -- default; if OFF then use Poisson distribution 
+\item[slope] $slope$ --  default = 0.;    
+if $slope\ \neq\ 0$ then $   p_t = ptmin - log(1 - random \# \times (1-exp(-slope \times (ptmax-ptmin)) )) / slope $
+\item[type\_info] $hep\_id\ probability\ mass$ -- particle information; default = [211 1.0 0.13956]
+\item[ptmin]  $ptmin$ --   minimum $p_t$ ; default = 1.
+\item[ptmax]  $ptmax$ --   maximum $p_t$ ; default = 1.
+\item[etamin] $etamin$ --  minimum eta; default = 0.
+\item[etamax] $etamax$ --  maximum eta; default = 0.
+\item[phimin] $phimin$ --  minimum phi angle; default = 0.
+\item[phimax] $phimax$ --  maximum phi angle; default = $2 \pi$.
+\item[vertex] $x\ y\ z$ -- primary vertex position; default = [0.0 0.0 0.0]
+\item[dvertex] $dx\ dy\ dz$ --sigma of primary vertex position; default = [0.0 0.0 0.0]
+\end{description}
+
+\filbreak
+
+\section{Debug Flags}
+
+Used with command {\bf dbg\_trace} and {\bf dbg\_hist}:  
+
+\centerline {{\bf dbg\_trace muon ON} ;  Turn on debug output for muon code}
+\centerline {{\bf dbg\_hist muon ON}  ;  Turn on debug histograms in muon code}
+
+The default is OFF for all subsystems.
+
+BEWARE! Some of these switches turn on lots of output.  Many of them do nothing.
+
+\begin{description}
+\item[  general] ON sets dbg\_trace(jdbg\_general) .true. or dbg\_hist(jdbg\_general) 
+\item[  track]   ON sets dbg\_trace(jdbg\_track) .true. or dbg\_hist(jdbg\_track)
+\item[  shower] ON sets dbg\_trace(jdbg\_shower) .true. or dbg\_hist(jdbg\_shower)
+\item[  gamma] ON sets dbg\_trace(jdbg\_gamma) .true. or dbg\_hist(jdbg\_gamma)
+%\item[  hcal]  ON sets dbg\_trace(jdbg\_hcal) .true. or dbg\_hist(jdbg\_hcal)
+\item[  emcal] ON sets dbg\_trace(jdbg\_emcal) .true. or dbg\_hist(jdbg\_emcal)
+\item[  muon]  ON sets dbg\_trace(jdbg\_muon) .true. or dbg\_hist(jdbg\_muon)
+\item[  trig]  ON sets dbg\_trace(jdbg\_trig) .true. or dbg\_hist(jdbg\_trig)
+\item[  geom]  ON sets dbg\_trace(jdbg\_geom) .true. or dbg\_hist(jdbg\_geom)
+\item[  hits]  ON sets dbg\_trace(jdbg\_hits) .true. or dbg\_hist(jdbg\_hits)
+\end{description}
+
+\filbreak
+
+\section{Shower Control Command Definitions}
+\begin{description}
+\item[shw\_trans] -- 
+     Default value is ON.  The transverse profile of showers are generated by default.
+      In order to speed up the program, it is possible to create
+     calorimeter hits only on the exact path of the shower core.   
+\item[e\_thresh] -- 
+      The default value is 0.05.  With the current showering algorithm, we stop tracing a
+      shower if the remaining energy of the shower is 5\% or less of the incident energy.     
+\item[max\_hit\_step] --  
+The default value is 25.  This is the maximum number of
+hits with status SHOWERING that can be produced over each step as a shower
+propagates.  Correlated with {\bf e\_vis\_min} (nhits =
+min((edep/e\_vis\_min),max\_hit\_step));  max\_hit\_step = 0 is equivalent to
+shw\_trans OFF.  The user may change this parameter in order to speed up the code,
+but the precision of the shower transverse profile generation may be affected.
+\item[e\_vis\_min] -- 
+The default value is 0.002 GeV.  This is the minimum energy
+that can be recorded in the calorimeter cell (currently it is set once for all
+calorimeters.) 
+\end{description}
+
+\filbreak
+
+\section{Trigger Command Definitions}
+
+
+Three types of triggers can be defined at a single level in 
+the MCFAST framework.  The trigger types are TRACKING, MUON, and EM cluster.
+These objects work only from the generator information.
+
+To define triggers, several pieces of information must be specified.
+\begin{enumerate}
+ \item The level of the trigger (only L1 is active in this release)
+ \item A key word corresponding to the function required 
+ \begin{description}
+   \item[define] -- sets up a specific trigger
+   \item[term]   -- sets up the conditions corresponding to that specific trigger
+ \end{description}
+ 
+For ``define'' programming:
+
+ \begin{description}
+   \item[a)] bit number-- currently 0-31
+   \item[b)] Name for the trigger
+   \item[c)] Flag to determine whether or not to cut on the trigger condition.
+ \end{description}
+\end{enumerate}
+
+Examples:
+
+{\bf l1 define 2 track1\_trigger use}
+
+\begin{description}
+
+\item[ l1] --Trigger level
+\item[ define ] --Key word
+\item[ 2 ] --specific bit number (0-31)
+\item[ track1\_trigger] --trigger name--should be $<$32 characters
+\item[ use] -- cut on trigger condition, if left off, 
+accounting for trigger will still appear
+in summary, but trigger p/f will not be used.
+\end{description}
+
+Note that at this point, the trigger doesn't know anything about what
+is required.  Ideally, the name should have some meaning to the user, but
+what is used in the name has no effect on the trigger requirements.
+
+For ``term'' programming:
+\begin{description}
+ \item[a)] A key word corresponding to the type of trigger requested
+ \begin{description}
+  \item[ muon]
+  \item[ track]
+  \item[ calem]
+ \end{description}
+ \item[b)] require or veto on this condition
+ \item[c)] number of objects
+ \item[d)] pt of object(s)
+ \item[e)] eta of object(s)  --  For a symmetric geometry, be sure to specify 
+                         - eta to + eta.
+ \item[f)] phi of object(s)  -- if not used, a 2$\pi$ default is taken. 
+\end{description}
+
+Example:
+
+{\bf l1 term track require num 1 pt 1.5 eta -10. 10.}
+
+\begin{description}
+\item[ l1 ] -- trigger level
+\item[ term ] -- key word
+\item[ track ] -- object type (track, muon or calem)
+\item[ require] -- accept if the condition is true, use {\bf veto} to accept if the condition is false
+\item[ num 1 ] -- multiplicity
+\item[ pt 1.5 ] -- pt threshold
+\item[ eta -10. 10. ] -- eta range
+\end{description}
+
+This supplies the requirements to the trigger.  There can be up to 256
+terms associated with each specific trigger.  Examples of complete 
+triggers are:
+
+l1 define 0 test \\
+l1 term track require num 1 pt 0 eta -10. 10.\\
+{just count the events with any tracks at all}\\
+
+l1 define 1 track1\_trigger use\\
+l1 term track require num 1 pt 1.5 eta 0. 10.\\
+
+l1 define 2 track2\_trigger use\\
+l1 term track require num 1 pt 3 eta -10. 10.\\
+l1 term track require num 2 pt 1.5 eta -10. 10.\\
+
+l1 define 3 muon\_trig use\\
+l1 term muon require num 1 pt 2.0 eta 1. 4.\\
+l1 term track  require num 1 pt 2.0 eta 1. 4.\\
+{note, the muon and track are not  ``matched''}\\
+
+Output:  At the end of the mcfast.lpt file, trigger summary is printed out
+showing a truncated version of the term definitions, the number of events
+tried and passed for each term and each trigger.  Table \ref{tab:l1terms} shows
+the output from a typical job with 2 track triggers, 1 muon trigger and 4 
+calorimetry triggers defined.
+
+\begin{table*}
+% space before first and after last column: 1.5pc
+% space between columns: 3.0pc (twice the above)
+%\setlength{\tabcolsep}{1.5pc}
+% -----------------------------------------------------
+% adapted from TeX book, p. 241
+%\newlength{\digitwidth} \settowidth{\digitwidth}{\rm 0}
+%\catcode`?=\active \def?{\kern\digitwidth}
+% -----------------------------------------------------
+\caption{  Trigger Programming Summary:  level 1 term definitions}
+\label{tab:l1terms}
+\begin{tabular*}{\textwidth}{@{}l@{\extracolsep{\fill}}crr}
+\hline
+    TERM  &          TERM NAME              &            events passed /& tried \\
+\hline 
+       1  &   l1 term track require num 1 pt 1.5 eta 0      &    347/   &  500\\
+       2  &   l1 term track require num 1 pt 1.5 eta -      &    485/   &  500\\
+      33  &   l1 term muon require num 1 pt 2.0 eta 0.      &    168/   &  500\\
+      65  &   l1 term calem require num 1 pt 0.0 eta -      &    335/   &  500\\
+      66  &   l1 term calem require num 1 pt 0.0 eta 0      &    221/   &  500\\
+      67  &   l1 term calem require num 1 pt 0.1 eta -      &     49/   &  500\\
+      68  &   l1 term calem require num 1 pt 0.1 eta 0      &     23/   &  500\\
+\hline
+\end{tabular*}
+\end{table*}
+
+\filbreak
+ LEVEL 1 specific triggers \\
+ Trigger 0  TRACK\_TRIGGER                   required           347/     500 \\
+    terms used:  1\\
+ Trigger 1  TRACK1\_TRIGGER                  required           485/     500  \\
+    terms used:  2 \\
+
+
+
+\end{document}
+
+
+

@@ -1,0 +1,19 @@
+template LayerDRFAno(100)
+  int det
+  parent Drift
+  int lyr
+  real radius
+  real zlen
+  real cell_height
+  int nwires
+  int ID_readout
+  int ID_cathode
+  real phi0
+  real stereo_tau
+  real stereo_offset
+  real eff_hit
+  real eff_dedx
+  real siga
+  real sigb
+  real sigc
+end template

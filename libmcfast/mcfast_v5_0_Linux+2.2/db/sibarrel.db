@@ -1,0 +1,10 @@
+
+! **************** Barrel Silicon *****************
+
+template SiBarrel(15)
+  int num
+  char name
+  int nlyr
+  child LayerSiB
+  real z0_global
+end template

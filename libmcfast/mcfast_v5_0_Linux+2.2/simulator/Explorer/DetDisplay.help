@@ -1,0 +1,129 @@
+   NAME
+        DetDisplay
+
+   DESCRIPTION
+        This module displays the detector geometry.  The input file can be
+        a dbin file or an McFast file with Geometery.
+        Be sure to have defined a soft link to the db directory containing the
+        templates in the area from which you will be getting your .db files.
+        ln -s $MCFAST_DIR/db db
+        
+        After the geometry has been read in, the list of objects will appear in the
+        scrolled list box.  The name will be of the form DEVXXX_NAME. 
+        Many devices are displayed as more than one object.  For example, each layer of
+        silicon associated with a single silicon detector will appear as a separate
+        device.  To edit a device, select that device by clicking on it in the scrolled
+        list.  The current display parameters for that device will
+        appear on the widgets.  The detector display will remain in the Render, but the
+        modifications will not be displayed.  Multiple items can be selected.
+        Modify the display parameters as desired, using the Explorer Color Editor 
+        module to define the colors and the panel widgets to define the other
+        properties.  Modify as many detectors as desired remember to click on each
+        detector before you modify it.  When modifications are complete, click on
+        display.
+
+   INPUTS
+
+      Color -- Parameter (Opt.)
+         This port is used with the Explorer Color Map
+         Widget to allow the user to select the color of each detector.
+
+      DetName -- Parameter (Opt.)
+         When this port is wired to the DetPick module output port "DetLabel", a picked
+         detector will automatically be selected for updating.
+
+   WIDGETS
+
+      geom_filename -- File Browser
+         Input the file here.  The default is $DETECTOR which can be
+         defined using setenv prior to starting Explorer.  Otherwise 
+         enter the pathname and select the file.
+
+      Transparency -- Dial
+         This widget allows the user to set the transparency for each object.  0 is fully
+         opaque and 1 is transparent to the point of invisibility.  Use the outer dial
+         for coarse adjustment and the inner dial for fine adjustment
+
+      Visibility -- Radio Box
+         (not shown, solid, wireframe).
+         This widget allows the user to select the Visibility for each object.  Select
+         not shown to make an object disappear from view.
+
+      List -- Scroll List
+         This holds the list of detector objects for modification
+
+      Display -- Button
+         This button is used to redisplay the detector after modification.
+
+      CutAngleEnd -- Dial
+         This dial describes the angle in degrees for the end of a cut 
+         to show a detector cross section.  Use the outer dial for coarse adjustment and
+         the inner dial for fine adjustment.
+
+      CutAngleStart -- Dial
+         This dial describes the angle in degrees for the beginning of a cut to 
+         show a detector cross section.  Use the outer dial for coarse adjustment and
+         the inner dial for fine adjustment.
+
+      Cutaway -- Radio Box
+         (cut, solid, wedge).
+         These buttons toggle between cross section and solid views.  Some detectors, 
+         such as silicon wedges, are always displayed as cut cross sections 
+         so apply this cut judiciously.
+
+      Nsides -- Text
+         This text widget allows the user to specify how many sides on a polygon is used
+         to represent conical objects
+
+      Red -- Slider
+         This slider shows the RED component of the selected detector.  It is not used
+         as input, only as information.  Please use the color editor to change detector 
+         colors
+
+      Green -- Slider
+         This slider shows the GREEN component of the selected detector.  It is not used
+         as input.  Please use the color editor to change detector colors
+
+      Blue -- Slider
+         This slider shows the BLUE component of the selected detector.  It is not used
+         as input.  Please use the color editor to change detector colors
+
+      RWconfig -- Radio Box
+         (Read Configuration File, Write Configuration File).
+         Select whether to read or write a configuration file.  A selection of read or
+         write must be made to enable the configuration file browser.
+
+      ConfigFile -- File Browser
+         Use to enter or select configuration file for reading or writing.  Widget is
+         disabled unless the reading or writing has been selected.  Code is insensitive
+         on write to whether the configuration file already exists.  
+
+      Nodisplay -- Button
+         Turn off display of the detector.  Useful when module is used with TraceLat
+         module for displaying traces.
+
+      ColorWin -- Drawing Area
+         Displays the color of the selected object
+
+      ModByType -- Radio Box
+         (By Selected --modifies only the selected items in the scrolled list, By Type -- modifies all objects of the type selected).
+         (select one silicon barrel but modify all silicon barrels) 
+
+   OUTPUTS
+
+      geom -- Geometry
+         This output port is used to send the geometery to the render for display.
+
+   KNOWN PROBLEMS
+      Current implementation: The ntuple code used for configuration file reading and
+      writing is buggy and crashes.  DBin input also displays occasional
+      crashes.  Configuration file will overwrite files of the same name without 
+      warning.
+      
+      Normals to surface should be added to make the detectors look rounder.
+       
+
+   SEE ALSO
+      Render
+      Coloreditor
+      DetPick

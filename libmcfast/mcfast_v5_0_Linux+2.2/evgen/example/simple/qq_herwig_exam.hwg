@@ -1,0 +1,16 @@
+!B production: 1800 GeV pbar on p
+file_lpt qq_herwig_exam.lpt   !Output file
+file_evt_wrt qq_herwig_exam.evt   !Output event file
+file_hbk     qq_herwig_exam.rz    !Hbook output
+maxev 1000                 !Max events to generate
+maxpr 2                    !Max number of events to print
+iproc 1705                 !bbar quark production
+part1 P                    !Particle 1 ==> Proton
+part2 PBAR                 !Particle 2 ==> Antiproton
+pbeam1 900.                !Beam energy for proton
+pbeam2 900.
+ptmin 0.                   !Pt range
+ptmax 900.
+ranseed  0 0               !Random seed set to time of day
+qq                         !use QQ for decays
+qq_user_file user.dec      !QQ user decay file

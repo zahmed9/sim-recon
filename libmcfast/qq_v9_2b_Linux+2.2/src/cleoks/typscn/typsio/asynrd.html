@@ -1,0 +1,193 @@
+<HEAD>
+<TITLE>cleoks/typscn/typsio/asynrd.F</TITLE>
+</HEAD>
+<BODY>
+<PRE>
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:20  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1995/08/01  18:00:15  nk
+* Consolidation
+*
+* Revision 1.1  1995/07/31 19:40:37  nk
+* Added typscn
+*
+* Revision 1.1.1.1  1994/10/05  13:45:41  zfiles
+* first version of typscn in CVS
+*
+*
+#include &QUOT<A HREF="../../../sys/CLEO_machine.html">sys/CLEO_machine.h</A>&QUOT
+#include &QUOT<A HREF="../../../pilot.html">pilot.h</A>&QUOT
+*CMZ :  1.00/12 11/11/91  20.18.58  by  Unknown
+*CMZ :  1.00/10 31/05/91  13.43.53  by  Jon Urheim
+*-- add flag for ibm rs6000.
+*CMZ :  1.00/08 14/08/90  14.40.40  by  J. D. Lewis
+*CMZ :  1.00/08 16/02/90  16.19.56  by  Ian C. Brock
+*-- Author :
+*=*=*=*= ASYNRD.html =*=*=*=*
+
+</PRE>
+
+<A HREF="http://w4.lns.cornell.edu/Harvest/brokers/w4-public/">Search Keyword</A>
+<H1>SUBROUTINE ASYNRD</H1>
+
+<PRE>
+
+      SUBROUTINE <A NAME=asynrd>ASYNRD</A>
+C
+C----------------------------------------------------------------------
+C Asynchronous read routine
+C
+C
+#if (defined(CLEO_VAX))&&(!defined(CLEO_VAXF77))
+CJDL  IMPLICIT INTEGER (A-Z)
+      INCLUDE <A HREF="../../../cleoks/typscn/typsio/asynrd.html#'($ssdef)/nolist'">'($SSDEF)/NOLIST'</A>
+      INCLUDE <A HREF="../../../cleoks/typscn/typsio/asynrd.html#'($iodef)/nolist'">'($IODEF)/NOLIST'</A>
+#endif
+C
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typpar.html">cleoks/typscn/typcde/typpar.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typchr.html">cleoks/typscn/typcde/typchr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typscn.html">cleoks/typscn/typcde/typscn.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typstr.html">cleoks/typscn/typcde/typstr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typctl.html">cleoks/typscn/typcde/typctl.inc</A>&QUOT
+C
+      CHARACTER*80 <A NAME=text>TEXT</A>
+      LOGICAL <A NAME=ltty>LTTY</A>
+      INTEGER <A NAME=lunsav>LUNSAV</A>, <A NAME=mbyt>MBYT</A>
+      INTEGER <A NAME=istat>ISTAT</A>, <A NAME=n>N</A>, <A NAME=nn>NN</A>
+#if (defined(CLEO_VAX))&&(!defined(CLEO_VAXF77))
+      INTEGER*2 <A NAME=iosb>IOSB</A>(4)
+      INTEGER*2 <A NAME=input_channel>INPUT_CHANNEL</A>,<A NAME=len>LEN</A>
+      INTEGER <A NAME=lib>LIB</A>$<A NAME=get_ef>GET_EF</A>,<A NAME=sys>SYS</A>$<A NAME=qio>QIO</A>,<A NAME=sys>SYS</A>$<A NAME=cancel>CANCEL</A>
+      LOGICAL <A NAME=first>FIRST</A>
+      DATA    <A HREF="../../../cleoks/typscn/typsio/asynrd.html#first">FIRST</A>/.TRUE./
+#endif
+C
+C
+      IF (.NOT.<A HREF="../../../cleoks/typscn/typcde/typctl.html#lasync">LASYNC</A>) THEN
+C
+#if (defined(CLEO_VAX))&&(!defined(CLEO_VAXF77))
+      IF (<A HREF="../../../cleoks/typscn/typsio/asynrd.html#first">FIRST</A>) THEN
+        <A HREF="../../../cleoks/typscn/typsio/asynrd.html#first">FIRST</A> = .FALSE.
+        CALL <A NAME=ASYNRD_ASYNI_1  HREF="../../../cleoks/typscn/typsio/asyni.html">ASYNI</A>(<A HREF="../../../cleoks/typscn/typsio/asynrd.html#ltty">LTTY</A>,<A HREF="../../../cleoks/typscn/typsio/asynrd.html#input_channel">INPUT_CHANNEL</A>)
+        IF (<A HREF="../../../cleoks/typscn/typcde/typctl.html#ievflg">IEVFLG</A>.EQ.0) <A HREF="../../../cleoks/typscn/typsio/asynrd.html#istat">ISTAT</A> = <A HREF="../../../cleoks/typscn/typsio/asynrd.html#lib">LIB</A>$<A NAME=ASYNRD_GET_EF_1  HREF="../../../cleoks/typscn/typsio/asynrd.html#get_ef">GET_EF</A>(<A HREF="../../../cleoks/typscn/typcde/typctl.html#ievflg">IEVFLG</A>)
+      END IF
+C
+      IF (<A HREF="../../../cleoks/typscn/typsio/asynrd.html#ltty">LTTY</A>) THEN
+        <A HREF="../../../cleoks/typscn/typcde/typstr.html#ctydat">CTYDAT</A>=' '
+        <A HREF="../../../cleoks/typscn/typsio/asynrd.html#istat">ISTAT</A> = <A HREF="../../../cleoks/typscn/typsio/asynrd.html#sys">SYS</A>$<A NAME=ASYNRD_QIO_1  HREF="../../../cleoks/typscn/typsio/asynrd.html#qio">QIO</A>(%<A NAME=ASYNRD_VAL_1  HREF="../../../cleoks/typscn/typsio/asynrd.html#val">VAL</A>(<A HREF="../../../cleoks/typscn/typcde/typctl.html#ievflg">IEVFLG</A>),%<A NAME=ASYNRD_VAL_2  HREF="../../../cleoks/typscn/typsio/asynrd.html#val">VAL</A>(<A HREF="../../../cleoks/typscn/typsio/asynrd.html#input_channel">INPUT_CHANNEL</A>),
+     1          %<A NAME=ASYNRD_VAL_3  HREF="../../../cleoks/typscn/typsio/asynrd.html#val">VAL</A>(<A HREF="../../../cleoks/typscn/typsio/asynrd.html#io">IO</A>$<A HREF="../../../cleoks/typscn/typsio/asynrd.html#_readvblk">_READVBLK</A>),<A HREF="../../../cleoks/typscn/typsio/asynrd.html#iosb">IOSB</A>,,,%<A NAME=ASYNRD_REF_1  HREF="../../../cleoks/typscn/typsio/asynrd.html#ref">REF</A>(<A HREF="../../../cleoks/typscn/typcde/typstr.html#ctydat">CTYDAT</A>),
+     1          %<A NAME=ASYNRD_VAL_4  HREF="../../../cleoks/typscn/typsio/asynrd.html#val">VAL</A>(<A HREF="../../../cleoks/typscn/typcde/typctl.html#ndevbf">NDEVBF</A>),,,,)
+        IF (<A HREF="../../../cleoks/typscn/typsio/asynrd.html#istat">ISTAT</A>.NE.<A HREF="../../../cleoks/typscn/typsio/asynrd.html#ss">SS</A>$<A HREF="../../../cleoks/typscn/typsio/asynrd.html#_normal">_NORMAL</A>) THEN
+                CALL <A NAME=ASYNRD_SYS_1  HREF="../../../cleoks/typscn/typsio/asynrd.html#sys">SYS</A>$<A NAME=ASYNRD_GETMSG_1  HREF="../../../cleoks/typscn/typsio/asynrd.html#getmsg">GETMSG</A>(%<A NAME=ASYNRD_VAL_5  HREF="../../../cleoks/typscn/typsio/asynrd.html#val">VAL</A>(<A HREF="../../../cleoks/typscn/typsio/asynrd.html#istat">ISTAT</A>),<A HREF="../../../cleoks/typscn/typsio/asynrd.html#len">LEN</A>,<A HREF="../../../cleoks/typscn/typsio/asynrd.html#text">TEXT</A>,,)
+                IF (<A HREF="../../../cleoks/typscn/typcde/typctl.html#iuntyp">IUNTYP</A>.GT.0) WRITE(UNIT=<A HREF="../../../cleoks/typscn/typcde/typctl.html#iuntyp">IUNTYP</A>,FMT=300) <A HREF="../../../cleoks/typscn/typsio/asynrd.html#text">TEXT</A>(:<A HREF="../../../cleoks/typscn/typsio/asynrd.html#len">LEN</A>)
+300             FORMAT (' TYPSCN: async read ',A)
+        END IF
+      END IF
+#endif
+C
+      <A HREF="../../../avehst/seq/avehstin.html#ipoint">IPOINT</A> = 0
+      <A HREF="../../../cleoks/typscn/typcde/typctl.html#lasync">LASYNC</A> = .TRUE.
+      END IF
+C
+      RETURN
+C
+C------------------------------------------------------------------------------
+C Cancel asynchronous read request
+C
+*=*=*=*= ASYNCN.html =*=*=*=*
+
+</PRE>
+
+<A HREF="http://w4.lns.cornell.edu/Harvest/brokers/w4-public/">Search Keyword</A>
+<H1>ENTRY ASYNCN</H1>
+
+<PRE>
+
+      ENTRY <A NAME=asyncn>ASYNCN</A>
+C
+      IF (<A HREF="../../../cleoks/typscn/typcde/typctl.html#lasync">LASYNC</A>) THEN
+      <A HREF="../../../cleoks/typscn/typcde/typctl.html#lasync">LASYNC</A> = .FALSE.
+#if (defined(CLEO_VAX))&&(!defined(CLEO_VAXF77))
+      IF (<A HREF="../../../cleoks/typscn/typsio/asynrd.html#ltty">LTTY</A>) THEN
+        <A HREF="../../../cleoks/typscn/typsio/asynrd.html#istat">ISTAT</A> = <A NAME=ASYNCN_SYS_1  HREF="../../../cleoks/typscn/typsio/asynrd.html#sys">SYS</A>$<A NAME=ASYNCN_CANCEL_1  HREF="../../../cleoks/typscn/typsio/asynrd.html#cancel">CANCEL</A>(%<A NAME=ASYNCN_VAL_1  HREF="../../../cleoks/typscn/typsio/asynrd.html#val">VAL</A>(<A HREF="../../../cleoks/typscn/typsio/asynrd.html#input_channel">INPUT_CHANNEL</A>))
+        IF (<A HREF="../../../cleoks/typscn/typsio/asynrd.html#istat">ISTAT</A>.NE.<A HREF="../../../cleoks/typscn/typsio/asynrd.html#ss">SS</A>$<A HREF="../../../cleoks/typscn/typsio/asynrd.html#_normal">_NORMAL</A>) THEN
+                CALL <A NAME=ASYNCN_SYS_2  HREF="../../../cleoks/typscn/typsio/asynrd.html#sys">SYS</A>$<A NAME=ASYNCN_GETMSG_1  HREF="../../../cleoks/typscn/typsio/asynrd.html#getmsg">GETMSG</A>(%<A NAME=ASYNCN_VAL_2  HREF="../../../cleoks/typscn/typsio/asynrd.html#val">VAL</A>(<A HREF="../../../cleoks/typscn/typsio/asynrd.html#istat">ISTAT</A>),<A HREF="../../../cleoks/typscn/typsio/asynrd.html#len">LEN</A>,<A HREF="../../../cleoks/typscn/typsio/asynrd.html#text">TEXT</A>,,)
+                IF (<A HREF="../../../cleoks/typscn/typcde/typctl.html#iuntyp">IUNTYP</A>.GT.0) WRITE(UNIT=<A HREF="../../../cleoks/typscn/typcde/typctl.html#iuntyp">IUNTYP</A>,FMT=400) <A HREF="../../../cleoks/typscn/typsio/asynrd.html#text">TEXT</A>(:<A HREF="../../../cleoks/typscn/typsio/asynrd.html#len">LEN</A>)
+400             FORMAT (' CANCEL_QIO: ',A)
+        END IF
+      END IF
+#endif
+      END IF
+C
+      RETURN
+C
+C-----------------------------------------------------------------------------
+C Check status of outstanding asynchronous read
+C
+*=*=*=*= ASYNCK.html =*=*=*=*
+
+</PRE>
+
+<A HREF="http://w4.lns.cornell.edu/Harvest/brokers/w4-public/">Search Keyword</A>
+<H1>ENTRY ASYNCK</H1>
+
+<PRE>
+
+      ENTRY <A NAME=asynck>ASYNCK</A>
+C
+#if (defined(CLEO_VAX))&&(!defined(CLEO_VAXF77))
+      IF (<A HREF="../../../cleoks/typscn/typsio/asynrd.html#ltty">LTTY</A>) THEN
+      IF (<A HREF="../../../cleoks/typscn/typsio/asynrd.html#iosb">IOSB</A>(1).EQ.0) THEN
+        CONTINUE
+      ELSE IF (<A HREF="../../../cleoks/typscn/typsio/asynrd.html#iosb">IOSB</A>(1).EQ.<A HREF="../../../cleoks/typscn/typsio/asynrd.html#ss">SS</A>$<A HREF="../../../cleoks/typscn/typsio/asynrd.html#_endoffile">_ENDOFFILE</A>) THEN
+        <A HREF="../../../cleoks/typscn/typcde/typctl.html#lasync">LASYNC</A> = .FALSE.
+        CALL <A NAME=ASYNCK_QUOTYP_1  HREF="../../../cleoks/typscn/typsub/quotyp.html">QUOTYP</A>(<A HREF="../../../cleoks/typscn/typcde/typchr.html#cctlz">CCTLZ</A>)
+      ELSE IF (<A HREF="../../../cleoks/typscn/typsio/asynrd.html#iosb">IOSB</A>(1).EQ.<A HREF="../../../cleoks/typscn/typsio/asynrd.html#ss">SS</A>$<A HREF="../../../cleoks/typscn/typsio/asynrd.html#_normal">_NORMAL</A>) THEN
+        <A HREF="../../../cleoks/typscn/typcde/typctl.html#lasync">LASYNC</A> = .FALSE.
+C       Strip trailing blanks and tabs
+        DO NN=<A HREF="../../../cleoks/typscn/typsio/asynrd.html#iosb">IOSB</A>(2),1,-1
+                <A HREF="../../../cleoks/typscn/typsio/asynrd.html#n">N</A> = <A HREF="../../../cleoks/typscn/typsio/asynrd.html#nn">NN</A>
+                IF (<A HREF="../../../roarlib/seq/rdtemp.html#index">INDEX</A>(<A HREF="../../../cleoks/typscn/typcde/typchr.html#ctabsp">CTABSP</A>,<A HREF="../../../cleoks/typscn/typcde/typstr.html#ctydat">CTYDAT</A>(<A HREF="../../../cleoks/typscn/typsio/asynrd.html#n">N</A>:<A HREF="../../../cleoks/typscn/typsio/asynrd.html#n">N</A>)).EQ.0) GO TO 1
+        END DO
+        <A HREF="../../../cleoks/typscn/typsio/asynrd.html#n">N</A> = 0
+1       CONTINUE
+        <A HREF="../../../cleoks/typscn/typcde/typscn.html#nchars">NCHARS</A> = <A HREF="../../../cleoks/typscn/typsio/asynrd.html#n">N</A>
+        <A HREF="../../../cleoks/typscn/typcde/typscn.html#nchacc">NCHACC</A> = <A HREF="../../../cleoks/typscn/typsio/asynrd.html#n">N</A>
+        <A HREF="../../../avehst/seq/avehstin.html#ipoint">IPOINT</A> = 0
+      ELSE
+        <A HREF="../../../cleoks/typscn/typcde/typctl.html#lasync">LASYNC</A> = .FALSE.
+        CALL <A NAME=ASYNCK_SYS_1  HREF="../../../cleoks/typscn/typsio/asynrd.html#sys">SYS</A>$<A NAME=ASYNCK_GETMSG_1  HREF="../../../cleoks/typscn/typsio/asynrd.html#getmsg">GETMSG</A>(%<A NAME=ASYNCK_VAL_1  HREF="../../../cleoks/typscn/typsio/asynrd.html#val">VAL</A>(<A HREF="../../../cleoks/typscn/typsio/asynrd.html#iosb">IOSB</A>(1)),<A HREF="../../../cleoks/typscn/typsio/asynrd.html#len">LEN</A>,<A HREF="../../../cleoks/typscn/typsio/asynrd.html#text">TEXT</A>,,)
+        IF (<A HREF="../../../cleoks/typscn/typcde/typctl.html#iuntyp">IUNTYP</A>.GT.0) WRITE(UNIT=<A HREF="../../../cleoks/typscn/typcde/typctl.html#iuntyp">IUNTYP</A>,FMT=500) <A HREF="../../../cleoks/typscn/typsio/asynrd.html#text">TEXT</A>(:<A HREF="../../../cleoks/typscn/typsio/asynrd.html#len">LEN</A>)
+500     FORMAT (' TYPSCN: async check ',A)
+      END IF
+      END IF
+#endif
+#if defined(CLEO_UNIX)
+      CALL <A NAME=ASYNCK_ASYNCK_C_1  HREF="../../../cleoks/typscn/typsio/asynrd.html#asynck_c">ASYNCK_C</A>(<A HREF="../../../cleoks/typscn/typsio/asynrd.html#mbyt">MBYT</A>)
+      IF (<A HREF="../../../cleoks/typscn/typsio/asynrd.html#mbyt">MBYT</A>.EQ.-1) THEN
+        CONTINUE
+      ELSE
+        <A HREF="../../../cleoks/typscn/typcde/typctl.html#lasync">LASYNC</A> = .FALSE.
+        <A HREF="../../../cleoks/typscn/typsio/asynrd.html#lunsav">LUNSAV</A> = <A HREF="../../../cleoks/typscn/typcde/typctl.html#iunacc">IUNACC</A>
+        <A HREF="../../../cleoks/typscn/typcde/typctl.html#iunacc">IUNACC</A> = 5
+        <A HREF="../../../cleoks/typscn/typcde/typstr.html#cwtype">CWTYPE</A> = '.FALSE.'
+        <A HREF="../../../cleoks/typscn/typcde/typctl.html#nwtype">NWTYPE</A> = <A HREF="../../../cleoks/typscn/typsio/asynrd.html#len">LEN</A>('.FALSE.')
+        CALL <A NAME=ASYNCK_SYNRD_1  HREF="../../../cleoks/typscn/typsio/asynrd.html#synrd">SYNRD</A>
+        <A HREF="../../../cleoks/typscn/typcde/typctl.html#iunacc">IUNACC</A> = <A HREF="../../../cleoks/typscn/typsio/asynrd.html#lunsav">LUNSAV</A>
+      END IF
+#endif
+C
+      RETURN
+      END
+</PRE>
+<ADDRESS>
+<A HREF="http://w4.lns.cornell.edu/cgi-bin/mail?nk">nk@lns62.lns.cornell.edu</A>
+</ADDRESS>
+
+</BODY>
+

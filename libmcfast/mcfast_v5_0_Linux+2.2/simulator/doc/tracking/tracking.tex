@@ -1,0 +1,363 @@
+\def\sm{\rm\scriptscriptstyle}
+
+\documentstyle[12pt]{report}
+\begin{document}
+
+\chapter{Tracking in MCFAST}
+
+The current version of MCFAST performs parametrized tracking.  For each
+generated track, MCFAST assembles a covariance matrix that represents all of
+the materials and measurement planes traversed by the ideal track.  A
+reconstructed track is produced by smearing the generated track parameters
+according to the track's covariance matrix.
+
+The MCFAST tracking software comprises two major subsystems: track tracing
+and track pseudo-reconstruction.  The first subsystem follows each generated
+track and finds all of its intersections with each r-plane and z-plane.  Each
+such intersection (called a ``trace'') is stored in a FORTRAN structure that
+includes such information as the trace location, the track parameters at that
+location, elapsed path length and proper time, and the index number of any
+detector hit occuring at that trace.  Detector hit information is generated
+along with the traces.  The trace structures are then stored in a list that
+is ordered by proper time.
+
+The second subsystem (track pseudo-recontruction) follows the trace list of
+each track (proceeding from last to first) and assembles a covariance matrix,
+which is then used to smear the track parameters.  The resulting smeared
+track is stored for use in the user analysis subroutine.
+
+\section{Track Tracing}
+
+The main subroutine for track tracing is \verb'trk_trace_param', which is
+called from the subroutine \verb'usr_before_trigger'.  
+
+Two functions are called by \verb'trk_trace_param' to create the trace and hit
+information.  As was detailed in section~{\ref:geom}, the detector geometry
+is represented as an ordered list of radial cylinders and an ordered list of
+planes at fixed locations in $z$.  The subroutine \verb'trk_trace_central' 
+computes all of the traces and hits that occur on r-planes, while the
+subroutine \verb'trk_trace_forward' finds those that occur on z-planes.  The
+resulting lists of traces are combined and ordered by \verb'trk_trace_param'
+and stored in an array \verb'trace_par'.
+
+\subsection{Central Tracing}
+
+The first thing that \verb'trk_trace_central' does is determine where the
+track originates within the ordered list of r-planes.  The main loop of the
+function propagates the track outwards to each successive r-plane.  (The
+propagation can be broken up into steps if the user specifies a maximum
+path length or turning angle per step.  These are specified in the command
+input file.)
+
+At each iteration of this loop, the function checks whether the particle is
+still inside the detector volume, and whether the magnetic field has changed.
+If the magnetic field has changed unexpectedly (that is, if the particle
+exits a cylindrical field volume through one of its z-faces), the function
+calculates the point at which the particle left the field volume, places a
+trace at that point, and continues propagation from there.
+
+When a trace is created at a measurement surface (e.g. a layer of wires in a
+drift chamber), hit information is generated according to the type of
+detector located at that r-plane.
+
+If the r-plane represents any thickness of material, the function randomly
+determines whether a photon converts to an electron-positron pair.
+
+If the proper time exceeds the lifetime as determined in
+\verb'trk_trace_param', a trace is created at the appropriate decay point, and
+decay routines are called that generate the daughters and add them to the
+generated particle STDHEP common blocks.
+
+If a particle is incident upon a calorimeter, the particle tracing is stopped
+at that point (unless the particle is a muon).  The final trace indicates
+that an electromagnetic or hadronic shower commences at that point.
+
+\subsection{Forward Tracing}
+
+Tracing through the list of forward z-planes is handled by the function
+\verb'trk_trace_forward'.  The general structure of this function is very
+similar to \verb'trk_trace_central', except that it allows particles to
+exit a field volume through x-planes and y-planes, in addition to z-planes
+and r-planes, to account for particles that do not pass cleanly through
+a dipole's aperture.  (This of course can happen to a particle that is
+being traced through the list of r-planes, but we assume that no
+important r-plane traces would occur for a particle that leaves a dipole
+field through an x- or y-plane.)  The subroutine \verb'trk_find_dipole_exit'
+handles such cases.
+
+\subsection{Trace Types}
+
+We have mentioned two different types of traces, forward traces
+(representing intersections between the track and a surface at fixed $z$)
+and central traces (representing intersections with surfaces at fixed $r$).
+There are several other types of traces that deserve mention; here is the
+list of trace types from the file \verb'trace_types.inc':
+
+\begin{verbatim}
+
+      parameter (jtrace_rplane    =  1)  !Radial plane
+      parameter (jtrace_zplane    =  2)  !Z plane
+      parameter (jtrace_cone      =  3)  !Cone
+      parameter (jtrace_prod      =  4)  !Production
+      parameter (jtrace_decay     =  5)  !Decay in flight
+      parameter (jtrace_pair      =  6)  !Pair production
+      parameter (jtrace_absorb    =  7)  !Absorption
+      parameter (jtrace_emshower  =  8)  !E&M shower
+      parameter (jtrace_hadshower =  9)  !Hadron shower
+      parameter (jtrace_dummy     = 10)  !Dummy point
+
+\end{verbatim}
+
+Cone traces represent the intersection between the track and a conical
+surface.  These have not been fully implemented in the tracing.
+
+A production trace represents the production point of the track.  All
+tracks have production traces as their first trace.
+
+Decay traces, absorption traces, and shower traces denote the end points
+of tracks that suffer those fates.  Pair production traces represent
+the conversion of a photon into an $e^+e^-$ pair.
+
+Dummy traces are used primarily to facilitate graphical displays of MCFAST
+events.  In the command file, the user can set a maximum turning angle and
+a maximum step length; if a step between detector surfaces exceeds either
+of these values, the step is broken up into a series of smaller steps, and
+dummy traces are placed at the intervening points.  This helps prevent
+confusing visual effects that can occur with tightly curving tracks.  The
+dummy traces are ignored in the pseudo-reconstruction routines.
+
+\section{Track Pseudo-reconstruction}
+
+Track reconstruction usually entails doing some form of pattern recognition
+to find the track out of a set of detector hits, and then performing some
+sort of fitting procedure to reconstruct the track parameters.  MCFAST does
+neither of these things.  Although detector hits are generated for triggering
+purposes, it would not be appropriate to use these for track reconstruction,
+since by construction they lie along the generated track.
+
+Instead, the MCFAST track reconstruction routines assemble an $N \times N$
+covariance matrix for each track (where $N$ is the number of track
+parameters), and use this matrix to smear the track parameters randomly.  If
+the covariance matrix is appropriate to that detector and that track, then
+the distribution obtained by smearing that track a large number of times
+should be the same as what you would get from an idealized track fitting
+procedure, if you could pass a large number of real tracks with those same
+parameters through a real detector.
+
+Briefly, this is how it works.  The covariance matrix is the inverse of the
+error matrix for the track parameters.  If a detector were to measure each of
+the $N$ track parameters independently, the covariance matrix would be
+diagonal, and the $i^{\sm th}$ diagonal element would simply be
+$1/\sigma^2_i$, where $\sigma_i$ is the measurement uncertainty for the
+$i^{\sm th}$ track parameter.  Smearing the track parameters would then be
+a matter of multiplying each $\sigma_i$ by a Gaussian deviate, and adding it
+to the $i^{\sm th}$ track parameter.
+
+Any realistic detector design will make measurements that depend on more than
+one of the track parameters, however, so there will be off-diagonal elements
+in the covariance matrix; that is, there will be correlations between the
+measurements made on the track parameters.  Fortunately, this matrix can
+still be diagonalized.  By diagonalizing the covariance matrix, we find a new
+track parametrization in which the errors on the parameters are uncorrelated.
+(The relationship between these new parameters and parameters with a simple
+physical interpretation can be quite complicated).
+
+The matrix that diagonalizes the covariance matrix is simply the set of
+eigenvectors of the covariance matrix; the diagonalized covariance matrix is
+the associated set of eigenvalues.  These eigenvectors are, in fact, the
+basis vectors for the new track parametrization, expressed in terms of the
+old easily-interpreted basis vectors.
+
+In order to smear the parameters for the track in question, we first
+use the eigenvector matrix to transform those parameters into their
+representation in the new basis (this is simply a coordinate change).  In
+this coordinate system, the track parameters can be smeared independently as
+described above, using the eigenvalues as $1/\sigma_i^2$.  Once the track
+parameters are smeared, the coordinate system is rotated back into the
+familiar basis; that is, the smeared track parameters are transformed by the
+inverse process by which the original unsmeared track parameters were
+transformed.
+
+\section{Track Parametrizations}
+
+MCFAST uses three track parametrizations.  The $c$ parametrization is used
+for purely central detectors; the $f$ parametrization is used for purely
+forward detectors, and the $w$ track parametrization is used for detectors
+that combine both forward and central elements (i.e. planes and cylinders).
+The $c$ and $f$ parametrizations each have five parameters, whereas the
+$w$ parametrization has seven.
+
+\subsection{$c$ track parametrization}
+
+The $c$-track structure appears as follows in the include file
+\verb'ctrack_struct.inc':
+
+\begin{verbatim}
+
+      structure /ctrack_struct/
+        DFLOAT cu     !1/2R
+        DFLOAT phi0   !phi at PCA to reference point
+        DFLOAT da     !DCA to reference point (signed)
+        DFLOAT ct     !cot(theta)
+        DFLOAT z0     !z - zref at PCA to reference point
+        DFLOAT u0     !cos(phi0)
+        DFLOAT v0     !sin(phi0)
+        DFLOAT pt     !Pt
+        DFLOAT p      !Momentum
+        DFLOAT q      !Charge
+        DFLOAT xref   !x of reference point
+        DFLOAT yref   !y of reference point
+        DFLOAT zref   !z of reference point
+      end structure
+
+\end{verbatim}
+
+(\verb'DFLOAT' is a C preprocessor variable that translates to double
+precision in MCFAST.)
+
+The first five members of this structure are the track parameters
+represented in the covariance matrix.
+
+\subsection{$f$ track parametrization}
+
+The $f$-track structure appears as follows in the include file
+\verb'ftrack_struct.inc': 
+
+\begin{verbatim}
+
+      structure /ftrack_struct/
+        DFLOAT alpha   !1/Pz
+        DFLOAT xslp    !x' = dx/dz at z = zp
+        DFLOAT yslp    !y' = dy/dz at z = zp
+        DFLOAT xp      !x at z = zp
+        DFLOAT yp      !y at z = zp
+        DFLOAT zp      !z position of reference plane
+        DFLOAT pt      !Pt = sqrt(px**2 + py**2)
+        DFLOAT p       !Momentum
+        DFLOAT q       !Charge
+      end structure
+
+\end{verbatim}
+
+As was the case with the $c$-track structure, the first five members of the
+structure are the track parameters represented in the covariance matrix.
+
+\subsection{$w$ track parametrization}
+
+The $w$-track structure appears as follows in the include file
+\verb'wtrack_struct.inc': 
+
+\begin{verbatim}
+
+      structure /wtrack_struct/
+        DFLOAT px      !Px
+        DFLOAT py      !Py
+        DFLOAT pz      !Pz
+        DFLOAT E       !E
+        DFLOAT x       !x
+        DFLOAT y       !y
+        DFLOAT z       !z
+        DFLOAT pt      !Pt = sqrt(px**2 + py**2)
+        DFLOAT p       !Momentum
+        DFLOAT q       !Charge
+      end structure
+
+\end{verbatim}
+
+In this case, the first seven parameters have errors represented by the
+covariance matrix.
+
+\section{Assembling the Covariance Matrix}
+
+The covariance matrices for $f$-tracks, $c$-tracks, and $w$-tracks are
+created by the (misleadingly-named) routines \verb'pfit_fit_ftk',
+\verb'pfit_fit_ctk', and \verb'pfit_fit_wtk', respectively.  They are
+similar in structure, with the main difference that \verb'pfit_fit_ftk'
+and \verb'pfit_fit_ctk' utilize hits from only forward or central
+detector types, while \verb'pfit_fit_wtk' uses hits from all detector
+types.
+
+One of these routines is called once for each generated track.  The routines
+start by determining whether the track can be reconstructed (is the track
+charged, are there enough hits, etc.).  The routines then loop over all the
+traces associated with that track, starting with the last and working back
+towards the particle production point.  The matrix is propagated from trace
+to trace using the appropriate magnetic field.
+
+A trace can contribute to the covariance matrix in two ways: it either
+represents a measurement of the track or a scattering of the track off of
+material.
+
+\subsection{Adding Hits}
+
+\subsection{Multiple Scattering}
+
+\subsection{Propagation}
+
+\section{User Information}
+
+Tracking in MCFAST is essentially transparent to the user.  The tracing is
+done in one call to \verb'trk_trace_param' in the routine
+\verb'usr_before_trigger'; the pseudo-reconstruction is done in one call to
+\verb'fctl_offline' in the routine \verb'usr_analysis'.  These calls are made
+in the default user routines; they can be commented out if the user does not
+want to use tracking information.
+
+\subsection{Accessing Reconstructed Track Information}
+
+Most users will primarily be interested in the reconstructed (also called
+``smeared'' or ``offline'') track
+information.  This can be accessed by including the file 
+\verb'offline_track.inc' in any user analysis routine.
+
+After pseudo-reconstruction, there are \verb'trk_off_num' smeared tracks
+listed in the array \verb'trk_off'.  Each such track has a structure
+described in the include file \verb'offline_track_struct.inc' (the user need
+not explicitly include this file, as it will be automatically included by
+\verb'offline_track.inc').  The track parameters are stored in the
+$w$-track parametrization described above.
+
+The offline track structure from \verb'offline_track_struct.inc' is
+given here:
+
+\begin{verbatim}
+
+      structure /offline_track_struct/
+        record /wtrack_struct/ w  !Track parameters
+        DFLOAT mass         !Mass
+        DFLOAT cov(7,7)     !Covariance matrix
+        DFLOAT chisq        !Chisquare of fit
+        integer nhit        !Number of hits in fit
+        integer nhit_sil    !Number of silicon hits
+        integer nhit_stereo !Number of hits with stereo info
+        integer icov        !0 ==> covariance matrix not defined
+                            !1 ==> covariance matrix defined
+        integer hep         !Pos. of corresp. track in HEPEVT list
+      end structure
+
+\end{verbatim}
+
+A user wanting to know the $z$ momentum of the $i^{\sm th}$ offline track,
+for example, would need to look at \verb'trk_off(i).w.pz'.
+
+\subsection{Accessing Tracing Information}
+
+Tracing information can be made available in any routine (after tracing has
+been performed) by including the file \verb'trace.inc'.  The traces are
+stored in an array \verb'trace_par', where each element is a structure
+described by in the file \verb'trace_struct.inc'.
+
+The user must be aware that the array \verb'trace_par' contains all of the
+traces for all of the tracks in the event.  In order to determine which
+traces are associated with which generated track, the user must include
+the file \verb'hep_trace.inc'.  The number of traces associated with the
+$i^{\sm th}$ generated track would then be \verb'hep_trace(i).ntrace', and
+the first of these traces would be \verb'hep_trace(i).first_trace'.
+
+To associate offline (i.e. smeared) tracks with generated tracks, the
+user should examine (for the $i^{\sm th}$ offline track) the member
+\verb'trk_off(i).hep'.  This is the pointer to where the generated track
+appears in the \verb'HEPEVT' common block.
+
+\end{document}
+\end

@@ -1,0 +1,72 @@
+#!/usr/local/bin/perl
+######################################################################## 
+# get_c_dep myfile.c(c) myfile.d 
+#
+# This script runs gcc on a C or C++ file and prepends the path
+# to myfile.o in the resultind myfile.d dependency file.
+# Create dependencies for both myfile.o and myfile_g.o.
+#
+# Created Jan. 12, 1998 - Lynn Garren
+#
+######################################################################## 
+# describe command syntax if no arguments are given
+if ( $ARGV[1] eq "" ) {
+    print("get_c_dep [opts] myfile.c(c) myfile.d\n");
+    print("opts: \n");
+    print("	-cpp <cppflags>   C preprocessor flags\n");
+    print(" \n");
+    print("get_c_dep - create c dependecy file using gcc -MM\n");
+    print(" \n");
+    die "get_c_dep: specify file names\n";
+}
+# read command line arguments
+$cfile = "";
+# read command line arguments
+$i = 0;
+while ( $i <= $#ARGV ) {
+   if( $ARGV[$i] =~ /^-/ ) {
+      $arg = $ARGV[$i];
+      if( $arg eq "-cpp" ) {
+         $i++;
+         $cppflag = $ARGV[$i]; 
+      } else {
+         print(" undefined option $arg will be ignored\n");
+      }
+   } elsif( $cfile eq "" ) {
+      $cfile = $ARGV[$i];
+   } else {
+      $depfile = $ARGV[$i];
+   }
+   $i++;
+}
+##print "gcc -MM $cppflag -o $depfile $cfile\n";
+
+# extract path
+@words=split(/\//,$depfile);
+$file = pop( @words );
+$path = join('/',@words);
+
+# create myfile.d
+open( NEW, ">$depfile");
+open( DP, "gcc -MM $cppflag $cfile |");
+while($line = <DP> ) {
+   ##print "$line";
+   if( index($line," ") != 0 ) { #first character is not a blank (for continuation)
+       $line = $path."/".$line;
+   }
+   print NEW "$line";
+}
+close DP;
+open( DP, "gcc -MM $cppflag $cfile |");
+while($line = <DP> ) {
+   ##print "$line";
+   if( index($line," ") != 0 ) { #first character is not a blank (for continuation)
+       $line =~ s/^.*\:/:/;	#strip up to colon
+       $outfile = $depfile;
+       $outfile =~ s/\.d/\_g\.o/;
+       $line = $outfile.$line;
+   }
+   print NEW "$line";
+}
+close DP;
+close NEW;

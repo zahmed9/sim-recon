@@ -1,0 +1,18 @@
+
+template LayerSizRect(500)
+  int det
+  parent SizRect
+  int lyr
+  int nWaferX
+  int nWaferY
+  child WfrSizRect
+  real zLayerLocal  
+  real rotation
+  real Xlen
+  real Ylen
+  real GapXlen
+  real GapYlen
+  char StaggeringPattern
+end template
+
+

@@ -1,0 +1,203 @@
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:33  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1994/10/08  02:21:35  zfiles
+* first version of qqlib in CVS
+*
+*
+#include "sys/CLEO_machine.h"
+#include "pilot.h"
+*CMZ :  1.03/20 12/08/91  11.08.11  by  R.A.FULTON
+*-- Author :
+        SUBROUTINE GGPRNT (UNIT)
+
+#include "qqlib/gggseq/ggprms.inc"
+#include "qqlib/gggseq/ggmodl.inc"
+#include "qqlib/gggseq/sintag.inc"
+#include "qqlib/gggseq/fragmt.inc"
+#include "qqlib/gggseq/ggcombo.inc"
+#include "qqlib/gggseq/wgtsum.inc"
+#include "geant/gcdes/ludat1.inc"
+
+       INTEGER   UNIT
+       INTEGER   ICOMB, L
+C
+       REAL      APT, D1TMP, D2TMP, EFF, EFF1, EFFPC, ELUM, ERR, ERR1
+       REAL      FSUM, SIG, SIG1, SDEVW, LUMIN
+C
+C     compute cross section and program efficiency.
+      SIG=0.
+      EFF=0.
+      SIG1=0.
+      EFF1=0.
+      IF(TRY2G.LT.0.1)GOTO 10
+      EFF = OK2G/TRY2G
+      FSUM = SNGL(WSUM)/TRY2G
+      IF (NTAG2G .EQ. 0) THEN
+      SIG=2.*FACT2G*GGAREA*EPAMAX*DTAG*EFF
+      ELSE IF (NTAG2G .EQ. 1) THEN
+      SIG=2.*FACT2G*GGAREA*EPAMAX*D2GTH*DTAG*EFF
+      ELSE IF (NTAG2G .EQ. 2) THEN
+      D1TMP = D1GTH/2.
+      D2TMP = D2GTH/2.
+      SIG=2.*FACT2G*GGAREA*EPAMAX*D1TMP*D2TMP*EFF
+      ELSE
+      WRITE (UNIT,*) ' ERROR IN GGPRNT: NTAG2G = ',NTAG2G
+      ENDIF
+
+      IF (NTAG2G .EQ. 0) THEN
+      SIG1=2.*FACT2G*GGAREA*DTAG*FSUM
+      ELSE IF (NTAG2G .EQ. 1) THEN
+      SIG1=2.*FACT2G*GGAREA*D2GTH*DTAG*FSUM
+      ELSE IF (NTAG2G .EQ. 2) THEN
+      D1TMP = D1GTH/2.
+      D2TMP = D2GTH/2.
+      SIG1=2.*FACT2G*GGAREA*D1TMP*D2TMP*FSUM
+      ELSE
+      WRITE (UNIT,*) ' ERROR IN GGPRNT: NTAG2G = ',NTAG2G
+      ENDIF
+      EFFPC=100.*EFF
+      WRITE(UNIT,50)
+  50  FORMAT(1H0,25X,'>>>TWO-PHOTON GENERATOR NORMALIZATION DATA')
+      ERR  = SIG*SQRT(ABS(1.0 - EFF)/(EFF*TRY2G))
+      ERR1 = SIG1*SQRT(ABS(SNGL(WSUMSQ/WSUM**2) - 1./TRY2G))
+      SDEVW = ERR1*SQRT(TRY2G)
+      LUMIN = OK2G/(1000.*SIG1)
+      ELUM  = LUMIN*ERR1/SIG1
+  10  CONTINUE
+      WRITE(UNIT,180) LUMIN,ELUM,SIG1,ERR1,SDEVW,SIG,ERR
+  180 FORMAT(1H ,22X,'>>>LUMINOSITY = ',G12.6,' +/- ',G12.6,' pbs.-1',
+     +      /,23X,'>>>TOTAL CROSS SECTION EE=>EEX    =',G12.6,' NB.',
+     +      /,23X,'>>>ERROR ON TOTAL CROSS SECTION   =',G12.6,' NB.',
+     +      /,23X,'>>>STANDARD DEVIATION OF WEIGHTS  =',G12.6,' NB.',
+     +      /,23X,'>>>Unweighted Estimate(EE=>EEX)   =',G12.6,' NB.',
+     +      /,23X,'>>>Error on Unweighted Calculation=',G12.6,' NB.')
+      WRITE(UNIT,200) TRY2G,OK2G,EFFPC,NEPAUP
+  200 FORMAT(1H ,22X,'>>>MONTE-CARLO ATTEMPTS =',G12.1/
+     +           23X,'>>>MONTE-CARLO SUCCESSES =',G12.1/
+     +           23X,'>>>MONTE-CARLO EFFICIENCY =',F6.2,' %.'/
+     +           23X,'>>>NUMBER OF EPA BOOSTS =',I5,/ )
+      WRITE(UNIT,201)ITERS
+ 201    FORMAT(26X,'>>>BAD PHASE SPACE POINTS = ',I6)
+      WRITE(UNIT,205)TAGMN,TAGMX,ANGUNT,EPAUPS,
+     +  T1MIN,T2MAX,T3MIN,T3MAX
+ 205    FORMAT(
+     +  5X,'  TAGMN   = ',G12.6/
+     +  5X,'  TAGMX   = ',G12.6/
+     +  5X,'  ANGUNT  = ',G12.6/
+     +  5X,'  EPA MAX SO FAR = ',G12.6/
+     +  5X,'  MIN ACCEPTED  CMS TAGGING  ANGLE SO FAR  = ',G12.6/
+     +  5X,'  MAX ACCEPTED  CMS UNTAGGED ANGLE SO FAR = ',G12.6/
+     +  5X,'  MIN GENERATED CMS TAGGED   ANGLE SO FAR = ',G12.6/
+     +  5X,'  MAX GENERATED CMS TAGGED   ANGLE SO FAR = ',G12.6)
+      WRITE(UNIT,206)QRKM,IQRK,NUMQRK,
+     +  LMSBSQ,XSMIN,XSMAX
+ 206    FORMAT(
+     +  5X,'  QUARK MASS (NOT ALWAYS APPLICABLE) = ',G12.6/
+     +  5X,'  QUARK TYPE (NOT ALWAYS APPLICABLE) = ',I12/
+     +  5X,'  MAX NUMBER OF QUARKS ALLOWED (NAA) = ',I12/
+     +  5X,'  DEFAULT VALUE OF LAMDA_MS_BAR**2   = ',G12.6/
+     +  5X,'  MIN VALUE OF X ACCEPTED            = ',G12.6/
+     +  5X,'  MAX VALUE OF X ACCEPTED           = ',G12.6/ )
+C
+        IF(MODE2G.EQ.5) THEN
+C
+      WRITE(UNIT,211)F2TYPE
+      IF(F2TYPE.EQ.1)THEN
+         WRITE(UNIT,212)
+      ELSEIF(F2TYPE.EQ.2)THEN
+         WRITE(UNIT,213)
+      ELSEIF(F2TYPE.EQ.3.AND..NOT.(GVDM.OR.RHOPOL))THEN
+         WRITE(UNIT,214)
+      ELSEIF(F2TYPE.EQ.4)THEN
+         WRITE(UNIT,215)
+      ELSEIF(F2TYPE.EQ.5 .AND. .NOT.TARGMS)THEN
+         WRITE(UNIT,216)
+      ELSEIF(F2TYPE.EQ.6)THEN
+         WRITE(UNIT,207)PTBRK
+      ELSEIF(F2TYPE.EQ.7.OR.F2TYPE.EQ.8)THEN
+         WRITE(UNIT,208)PTBRK
+         ICOMB = COMBS(1) + COMBS(2) + COMBS(3)
+         WRITE(UNIT,209)COMBS,ICOMB
+      ENDIF
+
+ 211    FORMAT(5X,'  F2_MODEL_NUM = ',I12)
+ 212    FORMAT(5X,'  F2 MODEL --->F2 = ALPHA')
+ 213    FORMAT(5X,'  F2 MODEL --->F2 = ALPHA*|Q|')
+ 214    FORMAT(5X,'  F2 MODEL --->F2 = ALPHA*|Q**2|')
+ 215    FORMAT(5X,'  F2 MODEL --->F2 = Quark Parton Model')
+ 216    FORMAT(5X,'  F2 MODEL --->F2 = alpha*log(Q**2/Lambda**2)')
+ 207    FORMAT(5X,'  F2 MODEL --->F2 = 3JET MODEL, PTBRK = ',G12.6)
+ 208    FORMAT(5X,
+     +  '  F2 MODEL --->F2 = ALL INCLUSIVE BACKGROUND MODEL, PTBRK = ',
+     +  G12.6)
+ 209    FORMAT(1X,'INCLUSIVE COMBS(NO CUTS) = ',3(I6,2X),' TOTALS = ',
+     +   I6,/)
+C
+C
+      IF(F2TYPE.EQ.5 .AND. TARGMS)WRITE(UNIT,217)
+      IF(F2TYPE.GE.8)WRITE(UNIT,218)F2TYPE
+      IF(DOFRAG)WRITE(UNIT,219)
+      IF(F2TYPE.EQ.3)THEN
+        WRITE(UNIT,220)
+      ELSE
+        WRITE(UNIT,221)
+      ENDIF
+      IF(DOFRAG)WRITE(UNIT,223)
+      IF(NORAMP.AND.DOFRAG)THEN
+        WRITE(UNIT,224)
+      ELSEIF(.NOT.NORAMP.AND.DOFRAG)THEN
+        WRITE(UNIT,225)
+      ENDIF
+      IF(F2TYPE.GE.4 .AND. TARGMS)WRITE(UNIT,226)
+      IF(DOFRAG)WRITE(UNIT,229)
+      IF(LUMTL)THEN
+        WRITE(UNIT,232)
+      ELSE
+        WRITE(UNIT,233)
+      ENDIF
+ 217    FORMAT(
+     +  5X,'  F2 MODEL --->F2 = alpha*log(Q**2/(Lambda**2+Q2**2))')
+ 218    FORMAT(5X,'  F2TYPE = ',I12,' ****MODEL NOT DEFINED****')
+ 219    FORMAT(5X,'  LUND FRAGMENTATION IS ---> ON <---- !!!')
+ 220    FORMAT(5X,'  QUARK ANGULAR DIST. ---VDM---')
+ 221    FORMAT(5X,'  QUARK ANGULAR DIST. ---QPM---')
+ 223    FORMAT(5X,'  MULTI-HADRONIC LUND FRAGMENTATION USED')
+ 224    FORMAT(5X,'  NO RAMPING OF LUND PARAMETERS ' )
+ 225    FORMAT(5X,'  RAMPING OF LUND PARAMETERS AS PER LUGGEV.FOR')
+ 226    FORMAT(5X,'  TARGET MASS EFFECTS INCLUDED IN F2 MODEL')
+ 229    FORMAT(5X,'  --->FRAGMENTATION ON BUT PRESELECTION IS OFF<--')
+ 232    FORMAT(5X,'  SIGMA LT IS USED ')
+ 233    FORMAT(5X,'  SIGMA LT = 0')
+      IF(DOFRAG)THEN
+        WRITE(UNIT,234)
+ 234      FORMAT(5X,'  LUND FRAGMENTATION PARAMETERS :')
+C
+        CALL LULIST(5)
+C
+      ENDIF
+       IF (F2TYPE .EQ. 3)THEN
+          IF(RHOPOL.OR.GVDM)THEN
+             WRITE(UNIT,242)
+             APT = 1./EXPSL**2
+             WRITE(UNIT,243)APT
+             WRITE(UNIT,244)
+          ELSEIF(GVDM)THEN
+             WRITE(UNIT,241)
+             WRITE(UNIT,245)F2TYPE
+          ELSE
+             WRITE(UNIT,245)F2TYPE
+          ENDIF
+        ENDIF
+      ENDIF
+      RETURN
+ 241    FORMAT(5X,'  F2 MODEL --->F2 = GVDM')
+ 242    FORMAT(5X,'  F2 MODEL --->F2 = RHOPOL')
+ 243    FORMAT(5X,' QUARK PT DIST IS EXP(-A*Pt**2) WHERE A =',F6.3)
+ 244    FORMAT(5X,' VECTOR DOMINANCE MODEL; *** QPM *** QUARK ANGLES')
+ 245    FORMAT(5X,' UNIT FORM FACTOR FOR F2 MODEL  =  ',I5)
+      END

@@ -1,0 +1,114 @@
+#!/usr/local/bin/perl
+
+require "getopts.pl";
+
+&Getopts('LS:nrs:');
+
+#$TITLE = "TITLE." . `basename $ENV{PWD}`;
+$PWD = `pwd`;
+if ($opt_s) {
+  $TITLE = "$opt_s" . "/TITLE." . `basename $PWD`;
+} else {
+  $TITLE = "TITLE." . `basename $PWD`;
+}
+chop($TITLE);
+$line_count = 0;
+open(TITLE, $TITLE) || die "Could not find $TITLE: $!\n";
+while (<TITLE>) {
+    $line_count++;
+    if (/^\*\s+\w+\s+\d+\.\d+\/\d+\s+\d+\s+\d+\.\d+.*$/) {
+	$lastline = $_;
+	print if $opt_L;
+    }
+}
+close(TITLE);
+
+if ((!@ARGV || $opt_s) && !$opt_S) {
+    print $lastline unless $opt_L;
+    exit;
+}
+
+$cp_command = "cp " . $TITLE . " Tmpl";
+system($cp_command);
+
+$arg = shift;
+
+($star, $user, $vrl, $date, $time) = split(' ', $lastline);
+($vr, $level) = split('/', $vrl);
+($version, $release) = split(/\./, $vr);
+
+if ($opt_S) {
+    die "Version $opt_S not in v.rr/ll format\n"
+	unless $opt_S =~ /\d+\.\d\d+\/\d\d+/;
+    $vrl = $opt_S;
+    ($vr, $level) = split('/', $vrl);
+    ($version, $release) = split(/\./, $vr);
+} elsif ($arg eq '+') {
+    $level++;
+} elsif ($arg eq '+0') {
+    $release++;
+    $level   = '00';
+} elsif ($arg eq '+00') {
+    $version++;
+    $release = '00';
+    $level   = '00';
+}
+
+#($myname) = getpwuid($<);
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+
+$year %= 100;
+$date = sprintf("%02d%02d%02d", $year, $mon+1, $mday);
+
+open(TITLE, ">>$TITLE") || die "Could not find $TITLE for append: $!\n";
+
+#* USER   1.00/04  900301  18.42
+printf TITLE "* %-6s%2d.%02d/%02d  %6s  %2d.%02d\n*\n*\n*\n",
+	$user, $version, $release, $level, $date, $hour, $min;
+close(TITLE);
+$line_count += 3;
+$emacs_command = "emacs  +" . $line_count . " " . $TITLE;
+system($emacs_command);
+$diff_command = "diff " . $TITLE . " Tmpl | grep \"<\" > Tmpll";
+system($diff_command);
+#
+# Send mail to clib
+#
+$PWD_BASE = `basename $PWD`;
+$uname = (getpwuid($<))[0];
+open(MAIL,"|Mail -s \"Please update $PWD_BASE\" nk,clib,$uname") || die "Could not send mail\n";
+printf MAIL "Please update ";
+printf MAIL "$PWD_BASE\n";
+open(TEMP, Tmpll) || die "Could not find Tmpll: $!\n";
+while (<TEMP>) {
+    $ss = substr($_,2,80);
+    printf MAIL "$ss";
+}
+
+close(TEMP);
+close(MAIL);
+
+if (!$opt_n) {
+    $cvs_ci = "cvs ci .";
+    system($cvs_ci);
+    if ($opt_r) {
+	$cvs_tag = "cvs tag " . sprintf("v%d-%02d-%02d",$version,$release,$level);
+	system($cvs_tag);
+    }
+}
+
+open(VERSLIST,">>/cleo/incoming/new.lis") || die "Coule not open /cleo/incoming/new.lis\n";
+printf VERSLIST  "*****  Submission by %s  *****\n", $uname;
+open(TEMP, Tmpll) || die "Could not find Tmpll: $!\n";
+while (<TEMP>) {
+    $ss = substr($_,2,80);
+    printf VERSLIST "$ss";
+}
+
+close(TEMP);
+close(VERSLIST);
+
+unlink("Tmpl");
+unlink("Tmpll");
+
+

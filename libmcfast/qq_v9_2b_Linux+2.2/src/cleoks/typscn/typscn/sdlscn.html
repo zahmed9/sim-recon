@@ -1,0 +1,79 @@
+<HEAD>
+<TITLE>cleoks/typscn/typscn/sdlscn.F</TITLE>
+</HEAD>
+<BODY>
+<PRE>
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:19  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1995/08/01  18:00:12  nk
+* Consolidation
+*
+* Revision 1.1  1995/07/31 19:39:42  nk
+* Added typscn
+*
+* Revision 1.1.1.1  1994/10/05  13:45:39  zfiles
+* first version of typscn in CVS
+*
+*
+#include &QUOT<A HREF="../../../sys/CLEO_machine.html">sys/CLEO_machine.h</A>&QUOT
+#include &QUOT<A HREF="../../../pilot.html">pilot.h</A>&QUOT
+*CMZ :  1.00/00 12/05/89  16.52.48  by  Ian C. Brock
+*-- Author :
+C
+C----------------------------------------------------------------------------
+C Store up to DIMDEL-2 legal delimiter characters. Space and tab are always
+C the first two.
+C
+*=*=*=*= SDLSCN.html =*=*=*=*
+
+</PRE>
+
+<A HREF="http://w4.lns.cornell.edu/Harvest/brokers/w4-public/">Search Keyword</A>
+<H1>SUBROUTINE SDLSCN</H1>
+
+<PRE>
+
+      SUBROUTINE <A NAME=sdlscn>SDLSCN</A>(<A HREF="../../../cleoks/typscn/typscn/sdlscn.html#cusdel">CUSDEL</A>)
+      SAVE
+C
+C     CUSDEL defines users delimiters (input).
+C
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typpar.html">cleoks/typscn/typcde/typpar.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typchr.html">cleoks/typscn/typcde/typchr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typscn.html">cleoks/typscn/typcde/typscn.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typstr.html">cleoks/typscn/typcde/typstr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typctl.html">cleoks/typscn/typcde/typctl.inc</A>&QUOT
+C
+      CHARACTER*(*) <A NAME=cusdel>CUSDEL</A>
+      INTEGER  <A NAME=i>I</A>
+      INTEGER  <A NAME=l>L</A>
+C
+      <A HREF="../../../cleoks/typscn/typscn/sdlscn.html#l">L</A> = <A HREF="../../../cleoks/typscn/typscn/sdlscn.html#min">MIN</A>(<A HREF="../../../cleoks/typscn/typscn/sdlscn.html#len">LEN</A>(<A HREF="../../../cleoks/typscn/typscn/sdlscn.html#cusdel">CUSDEL</A>),<A HREF="../../../cleoks/typscn/typcde/typpar.html#dimdel">DIMDEL</A>-2) + 2
+      <A HREF="../../../cleoks/typscn/typcde/typctl.html#ndelim">NDELIM</A> = 2
+      DO 10 <A HREF="../../../cleoks/typscn/typscn/sdlscn.html#i">I</A>=3,<A HREF="../../../cleoks/typscn/typscn/sdlscn.html#l">L</A>
+      IF (<A HREF="../../../roarlib/seq/rdtemp.html#index">INDEX</A>(<A HREF="../../../cleoks/typscn/typcde/typchr.html#ctabsp">CTABSP</A>,<A HREF="../../../cleoks/typscn/typscn/sdlscn.html#cusdel">CUSDEL</A>(<A HREF="../../../cleoks/typscn/typscn/sdlscn.html#i">I</A>-2:<A HREF="../../../cleoks/typscn/typscn/sdlscn.html#i">I</A>-2)).EQ.0) THEN
+              <A HREF="../../../cleoks/typscn/typcde/typstr.html#cdelim">CDELIM</A>(<A HREF="../../../cleoks/typscn/typscn/sdlscn.html#i">I</A>:<A HREF="../../../cleoks/typscn/typscn/sdlscn.html#i">I</A>) = <A HREF="../../../cleoks/typscn/typscn/sdlscn.html#cusdel">CUSDEL</A>(<A HREF="../../../cleoks/typscn/typscn/sdlscn.html#i">I</A>-2:<A HREF="../../../cleoks/typscn/typscn/sdlscn.html#i">I</A>-2)
+              <A HREF="../../../cleoks/typscn/typcde/typctl.html#ndelim">NDELIM</A> = <A HREF="../../../cleoks/typscn/typcde/typctl.html#ndelim">NDELIM</A> + 1
+      END IF
+10    CONTINUE
+      RETURN
+      END
+</PRE>
+<H1>Cross references</H1>
+<PRE>
+Called from <A HREF="../../../dvlib/dvlib/dvcmin.html#DVCMIN_SDLSCN_1>dvcmin_1</A>
+Called from <A HREF="../../../ftlib/ftgeom/fgread.html#FGREAD_SDLSCN_1>fgread_1</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgread.html#FGREAD_SDLSCN_1>fgread_1</A>
+Called from <A HREF="../../../qqlib/decay/qqrfil.html#QQRFIL_SDLSCN_1>qqrfil_1</A>
+</PRE>
+<ADDRESS>
+<A HREF="http://w4.lns.cornell.edu/cgi-bin/mail?nk">nk@lns62.lns.cornell.edu</A>
+</ADDRESS>
+
+</BODY>
+

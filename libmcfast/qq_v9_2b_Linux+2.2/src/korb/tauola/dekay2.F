@@ -1,0 +1,132 @@
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:31  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1994/11/22  16:57:02  zfiles
+* first version of korb in CVS
+*
+*
+#include "sys/CLEO_machine.h"
+#include "pilot.h"
+*CMZ :  2.00/00 21/01/93  15.42.29  by  Alan Weinstein
+*-- Author :
+      SUBROUTINE DEKAY2(IMOD,HH,ISGN)
+C     *******************************
+C THIS ROUTINE  SIMULATES TAU-  DECAY
+      COMMON / DECP4 / PP1(4),PP2(4),KF1,KF2
+      COMMON / JAKI   /  JAK1,JAK2,JAKP,JAKM,KTOM
+      COMMON / TAUBMC / GAMPMC(30),GAMPER(30),NEVDEC(30)
+      REAL*4            GAMPMC    ,GAMPER
+      REAL  HH(4)
+      REAL  HV(4),PNU(4),PPI(4)
+      REAL  PWB(4),PMU(4),PNM(4)
+      REAL  PRHO(4),PIC(4),PIZ(4)
+      REAL  PAA(4),PIM1(4),PIM2(4),PIPL(4)
+      REAL  PKK(4),PKS(4)
+      REAL  PNPI(4,6)
+      REAL  PHOT(4)
+      REAL  PDUM(4)
+      DATA NEV,NPRIN/0,10/
+      KTO=2
+      IF(JAK2.EQ.-1) RETURN
+      IMD=IMOD
+      IF(IMD.EQ.0) THEN
+C     =================
+      JAK=JAK2
+      IF(JAK2.EQ.0) CALL JAKER(JAK)
+      IF(JAK.EQ.1) THEN
+        CALL DADMEL(0, ISGN,HV,PNU,PWB,PMU,PNM,PHOT)
+      ELSEIF(JAK.EQ.2) THEN
+        CALL DADMMU(0, ISGN,HV,PNU,PWB,PMU,PNM,PHOT)
+      ELSEIF(JAK.EQ.3) THEN
+        CALL DADMPI(0, ISGN,HV,PPI,PNU)
+      ELSEIF(JAK.EQ.4) THEN
+        CALL DADMRO(0, ISGN,HV,PNU,PRHO,PIC,PIZ)
+      ELSEIF(JAK.EQ.5) THEN
+        CALL DADMAA(0, ISGN,HV,PNU,PAA,PIM1,PIM2,PIPL,JAA)
+      ELSEIF(JAK.EQ.6) THEN
+        CALL DADMKK(0, ISGN,HV,PKK,PNU)
+      ELSEIF(JAK.EQ.7) THEN
+        CALL DADMKS(0, ISGN,HV,PNU,PKS ,PKK,PPI,JKST)
+      ELSEIF(JAK.EQ.8.OR.JAK.EQ.9) THEN
+        JNPI=JAK-7
+        CALL DAD4PI(0, ISGN,HV,PNU,PWB,PNPI,JNPI)
+      ELSEIF(JAK.GT.9.AND.JAK.LE.11) THEN
+        JNPI=JAK-7
+        CALL DEXNPI(0, ISGN,PNU,PWB,PNPI,JNPI)
+      DO 32 I=1,3
+ 32   HV(I)=0.
+      ELSEIF(JAK.GE.12.AND.JAK.LE.19) THEN
+        JAA=JAK-11
+        CALL DADMPK(0, ISGN,HV,PNU,PAA,PIM1,PIM2,PIPL,JAA)
+      ELSE
+        GOTO 902
+      ENDIF
+      DO 33 I=1,3
+ 33   HH(I)=HV(I)
+      HH(4)=1.0
+      ELSEIF(IMD.EQ.1) THEN
+C     =====================
+      NEV=NEV+1
+        IF (JAK.LT.20) THEN
+           NEVDEC(JAK)=NEVDEC(JAK)+1
+         ENDIF
+      DO 34 I=1,4
+ 34   PDUM(I)=.0
+      IF(JAK.EQ.1) THEN
+        CALL DWLUEL(2,ISGN,PNU,PWB,PMU,PNM)
+        CALL DWRPH(KTOM,PHOT)
+        DO 10 I=1,4
+ 10     PP2(I)=PMU(I)
+ 
+      ELSEIF(JAK.EQ.2) THEN
+        CALL DWLUMU(2,ISGN,PNU,PWB,PMU,PNM)
+        CALL DWRPH(KTOM,PHOT)
+        DO 20 I=1,4
+ 20     PP2(I)=PMU(I)
+ 
+      ELSEIF(JAK.EQ.3) THEN
+        CALL DWLUPI(2,ISGN,PPI,PNU)
+        DO 30 I=1,4
+ 30     PP2(I)=PPI(I)
+ 
+      ELSEIF(JAK.EQ.4) THEN
+        CALL DWLURO(2,ISGN,PNU,PRHO,PIC,PIZ)
+        DO 40 I=1,4
+ 40     PP2(I)=PRHO(I)
+ 
+      ELSEIF(JAK.EQ.5) THEN
+        CALL DWLUAA(2,ISGN,PNU,PAA,PIM1,PIM2,PIPL,JAA)
+        DO 50 I=1,4
+ 50     PP2(I)=PAA(I)
+      ELSEIF(JAK.EQ.6) THEN
+        CALL DWLUKK(2,ISGN,PKK,PNU)
+        DO 60 I=1,4
+ 60     PP1(I)=PKK(I)
+      ELSEIF(JAK.EQ.7) THEN
+        CALL DWLUKS(2,ISGN,PNU,PKS,PKK,PPI,JKST)
+        DO 70 I=1,4
+ 70     PP1(I)=PKS(I)
+      ELSEIF(JAK.GE.8.AND.JAK.LE.11) THEN
+CAM     MULTIPION DECAY
+        JNPI=JAK-7
+        CALL DWLNPI(2,ISGN,PNU,PWB,PNPI,JNPI)
+        DO 80 I=1,4
+ 80     PP1(I)=PWB(I)
+      ELSEIF(JAK.GE.12.AND.JAK.LE.19) THEN
+        JAA=JAK-11
+        CALL DWLUPK(2,ISGN,PNU,PAA,PIM1,PIM2,PIPL,JAA)
+        DO 90 I=1,4
+ 90     PP2(I)=PAA(I)
+      ENDIF
+ 
+      ENDIF
+C     =====
+      RETURN
+ 902  PRINT 9020
+ 9020 FORMAT(' ----- DEKAY2: WRONG JAK')
+      STOP
+      END

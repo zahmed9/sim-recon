@@ -1,0 +1,37 @@
+#! /bin/csh
+#
+# Find a file in a list of directories.
+#
+
+# This list is for mcfast and evgen.
+set dirlist = " $MCFINC/event $MCFINC/geom $MCFINC/trig \
+                $STDHEP_DIR/src/inc $MCFIO_DIR/src  \
+                $MCFSRC/dst/src $MCFSRC/dbin_mcfast/src $QQ_DIR/src/inc \
+                $EVGEN_DIR/inc $LUND_DIR/src/inc $HERWIG_DIR/src . "
+
+
+# With dirlist defined as above, the construction:
+# foreach stuff ( $dirlist )
+# has spurious blank strings.  I stripped these away with the awk
+# commands below.
+
+@ nfound =0 
+foreach dirl ( $dirlist )
+  if ( `echo $dirl | awk '{print length($0)}' ` != "0" ) then
+     if ( -f $dirl/$1".inc" ) then
+        echo $dirl/$1".inc"
+        @ nfound +=1
+     endif
+  endif
+end
+
+if ( $nfound == 0 ) then
+   echo "File " $1".inc not found in any of: "
+
+   foreach dirl ( $dirlist )
+     if ( `echo $dirl | awk '{print length($0)}' ` != "0" ) \
+        echo "   " $dirl
+   end
+endif
+
+

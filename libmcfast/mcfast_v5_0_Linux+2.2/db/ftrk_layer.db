@@ -1,0 +1,24 @@
+template LayerFTRK(500)
+  int det
+  parent FTrk
+  int lyr
+  real z_local
+  real thick
+  real xmin
+  real xmax
+  real xmin_gap
+  real xmax_gap
+  real ymin
+  real ymax
+  real ymin_gap
+  real ymax_gap
+  real stereo
+  int ncell
+  real coord0_x
+  real coord0_y
+  int type
+  real eff_hit
+  real siga
+  real sigb
+  real sigc
+end template

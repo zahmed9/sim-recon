@@ -1,0 +1,15 @@
+template LayerDRFCatho(2)
+  int det
+  parent Drift
+  int lyr
+  real delta_r
+  real zlen
+  int nstrips
+  int n_phi_segm
+  int ID_anode
+  int cell_offset
+  real eff_hit
+  real resa
+  real resb
+  real resc
+end template

@@ -1,0 +1,95 @@
+#!/usr/local/bin/perl
+######################################################################## 
+# add_dep myfile.d depend_file     - add myfile.d to depend_file
+#
+# Created Jan. 12, 1998 - Lynn Garren
+#
+######################################################################## 
+# describe command syntax if no arguments are given
+if ( $ARGV[1] eq "" ) {
+    print("cdep myfile.d depend_file\n");
+    print(" \n");
+    print("cdep - add myfile.d to depend_file\n");
+    print(" \n");
+    die "add_dep: specify file names\n";
+}
+
+#-------- trap signals
+$SIG{'INT'} = 'handler';
+$SIG{'QUIT'} = 'handler';
+# read command line arguments
+$depfile = $ARGV[0];
+$dependfile = $ARGV[1];
+$^I = ".bak";
+# extract base file name
+@words=split(/\//,$depfile);
+$fileo = pop( @words );
+$fileo =~ s/\.d/\.o/;
+$fileg = $fileo;
+$fileg =~ s/\.o/_g\.o/;
+##print "fixing  $fileo in $dependfile\n";
+
+# create $dependfile if it doesn't exist
+if( -e $dependfile ) {
+    &check_old_file;
+} else {
+    open( NEW, ">$dependfile");
+    &add_deps;
+    close NEW;
+}
+#-------- restore signals
+$SIG{'INT'} = 'DEFAULT';
+$SIG{'QUIT'} = 'DEFAULT';
+#---------
+
+sub check_old_file {
+    $foundit = 0;
+    open( OLD, "<$dependfile" ) || die "add_dep: cannot open $dependfile\n";
+    rename( $dependfile, "$dependfile$^I" );
+    open( NEW, ">$dependfile");
+    while($line = <OLD> ) {
+	if( index($line,$fileo) >= 0 ) {		# found entry for myfile.o
+            $foundit = 1;
+	} elsif( index($line,$fileg) >= 0 ) {	# found entry for myfile_g.o
+            $foundit = 1;
+	} elsif( index($line," ") != 0 ) {		# not a continuation line
+            $foundit = 0;
+	    print NEW "$line";
+	} else {
+            if( $foundit == 0 ) {
+		print NEW "$line";
+	    }
+	}
+    }
+    close OLD;
+    #now append myfile.d to the end
+    &add_deps;
+    close NEW;
+}
+
+sub add_deps {
+    open( DF, "<$depfile" ) || die "add_dep: cannot open $depfile\n";
+    while($line = <DF> ) {
+	print NEW "$line";
+    }
+    close DF;
+}
+
+sub handler { # signal handler
+    local($sig) = @_;   # first argument is signal name
+    print "Found SIG$sig - exit gracefully\n";
+    $h1 = fileno(OLD);		# filehandle
+    $h2 = fileno(NEW);
+    if( $h1 =~ /\w/ && $h2 =~ /\w/ ) { 
+        #print "OLD and NEW are open\n"; 
+        close( OLD );
+        close( NEW );
+        print "renaming $dependfile$^I to $dependfile \n";
+        print "any changes to $dependfile have been lost\n";
+        rename("$dependfile$^I", $dependfile );
+    } elsif( $h2 =~ /\w/ ) { 
+        close( NEW );
+	print "add_dep: $dependfile is probably corrupt\n";
+    }
+    exit(0);
+}

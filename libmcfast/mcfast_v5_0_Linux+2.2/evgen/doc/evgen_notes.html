@@ -1,0 +1,306 @@
+
+<HEAD>
+<TITLE>Some Notes on Evgen</Title>
+</HEAD>
+
+<CENTER><IMG src=http://www-pat.fnal.gov/bars/default.bar.gif></CENTER>
+<CENTER><H1><IMG SRC=http://www-pat.fnal.gov/images/atom.gif ALIGN=middle>
+Some notes on Evgen
+  <IMG SRC=http://www-pat.fnal.gov/images/atom.gif ALIGN=middle></H1></CENTER>
+<CENTER><IMG src=http://www-pat.fnal.gov/bars/default.bar.gif></CENTER>
+
+<P>July 3, 1998<P>
+
+
+Evgen operates in a two step process.  First Evgen runs one of 
+pythia, isajet or herwig to do most of the event generation.
+When run from within Evgen, all of these generators run until they
+have generated hadrons.  At this point there are some
+differences in the behaviour of the generators.  The common
+behaviour is that all use QQ to decay all weakly decaying b and c hadrons.
+Pythia also uses QQ to decay all other hadrons in the
+event, while the other two generators decay the remaining hadrons using their
+own decay rules.  For pythia and isajet, the evgen job is a clean
+two step process, with QQ running only after the other generator has
+completed.  For herwig, on the other hand, the calls to QQ are embedded
+within herwig.
+
+<P>
+ The interface between QQ and isajet/pythia uses the stdhep package.
+The output format for all evgen jobs is in stdhep format.
+
+<P>
+The following note points out some of the differences which
+arise because of differences in the event
+generators, pythia, isajet and herwig.
+It also points out some of the quirks and oddities of
+Evgen.  
+
+<H3> Documentation for underlying event generators </H3>
+
+<table noborder>
+<tr><td>  Pythia: </td>
+<td>
+Document PM0087 in the Computing Division library. 
+</td>
+</tr>
+<tr><td></td><td>
+<A HREF="http://www-pat.fnal.gov/mcgen/lund/lund.html">
+FNAL PythiaDocumentation</A>,
+<A HREF="http://wwwcn.cern.ch/asdoc/pythia_html3/pythia57.html">
+CERN Pythia Documentation</A>,
+
+</td>
+<tr><td>  Isajet: </td>
+<td>
+$ISAJET_DIR/isatext.doc
+</td>
+</tr>
+<tr><td>  Herwig: </td>
+<td>
+$HERWIG_DIR/doc/herwig58.doc,
+<A HREF="http://www-pat.fnal.gov/mcgen/herwig/index.html">
+FNAL Herwig Documentation</A>
+</td>
+</tr>
+<tr><td>  QQ:  </td>
+<td>
+<A HREF="http://www-pat.fnal.gov/mcgen/qq/qq.html">
+FNAL QQ Documentation  </A>
+</td>
+</tr>
+</table>
+
+<H3> Job Control and Access to Generator Control Parameters </H3>
+<OL>
+<LI>Under normal circumstances, most users will only be interested in
+    one of two user routines, either usr_filter_postqq or usr_filter_preqq,
+    which tells evgen to keep or discard the event.
+<LI>
+   The call to usr_filter_preqq is done after the main generator,
+   but before the call to qq; therefore b and c hadrons are not yet decayed.
+   The call to usr_filter_postqq is done after the call to QQ.
+
+<LI>
+   There are two other user routines: usr_end_event and usr_end_job.
+   The former makes some standard diagnostic histograms.  The
+   latter is a dummy; it is called just before the histograms are written 
+   out. Normally the user will not need to modify either of these.
+
+<LI>
+   It should be clear how to modify the number of events, Ecm, etc for
+   the herwig and pythia examples.  For the isajet example the
+   information is on the second line, which has the format:<BR>
+   ECM,NEVENTS,NPRINT,NSKIP<BR>
+   where NSKIP events are skipped between each event which is printed out.
+
+<LI>
+   In the pythia and herwig examples one asks to run until a specific
+   number of accepted output events have been created.  In the isajet
+   example one asks to run a specific number of hard scatters.  It is
+   clear how to modify the isajet example to behave like the pythia and
+   herwig examples - however, if you do this, you should not believe the
+   luminosity information which is printed out in the isajet .lpt file.
+
+<LI> 
+   The input card file for the isajet example is a native isajet
+   input file.  On the other hand the input card files for the other two
+   generators have Evgen wrappers around them.  In pythia one can
+   modify the selected processes and other pythia control variables
+   by using the pygive command,
+   which passes the rest of that command line to the pythia command 
+   parsing routine, pygive.  In the herwig example a handful of the
+   herwig control variables have been included as Evgen commands.
+   To see which ones, you need to look at the code, <BR>
+   $MCFAST_DIR/evgen/src/hwg_command.F <BR>
+   To modify other variables one must edit either this routine or
+   $MCFAST_DIR/evgen/src/herwig_exam.F <BR>
+
+</OL>
+
+<H3> Precision Bugs and their far Reaching Consequences </H3>
+<OL>
+
+<LI>
+   There are some precision problems inside pythia which result
+   in particles with both high momentum and high rapidity having
+   an incorrect mass; that is sqrt(e**2-p**2) is not equal to the
+   book value of the mass.  This is not a misunderstanding of the
+   natural width of resonances -  almost always the offending particle is
+   a pion and the error can be many MeV.  Occasionally a negative
+   mass**2 results.  The problem is most pronounced for the
+   lightest particles and it is very rare for hadrons containing
+   b or c quarks - fewer than about 1 per thousand of these
+   are off by more than one MeV.  
+
+<LI>
+   On very rare occasions this
+   problem results in a charged pion which has a mass less than that of the
+   muon, or a pi0 which has a negative mass**2.  Such particles
+   cause many problems when one tries to decay them.  In previous
+   versions the way to work around this problem was to disable
+   all decays all pions in both evgen and mcfast.  QQ now contains
+   a trap to catch these situations; the trap declares the particle to be
+   stable and prints a warning message.  This fix works whether
+   QQ is called from within evgen or from within MCFast ( By default,
+   some long lived particles are not decayed in QQ, but are passed to
+   MCFast so that the user can choose to let them interact with 
+   the detector material before decaying. )
+
+<LI> 
+   In previous versions of evgen, the above problems caused the
+   output of the pythia+QQ chain to fail to conserve p_z and E.
+   This is now explicitly forced by calling STDFIXMASS before
+   calling QQ; this routine assumes that the 3 momentum and mass 
+   are correct coming out of pythia ( phep(1..3,i) and phep(5,i) )
+   - it then recomputes the energy.  
+
+<LI> 
+   A legacy of this problem is that the default example still
+   decays B's, D's, K0S, long lived hyperons etc within the generator.
+   The consequences of this are:<p>
+   <UL>
+    <LI> 
+       D^+, B^-, Lambda_c^+, tau^-, etc do not bend in the magnetic field
+       of the analysing magnet.
+       For early design studies this is fine so long as the reconstruction 
+       and analysis code
+       agree with what the simulation is doing.
+    <LI> 
+       K0s, Lambda etc are not scattered in material before they
+       decay.  This will have small effects on resolutions and efficiencies,
+       but too small to be of any consequence for early design work.
+   </UL>
+   A separate example has been set up to illustrate how to 
+   decay these particles inside of MCFast.  See:<p>
+
+   $MCFAST_DIR/example/simulator/advanced_example_2<p>
+
+<LI>
+   Isajet does not conserve charge; this problem is apparently
+   internal to isajet and is not the result of the isajet/QQ/stdhep
+   interfaces.  Both herwig and pythia do conserve charge.
+
+<LI>
+   Isajet also produces off-shell particles and the problem is again
+   fixed using STDFIXMASS.  The fix is also in place in herwig but,
+   because herwig is internally double precision, the
+   problem is much less pronounced.
+
+<LI>
+   There is currently a bug in the herwig-QQ interface which adds a few
+   extra particles to the event record.  The solution is known and will
+   be installed soon.  Please contact the authors ( see bottom of
+   page ) if you need to have the fix before then.
+
+</OL>
+
+<H3> Random Number Seeds </H3>
+<OL>
+<LI> Setting the random number seed is different for each generator.
+     <UL>
+     <LI> Pythia:<br>
+          In the .pyt file there is a command "ranseed".
+          If this has the value 0, then the pythia random number generator
+          is seeded from the time of day.  If this has the value -1, then
+          the pythia random number generator is seeded from the file LUND_RUN,
+          in the current directory.  For any other number, that number
+          is used to seed the random number generator.  Only the first
+          number following the keyword is significant but some old
+          examples still have two numbers following the keyword.
+     <LI> Herwig:<br>
+          This is similar to pythia, except that there is no provision to
+          read the seed from a file ( ie ranseed -1 is just another number).
+          However there are two significant words to the seed. 
+     <LI> Isajet:<BR>
+          The isajet random number generator is seeded from the time of
+          day.  There is no ranseed keyword in the isajet command file.
+          However there is the native isajet SEED command - but this is
+          overridden by the time of day.
+     <LI> QQ:<br>
+          In the present incarnation, QQ always seeds itself from the
+          time of day, regardless of the value of ranseed.
+     </UL>
+<LI> In the next release of MCFast, the above mess will be cleaned up so
+     that a user supplied random number generator can be specified to
+     be used by any of pythia, herwig, isajet and QQ.
+<LI> In the mean time, contact the authors ( see bottom of page ) if
+     you need to modify the behavior of the random number generators.
+</OL>
+
+<H3> Miscellaneous </H3>
+
+<OL>
+<LI>
+   When herwig and isajet fill the stdhep commons, they do not fill the 
+   jmohep and jdahep variables exactly as prescribed by the stdhep
+   documentation.  Here is a summary of the situation:
+   <UL>
+   <LI> For hadrons and leptons, 
+        jmohep(1,ihep), jdahep(1,ihep) and jdahep(2,hep) do behave
+        as prescribed by stdhep.  However jmohep(2,ihep) contains
+        other information which is meaningful to herwig/isajet.
+   <LI> For partons and clusters, one cannot rely on any of
+        the elements of jmohep and jdahep containing the information
+        prescribed by stdhep; again they contain other information
+        which is meaningful to herwig/isajet.
+   </UL>
+
+<LI>
+   A consequence of the preceding is that the stdhep routines
+   stdstdsclst and stdchgdsclst can have infinite loops  when called 
+   on herwig generated
+   events.  The fix is present in STDHEP version 3.03 and higher.
+
+<LI>
+   The J/psi generator in QQ has decay radation built into it.
+   That is, even if you explicitly
+   request a final state of mu^+ mu^- you will sometimes
+   get mu^+ mu^- gamma.  Similarly for e^+ e^-.   
+   This is very important for the e^+e^- final state but still signficant
+   at the few percent level for the mu^+mu^- final state.  You can
+   disable decay radiation by changing the matrix element code in your
+   user decay.dec file.  
+
+<LI>
+    Unlike the other two generators, herwig declares the following
+    particles to be stable: pi0, K0, K0bar, K0S, and all of the weakly
+    decaying hyperons.  
+    When QQ is called, it only operates on
+    hadrons containing b and c quarks so the above particles are left
+    undecayed.  On the other hand,if QQ produces a K0S or a pi0
+    in the decay of a heavy hadron, then QQ will decay the K0s and pi0.
+    This leads to some odd looking event dumps, with some K0s decayed
+    and some not.  However it should not severely prejudice any results
+    obtained so far.   It also should be straightforward to fix when
+    it becomes important.
+
+<LI> In most (all?) of isajet/herwig/pythia, some of K0s and the long
+     lived hyperons are decayed with zero decay length.  However,
+     when one of these particles is created by a B or D decay, then QQ
+     gives it a correct lifetime.  This will be fixed in a later release.
+
+<LI>
+    In order to disable the decay of heavy hadrons inside isajet, we 
+    have modified the file isadecay.dat.  The modified version is stored
+    in:<br>
+    $QQ_DIR/example/isa_nobc_decay.dat<P>
+    The code to produce this file from the default isadecay.dat is
+    found in make_isadecay.sh in the above directory.
+    The scripts inside the evgen examples look after setting this
+    correctly.
+
+</OL>
+
+<HR>
+<A HREF="http://www.fnal.gov/faw/fermilab_at_work.html">
+<IMG src=http://www-pat.fnal.gov/buttons/default.homebutton.gif align=bottom alt="[fermi at work]"></A>
+<A HREF="http://www-pat.fnal.gov/simulation.html">
+<IMG src=http://www-pat.fnal.gov/buttons/simulation.home.gif align=bottom alt="[simulation home]"></A>
+
+<HR>
+
+<ADDRESS>
+Rob Kutschke 
+<A HREF="mailto:kutschke@fnal.gov">kutschke@fnal.gov</A><P>
+</ADDRESS>

@@ -1,0 +1,17 @@
+
+template Wedge(80)
+  char speci        ! "SPC" or "ALL"
+  int det
+  parent LayerSiDi
+  int lyr
+  int nwed          ! only used for speci="SPC", but ALWAYS present
+  int nstrip
+  real c0_r
+  real c0_phi
+  real pitch
+  real stereo
+  real eff_hit
+  real siga
+  real sigb
+  real sigc
+end template

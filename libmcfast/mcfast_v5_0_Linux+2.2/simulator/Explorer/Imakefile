@@ -1,0 +1,39 @@
+       MODULESRCS = 
+         TYPESRCS = 
+       EXPLORERHOME = /usr/explorer
+   EXPLORERUSERHOME = .
+#define ExplorerModuleMakefile
+#define NotShared
+#define NotStatic
+#define DefaultInstallFlags 
+
+#include	<cxModules.tmpl>
+
+     CXMODULES_INST = $(EXPLORERUSERHOME)/modules
+      CXMANDIR_INST = $(EXPLORERUSERHOME)/man
+          CXCREDITS = $(CXLIBDIR_INST)/UserModule.credit
+       TYPE_DEPLIBS = NullParameter
+       TYPE_DEPLIBS = NullParameter
+       TYPE_DEPLIBS = NullParameter
+       TYPE_DEPLIBS = NullParameter
+       TYPE_DEPLIBS = NullParameter
+
+#include "Imakefile.default"
+
+MakeInstallDirectories(install,$(CXMODULES_INST))
+
+AllTarget(TraceLat)
+XCCModuleTarget(TraceLat,TraceLat.cx.o TraceLat.mdw.o, TraceLat.o McfTrace.o McfPositionUtil.o xdr_cal_hits.o,,$(CRNLIB)/libpacklib.a $(CRNLIB)/libmathlib.a $(FORTRANLIBS) /usr/lib/libsun.a /usr/lib/libftn.so $(MCFLIB)/libio.a $(MCFLIB)/libutil.a $(MCFLIB)/libdbin_mcfast.a $(MCFLIB)/libdst.a $(MCFLIB)/libio.a $(MCFLIB)/libdbin.a $(MCFLIB)/libFmcfio.a $(STDHEP_DIR)/lib/libstdhep.a $(INVENTORLIBS))
+AllTarget(DetDisplay)
+XCCModuleTarget(DetDisplay,DetDisplay.cx.o DetDisplay.mdw.o, Mcf_ExplorerModule.o Mcf_Explorer_ObjLib.o Mcf_Explorer_ObjAddExplorer.o McfShapeFill.o Mcf_Explorer_ObjAdd.o McfXlib.o McfGeomUtil.o xdr_cal_hits.o,,$(MCFLIB)/libio.a $(MCFLIB)/libdst.a $(MCFLIB)/libdbin_mcfast.a $(MCFLIB)/libdbin.a $(MCFLIB)/libgeneral.a $(STDHEP_DIR)/lib/libstdhep.a $(MCFLIB)/libFmcfio.a $(CRNLIB)/libpacklib.a $(CRNLIB)/libmathlib.a $(FORTRANLIBS) /usr/lib/libsun.a $(INVENTORLIBS))
+AllTarget(TracePick)
+XCCModuleTarget(TracePick,TracePick.cx.o TracePick.mdw.o, TracePick.o Mcf_Windows.o,,$(MCFLIB)/libio.a $(MCFLIB)/libutil.a $(MCFLIB)/libdbin_mcfast.a $(MCFLIB)/libdst.a $(MCFLIB)/libdbin.a $(MCFLIB)/libFmcfio.a $(CRNLIB)/libpacklib.a $(CRNLIB)/libmathlib.a $(FORTRANLIBS) /usr/lib/libsun.a /usr/lib/libPW.a $(STDHEP_DIR)/lib/libstdhep.a /usr/lib/libftn.so $(INVENTORLIBS))
+AllTarget(TraceInfo)
+XCCModuleTarget(TraceInfo,TraceInfo.cx.o TraceInfo.mdw.o, TraceInfo.o Mcf_Windows.o,,$(MCFLIB)/libio.a $(MCFLIB)/libutil.a $(MCFLIB)/libdbin_mcfast.a $(MCFLIB)/libdst.a $(MCFLIB)/libdbin.a $(MCFLIB)/libFmcfio.a $(CRNLIB)/libpacklib.a $(CRNLIB)/libmathlib.a $(FORTRANLIBS) /usr/lib/libsun.a /usr/lib/libPW.a $(STDHEP_DIR)/lib/libstdhep.a /usr/lib/libftn.so $(INVENTORLIBS))
+AllTarget(DetPick)
+XCCModuleTarget(DetPick,DetPick.cx.o DetPick.mdw.o, DetPick.o,,$(CRNLIB)/libpacklib.a $(CRNLIB)/libmathlib.a $(FORTRANLIBS) /usr/lib/libsun.a /usr/lib/libPW.a $(INVENTORLIBS))
+
+       MRESINCLUDES = -I$(STDHEP_DIR)/src/inc -I$(MCFSRC)/dst -I$(MCFSRC)/io -I$(MCFSRC)/event -I$(MCFIO_DIR)/src -I$(MCFIO_DIR)/src -I$(MCFSRC)/dbin_mcfast -I$(MCSRC)/io
+
+       MODULESRCS =  TraceLat.mdw.c TraceLat.c McfTrace.c McfPositionUtil.c xdr_cal_hits.c DetDisplay.mdw.c Mcf_ExplorerModule.c Mcf_Explorer_ObjLib.c Mcf_Explorer_ObjAddExplorer.c McfShapeFill.c Mcf_Explorer_ObjAdd.c McfXlib.c McfGeomUtil.c TracePick.mdw.c TracePick.c Mcf_Windows.c TraceInfo.mdw.c TraceInfo.c DetPick.mdw.c DetPick.c
+DependSrcsTarget($(MODULESRCS) $(TYPESRCS))

@@ -1,0 +1,19 @@
+Example b bbar job
+1800.,1000,2,50/
+TWOJET
+BEAMS
+'P','AP'/
+JETTYPE1
+'BT', 'BB'/
+JETTYPE2
+'BT', 'BB'/
+P
+0. , 900., 0. , 900./
+PT
+0.01 , 850., 0.01 , 850./
+NTRIES
+5000/
+NSIGMA
+400/
+END
+STOP

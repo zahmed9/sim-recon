@@ -1,0 +1,117 @@
+#!/bin/ksh
+# This is a hack of vms2f90
+#    T. Wenaus  LLNL
+# Convert VMS structures to Fortran 77 structures.
+# Operates on files of type .f (cpp has already been run).
+
+fname=$1
+froot=${fname%.f}
+#if [ ! -f $1.f ]
+#then echo No conversion; $1.f does not exist
+#     exit
+#fi
+awkfile=aix2f77.awk
+cat > $awkfile <<\!
+#
+#  aix2f77.awk     T. Wenaus 01/03/1994
+#
+#  Awk script to convert Fortran 90 structures to VMS
+#
+BEGIN {
+FS="[ \t]*[,.][ \t]*|[ \t]+"
+ROOT=substr(FILENAME,1,match(FILENAME,"\\.")-1)     
+OUTFILE="awk-REALLY-sucks.f90"
+GLINE=" "
+}
+
+{
+LINE=$0
+#print LINE
+TYPE_LINE=0
+if ( match(LINE,"^[ \t]+(RECORD|record|Record)[ ]*/") != 0) {
+  sub("RECORD","TYPE",LINE)
+  sub("record","type",LINE)
+  sub("Record","Type",LINE)
+  sub("/","(",LINE)
+  sub("/",")",LINE)
+}
+if ( match(LINE,"^[ \t]+(STRUCTURE|structure|Structure)") != 0 || 
+    match(LINE,"^[ \t]+(END|end|End)[ ]*(STRUCTURE|structure|Structure)") !=0){
+  if ( match(LINE,"^[ \t]+(STRUCTURE|structure|Structure)") != 0 ) TYPE_LINE=1
+  sub("STRUCTURE","TYPE",LINE)
+  sub("Structure","Type",LINE)
+  sub("structure","type",LINE)
+  sub("/"," ",LINE)
+  sub("/"," ",LINE)
+}
+## if not a comment or cpp directive, look for variables to convert
+if ( match(LINE,"^#") == 0 && match(LINE,"^[*!CcDd]") == 0) {
+DidSubs = 0
+OldRSTART = -1
+while ((match(LINE,
+ "[A-Za-z_]+[A-Za-z0-9_\\)]*\\.[A-Za-z_]+[A-Za-z0-9_\\+\\-]*")!=0 ||
+ match(LINE,
+ "\\([A-Za-z0-9_ \\,\\+\\-\\)]+\\)\\.[A-Za-z_]+[A-Za-z0-9_]*")!=0 ||
+ (match(LINE,"[A-Za-z_]+[A-Za-z0-9_\\(\\)]*\\.[ ]*$")!=0 &&
+  match(LINE,"\\.TRUE\\.")==0 && match(LINE,"\\.FALSE\\.")==0 &&
+  match(LINE,"\\.true\\.")==0 && match(LINE,"\\.false\\.")==0   )!=0 )&&
+  RSTART > OldRSTART)
+  {
+  OldRSTART=OldRSTART+1
+#  OldRSTART=RSTART
+  ChangePT(LINE,RSTART,RLENGTH)
+  LINE = GLINE
+  }
+# fix up booleans
+  if (DidSubs == 1) {
+    gsub("[%\\.]gt[%\\.]",".gt.",LINE)   ; gsub("[%\\.]GT[%\\.]",".GT.",LINE)
+    gsub("[%\\.]lt[%\\.]",".lt.",LINE)   ; gsub("[%\\.]LT[%\\.]",".LT.",LINE)
+    gsub("[%\\.]Lt[%\\.]",".Lt.",LINE)   ; gsub("[%\\.]Gt[%\\.]",".Gt.",LINE)
+    gsub("[%\\.]ge[%\\.]",".ge.",LINE)   ; gsub("[%\\.]GE[%\\.]",".GE.",LINE)
+    gsub("[%\\.]le[%\\.]",".le.",LINE)   ; gsub("[%\\.]LE[%\\.]",".LE.",LINE)
+    gsub("[%\\.]Le[%\\.]",".Le.",LINE)   ; gsub("[%\\.]Ge[%\\.]",".Ge.",LINE)
+    gsub("[%\\.]eq[%\\.]",".eq.",LINE)   ; gsub("[%\\.]EQ[%\\.]",".EQ.",LINE)
+    gsub("[%\\.]Eq[%\\.]",".Eq.",LINE)   ; gsub("[%\\.]Ne[%\\.]",".Ne.",LINE)
+    gsub("[%\\.]ne[%\\.]",".ne.",LINE)   ; gsub("[%\\.]NE[%\\.]",".NE.",LINE)
+    gsub("[%\\.]and[%\\.]",".and.",LINE) ; gsub("[%\\.]AND[%\\.]",".AND.",LINE)
+    gsub("[%\\.]or[%\\.]",".or.",LINE)   ; gsub("[%\\.]OR[%\\.]",".OR.",LINE)
+    gsub("[%\\.]xor[%\\.]",".xor.",LINE)   ; gsub("[%\\.]XOR[%\\.]",".XOR.",LINE)
+    gsub("[%\\.]not[%\\.]",".not.",LINE)   ; gsub("[%\\.]NOT[%\\.]",".NOT.",LINE)
+  }
+
+}
+print LINE > OUTFILE
+if (TYPE_LINE == 1 ) print "        sequence" > OUTFILE
+
+}
+function ChangePT(LINE,RSTART,RLENGTH) {
+#  if number of quotes in line to this point is odd, I'm in a comment.
+#  Don't convert. $$$ unless there are no more quotes on the line.
+  GLINE = LINE
+  NoConversion = 0
+  nq=0; ic=1; while (ic<=RSTART) { if (substr(LINE,ic,1) =="'") {nq++}; ic++ }
+  if ( nq == 1 || nq == 3 || nq == 5 || nq == 7 || nq == 9) { NoConversion=1 }
+  if ( match(substr(LINE,RSTART,RLENGTH),"\\'")==0) { NoConversion=0}
+  if ( NoConversion == 0 ) {
+    DidSubs = 1
+    TOKEN=substr(LINE,RSTART,RLENGTH)
+    
+    NewTOKEN=TOKEN
+#    sub("\\.","%",NewTOKEN)     - no structures in qq - causes problems
+#    print "Token " TOKEN
+#    print "New   "  NewTOKEN
+#    print "Line  " LINE
+##### JUNK    sub(TOKEN,NewTOKEN,LINE)
+#     print "L "  LINE
+    GLINE = substr(LINE,1,RSTART-1) NewTOKEN substr(LINE,RSTART+RLENGTH)
+#     print "G " GLINE
+    }
+}
+
+!
+
+echo aix2f77: Converting $froot.f
+awk -f $awkfile $froot.f
+if test -f awk-REALLY-sucks.f90 ; then mv awk-REALLY-sucks.f90 $froot.f90 ; fi
+rm $awkfile
+echo Done preprocessing

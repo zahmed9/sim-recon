@@ -1,0 +1,85 @@
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:34  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1994/10/08  02:21:28  zfiles
+* first version of qqlib in CVS
+*
+*
+#include "sys/CLEO_machine.h"
+#include "pilot.h"
+*CMZ :  1.00/00 04/06/90  18.55.45  by  Jorge L. Rodriguez
+*-- Author :
+
+      SUBROUTINE QED013
+
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+      COMMON/QED000/IMODDD,IOUT
+      COMMON / BAPARM / SIG0,SIGS,SIGH,SIGT,WT(18)
+     *                 ,YSOFT,XK0,XKRAT,DMIN,DMAX,XLCMIN,XM2,TWOPI
+     *                  ,EM2,CMIN,CMAX,WMAX,ZSOFT,EBEAMM
+     *                  ,SIGSW,WTWT(2)
+C
+      WRITE (IOUT,'(A37,F15.6,A10)')
+     *  '           LOWEST ORDER CROSS SECTION',SIG0,' NB = UNIT'
+C*****TYPE     '(A37,F15.6,A10)',
+C     *  '           LOWEST ORDER CROSS SECTION',SIG0,' NB = UNIT'
+C
+      IF(WT(1).EQ.0.D0) GOTO 1
+      SIGHE=SIGH*WT(4)/WT(1)
+      DSIGHE=SIGH/WT(1)*DSQRT(WT(5)-WT(4)**2/WT(1))
+      SIGHM=SIGH*WMAX*WT(6)/WT(1)
+      EC=WT(1)/WT(2)
+      ECT=WT(3)/WT(1)
+      EWH=WT(6)/WT(3)
+      WRITE(IOUT,611) SIGH,SIGHE,DSIGHE,SIGHM,WT(1),WT(6),EC,ECT,EWH
+C*****TYPE        611,SIGH,SIGHE,DSIGHE,SIGHM,WT(1),WT(6),EC,ECT,EWH
+  611 FORMAT(
+     . 37H    APPROXIMATED HARD PHOTON XSECTION ,F15.6,/,
+     . 37H           EXACT HARD PHOTON XSECTION ,F15.6,' +- ',F15.6,/,
+     . 37H           M.C.  HARD PHOTON XSECTION ,F15.6,2F10.0,//,
+     . 37H  W.R.P EFFICIENCY IN INTERNAL C LOOP,F15.6,/,
+     . 37H    "      "      OF C/CT RESTRICTION,F15.6,/,
+     . 37H    "      "         FOR HARD WEIGHTS,F15.6,//)
+C
+    1 IF(WT(7).EQ.0.D0) GOTO 2
+      SIGSE=SIGS*WT(8)/WT(7)
+      DSIGSE=SIGS/WT(7)*DSQRT(WT(9)-WT(8)**2/WT(7))
+      SIGSM=SIGS*WMAX*WT(10)/WT(7)
+      EWS=WT(10)/WT(7)
+      WRITE (IOUT,612) SIGS,SIGSE,DSIGSE,SIGSM,WT(7),WT(10),EWS
+C*****TYPE         612,SIGS,SIGSE,DSIGSE,SIGSM,WT(7),WT(10),EWS
+  612 FORMAT(
+     . 37H    APPROXIMATED SOFT PHOTON XSECTION ,F15.6,/,
+     . 37H           EXACT SOFT PHOTON XSECTION ,F15.6,' +- ',F15.6,/,
+     . 37H           M.C.  SOFT PHOTON XSECTION ,F15.6,2F10.0,//,
+     . 37H   W.R.P. EFFICIENCY FOR SOFT WEIGHTS ,F15.6,//)
+C
+    2 DTE =SIGHE+SIGSE
+      DDTE=DSIGHE+DSIGSE
+      WTA=WT(1)+WT(7)
+      WTB=WT(6)+WT(10)
+      DTM=SIGT*WMAX*WTB/WTA
+      WRITE(IOUT,613) SIGT,DTE,DDTE,DTM,WTA,WTB
+C*****TYPE        613,SIGT,DTE,DDTE,DTM,WTA,WTB
+  613 FORMAT(
+     . 37H     APPROXIMATED TOTAL CROSS SECTION ,F15.6,/,
+     . 37H            EXACT TOTAL CROSS SECTION ,F15.6,' +- ',F15.6,/,
+     . 37H            M.C.  TOTAL CROSS SECTION ,F15.6,2F10.0,/)
+C
+      WRITE (IOUT,614) (WT(J),J=11,18)
+C*****TYPE         614,(WT(J),J=11,18)
+  614 FORMAT(' GENERATED WEIGHTS:',/,
+     *6X,'    < 0 IN HARD PART',F20.6,/,
+     *6X,' > WMAX IN HARD PART',F20.6,/,
+     *6X,'MINIMUM IN HARD PART',F20.6,/,
+     *6X,'MAXIMUM IN HARD PART',F20.6,/,
+     *6X,'    < 0 IN SOFT PART',F20.6,/,
+     *6X,' > WMAX IN SOFT PART',F20.6,/,
+     *6X,'MINIMUM IN SOFT PART',F20.6,/,
+     *6X,'MAXIMUM IN SOFT PART',F20.6)
+      RETURN
+      END

@@ -1,0 +1,21 @@
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:23  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1994/04/05  21:31:31  lkg
+* Beta version of GEANT in CLEO CVS format
+*
+*
+*
+* gcmulo.inc
+*
+      COMMON/GCMULO/SINMUL(101),COSMUL(101),SQRMUL(101),OMCMOL,CHCMOL
+     +  ,EKMIN,EKMAX,NEKBIN,NEK1,EKINV,GEKA,GEKB,EKBIN(200),ELOW(200)
+C
+      REAL SINMUL,COSMUL,SQRMUL,OMCMOL,CHCMOL,EKMIN,EKMAX,ELOW,EKINV
+      REAL GEKA,GEKB,EKBIN
+      INTEGER NEKBIN,NEK1
+C

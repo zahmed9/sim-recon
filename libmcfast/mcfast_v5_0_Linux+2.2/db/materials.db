@@ -1,0 +1,38 @@
+! ************ Materials ***************
+
+template Material(50)
+  char name
+  real a
+  real z
+  real density
+  real radlen
+  real abslen
+  real collen
+  real dedx
+end Material
+
+!               name         A          Z       density    RadLen     AbsLen     ColLen      Dedx
+
+make Material  "VACU"   0.1000E-15 0.1000E-15 0.1000E-15 0.1000E+17 0.1000E+17 0.1000E+17 0.1000E-15
+make Material  "AIR"    0.1461E+02 0.7300E+01 0.1205E-02 0.3042E+05 0.7469E+05 0.4960E+05 0.2269E-05
+make Material  "ALUM"   0.2698E+02 0.1300E+02 0.2700E+01 0.8900E+01 0.3941E+02 0.2615E+02 0.4360E-02
+make Material  "IRON"   0.5585E+02 0.2600E+02 0.7870E+01 0.1760E+01 0.1676E+02 0.1052E+02 0.1142E-01
+make Material  "SILI"   0.2809E+02 0.1400E+02 0.2330E+01 0.9360E+01 0.4549E+02 0.3030E+02 0.3877E-02
+make Material  "SCIN"   0.1200E+02 0.6000E+01 0.1032E+01 0.4240E+02 0.7646E+02 0.5659E+02 0.2016E-02
+make Material  "CU"     0.6355E+02 0.2900E+02 0.8960E+01 0.1430E+01 0.1506E+02 0.9554E+01 0.1257E-01
+make Material  "TITA"   0.4788E+02 0.2200E+02 0.4540E+01 0.3560E+01 0.2751E+02 0.1760E+02 0.6701E-02
+make Material  "BE"     0.9012E+01 0.4000E+01 0.1848E+01 0.3530E+02 0.4069E+02 0.3019E+02 0.2946E-02
+make Material  "CARB"   0.1201E+02 0.6000E+01 0.2265E+01 0.1880E+02 0.3810E+02 0.2658E+02 0.3952E-02
+make Material  "CFIB"   0.1201E+02 0.6000E+01 0.2265E+01 0.2140E+02 0.4990E+02 0.2660E+02 0.4030E-02
+make Material  "MXSO"   0.5572E+02 0.2550E+02 0.6026E+01 0.2372E+01 0.2481E+02 0.0000E+00 0.9875E-02
+make Material  "ARGON"     39.95   18.0       1.78E-3    11706.     5.E+4      1.E+16     2.70E-6
+make Material  "C2H6"      30.8    18.0       1.36E-3    34035.     5.E+4      1.E+16     3.05E-6
+make Material  "MIX1"   0.5077E+02 0.2368E+02 0.4451E+01 0.3380E+01 0.3181E+02 0.0000E+00 0.1053E-01
+make Material  "TUNGS"  0.1839E+03 0.7400E+02 0.1930E+02 0.3500E+00 0.9585E+01 0.5715E+01 0.2210E-01
+make Material  "KAPTON" 0.1200E+02 0.6000E+01 0.1420E+01 0.1000E+17 0.1000E+17 0.1000E+17 0.1000E-15
+make Material  "LEAD"   0.2072E+03 0.8200E+02 0.1135E+02 0.5600E+00 0.1709E+02 0.1024E+02 0.1275E-01
+make Material  "PETHYL" 0.1200E+02 0.6000E+01 0.9200E+00 0.4790E+02 0.8565E+02 0.6185E+02 0.1910E-02
+make Material  "GLASS"  0.5953E+02 0.2958E+02 0.2230E+01 0.1270E+02 0.4377E+02 0.2969E+02 0.3780E-02
+
+
+! Note: I used Pyrex (Borosilicate glass): 80%SiO2 12%B2O3 5%Na2O

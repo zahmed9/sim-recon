@@ -1,0 +1,395 @@
+
+<HEAD>
+<TITLE>MCfast Utilities </Title>
+</HEAD>
+
+<CENTER><IMG src=http://www-pat.fnal.gov/bars/default.bar.gif></CENTER>
+<CENTER><H1><IMG SRC=http://www-pat.fnal.gov/images/atom.gif ALIGN=middle>
+  MCFast Utilities
+  <IMG SRC=http://www-pat.fnal.gov/images/atom.gif ALIGN=middle></H1></CENTER>
+<CENTER><IMG src=http://www-pat.fnal.gov/bars/default.bar.gif></CENTER>
+
+
+<P>July 3, 1998<P>
+
+<HR>
+<hr>
+The subroutines described below are found in: $MCFAST_DIR/simulator/util/src
+<br>
+<br>
+
+<hr>
+Notice that many of the routines below end in a suffix _d;
+these routines operate on real*8 arguments and return real*8
+values.  There are corresponding routines with the suffix _f which
+operate on real*4 arguments and return real*4 values.<P>
+
+This convention was a short lived abberation from the standard MCFast 
+convention of using the compile time parameter DFLOAT to determine the
+precision. <P>
+
+In general, routines returning a status code as a function value use
+the convention that 0 is success.<P>
+
+If the description here is a little vague, further details can probably
+be found in the source file.<P>
+
+
+<hr>
+<h3> Operations on 3-vectors and 4-vectors</h3>
+The following routines take either 3 vectors or 4 vectors as
+their input, 
+where the expected orders are (px,py,pz) and (px,py,pz,e).
+Of course a 4-vector is a perfectly good 3 vector argument and a
+wtrack is a perfectly good 3-vector or 4-vector arguement.
+In all cases the code checks for precision problems which might lead
+to sqrt(negative), log(0.0) or division by zero.  Remember that this
+can mask real problems which lead to the above conditions for reasons
+other than precision problems.
+
+<dl>
+<dt>    beta_d:
+<dd> Return the value of beta ( relativistic v/c ) of a momentum 4 vector.<br>
+     real*8 function beta_d ( p )<br>
+     real*8 p(4)<br><br>
+
+<dt>
+    beta_gamma_d:
+<dd> Return the value of relativistic beta*gamma of a momentum 4 vector.<br>
+     real*8 function beta_gamma_d ( p )<br>
+     real*8 p(4)<br><br>
+
+<dt>
+    cos_d:
+<dd>  Return the value of the cosine of the polar angle of a 3 vector.<br>
+      real*8 function cos_d ( p )<br>
+      real*8 p(4)<br><br>
+
+<dt>
+    eta_d:
+<dd>  Return the value of the pseudo-rapidity of a 3 vector.<br>
+      real*8 function eta_d ( p )<br>
+      real*8 p(3)<br><br>
+
+<dt>
+    pt_d:
+<dd>  Return the value of the momentum transverse to the z direction
+      of a 3 vector.<br>
+      real*8 function pt_d ( a )<br>
+      real*8 a(4)<br><br>
+
+<dt>
+    v3mag_d:
+<dd>  Return the magnitude of a 3-vector.<br>
+      real*8 function v3mag_d ( a )<br>
+      real*8 a(3)<br><br>
+
+<dt>
+    v4mag_d:
+<dd>  Return the magnitude of a 4-vector.<br>
+      real*8 function v4mag_d ( a )<br>
+      real*8 a(4)<br><br>
+
+<dt>
+    sum_4_vectors_d:
+<dd>  Compute the sum of n 4 vectors.<br>
+      subroutine sum_4_vectors_d ( n, psum, p1, p2, .... )<br>
+      integer n<br>
+      real*8 psum(4), p1(4), p2(4)<br><br>
+      The sum is accumulated in a running sum will work:<br>
+      real*8 psum(4), p(4,10)<br>
+      do i = 1, 10<br>
+        if ( .... ) call sum_4_vectors_d ( 2, psum, psum, p(1,i) )<br><br>
+
+
+<dt>
+      sum_4vec_cov_d:
+<dd>  Compute the sum of n 4 vectors.  Also compute the covariance
+      matrix of the sum.<br>
+      subroutine sum_4vec_cov_d ( n, m, psum, vsum, p1, v1, p2, v2, ... )<br>
+      integer n, m<br>
+      real*8 psum(4),   p1(4),   p2(4)<br>
+      real*8 vsum(m,4), v1(m,4), v2(m,4)<br><br>
+
+      As above, one can accumulate a running sum with this routine.<br><br>
+
+
+<dt> 
+     proper_decay_time:
+<dd> Compute proper decay time, without error.<br>
+      function proper_decay_time ( p, d )<br><br>
+
+      ! Return value, 4-momentum and decay length.<br>
+      DFLOAT proper_decay_time, p(4), d<br><br>
+
+</dl>
+
+<hr>
+<h3> Theta, eta, and all that</h3>
+
+The functions in this section convert among the various measures of the
+polar angle.
+
+<dl>
+<dt>
+    cos_to_cot_d:
+<dd>  Convert cosine to cotangent.<br>
+      real*8 function cos_to_cot_d ( cos )<br>
+      real*8 cos<br><br>
+
+<dt>
+    cos_to_eta_d:
+<dd>  Convert cosine to psuedo rapidity.<br>
+      real*8 function cos_to_eta_d ( cos )<br>
+      real*8 eta<br><br>
+
+<dt>
+    cot_to_cos_d:
+<dd>  Convert cotangent to cosine.<br>
+      real*8 function cot_to_cos_d ( cot )<br>
+      real*8 cot<br><br>
+
+<dt>
+    eta_to_cos_d:
+<dd>  Convert eta to cosine.<br>
+      real*8 function eta_to_cos_d ( eta )<br>
+      real*8 eta<br>
+
+<dt>
+     phi_small:
+<dd>  Take a value of phi and return it in the range [-pi,pi].<br>
+      function phi_small(arg)<br>
+      DFLOAT phi_small, arg<br><br>
+
+<dt>
+     phi_norm:
+<dd>  Take a value of phi and return it in the range [0,2.*pi].<br>
+      function phi_norm(arg)<br>
+      DFLOAT phi_small, arg<br><br>
+
+</dl>
+
+<hr>
+<h3> Error propagation </h3>
+Compute various quantities and the errors on those quantities.
+
+<dl>
+<dt>
+    calc_dkl_d:
+<dd>  Compute a decay length and its error.<br>
+      Mode=0 do not compute the error.<br>
+      Mode=1 compute the error.<br>
+      subroutine calc_dkl_d ( mode, x1, v1, x2, v2, dist, sdist )<br>
+      integer mode<br>
+      real*8 x1(3), v1(3,3)<br>
+      real*8 x2(3), v2(3,3)<br>
+      real*8 dist, sdist<br><br>
+
+<dt>
+    err_mass:
+<dd>  Compute the mass of a 4 vector and the error on the mass.
+      The first argument specifies the first dimension of the covariance
+      matrix so that p can either be an array of dimension 4 or it can
+      be a wtrack and v can be a 7x7 covariance matrix.<br>
+      integer function err_mass( na, p, v, m, vm)<br>
+      integer na<br>
+      real*8 p(4), v(na,4), m, vm<br><br>
+
+
+<dt>
+    err_p:
+<dd>  Compute the error on the magnitude of a 3 vector.  Again the
+      covariance matix is variably dimensioned to allow several sorts of
+      inputs.<br>
+      real*8 function err_p( na, p, v )<br>
+      integer na<br>
+      real*8 p(3), v(na,3)<br><br>
+
+<dt>
+    err_tau:
+<dd>  Compute the proper time of a decay and the error on the proper time.
+      It is assumed that the trajectory of the track is a straight line.<br>
+      integer function err_tau ( w, wcov, v, vcov, tau, sigtau )<br>
+      ! B candidate and its full covariance matrix,<br>
+      record /wtrack_struct/ w<br>
+      DFLOAT wcov(7,7)<br><br>
+
+      ! Main vertex and its covariance matrix.<br>
+      DFLOAT v(3), vcov(3,3)<br><br>
+
+      ! Proper decay time and its error.<br>
+      DFLOAT tau, sigtau<br><br>
+
+<dt>
+    wtk_impact_3d:
+<dd>  Given a wtrack and a vertex, compute the 3D distance of closest
+    approach (DCA) between the line and the point.
+    If requested, also compute the error on
+    this distance, using the covariance matrices of the line and the 
+    point.  The code works in an arbitrarily oriented magnetic field,
+    so long as the field is constant along the trajectory from the
+    intial point to the PCA.<br><br>
+      integer function wtk_impact_3d ( mode, w, wcov, m, mcov,
+                                      dd, err_dd )<br><br>
+
+      ! 0= do not compute error.  1= do compute error.<br>
+      integer mode<br><br>
+
+      ! Track and its covarinace matrix.<br>
+      record /wtrack_struct/ w<br>
+      real*8 wcov(7,7)<br><br>
+
+      ! Vertex and its covariance matrix.<br>
+      real*8 m(3), mcov(3,3)<br><br>
+
+      ! Output value and its error.<br>
+      real*8 dd, err_dd<br><br>
+
+<dt>
+    wtk_impact_3d_line:
+<dd>  Linear approximation to the previous routine.<br><br>
+      integer function wtk_impact_3d_line ( mode, w, wcov, m, mcov,
+                                      dd, err_dd )<br><br>
+
+      See above for meaning of arguments.<br><br>
+
+<dt>
+    wtk_impact_2d_line:
+<dd> Given a straight line and a point, compute the 2D distance of closest
+    approach (DCA) between the line and the point ( in the x-y plane ).
+    If requested, also compute the error on
+    this distance, using the covariance matrices of the line and the 
+    point.<br><br>
+      integer function wtk_impact_2d_line ( mode, w, wcov, m, mcov,
+                                      dd, err_dd )<br><br>
+    Arguments have same meaning as for previous two routines.<br><br>
+
+
+</dl>
+
+<hr>
+<h3> Mass and Vertex Fitters </h3>
+   
+The mass fitter and vertex fitters which operate in the mcfast
+environment are found in:<br>
+$MCFAST_DIR/simulator/vertex/src<br>
+Documentation for these
+<A href="vertex.ps"> fitting routines</a> is available,
+as are some 
+<A href="mcfast_advanced.html"> examples </a>
+which exercise them.
+
+<hr>
+<h3> Conversions among Track Representations </h3>
+
+MCFast supports three different representations of tracks, ctk, ftk, 
+wtk.  The first is a helical representation and is used
+during track fitting in central detectors.  The second is
+a forward representation which is used, not too surprisingly, in
+the forward tracking fitters.  After the fits are completed,
+the tracks are always converted to the wtk format, which is a
+4-vector and a space point.  This is the format in which the
+offline track bank is stored and is also the format used by
+all of the examples.<p>
+
+The detailed descriptions of these formats are found in:<br>
+$MCFAST_DIR/inc/event/ctrack_struct.inc<br>
+$MCFAST_DIR/inc/event/ftrack_struct.inc<br>
+$MCFAST_DIR/inc/event/wtrack_struct.inc<br><br>
+
+Two things to watch for when comparing to code used by other
+experiments.  The ctk representation uses the
+CLEO mystery factor of 2 in the definition of the curvature:
+that is the curvature is 1/(diameter of curvature), not
+1/(radius of curvature).
+The ftk representation uses 1/p_z, not 1/p, as its bending
+parameter.<br><br>
+
+
+<dl>
+
+<dt>
+cvt_ctk_ftk:
+<dd> Convert ctrack to ftrack.<br>
+
+<dt>
+cvt_ctk_wtk:
+<dd> Convert ctrack to wtrack.<br>
+
+<dt>
+cvt_ftk_ctk:
+<dd> Convert ftrack to ctrack.<br>
+
+<dt>
+cvt_ftk_wtk:
+<dd> Convert ftrack to wtrack.<br>
+
+<dt>
+cvt_wtk_ctk:
+<dd> Convert wtrack to ctrack.<br>
+
+<dt>
+cvt_wtk_ftk:
+<dd> Convert wtrack to ftrack.<br>
+
+<dt>
+ccov_to_wcov:
+<dd> Convert ctrack covariance matrix to wtrack format.<br>
+
+<dt>
+fcov_to_wcov:
+<dd> Convert ftrack covariance matrix to wtrack format.<br>
+
+<dt>
+wcov_to_ccov:
+<dd> Convert wtrack covariance matrix to ctrack format.<br>
+
+<dt>
+wcov_to_fcov:
+<dd> Convert wtrack covariance matrix to ftrack format.<br>
+
+<dt>
+wcov_to_wcov_point:
+<dd> Transport wtrack covariance matrix to a different space point.<br>
+
+
+</dl>
+
+<hr>
+<h3> Track Transport </h3>
+
+Below is the start of a list describing the track transport routines:
+<dl>
+
+<dt> move_ctk_point.F 
+<dd> Transform ctrack to have a new local origin.
+     This is the same as doing a vacuum transport
+     of the track from the PCAO of the first system to
+     the PCAO of the second. ( PCAO = point of closest
+     approach, in the r-phi plane, to the local z axis. )
+<dt>move_ctk_point_cov.F
+<dd> the same, but also transform the covariance matrix.
+
+</dl>
+
+
+</BLOCKQUOTE>
+<HR>
+
+<A HREF="http://www-pat.fnal.gov/mcfast/doc_index.html">
+<IMG src=http://www-pat.fnal.gov/buttons/default.leftbutton.gif align=bottom alt="[back]"></A>
+<A HREF="http://www.fnal.gov/faw/fermilab_at_work.html">
+<IMG src=http://www-pat.fnal.gov/buttons/default.homebutton.gif align=bottom alt="[fermi at work]"></A>
+<A HREF="http://www-pat.fnal.gov/simulation.html">
+<IMG src=http://www-pat.fnal.gov/buttons/simulation.home.gif align=bottom alt="[simulation home]"></A>
+
+<HR>
+
+<ADDRESS>
+Lynn Garren
+<a href="mailto:garren@fnal.gov">garren@fnal.gov</a><P>
+Rob Kutschke
+<A HREF="mailto:kutschke@fnal.gov">kutschke@fnal.gov</A><P>
+Patricia McBride
+<A HREF="mailto:mcbride@fnal.gov">mcbride@fnal.gov</A><P>
+</ADDRESS>

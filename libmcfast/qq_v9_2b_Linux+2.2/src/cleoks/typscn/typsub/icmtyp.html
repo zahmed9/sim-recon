@@ -1,0 +1,145 @@
+<HEAD>
+<TITLE>cleoks/typscn/typsub/icmtyp.F</TITLE>
+</HEAD>
+<BODY>
+<PRE>
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:20  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1995/08/01  18:00:20  nk
+* Consolidation
+*
+* Revision 1.1  1995/07/31 19:42:28  nk
+* Added typscn
+*
+* Revision 1.1.1.1  1994/10/05  13:45:40  zfiles
+* first version of typscn in CVS
+*
+*
+#include &QUOT<A HREF="../../../sys/CLEO_machine.html">sys/CLEO_machine.h</A>&QUOT
+#include &QUOT<A HREF="../../../pilot.html">pilot.h</A>&QUOT
+*CMZ :  1.00/00 12/05/89  16.55.33  by  Ian C. Brock
+*-- Author :
+C
+C----------------------------------------------------------------------------
+C Find commands
+C
+*=*=*=*= ICMTYP.html =*=*=*=*
+
+</PRE>
+
+<A HREF="http://w4.lns.cornell.edu/Harvest/brokers/w4-public/">Search Keyword</A>
+<H1>INTEGER FUNCTION ICMTYP</H1>
+
+<PRE>
+
+      INTEGER FUNCTION <A NAME=icmtyp>ICMTYP</A>(<A HREF="../../../cleoks/typscn/typsub/icmtyp.html#lwait">LWAIT</A>,<A HREF="../../../cleoks/typscn/typsub/icmtyp.html#idelim">IDELIM</A>,<A HREF="../../../cleoks/typscn/typsub/icmtyp.html#ccmd">CCMD</A>)
+      SAVE
+C
+C     ICMD gets sequence number of interpreted command, or error code.
+C     CCMD is input array of command names.
+C
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typpar.html">cleoks/typscn/typcde/typpar.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typchr.html">cleoks/typscn/typcde/typchr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typscn.html">cleoks/typscn/typcde/typscn.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typstr.html">cleoks/typscn/typcde/typstr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typctl.html">cleoks/typscn/typcde/typctl.inc</A>&QUOT
+C
+      CHARACTER*(*) <A NAME=ccmd>CCMD</A>(*)
+      LOGICAL <A NAME=lwait>LWAIT</A>
+      INTEGER <A NAME=idelim>IDELIM</A>
+      INTEGER <A NAME=icmscn>ICMSCN</A>
+C
+      <A HREF="../../../cleoks/typscn/typcde/typstr.html#ctypnm">CTYPNM</A> = 'COMMAND'
+C     signals waiting for TTY input
+      <A NAME=ICMTYP_ICMTYP_1  HREF="../../../cleoks/typscn/typsub/icmtyp.html#icmtyp">ICMTYP</A> = -2
+      CALL <A NAME=ICMTYP_GETLIN_1  HREF="../../../cleoks/typscn/typsub/getlin.html">GETLIN</A>(<A HREF="../../../cleoks/typscn/typsub/icmtyp.html#lwait">LWAIT</A>)
+C
+      IF (.NOT.<A HREF="../../../cleoks/typscn/typcde/typctl.html#lasync">LASYNC</A>) THEN
+      <A NAME=ICMTYP_ICMTYP_2  HREF="../../../cleoks/typscn/typsub/icmtyp.html#icmtyp">ICMTYP</A> = <A NAME=ICMTYP_ICMSCN_1  HREF="../../../cleoks/typscn/typsub/icmtyp.html#icmscn">ICMSCN</A>(<A HREF="../../../avehst/seq/avehstin.html#ipoint">IPOINT</A>,<A HREF="../../../cleoks/typscn/typcde/typscn.html#nchars">NCHARS</A>,<A HREF="../../../cleoks/typscn/typsub/icmtyp.html#idelim">IDELIM</A>,<A HREF="../../../cleoks/typscn/typsub/icmtyp.html#ccmd">CCMD</A>)
+      END IF
+C
+      RETURN
+      END
+</PRE>
+<H1>Cross references</H1>
+<PRE>
+Called from <A HREF="../../../avehst/avehst/hstunp.html#HSTUNP_ICMTYP_1>hstunp_1</A>
+Called from <A HREF="../../../avehst/avehst/hstunp.html#HSTUNP_ICMTYP_2>hstunp_2</A>
+Called from <A HREF="../../../avehst/avehst/hstunp.html#HSTUNP_ICMTYP_3>hstunp_3</A>
+Called from <A HREF="../../../avehst/avehst/hstunp.html#HSTUNP_ICMTYP_4>hstunp_4</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_ICMTYP_1>dvcmnd_1</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_ICMTYP_10>dvcmnd_10</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_ICMTYP_11>dvcmnd_11</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_ICMTYP_12>dvcmnd_12</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_ICMTYP_2>dvcmnd_2</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_ICMTYP_3>dvcmnd_3</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_ICMTYP_4>dvcmnd_4</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_ICMTYP_5>dvcmnd_5</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_ICMTYP_6>dvcmnd_6</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_ICMTYP_7>dvcmnd_7</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_ICMTYP_8>dvcmnd_8</A>
+Called from <A HREF="../../../dvlib/dvlib/dvcmnd.html#DVCMND_ICMTYP_9>dvcmnd_9</A>
+Called from <A HREF="../../../dvlib/dvlib/dvhelp.html#DVHELP_ICMTYP_1>dvhelp_1</A>
+Called from <A HREF="../../../dvlib/dvlib/dvhelp.html#DVHELP_ICMTYP_2>dvhelp_2</A>
+Called from <A HREF="../../../ftlib/ftgeom/fgetln.html#FGETLN_ICMTYP_1>fgetln_1</A>
+Called from <A HREF="../../../ftlib/ftgeom/fgrddx.html#FGRDDX_ICMTYP_1>fgrddx_1</A>
+Called from <A HREF="../../../ftlib/ftgeom/fgrdev.html#FGRDEV_ICMTYP_1>fgrdev_1</A>
+Called from <A HREF="../../../ftlib/ftgeom/fgrdft.html#FGRDFT_ICMTYP_1>fgrdft_1</A>
+Called from <A HREF="../../../ftlib/ftgeom/fgrdft.html#FGRDFT_ICMTYP_2>fgrdft_2</A>
+Called from <A HREF="../../../ftlib/ftgeom/fgread.html#FGREAD_ICMTYP_1>fgread_1</A>
+Called from <A HREF="../../../ftlib/ftgeom/fgrmuo.html#FGRMUO_ICMTYP_1>fgrmuo_1</A>
+Called from <A HREF="../../../ftlib/ftgeom/fgrrch.html#FGRRCH_ICMTYP_1>fgrrch_1</A>
+Called from <A HREF="../../../ftlib/ftgeom/fgrslb.html#FGRSLB_ICMTYP_1>fgrslb_1</A>
+Called from <A HREF="../../../ftlib/ftgeom/fgrsld.html#FGRSLD_ICMTYP_1>fgrsld_1</A>
+Called from <A HREF="../../../ftlib/ftgeom/fgrstw.html#FGRSTW_ICMTYP_1>fgrstw_1</A>
+Called from <A HREF="../../../ftlib/ftgeom/fgrtof.html#FGRTOF_ICMTYP_1>fgrtof_1</A>
+Called from <A HREF="../../../ftlib/ftgeom/fgrvol.html#FGRVOL_ICMTYP_1>fgrvol_1</A>
+Called from <A HREF="../../../ftlib/ftgeom/fgrvol.html#FGRVOL_ICMTYP_2>fgrvol_2</A>
+Called from <A HREF="../../../ftlib/ftgeom/fgrvol.html#FGRVOL_ICMTYP_3>fgrvol_3</A>
+Called from <A HREF="../../../ftlib/ftgeom/fgrxtl.html#FGRXTL_ICMTYP_1>fgrxtl_1</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgetln.html#FGETLN_ICMTYP_1>fgetln_1</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgrddx.html#FGRDDX_ICMTYP_1>fgrddx_1</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgrdev.html#FGRDEV_ICMTYP_1>fgrdev_1</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgrdft.html#FGRDFT_ICMTYP_1>fgrdft_1</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgrdft.html#FGRDFT_ICMTYP_2>fgrdft_2</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgread.html#FGREAD_ICMTYP_1>fgread_1</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgrmuo.html#FGRMUO_ICMTYP_1>fgrmuo_1</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgrrch.html#FGRRCH_ICMTYP_1>fgrrch_1</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgrslb.html#FGRSLB_ICMTYP_1>fgrslb_1</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgrsld.html#FGRSLD_ICMTYP_1>fgrsld_1</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgrstw.html#FGRSTW_ICMTYP_1>fgrstw_1</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgrtof.html#FGRTOF_ICMTYP_1>fgrtof_1</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgrvol.html#FGRVOL_ICMTYP_1>fgrvol_1</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgrvol.html#FGRVOL_ICMTYP_2>fgrvol_2</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgrvol.html#FGRVOL_ICMTYP_3>fgrvol_3</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgrxtl.html#FGRXTL_ICMTYP_1>fgrxtl_1</A>
+Called from <A HREF="../../../mctr/tprs/mgthex.html#MGTHEX_ICMTYP_1>mgthex_1</A>
+Called from <A HREF="../../../mctr/tprs/mgtoct.html#MGTOCT_ICMTYP_1>mgtoct_1</A>
+Called from <A HREF="../../../mctr/tprs/mprs0.html#MPRS0_ICMTYP_1>mprs0_1</A>
+Called from <A HREF="../../../mctr/tprs/mprs0.html#MPRS0_ICMTYP_2>mprs0_2</A>
+Called from <A HREF="../../../mctr/tprs/mprs1.html#MPRS1_ICMTYP_1>mprs1_1</A>
+Called from <A HREF="../../../mctr/tprs/mprs2.html#MPRS2_ICMTYP_1>mprs2_1</A>
+Called from <A HREF="../../../mctr/tprs/mrdpar.html#MRDPAR_ICMTYP_1>mrdpar_1</A>
+Called from <A HREF="../../../mctr/tprs/mrdpar.html#MRDPAR_ICMTYP_2>mrdpar_2</A>
+Called from <A HREF="../../../mctr/tprs/mrdpar.html#MRDPAR_ICMTYP_3>mrdpar_3</A>
+Called from <A HREF="../../../mctr/tprs/mrdpar.html#MRDPAR_ICMTYP_4>mrdpar_4</A>
+Called from <A HREF="../../../mctr/tprs/mrdpar.html#MRDPAR_ICMTYP_5>mrdpar_5</A>
+Called from <A HREF="../../../mctr/tprs/mrdpar.html#MRDPAR_ICMTYP_6>mrdpar_6</A>
+Called from <A HREF="../../../qqlib/decay/qqrfil.html#QQRFIL_ICMTYP_1>qqrfil_1</A>
+Called from <A HREF="../../../qqlib/decay/qqrgln.html#QQRGLN_ICMTYP_1>qqrgln_1</A>
+Called from <A HREF="../../../roarlib/wrroar/wrcnst.html#WRCNST_ICMTYP_1>wrcnst_1</A>
+Called from <A HREF="../../../rpuser/lib/rpcmd.html#RPCMD_ICMTYP_1>rpcmd_1</A>
+Called from <A HREF="../../../rpuser/lib/rpcmd.html#RPCMD_ICMTYP_2>rpcmd_2</A>
+Called from <A HREF="../../../rpuser/lib/rpcmd.html#RPCMD_ICMTYP_3>rpcmd_3</A>
+</PRE>
+<ADDRESS>
+<A HREF="http://w4.lns.cornell.edu/cgi-bin/mail?nk">nk@lns62.lns.cornell.edu</A>
+</ADDRESS>
+
+</BODY>
+

@@ -1,0 +1,89 @@
+<HEAD>
+<TITLE>cleoks/typscn/typsub/unityp.F</TITLE>
+</HEAD>
+<BODY>
+<PRE>
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:21  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1995/08/01  18:00:24  nk
+* Consolidation
+*
+* Revision 1.1  1995/07/31 19:42:44  nk
+* Added typscn
+*
+* Revision 1.1.1.1  1994/10/05  13:45:41  zfiles
+* first version of typscn in CVS
+*
+*
+#include &QUOT<A HREF="../../../sys/CLEO_machine.html">sys/CLEO_machine.h</A>&QUOT
+#include &QUOT<A HREF="../../../pilot.html">pilot.h</A>&QUOT
+*CMZ :  1.00/00 12/05/89  16.55.34  by  Ian C. Brock
+*-- Author :
+C
+C
+C************************************************************************
+C GENERIC I/O ROUTINES
+C---------------------------------------------------------------------------
+C User changes teletype input unit to IACC and output to ITYP
+C
+*=*=*=*= UNITYP.html =*=*=*=*
+
+</PRE>
+
+<A HREF="http://w4.lns.cornell.edu/Harvest/brokers/w4-public/">Search Keyword</A>
+<H1>SUBROUTINE UNITYP</H1>
+
+<PRE>
+
+      SUBROUTINE <A NAME=unityp>UNITYP</A>(<A HREF="../../../cleoks/typscn/typsub/unityp.html#iacc">IACC</A>,<A HREF="../../../cleoks/typscn/typsub/unityp.html#ityp">ITYP</A>)
+      SAVE
+C
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typpar.html">cleoks/typscn/typcde/typpar.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typchr.html">cleoks/typscn/typcde/typchr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typscn.html">cleoks/typscn/typcde/typscn.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typstr.html">cleoks/typscn/typcde/typstr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typctl.html">cleoks/typscn/typcde/typctl.inc</A>&QUOT
+C
+      INTEGER  <A NAME=iacc>IACC</A>
+      INTEGER  <A NAME=ityp>ITYP</A>
+C
+C     Cancel outstanding async I/O if unit number is changing
+CJB      CALL ASYNCN
+      IF (<A HREF="../../../cleoks/typscn/typsub/unityp.html#iacc">IACC</A>.NE.<A HREF="../../../cleoks/typscn/typcde/typctl.html#iunacc">IUNACC</A>) CALL <A NAME=UNITYP_ASYNCN_1  HREF="../../../cleoks/typscn/typsub/unityp.html#asyncn">ASYNCN</A>
+      <A HREF="../../../cleoks/typscn/typcde/typctl.html#lasyin">LASYIN</A> = .TRUE.
+      <A HREF="../../../cleoks/typscn/typcde/typctl.html#iunacc">IUNACC</A> = <A HREF="../../../cleoks/typscn/typsub/unityp.html#iacc">IACC</A>
+      <A HREF="../../../cleoks/typscn/typcde/typctl.html#iuntyp">IUNTYP</A> = <A HREF="../../../cleoks/typscn/typsub/unityp.html#ityp">ITYP</A>
+      <A HREF="../../../avehst/seq/avehstin.html#ipoint">IPOINT</A> = <A HREF="../../../cleoks/typscn/typcde/typscn.html#nchacc">NCHACC</A>
+      <A HREF="../../../cleoks/typscn/typcde/typscn.html#nchars">NCHARS</A> = -1
+      RETURN
+      END
+</PRE>
+<H1>Cross references</H1>
+<PRE>
+Called from <A HREF="../../../avehst/avehst/hstint.html#HSTINT_UNITYP_1>hstint_1</A>
+Called from <A HREF="../../../ftlib/ftgeom/fgread.html#FGREAD_UNITYP_1>fgread_1</A>
+Called from <A HREF="../../../ftlib/ftgeom/fgread.html#FGREAD_UNITYP_2>fgread_2</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgread.html#FGREAD_UNITYP_1>fgread_1</A>
+Called from <A HREF="../../../ftmonte/ftgeom/fgread.html#FGREAD_UNITYP_2>fgread_2</A>
+Called from <A HREF="../../../mctr/tprs/mprs0.html#MPRS0_UNITYP_1>mprs0_1</A>
+Called from <A HREF="../../../mctr/tprs/mprs0.html#MPRS0_UNITYP_2>mprs0_2</A>
+Called from <A HREF="../../../mctr/tprs/mprs1.html#MPRS1_UNITYP_1>mprs1_1</A>
+Called from <A HREF="../../../mctr/tprs/mprs1.html#MPRS1_UNITYP_2>mprs1_2</A>
+Called from <A HREF="../../../mctr/tprs/mprs2.html#MPRS2_UNITYP_1>mprs2_1</A>
+Called from <A HREF="../../../mctr/tprs/mprs2.html#MPRS2_UNITYP_2>mprs2_2</A>
+Called from <A HREF="../../../mctr/tprs/mrdpar.html#MRDPAR_UNITYP_1>mrdpar_1</A>
+Called from <A HREF="../../../mctr/tprs/mrdpar.html#MRDPAR_UNITYP_2>mrdpar_2</A>
+Called from <A HREF="../../../qqlib/decay/qqrfil.html#QQRFIL_UNITYP_1>qqrfil_1</A>
+Called from <A HREF="../../../qqlib/decay/qqrfil.html#QQRFIL_UNITYP_2>qqrfil_2</A>
+</PRE>
+<ADDRESS>
+<A HREF="http://w4.lns.cornell.edu/cgi-bin/mail?nk">nk@lns62.lns.cornell.edu</A>
+</ADDRESS>
+
+</BODY>
+

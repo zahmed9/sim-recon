@@ -1,0 +1,43 @@
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:26  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1994/11/22  16:57:01  zfiles
+* first version of korb in CVS
+*
+*
+*CMZ :  2.00/01 16/03/93  11.51.07  by  CLEO II Librarian
+*CMZ :  1.00/00 27/04/92  11.55.56  by  Peter C Kim
+*-- Author :
+******************************************************************
+*  Unified TEMPLATE for INSTALLATION MACROS (.KUMAC)             *
+*                                                                *
+*  This is an ultimate unified kumac macro.                      *
+*  The code author has to modify only the first two sections     *
+*  (i.e. ALL and EXTRA)                                          *
+*              - Manoj.                                          *
+*                March 28
+*                                                                *
+******************************************************************
+*
+MACRO ALL CMZFILE=korb LIBRARY=korb
+*
+    trace
+    sel  .
+    seq  .
+    rel  *
+*
+    exec  SETFLAGS
+    exec  GETSEQ    seq clinc clutil
+    exec  GETSEQ    qqlib seq
+    exec  GETFILE   [CMZFILE] -r
+    exec  VAXNLIB   [LIBRARY] korb LOCCODE DIST KORALHEP KORB22
+    exec  VAXNLIB   [LIBRARY] korb TAUOLA FORMF PHOTOS
+    exec  RUNFIL    [CMZFILE] runfil korb dec
+*
+   rel  *
+RETURN
+*

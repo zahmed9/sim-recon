@@ -1,0 +1,27 @@
+       integer nterm_type
+       integer track
+       integer vertex
+       integer muon
+       integer calem
+       integer caljt
+       integer calmet
+       integer calscet
+       integer user
+       integer fangl
+       parameter (nterm_type = 9)
+       parameter (track      = 1)
+       parameter (vertex     = 2)
+       parameter (muon       = 3)
+       parameter (calem      = 4)
+       parameter (caljt      = 5)
+       parameter (calmet     = 6)
+       parameter (calscet    = 7)
+       parameter (user       = 8)
+       parameter (fangl      = 9)
+
+       integer level1 
+       integer level2
+       parameter (level1     = 1)
+       parameter (level2     = 2)
+ 
+

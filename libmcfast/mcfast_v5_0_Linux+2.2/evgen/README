@@ -1,0 +1,27 @@
+This is the event generator area.
+
+The following products need to be defined:
+
+	setup cern
+	setup lund
+	setup isajet
+	setup herwig
+	setup -d qq
+	setup -t stdhep
+
+File extension conventions:
+
+	.hwg	- input file for herwig
+	.isa	- input file for isajet
+	.pyt	- input file for pythia
+	.std	- input file for stdhep
+	.lpt	- "line printer" output
+	.evt	- native mode event files as written by stdhep
+	.f	- standard fortran
+	.F	- fortran that will be passed through the c preprocessor
+	.rz	- hbook histogram or ntuple files (readable by paw)
+	.fz	- zebra event files
+
+For all examples, the events are put into the HEPEVT common block and 
+written to disk as xdr files by stdhep.
+

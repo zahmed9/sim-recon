@@ -1,0 +1,149 @@
+###################################################
+#  Makefile: General library and executable maker 
+#
+#  build evgen user examples
+#  this is the user example - it assumes all libraries have been built
+#
+#  Important:  use gmake
+#
+###################################################
+
+# platform specific information
+include $(MCFAST_DIR)/arch_mcfast
+
+#-----------------------------
+#  Useful Definitions
+#----------------------------
+
+# User files.
+PYTHIA_USER_OBJS = usr_filter_preqq.o usr_end_event.o bookhistos.o
+ISAJET_USER_OBJS = usr_filter_preqq.o usr_end_event.o bookhistos.o
+HERWIG_USER_OBJS = usr_filter_preqq.o usr_end_event.o bookhistos.o
+
+
+# Include path.  
+# Note that pythia and isajet do not use fortran or cpp includes.
+# There is no harm having the herwig include area in the path for
+# for compilation of pythia and isajet code.
+FINC = -I$(EVGEN_DIR)/inc \
+	 -I$(STDHEP_DIR)/src/inc -I$(LUND_DIR)/src/inc \
+	 -I$(QQ_DIR)/src/inc -I$(HERWIG_DIR)/src
+
+
+# Evgen main program.
+MAIN = $(GLIB)/main_args.o
+
+# Directory which contains EVGEN .a and .o files.
+ifdef MCFREL
+  OBJ = $(MCFAST_DIR)/lib.$(UNAME)
+  MCFIO = $(MCFAST_DIR)/lib.$(UNAME)/libFmcfio.a
+else
+  OBJ = $(EVGEN_DIR)/lib.$(UNAME)
+  MCFIO = $(MCFIO_DIR)/lib.$(UNAME)/libFmcfio.a
+endif
+
+CERNLIB = -L$(CRNLIB) -lmathlib -lpacklib 
+
+#-----------------
+#  Action section 
+#-----------------
+
+all: pythia_exam isajet_exam herwig_exam
+
+clean:
+	rm -f pythia_exam
+	rm -f isajet_exam
+	rm -f herwig_exam
+	rm -f *.f
+	rm -f *.o
+
+test:
+	@echo OBJ is $(OBJ)
+
+#-----------------
+#  Executables 
+#-----------------
+
+pythia_exam:    $(PYTHIA_USER_OBJS)
+	$(F77) $(FMAIN) $(FFLAGS) -o pythia_exam \
+		$(MAIN) $(OBJ)/pythia_exam.o \
+	        $(PYTHIA_USER_OBJS) \
+		$(LULIB)/pydata.o $(LULIB)/pdfdum.o $(QQ_DIR)/lib/ranp.o \
+		-L$(OBJ) -levgen \
+                -L$(STDHEP_DIR)/lib -lstdhep  $(MCFIO) \
+		$(QQLIB) $(TYPSCN) \
+		-L$(LULIB) -llund \
+                -L$(GLIB) -lcmd_parse -lgeneral \
+		$(CERNLIB) $(LIBS) $(MAP)
+
+
+isajet_exam:    $(ISAJET_USER_OBJS)
+	$(F77) $(FMAIN) $(FFLAGS) -o isajet_exam \
+		$(MAIN) $(OBJ)/isajet_exam.o \
+		$(ISAJET_USER_OBJS) \
+		$(OBJ)/amass_isa.o $(QQ_DIR)/lib/ranp.o \
+                -L$(OBJ) -levgen \
+                -L$(GLIB) -lgeneral \
+                -L$(STDHEP_DIR)/lib -lstdhep  \
+		$(ISAJET_DIR)/isajet.a \
+		$(QQLIB) $(TYPSCN) $(MCFIO) \
+		$(CERNLIB) $(LIBS) $(MAP)
+
+herwig_exam:    $(HERWIG_USER_OBJS)
+	$(F77) $(FMAIN) $(FFLAGS) -o herwig_exam \
+                $(MAIN) $(OBJ)/herwig_exam.o \
+		$(HERWIG_USER_OBJS) \
+		-L$(OBJ) -levgen \
+		$(HERWIG_DIR)/lib/hwudat.o $(QQ_DIR)/lib/ranp.o \
+		-L$(STDHEP_DIR)/lib -lstdhep  $(MCFIO) \
+                -L$(GLIB) -lcmd_parse -lgeneral \
+		-L$(HERWIG_DIR)/lib -lherwig  \
+                $(QQLIB) $(TYPSCN) -lherdum \
+		$(CERNLIB) $(LIBS) $(MAP)
+
+
+# Tell gmake to forget about the all implicit rules and then
+# define only the ones that we want - all this is to get rid of
+# the .f rule, which bites us because f77mcf creates .f files in
+# .F.o step ( not the .f.o step ) and these subsequently confuse gmake.
+# A corollary is that one cannot make .f files with this GNUmakefile.
+.SUFFIXES :
+.SUFFIXES :  .o .c .F
+
+.F.o:
+	$(FC) $(ABSOFT) -f77 "$(FFLAGS)" -cpp "$(FINC)" $<
+
+#
+# $Id$
+#
+# $Log$
+# Revision 1.1  2000/06/19 19:58:31  eugenio
+# Initial revision
+#
+# Revision 1.15  2000/02/08 16:45:25  garren
+# first pass at merging archtecture files
+#
+# Revision 1.14  1999/10/21  14:57:42  garren
+# don't need -lutil
+#
+# Revision 1.13  1999/01/31  00:43:34  garren
+# use common architecture include file
+#
+# Revision 1.12  1999/01/13  22:23:39  garren
+# fix example makefiles for UNAME=IRIX under IRIX+6
+#
+# Revision 1.11  1998/07/09  22:36:35  garren
+# new generators
+#
+# Revision 1.10  1998/06/25  15:48:52  bphyslib
+# add all necessary changes from v3_3
+#
+# Revision 1.7.2.4  1998/05/21  21:05:10  garren
+# fix IRIX+6 options
+#
+# Revision 1.7.2.3  1998/05/19  01:29:44  kutschke
+# Remove bogus history records.
+#
+# Revision 1.7.2.2  1998/05/19  01:27:26  kutschke
+# Major update.
+#

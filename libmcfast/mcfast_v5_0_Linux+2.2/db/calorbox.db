@@ -1,0 +1,21 @@
+template CalorBox(40)
+  char name
+  char shape
+  int type
+  real xlimit(2)        ! xmin,xmax
+  real ylimit(2)        ! ymin,ymax
+  real xlimit_gap(2)    ! inner gap xmin,xmax
+  real ylimit_gap(2)    ! inner gap ymin,ymax
+  real z0
+  real zlen
+  material material
+  material active
+  int ncr1
+  int ncr2
+  real siga_em
+  real sigb_em
+  real siga_had
+  real sigb_had
+  real em_had_ratio
+  int nlayers
+end template

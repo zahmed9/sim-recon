@@ -1,0 +1,21 @@
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:24  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1994/04/05  21:31:35  lkg
+* Beta version of GEANT in CLEO CVS format
+*
+*
+*
+* gtscan.inc
+*
+      INTEGER MSLIST,NPHI,IPHIMI,IPHIMA,IPHI1,IPHIL,NTETA,MODTET,NSLMAX,
+     +        MAXMDT,NSLIST,ISLIST,IPHI,ITETA,ISCUR
+      REAL    PHIMIN,PHIMAX,TETMIN,TETMAX,VSCAN,FACTX0,FACTL,
+     +        FACTR,SX0,SABS,TETMID,TETMAD
+     +       ,SX0S,SX0T,SABSS,SABST,FACTSF
+     +       ,DLTPHI,DLTETA,DPHIM1,DTETM1
+     +       ,FCX0M1,FCLLM1,FCRRM1

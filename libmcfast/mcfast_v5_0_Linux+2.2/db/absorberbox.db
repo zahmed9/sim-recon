@@ -1,0 +1,12 @@
+template AbsorberBox(25)
+  char name
+  char shape         ! BOX only !
+  int type           ! 1 - central, 2 - forward
+  real xlimit(2)     ! xmin,xmax
+  real ylimit(2)     ! ymin,ymax
+  real xlimit_gap(2) ! inner gap xmin,xmax
+  real ylimit_gap(2) ! inner gap ymin,ymax
+  real z0
+  real zlen
+  material material
+end template

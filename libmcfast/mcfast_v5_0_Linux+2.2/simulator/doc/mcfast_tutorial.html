@@ -1,0 +1,270 @@
+
+<HEAD>
+<TITLE>MCFast Tutorial</Title>
+</HEAD>
+
+<CENTER><IMG src=http://www-pat.fnal.gov/bars/default.bar.gif></CENTER>
+<CENTER><H1><IMG SRC=http://www-pat.fnal.gov/images/atom.gif ALIGN=middle>
+  MCFast Tutorial
+  <IMG SRC=http://www-pat.fnal.gov/images/atom.gif ALIGN=middle></H1></CENTER>
+<CENTER><IMG src=http://www-pat.fnal.gov/bars/default.bar.gif></CENTER>
+
+
+<P>August 24, 1998<P>
+
+<H2>Tutorial for Evgen and MCFast</H2>
+
+This tutorial will allow you to create some  
+<math> B^0 -> psi K_s </math> events with one of
+pythia, herwig or isajet, then
+to decay all of the heavy flavor hadrons in these
+events with qq and, finally,
+ to trace these events through the detector with MCFast.
+For reading clarity, these instructions usually only refer to pythia;
+the translation to the other generators is to
+substitute .isa or .hwg for .pyt throughout; also substitute
+isajet_exam or herwig_exam for pythia_exam.
+<P>
+
+Most users of Evgen and MCFast will use the MCFast product version,
+which is  distributed via the Fermilab ups system.  The tutorial on this
+page is appropriate for these users.  Some users, mostly those
+doing development work, will want to use the bphyslib version,
+<A href="mcfast_tutorial_bphyslib.html"> 
+click here to go to the tutorial for the 
+bphyslib version. </A>.  The difference between the two tutorials
+reflects differences in directory structure between the product and
+bphyslib versions.
+<P>
+
+
+<P>
+
+<HR>
+<H2><IMG src=http://www-pat.fnal.gov/balls/redball.gif align=bottom alt="*">
+Step 0: Finding all the Documentation.</H2>
+<HR>
+This page contains a brief cookbook style tutorial.
+Additional commentary on the examples is available:
+<A href="../evgen/evgen_notes.html"> Evgen commentary</A> and
+<A href="mcfast_notes.html"> MCFast commentary</A>
+<HR>
+<H2><IMG src=http://www-pat.fnal.gov/balls/redball.gif align=bottom alt="*">
+Step 1: Set up packages</H2>
+<HR>
+setup mcfast v5_0
+<HR>            
+<H2><IMG src=http://www-pat.fnal.gov/balls/redball.gif align=bottom alt="*">
+Step 2: Creation of directories</H2>
+<HR>
+                 
+<BLOCKQUOTE>
+
+(A) Create a new directory somewhere and go into it.<P>
+
+(B) In the new directory, create two subdirectories: "evgen" and "mcfast".<P>
+
+</BLOCKQUOTE>
+
+<HR>
+<H2><IMG src=http://www-pat.fnal.gov/balls/redball.gif align=bottom alt="*">
+Step 3: Create event generator executable and run it</H2>
+<HR> 
+         
+<BLOCKQUOTE>
+
+(A) Go into the new evgen area. Copy the following files into the area.<P>
+     $MCFAST_DIR/example/evgen/b_psiks/GNUmakefile      : Makefile<BR>
+     $MCFAST_DIR/example/evgen/b_psiks/bookhistos.F     : Select B0 events<BR>
+     $MCFAST_DIR/example/evgen/b_psiks/usr_filter_preqq.F  : Select B0 events<BR>
+     $MCFAST_DIR/example/evgen/b_psiks/usr_end_event.F  : Make some histograms<BR>
+     $MCFAST_DIR/example/evgen/b_psiks/b_psiks.dec      : Force B0 --> psi Ks<BR>
+     $MCFAST_DIR/example/evgen/b_psiks/pythia_psiks.pyt : Pythia input file<P>
+
+(B) If you are not comfortable with unix script languagues, skip to
+    step (C), which continues the tutorial line by line. <P>
+    If you are comfortable with unix script languages, you can also copy:<BR>
+      $MCFAST_DIR/example/evgen/b_psiks/Run_evgen<BR>
+      $MCFAST_DIR/example/evgen/b_psiks/Run_all<BR>
+    The first file compiles links and runs a single Evgen job.  The
+    second file uses the Run_evgen to run examples for all of
+    pythia, isajet and herwig. To run the examples for all three
+    event generators, type:<br>
+    Run_all<br>
+    Inspect Run_all to see how to run a single example.
+
+<P>
+(C) Check the definition of the QQ user decay file.<P>
+    This is the file which forces the B0 to decay to psi K_s.
+    There are two ways to specify this file.  The first way, 
+    which only works for
+    herwig and pythia, is to include a line to the control file
+    ( pythia_psiks.pyt or herwig_psiks.hwg ):<p>
+
+       qq_user_file   b_psiks.dec       !QQ user decay file<p>
+
+    This is done in the example.  The other method, which
+    is the only method which works for isajet, is to type:<P>
+    setenv QQ_USER_FILE b_psiks.dec<p>
+    If you run interactively, you must do this every time you log in,
+    before running evgen.  See the
+    <A href="../evgen/evgen_notes.html"> evgen commentary</A> for
+    more details.<p>
+
+(D) Make one of the following executables. Any of them can be used.<P>
+
+      gmake  pythia_exam<BR>
+      gmake  isajet_exam<BR>
+      gmake  herwig_exam<P>
+
+(E) Run pythia_exam, using QQ to decay the B0 and other particles
+correctly.  This is done by entering the following command on one line:<P>
+
+ pythia_exam -f pythia_psiks.pyt -l pythia_psiks.lpt -o pythia_psiks.evt  -hb pythia_psiks.hbook -qq<P>
+
+
+This will generate 200 events of the form B0 --> psi Ks --> mu+mu-pi+pi-.
+You may need to decrease this number on account of disk space limitations.
+You can do this by editing the file pythia_psiks.pyt and changing the maximum number
+of events to be generated - maxev 200.  The command line options are:
+-f the name of file which controls evgen; -l the "printer" file which
+contains a copy of most messages sent to the screen, plus some
+additional status information; -o the output file containing the
+generated event; -hb the hbook file containing histograms made by the job.
+<P>
+
+You may also specify the QQ user decay file with the -qu flag.<p>
+
+ pythia_exam -f pythia_psiks.pyt -l pythia_psiks.lpt -o pythia_psiks.evt  -hb pythia_psiks.hbook -qq -qu b_psiks.dec<P>
+
+The histograms created by this job check to see if charge
+and 4-momentum are conserved by the final state particles.
+They are not always conserved! Check the 
+<A href="../evgen/evgen_notes.html"> Evgen commentary.</A>
+They also look at multiplicities of different sorts of final state
+particles.
+<P>
+
+There are similar examples which generate D0-> K- pi+ events and 
+minimum bias events.  These are found in the directories:<BR>
+$MCFAST_DIR/example/evgen/d_kpi<BR>
+$MCFAST_DIR/example/evgen/min_bias<BR>
+<P>
+
+
+</BLOCKQUOTE>
+
+<HR>
+<H2><IMG src=http://www-pat.fnal.gov/balls/redball.gif align=bottom alt="*">
+Step 4: Create MCFast executable and run it</H2>
+<HR>
+ 
+<BLOCKQUOTE>
+
+(A) Go into your mcfast directory and copy these files in to that area:<P>
+   $MCFAST_DIR/example/simulator/GNUmakefile<BR>  
+   $MCFAST_DIR/example/simulator/cdf.cmd<BR>
+   $MCFAST_DIR/example/simulator/cdf.db<BR>
+   $MCFAST_DIR/example/simulator/psiks.fil<BR>   
+   $MCFAST_DIR/example/simulator/usr_init.F<BR>   
+   $MCFAST_DIR/example/simulator/usr_analysis.F<BR>   
+   $MCFAST_DIR/example/simulator/Run_MCfast<BR>   
+<P>    
+
+   If you are not familar with unix script languages, then skip this
+   paragraph to continue with the line by line tutorial.
+   If you are familiar with unix script languages you can compile link
+   and run the example with the command,<BR>
+   Run_MCfast cdf<BR>
+   where the argument cdf tells the script to run the job described by
+   the file cdf.cmd.  There are also btev.cmd and d0.cmd which are run
+   in a similar fashion.
+
+<P>
+    Continue here for line by line tutorial:<br>
+    Create a link to the directory with the geometry template files,
+    after first removing any pre-existing links.<P>
+
+    rm db<br>
+    ln -s $MCFAST_DIR/db db
+<P>    
+    Edit the file psiks.fil. It should contain at least 1 line specifying 
+    the name of the pythia event file(s) you just created, i.e. 
+    pythia_psiks.evt in your evgen working directory.
+   
+<P> 
+(B) The other user routines which you may wish to modify can be found
+    $MCFAST_DIR/simulator/user/src/usr*.F:<P>
+       
+       usr_analysis.F             :   Analysis steering routine<BR>
+       usr_before_trigger.F       :   Trace particles/ fill calorimeter<BR>
+       usr_command.F              :   Build user defined runtime command<BR> 
+       usr_filter.F               :   Filter generator events<BR>
+       usr_generate_event.F       :   modify internal event generator<BR>
+       usr_hbinit.F               :   initialization for HBOOK<BR>
+       usr_hbsummary.F            :   close out HBOOK files<BR>
+       usr_hsinit.F               :   Initialization for Histoscope
+                                      (an alternate histogramming package)<BR>
+       usr_init.F                 :   user defined initialization<BR>
+       usr_mcfio_out.F            :   user defines output structures<BR>
+       usr_summary.F              :   User defined summary output<P>
+
+
+(C) Edit GNUmakefile<P>
+
+1.  If you want to include user routines other than the two specified
+    in (A), then you must add these to the USER_OBJ list found in
+    GNUmakefile.  For example<p>
+
+	USER_OBJ = usr_analysis.o usr_init.o usr_summary.F
+<p>	
+2.  If you wish, you can make your own library of user routines; but
+    do NOT call it libuser.a ( that is the library which contains the
+    dummy versions the user routines ).
+    Make sure your local user library appears before the line
+    -luser in the makefile.<P>
+
+
+(D) Make the MCFast executable<P>
+    gmake mcfast<P>
+    See below for a discussion about spurious link-time error messages.<P>
+
+(E) Run MCFast, reading in the data created by Pythia.<P>
+
+        mcfast -f cdf.cmd -l cdf.lpt -hb cdf.hbook<P>
+
+    The user histograms created by this job show the mass plots of
+the reconstructed Psi, K0s and B.  The meaning of the command line
+arguments is as for evgen, described above.
+<P>
+   
+    Several other detector configurations are available in the
+examples area.  To see what is available type:<BR>
+ls $MCFAST_DIR/example/simulator/README
+<P>
+
+</BLOCKQUOTE>
+
+
+<HR>
+<H2><IMG src=http://www-pat.fnal.gov/balls/redball.gif align=bottom alt="*">
+<a href=error_messages.html>Comments on Spurious Error Messages</a></H2>
+<HR>
+
+<A HREF="http://www-pat.fnal.gov/mcfast/doc_index.html">
+<IMG src=http://www-pat.fnal.gov/buttons/default.leftbutton.gif align=bottom alt="[back]"></A>
+<A HREF="http://www.fnal.gov/faw/fermilab_at_work.html">
+<IMG src=http://www-pat.fnal.gov/buttons/default.homebutton.gif align=bottom alt="[fermi at work]"></A>
+<A HREF="http://www-pat.fnal.gov/simulation.html">
+<IMG src=http://www-pat.fnal.gov/buttons/simulation.home.gif align=bottom alt="[simulation home]"></A>
+
+<HR>
+
+<ADDRESS>
+Lynn Garren
+<a href="mailto:garren@fnal.gov">garren@fnal.gov</a><P>
+Rob Kutschke
+<A HREF="mailto:kutschke@fnal.gov">kutschke@fnal.gov</A><P>
+Patricia McBride
+<A HREF="mailto:mcbride@fnal.gov">mcbride@fnal.gov</A><P>
+</ADDRESS>

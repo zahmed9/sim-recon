@@ -1,0 +1,13 @@
+
+template ForDisk(50)
+  int num
+  char name               ! name
+  int nlyr                ! number of layers
+  real rmin               ! cylinder min radius
+  real rmax               ! cylinder max radius
+  real z0                 ! global Z of center
+  real zlen               ! length in Z
+  material material       ! fill material
+  real thick_boun(4)      ! thickness at rmin, rmax, zmin, zmax
+  material mat_boun(4)    ! material at rmin, rmax, zmin, zmax
+end template

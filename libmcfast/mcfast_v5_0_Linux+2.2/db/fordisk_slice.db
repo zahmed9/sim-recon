@@ -1,0 +1,17 @@
+
+template FDSlice(16)
+  char speci        ! "SPC" or "ALL"
+  int det
+  parent LayerForDi
+  int lyr
+  int nslice         ! slice number (used with "SPC")         
+  int ncells         ! number of cells
+  real c0_r          ! coordinate 0 for r coor
+  real c0_phi
+  real cell_width    
+  real stereo
+  real eff_hit
+  real siga
+  real sigb
+  real sigc
+end template

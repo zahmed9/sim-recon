@@ -1,0 +1,59 @@
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:26  eugenio
+* Initial revision
+*
+# Revision 1.1.1.1  1994/11/22  16:57:01  zfiles
+# first version of korb in CVS
+#
+*
+*CMZ :V 2.00/07 17/11/94  10.29.15  by  Alan J. Weinstein
+*CMZ :V 2.00/06 30/01/94  16.23.07  by  Alan J. Weinstein
+*CMZ :  2.00/05 21/10/93  17.43.47  by  Alan Weinstein
+*CMZ :  2.00/04 17/05/93  22.59.08  by  Alan Weinstein
+*CMZ :V 2.00/03 30/03/93  15.23.30  by  Alan J. Weinstein
+*CMZ :  2.00/02 16/03/93  14.05.25  by  CLEO II Librarian
+*CMZ :  2.00/01 16/03/93  12.06.11  by  CLEO II Librarian
+*CMZ :  2.00/00 21/01/93  17.42.27  by  Alan Weinstein
+*-- Author :    Alan Weinstein   21/01/93
+*
+*::>          VERSION  2.00/07   941117 10.29
+*
+* AJW: Mods for PRA: the rearrangement of MCCOMS, QQ* commons
+*   - Delete the entire patch //korb/old/ and //korb/taumain
+*   - Delete obsolete install/korb_v1, dist/korbdm,inimas
+*   - change QQ commons, and DECAY->QQDECA,
+*     in loccode/korbbr,korbev,decaks,inimas, and dist/taurdf.
+*   - declare LQPMAT in loccode/korbev
+*   - add +SEQ, QQPARS, HEPEVT, and comment out COMMON/HEPEVT/ in
+*     tauola/reslu,filhep, and
+*     photos/photos,phzode,phokin,phobos,phoin,phoout,phtype,phomak
+*
+*::>          VERSION  2.00/06   940130 16.23
+*AJW: New FORMF/CURR with 4pi AMPLitudes from Vasia;
+*     New TAUOLA/DPHNPI from Was with fixed Jacobian for npi decay.
+*     New PHOTOS 161193 from Was with itfc; protection in PHOCOR, PHINT, PHOTRI.
+*     New RUNFIL/KORB.DEC with New BRs, A1 mass/width, 5/6pi matrix elements.
+*
+*::>          VERSION  2.00/05   931021 17.43
+*AJW: New PHOTOS v 2.0 from Was
+*
+*::>          VERSION  2.00/04   930517 22.59
+*
+*AJW In RUNFIL/KORB, give lifetimes to pseudo-particles so QQ doesn't complain.
+*AJW In KORB22/TRALOR, implement bug fix from authors, re: spin correlations.
+*
+*::>          VERSION  2.00/03   930330 15.23
+*AJW mods to KORBEV and RUNFIL/KORB
+*
+*::>          VERSION  2.00/02   930316 14.05
+*CLIB  fixed KORB.DEC, changed comment line from : to ;
+*
+*::>          VERSION  2.00/01   930316 12.06
+*CLIB  added new patch //KORB/RUNFIL for KORB.DEC, is installed into C$RUNFIL
+*
+*::>          VERSION  2.00/00   930121 17.42
+*
+*  New KoralB/Tauola v 2.3 from Was, 10/1/92.

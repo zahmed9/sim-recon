@@ -1,0 +1,38 @@
+/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/cleoks
+gmake[2]: Entering directory `/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/cleoks'
+creating cache ./config.cache
+checking for cleo_f77... no
+checking for f77... f77
+checking for cleo_cc... no
+checking for cc... cc
+checking for cleo_makedepend... no
+checking for makedepend... makedepend
+checking how to run the C preprocessor... cc -E
+updating cache ./config.cache
+creating ./config.status
+creating Makefile
+creating lunmgr/Makefile
+creating mesrep/Makefile
+creating Makefile.cleoks
+creating typscn/Makefile
+creating typscn/typscn/Makefile
+creating typscn/typsio/Makefile
+creating typscn/typsio_c/Makefile
+creating typscn/typsub/Makefile
+creating Makefile
+creating lunmgr/Makefile
+creating mesrep/Makefile
+creating Makefile.cleoks
+creating typscn/Makefile
+creating typscn/typscn/Makefile
+creating typscn/typsio/Makefile
+creating typscn/typsio_c/Makefile
+creating typscn/typsub/Makefile
+gmake[3]: Entering directory `/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/cleoks'
+gmake[4]: Entering directory `/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/cleoks'
+gmake[5]: Entering directory `/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/cleoks'
+gmake[2]: *** Deleting file `Makefile'
+gmake[5]: *** [depend] Interrupt
+gmake[4]: *** [cleoks] Interrupt
+gmake[3]: *** [depend] Interrupt
+gmake[2]: *** [Makefile] Interrupt

@@ -1,0 +1,202 @@
+gmake[3]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/stdhep_v4_08_Linux+2.2/src/stdhep'
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio dpmhep.F > dpmhep.f
+/usr/bin/g77  -fno-second-underscore -c dpmhep.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio dpmtran.F > dpmtran.f
+/usr/bin/g77  -fno-second-underscore -c dpmtran.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio gtran.F > gtran.f
+/usr/bin/g77  -fno-second-underscore -c gtran.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio hep2geant.F > hep2geant.f
+/usr/bin/g77  -fno-second-underscore -c hep2geant.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio hepchg.F > hepchg.f
+/usr/bin/g77  -fno-second-underscore -c hepchg.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio hepchg_old.F > hepchg_old.f
+/usr/bin/g77  -fno-second-underscore -c hepchg_old.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio hepcmp.F > hepcmp.f
+/usr/bin/g77  -fno-second-underscore -c hepcmp.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio hepcmp_old.F > hepcmp_old.f
+/usr/bin/g77  -fno-second-underscore -c hepcmp_old.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio heplst.F > heplst.f
+/usr/bin/g77  -fno-second-underscore -c heplst.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio hepnam.F > hepnam.f
+/usr/bin/g77  -fno-second-underscore -c hepnam.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio hepnam_old.F > hepnam_old.f
+/usr/bin/g77  -fno-second-underscore -c hepnam_old.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio heptree.F > heptree.f
+/usr/bin/g77  -fno-second-underscore -c heptree.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio hptrlstdpm.F > hptrlstdpm.f
+/usr/bin/g77  -fno-second-underscore -c hptrlstdpm.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio hptrlsth.F > hptrlsth.f
+/usr/bin/g77  -fno-second-underscore -c hptrlsth.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio hptrlsti.F > hptrlsti.f
+/usr/bin/g77  -fno-second-underscore -c hptrlsti.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio hptrlstj.F > hptrlstj.f
+/usr/bin/g77  -fno-second-underscore -c hptrlstj.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio hptrlstq.F > hptrlstq.f
+/usr/bin/g77  -fno-second-underscore -c hptrlstq.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio hwghep.F > hwghep.f
+/usr/bin/g77  -fno-second-underscore -c hwghep.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio hwtran.F > hwtran.f
+/usr/bin/g77  -fno-second-underscore -c hwtran.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio isahep.F > isahep.f
+/usr/bin/g77  -fno-second-underscore -c isahep.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio istran.F > istran.f
+/usr/bin/g77  -fno-second-underscore -c istran.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio lunhep.F > lunhep.f
+/usr/bin/g77  -fno-second-underscore -c lunhep.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio lutran.F > lutran.f
+/usr/bin/g77  -fno-second-underscore -c lutran.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio pdgprtb.F > pdgprtb.f
+/usr/bin/g77  -fno-second-underscore -c pdgprtb.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio pdgrdtb.F > pdgrdtb.f
+/usr/bin/g77  -fno-second-underscore -c pdgrdtb.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio pdgtonew.F > pdgtonew.f
+/usr/bin/g77  -fno-second-underscore -c pdgtonew.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio pdgtran.F > pdgtran.f
+/usr/bin/g77  -fno-second-underscore -c pdgtran.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio qqhep.F > qqhep.f
+/usr/bin/g77  -fno-second-underscore -c qqhep.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio qqtran.F > qqtran.f
+/usr/bin/g77  -fno-second-underscore -c qqtran.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio std3to4.F > std3to4.f
+/usr/bin/g77  -fno-second-underscore -c std3to4.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio std3to4lst.F > std3to4lst.f
+/usr/bin/g77  -fno-second-underscore -c std3to4lst.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio std3to4prt.F > std3to4prt.f
+/usr/bin/g77  -fno-second-underscore -c std3to4prt.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio std3to4tran.F > std3to4tran.f
+/usr/bin/g77  -fno-second-underscore -c std3to4tran.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdchg.F > stdchg.f
+/usr/bin/g77  -fno-second-underscore -c stdchg.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdchgdsclst.F > stdchgdsclst.f
+/usr/bin/g77  -fno-second-underscore -c stdchgdsclst.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdcomp.F > stdcomp.f
+/usr/bin/g77  -fno-second-underscore -c stdcomp.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdcquarks.F > stdcquarks.f
+/usr/bin/g77  -fno-second-underscore -c stdcquarks.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stddautr.F > stddautr.f
+/usr/bin/g77  -fno-second-underscore -c stddautr.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stddautrlst.F > stddautrlst.f
+/usr/bin/g77  -fno-second-underscore -c stddautrlst.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stddecayqq.F > stddecayqq.f
+/usr/bin/g77  -fno-second-underscore -c stddecayqq.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stddscndlst.F > stddscndlst.f
+/usr/bin/g77  -fno-second-underscore -c stddscndlst.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdexpname.F > stdexpname.f
+/usr/bin/g77  -fno-second-underscore -c stdexpname.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdfixmass.F > stdfixmass.f
+/usr/bin/g77  -fno-second-underscore -c stdfixmass.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdfixpart.F > stdfixpart.f
+/usr/bin/g77  -fno-second-underscore -c stdfixpart.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdflhwxsec.F > stdflhwxsec.f
+/usr/bin/g77  -fno-second-underscore -c stdflhwxsec.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdflisxsec.F > stdflisxsec.f
+/usr/bin/g77  -fno-second-underscore -c stdflisxsec.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdflpyxsec.F > stdflpyxsec.f
+/usr/bin/g77  -fno-second-underscore -c stdflpyxsec.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdlst.F > stdlst.f
+/usr/bin/g77  -fno-second-underscore -c stdlst.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdmsjet.F > stdmsjet.f
+/usr/bin/g77  -fno-second-underscore -c stdmsjet.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdparent.F > stdparent.f
+/usr/bin/g77  -fno-second-underscore -c stdparent.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdparentlst.F > stdparentlst.f
+/usr/bin/g77  -fno-second-underscore -c stdparentlst.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdqqadd.F > stdqqadd.f
+/usr/bin/g77  -fno-second-underscore -c stdqqadd.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdqqdcy.F > stdqqdcy.f
+/usr/bin/g77  -fno-second-underscore -c stdqqdcy.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdqquset.F > stdqquset.f
+/usr/bin/g77  -fno-second-underscore -c stdqquset.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdquarkcnt.F > stdquarkcnt.f
+/usr/bin/g77  -fno-second-underscore -c stdquarkcnt.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdquarklst.F > stdquarklst.f
+/usr/bin/g77  -fno-second-underscore -c stdquarklst.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdquarks.F > stdquarks.f
+/usr/bin/g77  -fno-second-underscore -c stdquarks.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdrotboost.F > stdrotboost.f
+/usr/bin/g77  -fno-second-underscore -c stdrotboost.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdsort.F > stdsort.f
+/usr/bin/g77  -fno-second-underscore -c stdsort.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdspin.F > stdspin.f
+/usr/bin/g77  -fno-second-underscore -c stdspin.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdstdsclst.F > stdstdsclst.f
+/usr/bin/g77  -fno-second-underscore -c stdstdsclst.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdtcopy.F > stdtcopy.f
+/usr/bin/g77  -fno-second-underscore -c stdtcopy.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdversn.F > stdversn.f
+/usr/bin/g77  -fno-second-underscore -c stdversn.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdvtxmatch.F > stdvtxmatch.f
+/usr/bin/g77  -fno-second-underscore -c stdvtxmatch.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdxend.F > stdxend.f
+/usr/bin/g77  -fno-second-underscore -c stdxend.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdxrd.F > stdxrd.f
+/usr/bin/g77  -fno-second-underscore -c stdxrd.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdxrdm.F > stdxrdm.f
+/usr/bin/g77  -fno-second-underscore -c stdxrdm.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdxrinit.F > stdxrinit.f
+/usr/bin/g77  -fno-second-underscore -c stdxrinit.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdxropen.F > stdxropen.f
+/usr/bin/g77  -fno-second-underscore -c stdxropen.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdxwcm1.F > stdxwcm1.f
+/usr/bin/g77  -fno-second-underscore -c stdxwcm1.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdxwevt.F > stdxwevt.f
+/usr/bin/g77  -fno-second-underscore -c stdxwevt.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdxwinit.F > stdxwinit.f
+/usr/bin/g77  -fno-second-underscore -c stdxwinit.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdxwopen.F > stdxwopen.f
+/usr/bin/g77  -fno-second-underscore -c stdxwopen.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdxwrt.F > stdxwrt.f
+/usr/bin/g77  -fno-second-underscore -c stdxwrt.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdzero.F > stdzero.f
+/usr/bin/g77  -fno-second-underscore -c stdzero.f
+/usr/bin/gcc -E -C -P -DUNIX -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/src/inc -I/src -I/home/halld/src/libmcfast/qq_v9_2b_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio stdzeroqq.F > stdzeroqq.f
+/usr/bin/g77  -fno-second-underscore -c stdzeroqq.f
+stdzeroqq.f: In subroutine `stdzeroqq':
+stdzeroqq.f:302: warning:
+          call VZERO(IPCDQQ,MCTRK)
+               1
+stdzeroqq.f:307: (continued):
+          call VZERO(HELCQQ,MCTRK,-100.)
+               2
+Too many arguments for `vzero' at (2) versus invocation at (1) [info -f g77 M GLOBALS]
+stdzeroqq.f:302: warning:
+          call VZERO(IPCDQQ,MCTRK)
+               1
+stdzeroqq.f:307: (continued):
+          call VZERO(HELCQQ,MCTRK,-100.)
+               2
+Argument #1 of `vzero' is one type at (2) but is some other type at (1) [info -f g77 M GLOBALS]
+stdzeroqq.f:302: warning:
+          call VZERO(IPCDQQ,MCTRK)
+               1
+stdzeroqq.f:309: (continued):
+          call VZERO(CTTAU,250)
+               2
+Argument #1 of `vzero' is one type at (2) but is some other type at (1) [info -f g77 M GLOBALS]
+/usr/bin/gcc   -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio -c mcf_Stdhep_xdr.c
+mcf_Stdhep_xdr.c: In function `xdr_stdhep_':
+mcf_Stdhep_xdr.c:104: warning: passing arg 6 of `xdr_array' from incompatible pointer type
+mcf_Stdhep_xdr.c:107: warning: passing arg 6 of `xdr_array' from incompatible pointer type
+mcf_Stdhep_xdr.c:110: warning: passing arg 6 of `xdr_array' from incompatible pointer type
+mcf_Stdhep_xdr.c:113: warning: passing arg 6 of `xdr_array' from incompatible pointer type
+mcf_Stdhep_xdr.c:116: warning: passing arg 6 of `xdr_array' from incompatible pointer type
+mcf_Stdhep_xdr.c:119: warning: passing arg 6 of `xdr_array' from incompatible pointer type
+mcf_Stdhep_xdr.c: In function `xdr_stdhep_multi_':
+mcf_Stdhep_xdr.c:174: warning: passing arg 6 of `xdr_array' from incompatible pointer type
+mcf_Stdhep_xdr.c:177: warning: passing arg 6 of `xdr_array' from incompatible pointer type
+mcf_Stdhep_xdr.c:180: warning: passing arg 6 of `xdr_array' from incompatible pointer type
+mcf_Stdhep_xdr.c:183: warning: passing arg 6 of `xdr_array' from incompatible pointer type
+mcf_Stdhep_xdr.c:186: warning: passing arg 6 of `xdr_array' from incompatible pointer type
+mcf_Stdhep_xdr.c:189: warning: passing arg 6 of `xdr_array' from incompatible pointer type
+mcf_Stdhep_xdr.c:201: warning: passing arg 6 of `xdr_array' from incompatible pointer type
+mcf_Stdhep_xdr.c:226: warning: passing arg 6 of `xdr_array' from incompatible pointer type
+mcf_Stdhep_xdr.c:229: warning: passing arg 6 of `xdr_array' from incompatible pointer type
+mcf_Stdhep_xdr.c:232: warning: passing arg 6 of `xdr_array' from incompatible pointer type
+/usr/bin/gcc   -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio -c sum_4vec_d.c
+/usr/bin/gcc   -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio -c sum_4vec_f.c
+ar -urs /home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/lib/libstdhep.a dpmhep.o dpmtran.o gtran.o hep2geant.o hepchg.o hepchg_old.o hepcmp.o hepcmp_old.o heplst.o hepnam.o hepnam_old.o heptree.o hptrlstdpm.o hptrlsth.o hptrlsti.o hptrlstj.o hptrlstq.o hwghep.o hwtran.o isahep.o istran.o lunhep.o lutran.o pdgprtb.o pdgrdtb.o pdgtonew.o pdgtran.o qqhep.o qqtran.o std3to4.o std3to4lst.o std3to4prt.o std3to4tran.o stdchg.o stdchgdsclst.o stdcomp.o stdcquarks.o stddautr.o stddautrlst.o stddecayqq.o stddscndlst.o stdexpname.o stdfixmass.o stdfixpart.o stdflhwxsec.o stdflisxsec.o stdflpyxsec.o stdlst.o stdmsjet.o stdparent.o stdparentlst.o stdqqadd.o stdqqdcy.o stdqquset.o stdquarkcnt.o stdquarklst.o stdquarks.o stdrotboost.o stdsort.o stdspin.o stdstdsclst.o stdtcopy.o stdversn.o stdvtxmatch.o stdxend.o stdxrd.o stdxrdm.o stdxrinit.o stdxropen.o stdxwcm1.o stdxwevt.o stdxwinit.o stdxwopen.o stdxwrt.o stdzero.o stdzeroqq.o \
+	mcf_Stdhep_xdr.o sum_4vec_d.o sum_4vec_f.o
+/usr/bin/gcc   -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio -c stdhep_internal_utils.c
+/usr/bin/gcc   -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/inc -I/home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/src/mcfio -c stdhep_mcfio.c
+ar -urs /home/halld/src/libmcfast/stdhep_v4_08_Linux+2.2/lib/libstdhepC.a mcf_Stdhep_xdr.o stdhep_internal_utils.o stdhep_mcfio.o sum_4vec_d.o sum_4vec_f.o
+gmake[3]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/stdhep_v4_08_Linux+2.2/src/stdhep'

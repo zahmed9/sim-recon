@@ -1,0 +1,9 @@
+template OffsetDRFAno(100)
+  int det
+  parent Drift
+  int lyr
+  real cell_offset
+  real sag
+  real offset(3)
+  real dircos(3)
+end template

@@ -1,0 +1,39 @@
+TracePick
+%%------------ DESCRIPTION ------------
+This module is used to get pick information to send to the TraceLat and 
+TraceInfo modules
+%%------------ INPUTS ------------
+%PORT Input Pick
+%TYPE Pick
+Picked input from the render module.  Select pick and user pick mode
+in the render. Place cursor on track and click left mouse button.  Try to only
+chose one track at a time.
+%%------------ WIDGETS ------------
+%PORT TraceInfo
+%TYPE Radio Box
+%MENUITEM Display Information only
+%MENUITEM Display hits on picked trace
+%MENUITEM Do not display trace
+%MENUITEM Reset display
+This lets the user select what happens to the picked track.  "Display
+information only" will cause information to appear in the TraceInfo window.
+"Display hits on the picked trace" will also put blue crosses on the hit points
+for that trace.  "Do not display trace" is useful in eliminating traces which
+look strange because heavy curvature combined with a maxinum number of steps in
+a region without many detectors.  The D0 geometry is especially prone to this
+effect.  The symptom is tracks that look as if they were draw by a spirograph.
+"Reset Display" allows the user to undo the effects of the picking.
+%%------------ OUTPUTS ------------
+%PORT HepNumber
+%TYPE Parameter
+Hep number of the track that was picked.  Sent to TraceLat and TraceInfo
+%PORT TraceInfoOut
+%TYPE Parameter
+Outputs the setting of the TraceInfo Widget to TraceLat
+%%------------ PROBLEMS ------------
+Sending HepNumber and TraceInfoOut separately to TraceLat seems to cause
+multiple firing.  Patience is required when using the pick option in this way.
+%%------------ SEEALSO ------------
+TraceLat
+TraceInfo
+Render

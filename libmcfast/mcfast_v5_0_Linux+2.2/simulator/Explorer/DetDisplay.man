@@ -1,0 +1,103 @@
+.TH DETDISPLAY 1EXP
+.SH NAME
+DetDisplay
+.SH DESCRIPTION
+.PP
+This module displays the detector geometry.  The input file can be
+a dbin file or an McFast file with Geometery.
+Be sure to have defined a soft link to the db directory containing the
+templates in the area from which you will be getting your .db files.
+ln -s $MCFAST_DIR/db db
+.PP
+After the geometry has been read in, the list of objects will appear in the
+scrolled list box in reverse order.  The name will be of the form DEVXXX_NAME. 
+Many devices are displayed as more than one object.  For example, each layer of
+silicon associated with a single silicon detector will appear as a separate
+device.  To edit a device, select that device by clicking on it in the scrolled
+list.  The current display parameters for that device will
+appear on the widgets.  The detector display will disappear from the Render.
+Modify the display parameters as desired, using the Explorer Color Editor 
+module to define the colors and the panel widgets to define the other
+properties.  Modify as many detectors as desired remember to click on each
+detector before you modify it.  When modifications are complete, click on
+display.
+.SH INPUTS
+.TP
+.BI "Color" " -- Parameter (Opt.)"
+This port is used with the Explorer Color Map
+Widget to allow the user to select the color of each detector.
+.TP
+.BI "DetName" " -- Parameter (Opt.)"
+.SH WIDGETS
+.TP
+.BI "geom_filename" " -- File Browser"
+Input the file here.  The default is $DETECTOR which can be
+defined using setenv prior to starting Explorer.  Otherwise 
+enter the pathname and select the file.
+.TP
+.BI "Transparency" " -- Dial"
+This widget allows the user to set the transparency for each object.  0 is fully
+opaque and 1 is transparent to the point of invisibility.  Use the outer dial
+for coarse adjustment and the inner dial for fine adjustment
+.TP
+.BI "Visibility" " -- Radio Box"
+(not shown, solid, wireframe).
+This widget allows the user to select the Visibility for each object.  Select
+not shown to make an object disappear from view.
+.TP
+.BI "List" " -- Scroll List"
+This holds the list of detector objects for modification
+.TP
+.BI "Display" " -- Button"
+This button is used to redisplay the detector after modification.
+.TP
+.BI "CutAngleEnd" " -- Dial"
+This dial describes the angle in degrees for the end of a cut 
+to show a detector cross section.  Use the outer dial for coarse adjustment and
+the inner dial for fine adjustment.
+.TP
+.BI "CutAngleStart" " -- Dial"
+This dial describes the angle in degrees for the beginning of a cut to 
+show a detector cross section.  Use the outer dial for coarse adjustment and
+the inner dial for fine adjustment.
+.TP
+.BI "Cutaway" " -- Radio Box"
+(cut, solid, wedge).
+These buttons toggle between cross section and solid views.  Some detectors, 
+such as silicon wedges, are always displayed as cut cross sections 
+so apply this cut judiciously.
+.TP
+.BI "Nsides" " -- Text"
+This text widget allows the user to specify how many sides on a polygon is used
+to represent conical objects
+.TP
+.BI "Red" " -- Slider"
+This slider shows the RED component of the selected detector.  It is not used
+as input, only as information.  Please use the color editor to change detector 
+colors
+.TP
+.BI "Green" " -- Slider"
+This slider shows the GREEN component of the selected detector.  It is not used
+as input.  Please use the color editor to change detector colors
+.TP
+.BI "Blue" " -- Slider"
+This slider shows the BLUE component of the selected detector.  It is not used
+as input.  Please use the color editor to change detector colors
+.TP
+.BI "DetName" " -- Parameter (Opt.)"
+When this port is wired to the DetPick module output port "DetLabel", a picked
+detector will automatically be selected for updating.
+.SH OUTPUTS
+.TP
+.BI "geom" " -- Geometry"
+This output port is used to send the geometery to the render for display.
+.SH KNOWN PROBLEMS
+.PP
+Current implementation.  Values of changes to viewing parameters are not saved
+on exit.  Changing one device at a time is extremely tedious for many detectors
+that are composed of many devices (silicon is especially bad).  The scrolled
+list does not refresh after a geometer file is read in.
+.SH SEE ALSO
+Render
+Coloreditor
+DetPick

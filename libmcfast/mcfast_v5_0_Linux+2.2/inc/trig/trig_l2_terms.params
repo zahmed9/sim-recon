@@ -1,0 +1,19 @@
+c      the following paramters specify the number of terms for each
+c      term type and the starting point of the term in the andor network
+c      include TRIG_TERM_INDEX.PARAMS to get term types.
+
+       integer l2_terms_track_max,l2_terms_muon_max
+       integer l2_terms_calem_max,l2_terms_caljt_max
+       integer l2_terms_vertex_max,l2_terms_user_max
+       integer l2_terms_calmet_max,l2_terms_calscet_max
+       integer l2_terms_fangl_max
+c
+       parameter (l2_terms_track_max = 32)
+       parameter (l2_terms_muon_max = 32)
+       parameter (l2_terms_calem_max = 32)
+       parameter (l2_terms_caljt_max = 32)
+       parameter (l2_terms_vertex_max = 8)
+       parameter (l2_terms_calmet_max = 8)
+       parameter (l2_terms_calscet_max = 8)
+       parameter (l2_terms_user_max = 8)
+       parameter (l2_terms_fangl_max=32)

@@ -1,0 +1,79 @@
+#
+# evgen archtecture file
+#
+UNAME := $(shell uname)
+ifeq "$(UNAME)" "IRIX"
+  IRIX6 = $(findstring 6,$(shell uname -r))
+  ifeq "$(IRIX6)" "6"
+    UNAME = IRIX64
+  endif
+endif
+#
+# allow a hook for forcing use of the absoft compiler on linux
+#
+COMPILER = default
+ABSOFT = 
+
+AR = ar
+LIBS =
+FMAIN =
+
+ifeq "$(UNAME)" "AIX"
+   CC=cc
+   F77=xlf
+   CFLAGS= -g -DAIX
+   FFLAGS= -g -qextname -C
+   MAP  =  -Wl,-m > $@.map
+endif
+ifeq "$(UNAME)" "HP-UX"
+   CC=cc
+   F77=fort77
+   CFLAGS= -g -Aa -D_HPUX_SOURCE
+   FFLAGS= -g +U77 +ppu
+   CFLIBS+= +U77 +ppu +E1 
+   LIBS+= -lm -lf -L/opt/fortran/lib -lU77
+endif
+ifeq "$(UNAME)" "IRIX"
+   CC=cc
+   F77=f77
+   CFLAGS= -g
+   FFLAGS= -g -C
+   MAP    = -Wl,-m > $@.map
+endif
+ifeq "$(UNAME)" "IRIX64"
+   CC=cc
+   F77=f77
+   CFLAGS= -g -n32 -mips3
+   FFLAGS= -g -C -n32 -mips3
+   MAP    = -Wl,-m > $@.map
+endif
+ifeq "$(UNAME)" "Linux"
+   CC=gcc
+   CFLAGS= -g
+   ifeq "$(COMPILER)" "absoft"
+      F77=/usr/local/bin/f77    # ABSOFT location on heoc09.phys.cmu.edu
+      FFLAGS = -g               
+      ABSOFT = -absoft          # Tells f77mcf to use absoft
+      LIBS =  -L/usr/local/packages/egcs/lib/gcc-lib/i586-pc-linux-gnu/egcs-2.91.57 -lg2c -lm -lnsl
+   else
+      F77=g77
+      FFLAGS = -g -Wall
+      LIBS =  -lnsl
+   endif
+endif
+ifeq "$(UNAME)" "OSF1"
+   CC=cc
+   F77=f77
+   CFLAGS= -g
+   FFLAGS= -g -C
+   FMAIN += -nofor_main
+   MAP    = -Wl,-m > $@.map
+endif
+ifeq "$(UNAME)" "SunOS"
+   CC=/opt/SUNWspro/bin/cc
+   F77=f77
+   CFLAGS=-g -I/usr/openwin/include -DUSE_DIRENT
+   FFLAGS=-g -C
+   LIBS += -lnsl -lsocket
+   MAP    = -Qoption ld -m > $@.map
+endif

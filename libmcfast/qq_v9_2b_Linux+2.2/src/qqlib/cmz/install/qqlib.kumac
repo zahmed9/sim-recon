@@ -1,0 +1,116 @@
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:35  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1994/10/08  02:21:34  zfiles
+* first version of qqlib in CVS
+*
+*
+*CMZ :  1.04/00 05/10/94  12.35.14  by  Peter C Kim
+*CMZ :  1.03/57 15/02/93  22.02.52  by  Peter C Kim
+*CMZ :  1.03/45 27/04/92  12.38.40  by  Peter C Kim
+*CMZ :  1.03/32 26/11/91  13.14.18  by  CLEO II Librarian
+*CMZ :  1.03/31 11/11/91  20.48.01  by  Unknown
+*CMZ :  1.03/30 04/11/91  15.34.25  by  Peter C Kim
+*CMZ :  1.03/18 27/07/91  17.40.03  by  Peter C Kim
+*CMZ :  1.03/17 24/07/91  15.25.59  by  Peter C Kim
+*CMZ :  1.03/15 22/07/91  21.26.51  by  Peter C Kim
+*CMZ :  1.03/09 17/04/91  01.23.34  by  MIKE MODESITT
+*-- Author :
+******************************************************************
+*  Unified TEMPLATE for INSTALLATION MACROS (.KUMAC)             *
+*                                                                *
+*  This is an ultimate unified kumac macro.                      *
+*  The code author has to modify only the first two sections     *
+*  (i.e. ALL and EXTRA)                                          *
+*              - Manoj.                                          *
+*                March 28                                        *
+*                                                                *
+*  old  QQLIB & QQSTUF merged into QQLIB.                        *
+*  QQJS73,BHLUMI,KORB split off as separate libraries.           *
+*                                                                *
+*                                         27/04/92  PCK          *
+******************************************************************
+*
+MACRO ALL CMZFILE=qqlib LIBRARY=qqlib
+*
+    trace
+    sel  .
+    seq  .
+    rel  *
+*
+    exec  SETFLAGS
+    exec  GETSEQ    qqlib seq gggseq
+    exec  GETSEQ    seq clinc clutil
+    exec  GETSEQ    geant gcdes
+    exec  GETFILE   [CMZFILE] -r
+    exec  LIB       [LIBRARY] qq_libu libu usrdum
+    exec  LIB       [LIBRARY] qq qq
+    exec  LIB       [LIBRARY] qq_decay decay
+    exec  LIB       [LIBRARY] qq_qdecay qdecay
+    exec  LIB       [LIBRARY] qq_qcd qcd
+    exec  LIB       [LIBRARY] qq_jetset jetset
+    exec  LIB       [LIBRARY] qq_2phot 2phot
+    exec  VAXNLIB   [LIBRARY] psirad psirad
+    exec  VAXNLIB   [LIBRARY] qq_bkqed bkqed
+    exec  LIB       [LIBRARY] onlycleo onlycleo
+    exec  OBJ       [LIBRARY] user qquser
+    exec  RUNFIL    [CMZFILE] runfil decay  dec
+    exec  RUNFIL    [CMZFILE] runfil ldecay tab
+    exec  RUNFIL    [CMZFILE] runfil qqpart ini
+    exec  RUNFIL    [CMZFILE] runfil bb_4s2  ctr
+    exec  RUNFIL    [CMZFILE] runfil bb_4s3  ctr
+    exec  RUNFIL    [CMZFILE] runfil bhabha  ctr
+    exec  RUNFIL    [CMZFILE] runfil korb    ctr
+    exec  RUNFIL    [CMZFILE] runfil lggg    ctr
+    exec  RUNFIL    [CMZFILE] runfil lqq     ctr
+    exec  RUNFIL    [CMZFILE] runfil ly3s    ctr
+    exec  RUNFIL    [CMZFILE] runfil master  ctr
+    exec  RUNFIL    [CMZFILE] runfil mumu    ctr
+    exec  RUNFIL    [CMZFILE] runfil qy3s    ctr
+    exec  RUNFIL    [CMZFILE] runfil qq      ctr
+    exec  RUNFIL    [CMZFILE] runfil singl   ctr
+*
+    exec  SETFLAGS  typechek cdgdoc
+*
+    exec  EXTRA
+*
+    rel  *
+RETURN
+*
+
+MACRO EXTRA
+*
+*** Make .inc files
+*
+    cd seq
+    set *.inc -d
+    ctot -y hepevt
+    ctot -y jetscl
+    ctot -y ludatn
+    ctot -y korbcm
+    ctot -y mcgen
+    ctot -y mcjet
+*
+#if defined(CLEO_UNIX)
+    shell mv -f hepevt.inc    ../inc/HEPEVT.INC
+    shell mv -f jetscl.inc    ../inc/JETSCL.INC
+    shell mv -f ludatn.inc    ../inc/LUDATN.INC
+    shell mv -f korbcm.inc    ../inc/KORBCM.INC
+    shell mv -f mcgen.inc     ../inc/MCGEN.INC
+    shell mv -f mcjet.inc     ../inc/MCJET.INC
+#endif
+#if defined(CLEO_VAX)
+    shell copy  hepevt.inc   t$inc:hepevt.inc
+    shell copy  jetscl.inc   t$inc:jetscl.inc
+    shell copy  ludatn.inc   t$inc:ludatn.inc
+    shell copy  korbcm.inc   t$inc:korbcm.inc
+    shell copy  mcgen.inc    t$inc:mcgen.inc
+    shell copy  mcjet.inc    t$inc:mcjet.inc
+#endif
+*
+RETURN
+*

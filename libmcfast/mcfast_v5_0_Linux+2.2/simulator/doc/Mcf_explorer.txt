@@ -1,0 +1,48 @@
+USER BEWARE--- THIS DOCUMENT IS OUT OF DATE---- 
+Explorer Module DetDisplay
+v1.0
+This module displays the detector geometry.  Input is an MCFAST geometry
+file.
+
+Filebrowser is used to input geometry file.
+
+Detector volumes can be displayed by using the 0 setting on the slider.
+Warning: silicon WILL NOT be displayed in volume only mode.  Use the 1 setting
+to see the full detector (recommended)
+
+Explorer Module TraceDisplay
+v1.0
+TraceDisplay is an Explorer Module used for displaying the information
+from the MCFAST trace structure.  Charged traces are displayed in green,
+Charged traces associated with reconstructed tracks are displayed in
+red, and neutral traces are displayed in blue.
+
+The display panel contains:
+
+Filebrowser for inputing data file.  Input is an MCFIO file with
+STDHEP, OFFLINE_TRACKS and TRACE structures.  
+
+NextEvent button:  Used to read and display the next event.
+
+Radio buttons are used to display or not display the charged traces,
+reconstructed traces, and neutral traces.  The radio button to control
+the hits is present but not implemented.
+
+The minimum and maximum eta for the displayed traces can be set by the
+dials.  
+
+MAPS:  Three maps are available
+
+DetDisplay -- only displays detector
+TraceDisplay -- only displays traces
+Mcf_Explorer -- does both.
+
+Lauch map by setting default to  
+~bphyslib/v2.1/Explorer 
+
+explorer -m DesiredMap.map &  
+
+Maps can also be launched from within Explorer.
+
+If you have any questions or need more information, contact COPE@FNAL
+                                                            (708)879-5105   

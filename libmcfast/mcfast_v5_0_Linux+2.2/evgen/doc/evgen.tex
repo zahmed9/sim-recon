@@ -1,0 +1,381 @@
+\documentstyle[12pt,epsf]{article}
+\textwidth 465pt
+\textheight 683.4pt
+\oddsidemargin 0pt
+\evensidemargin 0pt
+\topmargin -2cm
+\pagestyle{plain}
+\def\dec{\rightarrow}
+\def\qsq{$q^2$}
+
+\begin{document}
+
+\title{The Event Generator}
+
+\author{P. Avery, L. Garren}
+
+\maketitle
+ 
+
+\section{Introduction}
+ 
+Evgen provides as consistent a wrapper as possible around the Isajet, 
+Pythia, and Herwig Monte Carlo event generators.  Each example program contains
+the option of decaying the particles via QQ.  The example code  
+can be found under \$EVGEN\_DIR/example.
+All examples fill the HEPEVT common block and write events to disk
+using the stdhep xdr (mcfio) I/O routines.  The examples are designed
+to generate b events at collider energies.
+
+\section{Directory Structure}
+
+Simple executables are in \$MCFBIN.  
+The source code is in \$EVGEN\_DIR/src and 
+\newline \$EVGEN\_DIR/inc.  
+Input files are in \$EVGEN\_DIR/input.  
+A scratch area is availble for large event files in 
+/afs/fnal/files/scratch/bphysN, where N = 1-5.
+
+The products cern, lund, herwig, isajet, qq, and 
+stdhep will need to be defined.  Products are defined with the command 
+"setup $[-t|-d]$ $<$product$> [version]$".  
+The flags -t and -d signify test and development versions.  
+Use the command "ups list -a $<$product$>$" to check the status of a product.
+
+See http://www-pat.fnal.gov/stdhep.html for a table of stdhep and
+related product versions.  Because common blocks and particle numbers
+can change between event generator releases, it is important to
+use the correct set of products.
+
+\vspace{0.2 in}
+
+\scriptsize
+\begin{tabular}{|llll|} \hline
+\multicolumn{4}{|c|}{Evgen directory structure} \\  \hline
+\$EVGEN\_DIR  &    &     &    	\\
+  & README   &     &     (evgen overview) \\
+  & GNUmakefile   &     &     (build evgen library)	\\
+  & evgen\_arch   &     &     (build evgen library)	\\
+  &  doc & & \\
+  &    &  examples.doc  &  (short explanation) \\
+  &    &  evgen.tex  &  (long explanation) \\
+  &  example  &    &  (example area) \\
+  &    &  b\_psiks  &  (B to psi Ks example) \\
+  &    &  d\_kpi  &  (D to K pi example) \\
+  &    &  min\_bias  &  (minimum bias example) \\
+  &    &  simple  &  (simple example) \\
+  &  inc & & \\
+  &    &  file\_names.inc & \\
+  &    &  herwig\_cmd.inc & \\
+  &    &  pythia\_user.inc & \\
+  &    &  qq\_flag.inc & \\
+  &  input & & \\
+  &    &  isa\_nobc\_decay.dat  &  (isajet decay file if QQ used) \\
+  &    &  jetset.dcy     &  (Pythia decay table if QQ used) \\
+  &    &  user.dec     &  (sample user decay file for QQ) \\
+  &  src & & \\
+  &    &  amass\_isa.F & \\
+  &    &  bookhistos.F & \\
+  &    &  herwig\_exam.F & \\
+  &    &  hwg\_command.F & \\
+  &    &  hwg\_open.F & \\
+  &    &  hwg\_user\_init.F & \\
+  &    &  hwg\_user\_reset.F & \\
+  &    &  isajet\_exam.F & \\
+  &    &  main\_args.c & \\
+  &    &  main\_fortran.F & \\
+  &    &  pyt\_command.F & \\
+  &    &  pyt\_get\_seed.F & \\
+  &    &  pyt\_save\_seed.F & \\
+  &    &  pyt\_user\_init.F & \\
+  &    &  pythia\_exam.F & \\
+  &    &  read\_xdr.F & \\
+  &    &  usr\_end\_event.F & \\
+  &    &  usr\_end\_job.F & \\
+  &    &  usr\_filter.F & \\
+  &    &  usr\_filter\_postqq.F & \\
+  &    &  usr\_filter\_preqq.F & \\
+\$MCFBIN  &    &     &    	\\
+  &     herwig\_exam  & &  (generate herwig events) \\
+  &     isajet\_exam  & &  (generate isajet events) \\
+  &     pythia\_exam  & &  (generate pythia events) \\
+  &     read\_xdr  & &  (example to read event file) \\
+\$MCFLIB  &    &     &    	\\
+  &  libevgen.a  &    &   \\
+  & amass\_isa.o  &    &   \\
+  & herwig\_exam.o  &    &   \\
+  & isajet\_exam.o  &    &   \\
+  & pythia\_exam.o  &    &   \\
+  & read\_xdr.o  &    &   \\ \hline
+\end{tabular}
+\normalsize
+
+\newpage
+
+\section{Conventions}
+
+We use the following file extension conventions.
+
+\vspace{0.2 in}
+
+\begin{tabular}{|l|l|} \hline
+\multicolumn{2}{|c|}{File Extension Conventions} \\ \hline
+ .hwg  & Herwig input file \\ \hline
+ .isa  & Isajet input file \\ \hline
+ .pyt  & Pythia input file \\ \hline
+ .std  & input file for read\_xdr example \\ \hline
+ .lpt  & line printer output file \\ \hline
+ .evt  & xdr event files written by stdhep and mcfio \\ \hline
+ .f  & standard fortran \\ \hline
+ .F  & fortran which will be passed through the c preprocessor \\ \hline
+ .rz  & hbook histogram or ntuple file \\ \hline
+\end{tabular}
+
+\section{Running the Executables}
+
+Before running the examples, 
+define the environmental variables QQ\_USER\_FILE, 
+and ISAJET\_DECAY. 
+To run an executable, type, for instance, \$MCFBIN/pythia\_exam.
+You may define the input and output file names in the command line.
+Alternatively, you may use the input file to define the file names.
+For instance, you might type 
+"\$MCFBIN/pythia\_exam -f pythia.pyt -o pythia\_1.evt -l pythia\_1.lpt"
+Note that the structure of the Isajet input file is defined by Isajet.
+The Herwig and Pythia input files are defined locally.
+Sample input files are available in \$EVGEN\_DIR/example.
+ 
+
+\vspace{0.2 in}
+
+\begin{tabular}{|l|l|l|} \hline
+\multicolumn{3}{|c|}{Command Line Arguments} \\ \hline
+ -f & cmd\_file & input command file \\ \hline
+ -l & lpt\_file & line printer output file \\ \hline
+ -o & event\_output\_file & output event file \\ \hline
+ -i & event\_input\_file & input event file \\ \hline
+ -hb & hbook\_file & output hbook histogram file \\ \hline
+ -qq &  & use QQ for decay \\ \hline
+ -qu & user\_decay\_file & QQ user decay file \\ \hline
+ -h  &  & type help display \\ \hline
+\end{tabular}
+
+\section{Sample Input files}
+
+\begin{tabular}{|lll|} \hline
+\multicolumn{3}{|c|}{Sample Herwig input file} \\  \hline
+\multicolumn{3}{|l|}{!B production: 1800 GeV pbar on p} \\
+file\_lpt & herwig\_exam.lpt &  !Output file \\
+file\_evt\_wrt & herwig\_exam.evt &  !Output event file \\
+file\_hbk & herwig\_exam.rz &  !hbook output \\
+maxev & 1000      &          !Max events to generate \\
+maxpr & 2        &           !Max number of events to print \\
+ranseed & 0 0    &           !Random seed set to time of day \\
+iproc & 1705    &            !bbar quark production \\
+part1 & P      &             !Particle 1 ==$>$ Proton \\
+part2 & PBAR   &             !Particle 2 ==$>$ Antiproton \\
+pbeam1 & 900.    &           !Beam energy for proton \\
+pbeam2 & 900. &   \\
+ptmin & 0.        &          !Pt range \\
+ptmax & 900. &  \\ \hline
+\multicolumn{3}{|c|}{other possible commands} \\  \hline
+maxer        &                 & ! \\
+iprint       &                 & ! \\
+yjmin        &                 & ! \\
+yjmax        &                 & ! \\
+q2min        &                 & ! \\
+q2max        &                 & ! \\
+emmin        &                 & ! \\
+emmax        &                 & ! \\
+qcdlam       &                 & ! \\
+rmass        &                 & ! \\
+file\_evt\_rd  &               & !input event file \\
+qq           &                 & !use QQ for hadron decay \\
+ranseed      &                 & !two numbers \\
+exit         &                 & !stop reading the input file  \\
+stop         &                 & !stop reading the input file  \\ \hline
+\end{tabular}
+
+\vspace{0.2 in}
+
+\begin{tabular}{|lll|} \hline
+\multicolumn{3}{|c|}{Sample Pythia input file} \\  \hline
+\multicolumn{3}{|l|}{!B production: 900 GeV pbar on p} \\
+file\_lpt     & pythia\_test.lpt & !Output print file \\
+file\_evt\_wrt & pythia\_test.evt & !File to write events \\
+file\_hbk     & pythia\_test.rz  & !Hbook output \\
+maxev        & 1000            & !\# of events to generate \\
+frame        & CMS             & !Select center of mass frame \\
+beam         & PBAR            & !Beam particle 1 \\
+target       & P               & !Beam particle 2 \\
+cms\_energy   & 1800.0          & !Center of mass energy \\
+ranseed      & 0               & !Set random seed using time of day \\
+pygive       & MSEL=5          & !B production with massive matrix elements \\ \hline
+\multicolumn{3}{|c|}{other possible commands} \\  \hline
+maxpr        & 1               & !\# of events to print \\
+file\_evt\_rd  & pythia\_prev.evt & !input event file \\
+qq           &                 & !use QQ for hadron decay \\
+exit         &                 & !stop reading the input file  \\
+stop         &                 & !stop reading the input file  \\ \hline
+\end{tabular}
+
+\vspace{0.2 in}
+
+\begin{tabular}{|l|} \hline
+\multicolumn{1}{|c|}{Sample Isajet input file} \\  \hline
+Example b bbar job \\
+1800.,1000,2,10/ \\
+TWOJET \\
+BEAMS \\
+'P','AP'/ \\
+JETTYPE1 \\
+'BT', 'BB'/ \\
+JETTYPE2 \\
+'BT', 'BB'/ \\
+P \\
+0. , 900., 0. , 900./ \\
+PT \\
+0.01 , 850., 0.01 , 850./ \\
+NTRIES \\
+5000/ \\
+NSIGMA \\
+400/ \\
+END \\
+STOP \\ \hline
+See the Isajet manual for an explanation of options \\ \hline
+\end{tabular}
+
+\section{StdHep}
+
+The Particle Data Group has established a standard particle numbering scheme.
+A standard event common block, HEPEVT, has also been established.
+The StdHep product is designed to convert various Monte Carlo event
+generator output events to a standard version of the output event 
+common block. 
+
+The particle ID numbers between 1 and 80 are for elementary particles:
+quarks, gluons, leptons, gauge and higgs bosons and their supersymmetric
+partners. 
+The PDG numbering algorithm for composite particles uses a 
+signed 7 digit number for each particle:  $\pm nn_rn_Ln_{q_1}n_{q_2}n_{q_3}n_J$.
+$n_{q_{1-3}}$ are quark numbers used to specify the quark content.
+The rightmost digit, $n_J$ = 2J + 1, gives the spin of the composite particle.
+The scheme does not cover particles of spin $J>4$.
+The fifth digit, $n_L$, is reserved to distinguish mesons of the
+same total ($J$) but different spin ($S$) and orbital ($L$)
+angular momentum quantum numbers.
+The sixth digit, $n_r$, is used to label mesons radially excited
+above the ground state.
+The numbering scheme does not extend to baryons with $n>0$, $n_r>0$, or $n_L>0$.
+Digits $n_{q_2}$ and $n_{q_3}$ are used for mesons, with $n_{q_1}$ = 0.
+Digits $n_{q_1}$, $n_{q_2}$, and $n_{q_3}$ are used for baryons.
+Digits $n_{q_1}$ and $n_{q_2}$ are used for diquarks, with $n_{q_3}$ = 0. 
+A negative number
+indicates an antiparticle.  The states are generally listed in order of
+increasing mass.  $K_L^0$ and $K_S^0$ are exceptions.  Their assigned
+identification numbers are 130 and 310, respectively.
+A complete explanation can be found in \$STDHEP\_DIR/doc/PDG\_numbers\_98.ps
+or the 1998 PDG
+( C. Caso et. al., The European Physical Journal {\bf C3} ).
+
+
+
+\vspace{0.2 in}
+
+\begin{tabular}{|ll|} \hline
+\multicolumn{2}{|c|}{HEPEVT common block} \\  \hline
+PARAMETER & (NMXHEP=4000) \\
+COMMON/HEPEVT/ & NEVHEP,NHEP,ISTHEP(NMXHEP),IDHEP(NMXHEP), \\
+   &  JMOHEP(2,NMXHEP),JDAHEP(2,NMXHEP), \\
+ & PHEP(5,NMXHEP),VHEP(4,NMXHEP) \\ \hline
+NEVHEP & event number \\
+NHEP        & number of entries in this event record \\
+ISTHEP(..)  & status code \\
+IDHEP(..)   & particle ID, P.D.G. standard \\
+JMOHEP(1,..)& position of mother particle in list \\
+JMOHEP(2,..)& position of second mother particle in list \\
+JDAHEP(1,..)& position of first daughter in list \\
+JDAHEP(2,..)& position of last daughter in list \\
+PHEP(1,..)  & x momentum in GeV/c \\
+PHEP(2,..)  & y momentum in GeV/c \\
+PHEP(3,..)  & z momentum in GeV/c \\
+PHEP(4,..)  & energy in GeV \\
+PHEP(5,..)  & mass in GeV/c**2\\
+VHEP(1,..)  & x vertex position in mm \\
+VHEP(2,..)  & y vertex position in mm \\
+VHEP(3,..)  & z vertex position in mm \\
+VHEP(4,..)  & production time in mm/c \\ \hline
+\end{tabular}
+
+\vspace{0.3 in}
+
+\begin{tabular}{|ll|} \hline
+\multicolumn{2}{|c|}{ISTHEP convention} \\  \hline
+ 0       & null\\
+ 1       & final state particle\\
+ 2       & intermediate state\\
+ 3       & documentation line\\
+ 4-10    & reserved for future use\\
+ 11-200  & reserved for specific model use\\
+ 201-... & reserved for users\\ \hline
+\end{tabular}
+
+\vspace{0.2 in}
+
+Event I/O is handled by the routines STDXWRT(ILBL,ISTR,LOK) and 
+STDXRD(ILBL,ISTR,LOK). 
+LOK is an integer variable which returns the status of the I/O attempt.
+ILBL is an integer which defines the type of record to read or write.
+ISTR is a label used by MCFio to identify the event file.
+STDXRD and STDXWRT are interfaces from StdHep to MCFio xdr binary files,
+which can be transported to other platforms.  See the StdHep manual
+for a more complete explanation.
+
+\vspace{0.2 in}
+
+\begin{tabular}{|ll|} \hline
+\multicolumn{2}{|c|}{Supported Values of ILBL} \\  \hline
+ILBL = 1    &  standard HEPEVT common block \\
+ILBL = 2    &  standard HEPEVT common block plus multiple interaction info \\
+ILBL = 100  &  stdhep begin run record \\
+ILBL = 200  &  stdhep end run record \\
+ILBL = anything else  &  use I/O buffer \\ \hline
+\end{tabular}
+
+\vspace{0.2 in}
+
+StdHep writes the information in common block STDCM1 as the begin and
+end run records.
+You must call STDFLHWXSEC, STDFLISXSEC, or STDFLPYXSEC(N1) to fill
+common block STDCM1 before calling HEPWRT with ILBL of 100 or 200.  
+N1 is the number of events to be generated.
+
+
+\vspace{0.2 in}
+
+\begin{tabular}{|ll|} \hline
+\multicolumn{2}{|c|}{STDCM1 Common Block} \\  \hline
+      COMMON /STDCM1/ & STDECOM,STDXSEC,STDSEED1,STDSEED2, \\
+     1            &   NEVTREQ,NEVTGEN,NEVTWRT \\ \hline
+   STDECOM  & center-of-mass energy \\
+   STDXSEC  & cross-section \\
+   STDSEED1 & random number seed \\
+   STDSEED2 & random number seed \\
+   NEVTREQ  & number of events to be generated \\
+   NEVTGEN  & number of events actually generated \\
+   NEVTWRT  & number of events written to output file \\ \hline
+\end{tabular}
+
+\vspace{0.2 in}
+
+The routine STDXRDM(ILBL,ISTR,LOK) is provided to allow users the option
+of reading events from multiple input streams.  
+STDXRDM adds each event to the end of the existing
+data in HEPEVT.  The user must call STDZERO to zero the arrays in HEPEVT.
+This is intended as a tool to fake multiple interactions.
+
+See \$STDHEP\_DIR/doc/stdhep.ps for a list of stdhep translation,
+I/O, and utility routines.
+
+\end{document}
+

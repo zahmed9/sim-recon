@@ -1,0 +1,64 @@
+#! /bin/csh
+#
+# Compile, link and run an evgen job.
+#
+# Remember to edit the Makefile to ensure that correct user *.F 
+# routines are compiled and then picked up by the linker.
+#
+# Remember that there may be no spaces or tabs after a \
+# which is used to continue a line.
+#
+# Command line arguments:
+# 1) keyword {pythia,herwig,isajet} case sensitive
+# 2) root name for all files
+# 3) name of qq decay file ( optional )
+#
+# (If you get a "word too long" error, change the shell to tcsh
+#  - /usr/local/bin/tcsh at FNAL.)
+
+
+# Process arguments:
+set exe   = ${1}_exam      # Name of executable program;
+set base  = ${2}           # Base name of input and output files.
+if ( $#argv == 3 ) setenv QQ_USER_FILE ${3}   # QQ user decay file.
+
+
+# Check for a known generator.
+# Choose extension of input file, based on generator type.
+if ( ${1} == "pythia" ) then
+   set ext = "pyt"
+else if ( ${1} == "isajet" ) then
+   set ext = "isa"
+else if ( ${1} == "herwig" ) then
+   set ext = "hwg"
+else
+   echo "Only know how to do: pythia, isajet, herwig. (Case sensitive)"
+   echo "Do not know how to do: " $1
+   exit
+endif
+
+# Tell isajet to not decay mesons containing b and c quarks.
+if ( ${1} == "isajet" ) then
+   setenv ISAJET_DECAY $QQ_DIR/example/isa_nobc_decay.dat
+endif
+
+# Compile and link.
+gmake ${exe}
+if ( $status != 0 ) exit
+
+# Get rid of old files.
+if ( -f  ${base}.lpt ) /bin/rm -f  ${base}.lpt
+if ( -f  ${base}.log ) /bin/rm -f  ${base}.log
+if ( -f  ${base}.evt ) /bin/rm -f  ${base}.evt
+if ( -f  core        ) /bin/rm -f  core
+
+# Run the example
+# .${ext} - command input file
+# .lpt    - printed output
+# .evt    - event output
+# .rz     - hbook histograms.
+# .log    - the timing information and user printout to fortran unit 6.
+echo "Starting to run."
+time ./${exe} -f ${base}.${ext} -l ${base}.lpt \
+            -o ${base}.evt -hb ${base}.rz \
+            -qq >& ${base}.log

@@ -1,0 +1,11 @@
+template Solenoid(10)
+  char name
+  real bfield
+  real rmin
+  real rmax
+  real z0
+  real zlen
+  material mat_fill
+  real thick_boun(4) ! rmin, rmax, zmin, zmax
+  material mat_boun(4) ! rmin, rmax, zmin, zmax
+end template

@@ -1,0 +1,155 @@
+<HEAD>
+<TITLE>cleoks/typscn/typscn/istscn.F</TITLE>
+</HEAD>
+<BODY>
+<PRE>
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:19  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1995/08/01  18:00:10  nk
+* Consolidation
+*
+* Revision 1.1  1995/07/31 19:39:33  nk
+* Added typscn
+*
+* Revision 1.1.1.1  1994/10/05  13:45:39  zfiles
+* first version of typscn in CVS
+*
+*
+#include &QUOT<A HREF="../../../sys/CLEO_machine.html">sys/CLEO_machine.h</A>&QUOT
+#include &QUOT<A HREF="../../../pilot.html">pilot.h</A>&QUOT
+*CMZ :  1.00/00 12/05/89  16.52.49  by  Ian C. Brock
+*-- Author :
+C
+C----------------------------------------------------------------------
+C Extracts a character string
+C
+*=*=*=*= ISTSCN.html =*=*=*=*
+
+</PRE>
+
+<A HREF="http://w4.lns.cornell.edu/Harvest/brokers/w4-public/">Search Keyword</A>
+<H1>INTEGER FUNCTION ISTSCN</H1>
+
+<PRE>
+
+      INTEGER FUNCTION <A NAME=istscn>ISTSCN</A>(<A HREF="../../../cleoks/typscn/typscn/istscn.html#jpoint">JPOINT</A>,<A HREF="../../../cleoks/typscn/typscn/istscn.html#jchars">JCHARS</A>,<A HREF="../../../cleoks/typscn/typscn/istscn.html#idelim">IDELIM</A>,<A HREF="../../../cleoks/typscn/typscn/istscn.html#astr">ASTR</A>)
+      SAVE
+C
+      INTEGER  <A NAME=i>I</A>
+      INTEGER  <A NAME=idelim>IDELIM</A>
+      INTEGER  <A NAME=jchars>JCHARS</A>
+      INTEGER  <A NAME=jpoint>JPOINT</A>
+      INTEGER  <A NAME=nchr>NCHR</A>
+C
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typpar.html">cleoks/typscn/typcde/typpar.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typchr.html">cleoks/typscn/typcde/typchr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typscn.html">cleoks/typscn/typcde/typscn.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typstr.html">cleoks/typscn/typcde/typstr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typctl.html">cleoks/typscn/typcde/typctl.inc</A>&QUOT
+C
+      CHARACTER*(*) <A NAME=astr>ASTR</A>
+C
+      CHARACTER*1 <A NAME=cch>CCH</A>
+      CHARACTER*1 <A NAME=cchscn>CCHSCN</A>
+      LOGICAL <A NAME=strip>STRIP</A>
+      CHARACTER <A NAME=ctemp>CTEMP</A>*(<A NAME=dimcbf>DIMCBF</A>)
+C
+      <A HREF="../../../cleoks/typscn/typcde/typstr.html#ccbuf">CCBUF</A> = ' '
+      <A HREF="../../../cleoks/typscn/typscn/istscn.html#astr">ASTR</A>=' '
+      <A HREF="../../../cleoks/typscn/typcde/typctl.html#nchuse">NCHUSE</A> = 0
+      <A HREF="../../../cleoks/typscn/typcde/typctl.html#nmatch">NMATCH</A> = 0
+      DO 10 <A HREF="../../../cleoks/typscn/typscn/istscn.html#i">I</A>=1,<A HREF="../../../cleoks/typscn/typcde/typpar.html#dimcli">DIMCLI</A>
+      <A HREF="../../../cleoks/typscn/typcde/typctl.html#iclist">ICLIST</A>(<A HREF="../../../cleoks/typscn/typscn/istscn.html#i">I</A>) = 0
+10    CONTINUE
+C
+C is anything left on line
+      IF (<A HREF="../../../cleoks/typscn/typscn/istscn.html#jchars">JCHARS</A> .LE. 0) THEN
+      <A HREF="../../../cleoks/typscn/typscn/istscn.html#jchars">JCHARS</A> = -1
+      <A NAME=ISTSCN_ISTSCN_1  HREF="../../../cleoks/typscn/typscn/istscn.html#istscn">ISTSCN</A> = -1
+      <A HREF="../../../cleoks/typscn/typscn/istscn.html#idelim">IDELIM</A> = -1
+      RETURN
+      END IF
+C
+C     Strip leading blanks and tabs
+20    CONTINUE
+      <A HREF="../../../cleoks/typscn/typscn/istscn.html#cch">CCH</A> = <A NAME=ISTSCN_CCHSCN_1  HREF="../../../cleoks/typscn/typscn/istscn.html#cchscn">CCHSCN</A>(<A HREF="../../../cleoks/typscn/typscn/istscn.html#jpoint">JPOINT</A>,<A HREF="../../../cleoks/typscn/typscn/istscn.html#jchars">JCHARS</A>)
+      IF (<A HREF="../../../roarlib/seq/rdtemp.html#index">INDEX</A>(<A HREF="../../../cleoks/typscn/typcde/typchr.html#ctabsp">CTABSP</A>,<A HREF="../../../cleoks/typscn/typscn/istscn.html#cch">CCH</A>).NE.0) GO TO 20
+C
+C     If end of line, terminate
+      IF (<A HREF="../../../cleoks/typscn/typscn/istscn.html#cch">CCH</A>.EQ.<A HREF="../../../cleoks/typscn/typcde/typchr.html#cones">CONES</A>) THEN
+C             nothing
+      <A NAME=ISTSCN_ISTSCN_2  HREF="../../../cleoks/typscn/typscn/istscn.html#istscn">ISTSCN</A> = -1
+      <A HREF="../../../cleoks/typscn/typscn/istscn.html#idelim">IDELIM</A> = -1
+      RETURN
+      END IF
+C
+C     If standard  delimiter, terminate
+      IF (<A HREF="../../../roarlib/seq/rdtemp.html#index">INDEX</A>(<A HREF="../../../cleoks/typscn/typcde/typstr.html#cdelim">CDELIM</A>(1:<A HREF="../../../cleoks/typscn/typcde/typctl.html#ndelim">NDELIM</A>),<A HREF="../../../cleoks/typscn/typscn/istscn.html#cch">CCH</A>).NE.0) THEN
+C             nothing
+      <A NAME=ISTSCN_ISTSCN_3  HREF="../../../cleoks/typscn/typscn/istscn.html#istscn">ISTSCN</A> = -1
+      IF (<A HREF="../../../cleoks/typscn/typscn/istscn.html#jchars">JCHARS</A>.LE.0) THEN
+C                     nothing useful after delimiter
+              <A HREF="../../../cleoks/typscn/typscn/istscn.html#idelim">IDELIM</A> = -1
+              <A HREF="../../../cleoks/typscn/typscn/istscn.html#jchars">JCHARS</A> = -1
+      ELSE
+C                     more on line
+              <A HREF="../../../cleoks/typscn/typscn/istscn.html#idelim">IDELIM</A> = 0
+      END IF
+      RETURN
+      END IF
+C
+C     Make it upper case
+      IF (<A HREF="../../../cleoks/typscn/typscn/istscn.html#cch">CCH</A>.GE.'a' .AND. <A HREF="../../../cleoks/typscn/typscn/istscn.html#cch">CCH</A>.LE.'z') THEN
+      <A HREF="../../../cleoks/typscn/typscn/istscn.html#cch">CCH</A> = <A HREF="../../../cleoks/typscn/typscn/istscn.html#char">CHAR</A>(<A HREF="../../../cleoks/typscn/typscn/istscn.html#ichar">ICHAR</A>('A') + <A HREF="../../../cleoks/typscn/typscn/istscn.html#ichar">ICHAR</A>(<A HREF="../../../cleoks/typscn/typscn/istscn.html#cch">CCH</A>) - <A HREF="../../../cleoks/typscn/typscn/istscn.html#ichar">ICHAR</A>('a'))
+      END IF
+      <A HREF="../../../cleoks/typscn/typcde/typctl.html#nchuse">NCHUSE</A> = <A HREF="../../../cleoks/typscn/typcde/typctl.html#nchuse">NCHUSE</A> + 1
+      <A HREF="../../../cleoks/typscn/typcde/typstr.html#ccbuf">CCBUF</A>(<A HREF="../../../cleoks/typscn/typcde/typctl.html#nchuse">NCHUSE</A>:<A HREF="../../../cleoks/typscn/typcde/typctl.html#nchuse">NCHUSE</A>) = <A HREF="../../../cleoks/typscn/typscn/istscn.html#cch">CCH</A>
+C
+C     Extract characters until next delimiter or end of line
+      <A HREF="../../../cleoks/typscn/typscn/istscn.html#strip">STRIP</A> = .TRUE.
+30    CONTINUE
+      IF (<A HREF="../../../cleoks/typscn/typscn/istscn.html#strip">STRIP</A>) THEN
+      <A HREF="../../../cleoks/typscn/typscn/istscn.html#cch">CCH</A> = <A NAME=ISTSCN_CCHSCN_2  HREF="../../../cleoks/typscn/typscn/istscn.html#cchscn">CCHSCN</A>(<A HREF="../../../cleoks/typscn/typscn/istscn.html#jpoint">JPOINT</A>,<A HREF="../../../cleoks/typscn/typscn/istscn.html#jchars">JCHARS</A>)
+      IF (<A HREF="../../../cleoks/typscn/typscn/istscn.html#cch">CCH</A>.EQ.<A HREF="../../../cleoks/typscn/typcde/typchr.html#cones">CONES</A>) THEN
+              <A HREF="../../../cleoks/typscn/typscn/istscn.html#strip">STRIP</A> = .FALSE.
+C                     end of line
+              <A HREF="../../../cleoks/typscn/typscn/istscn.html#idelim">IDELIM</A> = -1
+      ELSE IF (<A HREF="../../../roarlib/seq/rdtemp.html#index">INDEX</A>(<A HREF="../../../cleoks/typscn/typcde/typstr.html#cdelim">CDELIM</A>(1:<A HREF="../../../cleoks/typscn/typcde/typctl.html#ndelim">NDELIM</A>),<A HREF="../../../cleoks/typscn/typscn/istscn.html#cch">CCH</A>).NE.0) THEN
+C                     standard delimter termination
+              <A HREF="../../../cleoks/typscn/typscn/istscn.html#strip">STRIP</A> = .FALSE.
+              IF (<A HREF="../../../cleoks/typscn/typscn/istscn.html#jchars">JCHARS</A>.LE.0) THEN
+C                             nothing after delimiter
+                      <A HREF="../../../cleoks/typscn/typscn/istscn.html#idelim">IDELIM</A> = -1
+                      <A HREF="../../../cleoks/typscn/typscn/istscn.html#jchars">JCHARS</A> = -1
+              ELSE
+C                             more on line
+                      <A HREF="../../../cleoks/typscn/typscn/istscn.html#idelim">IDELIM</A> = 0
+              END IF
+      ELSE
+              IF (<A HREF="../../../cleoks/typscn/typscn/istscn.html#cch">CCH</A>.GE.'a' .AND. <A HREF="../../../cleoks/typscn/typscn/istscn.html#cch">CCH</A>.LE.'z') THEN
+                      <A HREF="../../../cleoks/typscn/typscn/istscn.html#cch">CCH</A> = <A HREF="../../../cleoks/typscn/typscn/istscn.html#char">CHAR</A>(<A HREF="../../../cleoks/typscn/typscn/istscn.html#ichar">ICHAR</A>('A') + <A HREF="../../../cleoks/typscn/typscn/istscn.html#ichar">ICHAR</A>(<A HREF="../../../cleoks/typscn/typscn/istscn.html#cch">CCH</A>) - <A HREF="../../../cleoks/typscn/typscn/istscn.html#ichar">ICHAR</A>('a'))
+              END IF
+              <A HREF="../../../cleoks/typscn/typcde/typctl.html#nchuse">NCHUSE</A> = <A HREF="../../../cleoks/typscn/typcde/typctl.html#nchuse">NCHUSE</A> + 1
+              <A HREF="../../../cleoks/typscn/typcde/typstr.html#ccbuf">CCBUF</A>(<A HREF="../../../cleoks/typscn/typcde/typctl.html#nchuse">NCHUSE</A>:<A HREF="../../../cleoks/typscn/typcde/typctl.html#nchuse">NCHUSE</A>) = <A HREF="../../../cleoks/typscn/typscn/istscn.html#cch">CCH</A>
+      END IF
+      GO TO 30
+      END IF
+C
+      <A HREF="../../../cleoks/typscn/typscn/istscn.html#nchr">NCHR</A> = <A HREF="../../../cleoks/typscn/typscn/istscn.html#min">MIN</A>(<A HREF="../../../cleoks/typscn/typcde/typctl.html#nchuse">NCHUSE</A>,<A HREF="../../../cleoks/typscn/typscn/istscn.html#len">LEN</A>(<A HREF="../../../cleoks/typscn/typscn/istscn.html#astr">ASTR</A>))
+      <A HREF="../../../cleoks/typscn/typscn/istscn.html#astr">ASTR</A>=<A HREF="../../../cleoks/typscn/typcde/typstr.html#ccbuf">CCBUF</A>(1:<A HREF="../../../cleoks/typscn/typscn/istscn.html#nchr">NCHR</A>)
+      <A NAME=ISTSCN_ISTSCN_4  HREF="../../../cleoks/typscn/typscn/istscn.html#istscn">ISTSCN</A>=<A HREF="../../../cleoks/typscn/typscn/istscn.html#nchr">NCHR</A>
+C
+      RETURN
+      END
+</PRE>
+<ADDRESS>
+<A HREF="http://w4.lns.cornell.edu/cgi-bin/mail?nk">nk@lns62.lns.cornell.edu</A>
+</ADDRESS>
+
+</BODY>
+

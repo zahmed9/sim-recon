@@ -1,0 +1,47 @@
+MCFast v2.4 
+June 1, 1996
+PL McBride
+
+
+Setup for MCFast(in csh or tcsh):
+
+setenv $MCFAST_DIR ~bphyslib/mcfast/v2.4
+source ~bphyslib/setup_files/mcenv.fnalu v2.4
+
+Tutorial on the web:
+
+http://fnpspa.fnal.gov/mcfast/mcfast_tutorial.html
+
+Changes include:
+
+  Electromagnetic fast shower development in EM calorimeters  was included in v2.3.  
+  Simple hadronic shower development in EM calorimeters has been
+  included in this release).
+
+  Tracing and tracking is done in combined forward and central geometries.  This means
+  that forward tracking elements in a solenoid are handled correctly.
+    
+  New vertex routines for vertexing in a central dipole have been added.
+  routines are provided in $MCFAST_DIR/src/vertex
+  
+  Geometry files are .db files which are read with DBin.  
+  Template files for each geometry structure are in $MCFAST_DIR/db.  
+  Please create a link to $MCFAST_DIR/db in the directory where you plan to 
+  run MCFast.
+  
+  Output of traces, tracks, calorimetry and geometry files can be done.  Call 
+  usr_mcfio_out for each event you wish to write.
+  
+  $MCFAST_DIR/Explorer contains the makefiles that will allow you to build
+  the explorer modules for visualization of MCFast events for your SGI machine.
+  (We haven't tried other platforms, but in principle this is possible.)  
+  DetDiplay is the detector display module and TraceInfo will display the
+  tracks.
+   
+
+To run MCFast v2.4, new versions of QQ and STDHEP are required.  
+To use this version please setup the following:
+
+QQ version v9_1
+STDHEP version v3_02
+

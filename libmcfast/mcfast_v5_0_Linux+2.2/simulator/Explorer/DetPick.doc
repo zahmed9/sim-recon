@@ -1,0 +1,23 @@
+DetPick
+%%------------ DESCRIPTION ------------
+This module allows the user to find the name of a detector system
+by picking on that object.  Warning! The object displayed is the first
+object hit by the pick.  Only one object is chosen.  Please remember that many
+detectors come in "families" as each layer is displayed as a separate object.
+%%------------ INPUTS ------------
+%PORT Input Pick
+%TYPE Pick
+This port accepts input as picked from the render.
+%%------------ WIDGETS ------------
+%PORT detectors
+%TYPE Scroll List
+The name of the object is displayed here.
+%%------------ OUTPUTS ------------
+%PORT DetLabel
+%TYPE Parameter
+This can be wired to the DetDisplay module to allow modification of the picked
+object.
+%%------------ PROBLEMS ------------
+Make sure to position the pointer on the device you wish to change.  
+%%------------ SEEALSO ------------
+Render, DetDisplay

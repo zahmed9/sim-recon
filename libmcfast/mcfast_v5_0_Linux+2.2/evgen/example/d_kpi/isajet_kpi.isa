@@ -1,0 +1,19 @@
+Example c cbar job
+2000.,2000,10,1/
+TWOJET
+BEAMS
+'P','AP'/
+JETTYPE1
+'CH', 'CB'/
+JETTYPE2
+'CH', 'CB'/
+P
+0. , 1000., 0. , 1000./
+PT
+0.001 , 999., 0.001 , 999./
+NTRIES
+5000/
+NSIGMA
+400/
+END
+STOP

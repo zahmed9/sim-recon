@@ -1,0 +1,77 @@
+/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb
+gmake[5]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb'
+creating cache ./config.cache
+checking for cleo_f77... no
+checking for f77... f77
+checking for cleo_makedepend... no
+checking for makedepend... makedepend
+checking how to run the C preprocessor... cc -E
+updating cache ./config.cache
+creating ./config.status
+creating Makefile
+creating Makefile.korb
+creating loccode/Makefile
+creating dist/Makefile
+creating koralhep/Makefile
+creating korb22/Makefile
+creating tauola/Makefile
+creating formf/Makefile
+creating photos/Makefile
+creating Makefile
+creating Makefile.korb
+creating loccode/Makefile
+creating dist/Makefile
+creating koralhep/Makefile
+creating korb22/Makefile
+creating tauola/Makefile
+creating formf/Makefile
+creating photos/Makefile
+gmake[6]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb'
+gmake[7]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb'
+/bin/sh: version: command not found
+gmake[8]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb'
+/bin/sh: version: command not found
+gmake[9]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb'
+gmake[10]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/loccode'
+gmake[10]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/loccode'
+gmake[10]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/dist'
+gmake[10]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/dist'
+gmake[10]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/koralhep'
+gmake[10]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/koralhep'
+gmake[10]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/korb22'
+gmake[10]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/korb22'
+gmake[10]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/tauola'
+gmake[10]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/tauola'
+gmake[10]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/formf'
+gmake[10]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/formf'
+gmake[10]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/photos'
+gmake[10]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/photos'
+gmake[9]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb'
+gmake[8]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb'
+gmake[7]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb'
+gmake[6]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb'
+gmake[5]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb'
+gmake[5]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb'
+gmake[6]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb'
+/bin/sh: version: command not found
+gmake[7]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb'
+/bin/sh: version: command not found
+gmake[8]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb'
+gmake[9]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/loccode'
+gmake[9]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/loccode'
+gmake[9]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/dist'
+gmake[9]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/dist'
+gmake[9]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/koralhep'
+gmake[9]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/koralhep'
+gmake[9]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/korb22'
+gmake[9]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/korb22'
+gmake[9]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/tauola'
+gmake[9]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/tauola'
+gmake[9]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/formf'
+gmake[9]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/formf'
+gmake[9]: Entering directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/photos'
+gmake[9]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb/photos'
+gmake[8]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb'
+gmake[7]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb'
+gmake[6]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb'
+gmake[5]: Leaving directory `/.automount/megux1/export/dsk41/halld/source/libmcfast/qq_v9_2b_Linux+2.2/src/Build/Linux/korb'

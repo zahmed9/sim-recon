@@ -1,0 +1,51 @@
+C
+C $Id$
+C
+C $Log$
+C Revision 1.1  2000/06/19 20:00:45  eugenio
+C Initial revision
+C
+C Revision 1.2  1994/10/19  20:46:25  zfiles
+C Changed comment leader.
+C
+C Revision 1.1  1994/10/19  20:30:32  zfiles
+C Renamed korb.ctr
+C
+C Revision 1.1  1994/10/19  20:28:13  zfiles
+C Renamed files appropriately.
+C
+C Revision 1.1.1.1  1994/10/08  02:21:36  zfiles
+C first version of qqlib in CVS
+C
+C
+CMZ :  1.03/72 06/12/93  17.43.21  by  Peter C Kim
+CMZ :  1.03/60 16/03/93  11.58.41  by  Peter C Kim
+CMZ :  1.03/58 22/02/93  18.10.06  by  Peter C Kim
+C-- Author :    Peter C Kim   22/02/93
+C =======================================================================
+C    This is an example of generating KORALB events
+C    Please see C$DOC:KORB.DOC, C$RUNFIL:KORB.DEC               MODEL = 7
+C
+C        (Variables are defined as CHARCTER*6 strings.)
+C =======================================================================
+LIST
+C
+NDO     50
+NDUMP   50
+IRAN    0
+C                                                   Default DECAY.DEC
+C      DEFDEC  'C$RUNFIL:DECAY.DEC'   on VAX
+C      DEFDEC  '$C_RUNFIL/decay.dec'  on UNIX
+C
+ECM     10.58
+SPREAD   0.0041
+ENRGMN  10.4
+ENRGMX  10.8
+C
+C UDECAY 'korb.dec'
+C
+MODEL   7
+ITDKRC  1
+KORXK0  0.001
+C
+END

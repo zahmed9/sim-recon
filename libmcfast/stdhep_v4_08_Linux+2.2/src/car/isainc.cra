@@ -1,0 +1,7 @@
++EXE.
++ASM,21,R=!./*DECK ID>, !.inc */
++USE,P=ISAINC.
++USE,ISACDE.       ISAJET common blocks
++PAM,11,T=C,A.$ISAJET_DIR/isajet
++PAM,11,T=C,A.$STDHEP_DIR/src/car/isainc
++QUIT.

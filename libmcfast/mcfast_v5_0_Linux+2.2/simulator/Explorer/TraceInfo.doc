@@ -1,0 +1,21 @@
+TraceInfo
+%%------------ DESCRIPTION ------------
+This module displays information about picked traces
+%%------------ INPUTS ------------
+%PORT InputHepLat
+%TYPE Lattice
+%OPTIONAL 
+Input with the HEP information and McFast information for display
+%PORT hepnum
+%TYPE Parameter
+The position of the particle to be displayed in the Hep list.
+%%------------ WIDGETS ------------
+%PORT EventInfo
+%TYPE Drawing Area
+Widget for displaying information
+%%------------ OUTPUTS ------------
+%%------------ PROBLEMS ------------
+Current construction is awkward, requiring two inputs, one from TraceLat,
+the other from TracePick
+%%------------ SEEALSO ------------
+TraceLat, TracePick

@@ -1,0 +1,87 @@
+<HEAD>
+<TITLE>cleoks/typscn/typsub/getlin.F</TITLE>
+</HEAD>
+<BODY>
+<PRE>
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:20  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1995/08/01  18:00:19  nk
+* Consolidation
+*
+* Revision 1.1  1995/07/31 19:42:24  nk
+* Added typscn
+*
+* Revision 1.1.1.1  1994/10/05  13:45:41  zfiles
+* first version of typscn in CVS
+*
+*
+#include &QUOT<A HREF="../../../sys/CLEO_machine.html">sys/CLEO_machine.h</A>&QUOT
+#include &QUOT<A HREF="../../../pilot.html">pilot.h</A>&QUOT
+*CMZ :  1.00/10 31/05/91  13.40.09  by  Jon Urheim
+*-- add flag for IBM RS6000.
+*CMZ :  1.00/03 11/12/89  10.59.31  by  Ian C. Brock
+*CMZ :  1.00/01 24/05/89  12.19.08  by  Ian C. Brock
+*CMZ :  1.00/00 12/05/89  16.55.34  by  Ian C. Brock
+*-- Author :
+C
+C----------------------------------------------------------------------------
+C Input a string into work array if availble
+C
+*=*=*=*= GETLIN.html =*=*=*=*
+
+</PRE>
+
+<A HREF="http://w4.lns.cornell.edu/Harvest/brokers/w4-public/">Search Keyword</A>
+<H1>SUBROUTINE GETLIN</H1>
+
+<PRE>
+
+      SUBROUTINE <A NAME=getlin>GETLIN</A>(<A HREF="../../../cleoks/typscn/typsub/getlin.html#lwait">LWAIT</A>)
+      SAVE
+C
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typpar.html">cleoks/typscn/typcde/typpar.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typchr.html">cleoks/typscn/typcde/typchr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typscn.html">cleoks/typscn/typcde/typscn.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typstr.html">cleoks/typscn/typcde/typstr.inc</A>&QUOT
+#include &QUOT<A HREF="../../../cleoks/typscn/typcde/typctl.html">cleoks/typscn/typcde/typctl.inc</A>&QUOT
+C
+      LOGICAL <A NAME=lwait>LWAIT</A>
+C
+C
+      IF (<A HREF="../../../cleoks/typscn/typsub/getlin.html#ichar">ICHAR</A>(<A HREF="../../../cleoks/typscn/typcde/typchr.html#cones">CONES</A>).EQ.0) THEN
+      STOP 'TYPSCN not initialized.  Add CALL TYPINI to main routine'
+      END IF
+C
+      IF (<A HREF="../../../cleoks/typscn/typcde/typscn.html#nchars">NCHARS</A>.LT.0) THEN
+#if defined(CLEO_VAX)||defined(CLEO_IBM)||defined(CLEO_APOLLO)||defined(CLEO_DEC
+      IF (<A HREF="../../../cleoks/typscn/typsub/getlin.html#lwait">LWAIT</A> .OR. <A HREF="../../../cleoks/typscn/typcde/typctl.html#iunacc">IUNACC</A>.NE.5) THEN
+#endif
+#if defined(CLEO_MAC)
+      IF (<A HREF="../../../cleoks/typscn/typsub/getlin.html#lwait">LWAIT</A> .OR. <A HREF="../../../cleoks/typscn/typcde/typctl.html#iunacc">IUNACC</A>.NE.9) THEN
+#endif
+C     Synchronous read request - cancel outstanding async (if any)
+      IF (<A HREF="../../../cleoks/typscn/typcde/typctl.html#iunacc">IUNACC</A>.EQ.5) CALL <A NAME=GETLIN_ASYNCN_1  HREF="../../../cleoks/typscn/typsub/getlin.html#asyncn">ASYNCN</A>
+      CALL <A NAME=GETLIN_SYNRD_1  HREF="../../../cleoks/typscn/typsub/getlin.html#synrd">SYNRD</A>
+      ELSE
+C     Asynchronous request
+      CALL <A NAME=GETLIN_ASYNRD_1  HREF="../../../cleoks/typscn/typsio/asynrd.html">ASYNRD</A>
+      CALL <A NAME=GETLIN_ASYNCK_1  HREF="../../../cleoks/typscn/typsub/getlin.html#asynck">ASYNCK</A>
+      END IF
+      END IF
+C
+      <A HREF="../../../cleoks/typscn/typcde/typscn.html#kpoint">KPOINT</A> = <A HREF="../../../avehst/seq/avehstin.html#ipoint">IPOINT</A>
+      <A HREF="../../../cleoks/typscn/typcde/typscn.html#kchars">KCHARS</A> = <A HREF="../../../cleoks/typscn/typcde/typscn.html#nchars">NCHARS</A>
+      RETURN
+      END
+</PRE>
+<ADDRESS>
+<A HREF="http://w4.lns.cornell.edu/cgi-bin/mail?nk">nk@lns62.lns.cornell.edu</A>
+</ADDRESS>
+
+</BODY>
+

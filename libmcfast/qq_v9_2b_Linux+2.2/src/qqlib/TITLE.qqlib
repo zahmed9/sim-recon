@@ -1,0 +1,144 @@
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:32  eugenio
+* Initial revision
+*
+* Revision 1.12  1996/05/15 05:31:15  clib
+* Initialize CLEOG version number in onlycleo/qqinit.F
+* Save MODEL as IORGQQ in MCCOMS in qq/modevt.F
+*
+* Revision 1.11  1996/04/02 15:32:38  zfiles
+* Updates from Peter
+*
+* Revision 1.10  1996/02/16 20:07:10  zfiles
+* Updates from Peter
+*
+* Revision 1.9  1995/08/24  16:49:27  zfiles
+* Mods from PCK
+*
+* Revision 1.8  1995/05/30  13:15:38  zfiles
+* Updates from PCK.
+*
+* Revision 1.7  1995/05/02  12:30:36  zfiles
+* Bug fix in qqdeca.F. Major update of decay.dec
+*
+* Revision 1.6  1995/04/25  13:54:23  zfiles
+* Crossing angle variable. Modusr
+*
+* Revision 1.5  1995/03/07  00:52:00  zfiles
+* TAUMAT.F from AJW
+*
+* Revision 1.4  1995/02/18  02:54:00  zfiles
+* New version
+*
+* Revision 1.3  1995/02/03  16:39:52  zfiles
+* New version
+*
+* Revision 1.2  1994/11/01  15:07:20  lkg
+* version 1.04/01
+*
+* Revision 1.1.1.1  1994/10/08  02:21:26  zfiles
+* first version of qqlib in CVS
+*
+*
+* This directory was created from /cleo/dlib/car/qqlib.car
+* QQLIB   1.04/00  941005  12.42
+* QQLIB  1.04/01  941101  10.05
+*
+* Bug fix in NTOJS (Really this was PCK, not LKG)
+*
+* QQLIB  1.04/02  950203  11.36
+*
+* Added calls to VFIND, GTPIR, R2ELEC,  with corresponding On/Off
+* flags.   Added  CRSANG variable via FFREAD, for beam crossing angle.
+*
+* QQLIB  1.04/03  950217  21.52
+*
+* Fixed phsp.F. New beam size from JGS
+*
+* QQLIB  1.04/04  950306  19.50
+*
+*TAUMAT.F from AJW
+*
+* QQLIB  1.04/05  950425   9.51
+*
+*    seq/clinc/qqevnt.inc
+*               New variable XANGQQ (crossing angle) 
+*    seq/clinc/qqtrak.inc
+*               New variable IDKMEC(MCTRK) : to be filled by CLEOG
+*    qqlib/qq/modevt.F
+*               Initialization of  XANGQQ and IDKMEC
+*    usrdum/modusr.F
+*               replace it with the MODUSR from the 2-Photon group
+*
+* QQLIB  1.04/06  950502   8.29
+*
+* Bug fix for HIDE option in qqdeca.F
+* Major  update of decay.dec
+*
+* QQLIB  1.04/07  950530   9.13
+*
+*   /cdat/tem/pck/nonlep.F ==>  /cleo/dlib/cvssrc/qqlib/qdecay/nonlep.F
+*
+*          Modified to handle inclusive B_c decays...
+*
+*    /cdat/tem/pck/dmpmcc.F ==>  /cleo/dlib/cvssrc/qqlib/libu/dmpmcc.F
+*
+*         prints out "death by ?" info. from CLEOG if available.
+*
+*    /cdat/tem/pck/decay.dec ==>  /cleo/dlib/cvssrc/qqlib/runfil/decay.dec
+*
+*          Added more lam_B and B**'s;  Xi_c charge problem fixed.
+*
+*    /cdat/tem/pck/ldecay.tab ==>  /cleo/dlib/cvssrc/qqlib/runfil/ldecay.tab
+*
+*          D** masses now same as in decay.dec
+*
+* QQLIB  1.04/08  950824  12.46
+*
+*
+*     /cdat/tem/pck/luedit.F   ==>  /cleo/dlib/cvssrc/qqlib/jetset/luedit.F
+*                   decadl.F                                       decadl.F
+*                   ntonjs.F                                       ntonjs.F
+*
+*     /cdat/tem/pck/decay.dec  ==>  /cleo/dlib/cvssrc/qqlib/runfil/decay.dec
+*
+* 
+*    Comments:  Fix bugs in in event decay history for Upsilon decays,
+*               one is Jetset, the other in decadl.F
+*
+*               Update PDG particle assignment for D**s in decay.dec.
+*
+
+* QQLIB  1.04/09  960216  15.03
+*
+* Updates from Peter.
+*
+*  /cdat/tem/pck/qqlib/decay.dec   ==> /cleo/dlib/runfil/decay.dec
+*                     /ldecay.tab                       /ldecay.tab
+*                     /qqpart.ini                       /qqpart.ini
+*
+*             Resonance masses/widths updated (rho, omega, D**, etc.)
+*             Paricle list in qqpart.ini updated
+*
+*  /cdat/tem/pck/qqlib/qmlund.F   ==> /cleo/dlib/cvssrc/qqlib/jetset/qmlund.F
+*                     /qqevnt.inc ==>                  /seq/clinc/qqevnt.inc
+*                     /cleoii.ini ==> /cleo/dlib/runfil/cleoii.ini
+*
+*             Primary quark flavor in Continuum events saved in IQQFLV
+*
+*  /cdat/tem/pck/qqlib/qqdeca.F   ==> /cleo/dlib/cvssrc/qqlib/qdecay/qqdeca.F
+*
+*             Call to omg3pi subtroutine disabled.
+* QQLIB  1.04/10  960402  10.31
+*
+* Mass/decay width/branching ratios of all particles are checked and 
+* updated to match PDG.
+*
+* QQLIB  1.04/11  960515   1.29
+*
+* Initialize CLEOG version number in onlycleo/qqinit.F
+* Save MODEL as IORGQQ in MCCOMS in qq/modevt.F
+*

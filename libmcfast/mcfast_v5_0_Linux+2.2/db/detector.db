@@ -1,0 +1,4 @@
+template detector(5)
+  char name
+  char geom_id
+end detector

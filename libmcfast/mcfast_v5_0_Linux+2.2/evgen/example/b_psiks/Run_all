@@ -1,0 +1,9 @@
+#! /bin/csh
+#
+# Run all test jobs.
+#
+# (If you get a "word too long" error, change the shell to tcsh
+#  - /usr/local/bin/tcsh at FNAL.)
+Run_evgen pythia pythia_psiks b_psiks.dec
+Run_evgen isajet isajet_psiks b_psiks.dec
+Run_evgen herwig herwig_psiks b_psiks.dec

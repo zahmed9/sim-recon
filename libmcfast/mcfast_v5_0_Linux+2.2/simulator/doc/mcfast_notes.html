@@ -1,0 +1,283 @@
+
+<HEAD>
+<TITLE>Some Notes on MCFAST</Title>
+</HEAD>
+
+<CENTER><IMG src=http://www-pat.fnal.gov/bars/default.bar.gif></CENTER>
+<CENTER><H1><IMG SRC=http://www-pat.fnal.gov/images/atom.gif ALIGN=middle>
+Some notes on MCFAST
+  <IMG SRC=http://www-pat.fnal.gov/images/atom.gif ALIGN=middle></H1></CENTER>
+<CENTER><IMG src=http://www-pat.fnal.gov/bars/default.bar.gif></CENTER>
+
+<P>August 24, 1998<P>
+
+<H2>    The Five things you really need to know </H2>
+<UL>
+<LI> usr_init.F - book histograms
+<LI> usr_analysis.F - do event by event analysis on reconstructed tracks.
+<LI> stdhep.inc - list of generated particles.
+<LI> offline_track.inc  - list of reconstructed tracks.  See below for details.
+<LI> 
+In offline_track.inc the 3-momentum of each track is specified near
+the production vertex of the track.   For example,
+consider the decay chain, B-> Psi K0S, Psi-> mu mu, K0s-> pi+pi^-.
+The 3-momenta of the two muons will be specified near the
+B decay vertex, while those of the two pions will be specified near
+the K0S decay vertex.  To be more specific, in a forward detector, like
+BTeV, the z of the track is the z of the known production point and the
+remaining track parameters are the x, y and 4-momentum of the
+reconstructed helix at the point that it intersects this z.
+In a central detector, such as CDF or D0, the point specfied by (x,y)
+is the point of closest approach of the reconstructed helix to the
+line which is parallel to the z axis and which contains the known
+production point of the track; the remaining track parameters are the
+value of z and of the 4-momentum at this point on the reconstructed helix.
+</UL>
+
+<H2> Where are the include files? </H2>
+
+Go to the example area and look at the file GNUmakefile.
+There you will find lines of the form: <BR>
+INC1 = $(MCFINC)/inc/event<BR>
+INC2 = $(MCFINC)/inc/geom<BR>
+where MCFINC is defined as $MCFAST_DIR/inc.
+Check these areas to find the include files.  
+
+
+
+<P>
+The two files
+mentioned above are found in:<BR>
+$STDHEP_DIR/src/inc/stdhep.inc<BR>
+$MCFAST_DIR/inc/event/offline_track.inc
+
+<p>
+A general discussion on finding source files and include files,
+and a description of some usefully searching utilities, is given
+in <A HREF="mcfast_find.html"> "Find: The Mysteries Explained"</A>.
+
+
+<H2>    A Rough Outline of MCFAST </H2>
+
+This outline ignores any simulation of calorimetry; that information is
+in preparation.  Also notice
+that the control of vertexing is left up to the user.
+
+<OL>
+<LI> Do job initialization.  This includes a call to usr_init.F.
+<LI> Read in the next event from the evgen output file.
+     This fills the common stdhep.inc with the generator information.
+<LI> Trace every track through the detector and create a list of
+     hits on each track.  This fills internal common blocks which
+     are not normally interesting to the user.
+     At present there is no simulation of errors in pattern recognition
+     and, therefore, the list of hits on a track is perfect.
+     Well, almost perfect; there is a simulation of efficiency.
+<LI> Run the trigger simulation.  In the example this is a dummy.
+<LI> Call usr_analysis.F.  The tracking reconstruction is done
+     inside usr_analysis by the call to trk_offline.
+<LI> trk_offline:
+     <UL>
+     <LI> looks at each track which was handled by the tracing code,
+     <LI> demands a minimum number of hits on a track,
+     <LI> kalman filters the track back to its starting point.
+     </UL>
+     When a track has been successfully fitted, its track parameters and
+     covarinace matrix are loaded into the common
+     offline_track.inc.
+<LI> When the command usr_kalman T has been given, the preceding
+     description is exactly correct.  When that command has not been given,
+     the kalman filter only computes the covariance matrix, not the
+     track parameters.  The track parameters are then computed by
+     smearing the generated values using the covariance matrix computed in
+     the previous step.
+<LI> A corollary of the previous point is the the chisq varaible in the
+     offline track common is only defined if use_kalman T has been
+     set.  Otherwise it is undefined.
+<LI> At this point, we are back in usr_analysis.F, the simulation is 
+     complete and the user can do his or her physics analysis using the
+     information in offline_track.inc.  Make sure that your your
+     analysis code comes after the call to trk_offline!
+<LI> Get the next event.
+<LI> At the end of the job, the histograms are written out automagically.
+</OL>
+
+
+<H2> A Rather Abbreviated Calling Tree </H2>
+
+<UL>
+<LI> $MCFAST_DIR/simulator/main_args.c <BR>
+     This is what the linker thinks is the main program.  It is
+     just a wrapper to process command line arguments into a form
+     which can be understood by FORTRAN.
+<LI> $MCFAST_DIR/simulator/gen/src/main_fortran.F<BR>
+     This is what a physicist thinks is the main program.  
+     Calls usr_init and calls mcp_analyze.
+<LI> $MCFAST_DIR/simulator/gen/src/mcp_analyze.F<BR>
+     This is the event loop.  Calls usr_analysis.
+</UL>
+
+
+<H2> Track representations.</H2>
+
+
+WARNING: <BR>
+STDHEP reports distances in mm but the MCFAST commons
+report distances in cm!  They agree on GeV/c for quantities with
+dimensions of momentum.  Also, check quantities before you use them
+since some have never been filled - for example the chi2 of the
+track fit is only filled if you have specified "use_kalman T"
+in the command file.
+
+
+<P>
+MCFAST knows about three representations of tracks.
+
+   <UL>
+   <LI> wtrack_struct.inc <BR>
+        A point on the track and the 4-momentum at that point.
+        You can skip the next two if you are just doing physics
+        analysis; offline_track.inc uses this representation.
+   <LI> ctrack_struct.inc <BR>
+        A typical helical representation useful in solenoidal fields
+        which are parallel to the z axis.
+        Note that the curvature is the
+        CLEO curvature ( cu=q/2R), not the Trilling curvature (cu=q/R).
+        Also, the sign convention for the DCA and the parameter 
+        ordering are the CLEO conventions - see the include file for
+        details.  Also, representation is local, not
+        global as most people are used to.  That is, track parameters
+        are described in a local coordinate system and the position of
+        the local origin
+        is carried along in the representation; the DCA, PHI0, and Z0
+        depend on the coordinate system.
+   <LI> ftrack_struct.inc <BR>
+        A typical forward geometry representation for use in a dipole
+        field perpendicular to the z axis.  See the include file
+        for details about sign conventions.  Again this is a local 
+        representation - the reference z is carried along with the
+        representation.
+   </UL>
+
+<H2> Utility Routines</H2>
+
+The directory $MCFAST_DIR/simulator/util/src contains many 
+<A HREF="mcfast_utilities.html"> utility routines</A>
+to do such things as transform among the three track
+representations, project tracks to cylinders, change the local
+orgin to some new point, and so on.  There are also routines
+do compute such things as angles and pseudo-rapidty from a 3-momentum
+and routines to compute errors on various quantities, given the
+covariance matrix of a track.
+Many of these routines are exercised in the
+<A href=mcfast_advanced.html> MCFast Advanced Examples.</A>
+
+<H2> Fitters</H2>
+
+There is a postscript document which describes the use of the
+<A href=vertex.ps> vertex-constraint and mass-constraint fitters.</A>
+Some of these routines are exercised in the
+<A href=mcfast_advanced.html> MCFast Advanced Examples.</A>
+
+<H2> Miscellaneous</H2>
+
+<OL>
+<LI>
+   When MCFast is run with decays in-flight turned on, it sometimes
+   complains about negative mass particles, usually pi0's.  
+   This is due to precision problems in the hadronic event generators
+   and the problems are rare enough to be ignored.  See the
+   <A HREF="../evgen/evgen_notes.html"> evgen_notes </A>.
+   When the problem occurs, the offending particle is simply treated
+   as stable and the program continues.
+
+<LI> 
+   What are all of the DFLOAT things?  MCFAST was written to be 
+   switchable between real*4 and real*8.  This is implemented
+   by defining the string DFLOAT to be either "double precision" or
+   "real".  This is done in $MCFAST_DIR/inc/event/const.inc
+   and it is currently set to double precision.
+   In all of the MCFAST code, all of the floating point variables are
+   typed using DFLOAT.  In a preprocessing step, before compilation,
+   the variable DFLOAT is expanded and the resulting file is sent to
+   the compiler ( the prepreprocessor is invoked on files with an
+   extension .F, but not on files with an extension of .f ).
+   Users are encouraged to also use this method.  However the example
+   files may still have a few examples of hard coded typing.
+
+   <P>
+   <B>Warning:</b> When DFLOAT is expanded to "DOUBLE PRECISION"
+   it can shift the end of a long line past column 72.  This
+   causes the fortran compiler to truncate variable names and to
+   produce unpredictable results.  If one
+   is compiling with -u ( or implicit none ), then this will
+   normally be caught by the compiler.
+
+<LI>
+   One of the new features of MCFAST version v4_0 is a full
+   treatment of multiple scattering for hit generation.  This is
+   enabled by issuing the command:<br>
+   trace_integrated T<br>
+   In the future this will be come the default.  At present the
+   default mode of operation has trace_integrated F, in which 
+   there is no multiple scattering for hit generation if the
+   detector contains both forward and central elements.  In all
+   cases the tracks found in the offline track common do include
+   the mulitple scattering.
+
+<LI>
+   When filling histograms with calls to hf1, hf2, hfill, etc
+   remember that these take single precision numbers.  Therefore
+   an explicit type conversion is needed when passing many MCFast
+   variables into hbook.
+   <P>
+   If you prefer, MCFast contains a double precision interface to
+   hbook, dhf1, dhf2 etc.  However I recommend not paying the
+   overhead of the additional subroutine call.
+
+<LI>
+   The MCFast random number generator is seeded using the command ranseed
+   from withing the .cmd file.  A value of 0 means that it is seeded from
+   the time of day.  Other values are used as the seed; the seed
+   is 2 words long.
+   If qq is used within mcfast, it is seeded separately
+   from the MCFast random number generator; it is seeded from the time
+   of day when the first call to qq takes place.  In the next release
+   of mcfast it will be possible to easily link in user supplied
+   random number generators.
+<LI>
+   Some of the example makefiles are distributed with the compile and link
+   options set to make the fastest executable possible.  During
+   code development I strongly recommend modifying your makefiles adding the
+   compile options
+   -g -u -C and the link option -g.  These do the following:<br>
+     -g - build symbol tables for the debugger<br>
+     -u - give compile time warnings of undeclared variables<br>
+     -C - enable run time bounds checking<br>
+<LI>
+   The variable ISTHEP in the include file "stdhep.inc" tells whether
+   or not a particle has been decayed.  If isthep(i).eq.1, then particle
+   i has not been been decayed.  A number other than 1 indicates that
+   the particle has either decayed or interacted.
+   Occaisionally, particles such
+   as pi0's and K0S's are found to be stable when MCFast has finished!
+   These cases fall into two categories: 1) if the particle is the
+   daughter of some long lived particle and the decay vertex is outside
+   of the volume of the detector.  2) if the trace list or the stdhep
+   list have filled up then the remaining unstable particles cannot
+   be decayed.
+
+
+</OL>
+<HR>
+<A HREF="http://www.fnal.gov/faw/fermilab_at_work.html">
+<IMG src=http://www-pat.fnal.gov/buttons/default.homebutton.gif align=bottom alt="[fermi at work]"></A>
+<A HREF="http://www-pat.fnal.gov/simulation.html">
+<IMG src=http://www-pat.fnal.gov/buttons/simulation.home.gif align=bottom alt="[simulation home]"></A>
+
+<HR>
+
+<ADDRESS>
+Rob Kutschke 
+<A HREF="mailto:kutschke@fnal.gov">kutschke@fnal.gov</A><P>
+</ADDRESS>

@@ -1,0 +1,304 @@
+*
+* $Id$
+*
+* $Log$
+* Revision 1.1  2000/06/19 20:00:31  eugenio
+* Initial revision
+*
+* Revision 1.1.1.1  1994/11/22  16:57:04  zfiles
+* first version of korb in CVS
+*
+*
+#include "sys/CLEO_machine.h"
+#include "pilot.h"
+*CMZ :  2.00/00 21/01/93  15.42.36  by  Alan Weinstein
+*-- Author :
+      SUBROUTINE DPH4PI(DGAMT,HV,PN,PAA,PMULT,JNPI)
+C ----------------------------------------------------------------------
+* IT SIMULATES A1  DECAY IN TAU REST FRAME WITH
+* Z-AXIS ALONG A1  MOMENTUM
+C ----------------------------------------------------------------------
+      COMMON / PARMAS / AMTAU,AMNUTA,AMEL,AMNUE,AMMU,AMNUMU
+     *                 ,AMPIZ,AMPI,AMRO,GAMRO,AMA1,GAMA1
+     *                 ,AMK,AMKZ,AMKST,GAMKST
+C
+      REAL*4            AMTAU,AMNUTA,AMEL,AMNUE,AMMU,AMNUMU
+     *                 ,AMPIZ,AMPI,AMRO,GAMRO,AMA1,GAMA1
+     *                 ,AMK,AMKZ,AMKST,GAMKST
+      COMMON / DECPAR / GFERMI,GV,GA,CCABIB,SCABIB,GAMEL
+      REAL*4            GFERMI,GV,GA,CCABIB,SCABIB,GAMEL
+      REAL  HV(4),PT(4),PN(4),PAA(4),PIM1(4),PIM2(4),PIPL(4),PMULT(4,6)
+      REAL  PR(4),PIZ(4)
+      REAL*4 RRR(9)
+      REAL*8 UU,FF,FF1,FF2,FF3,FF4,GG1,GG2,GG3,GG4,RR
+      DATA PI /3.141592653589793238462643/
+      DATA ICONT /0/
+      XLAM(X,Y,Z)=SQRT(ABS((X-Y-Z)**2-4.0*Y*Z))
+C AMRO, GAMRO IS ONLY A PARAMETER FOR GETING HIGHT EFFICIENCY
+C
+C THREE BODY PHASE SPACE NORMALISED AS IN BJORKEN-DRELL
+C D**3 P /2E/(2PI)**3 (2PI)**4 DELTA4(SUM P)
+      PHSPAC=1./2**23/PI**11
+      PHSP=1./2**5/PI**2
+      IF (JNPI.EQ.1) THEN
+       PREZ=0.7
+       AMP1=AMPI
+       AMP2=AMPI
+       AMP3=AMPI
+       AMP4=AMPIZ
+       AMRX=0.782
+       GAMRX=0.0084
+        AMROP =1.2
+        GAMROP=.46
+ 
+      ELSE
+       PREZ=0.0
+       AMP1=AMPIZ
+       AMP2=AMPIZ
+       AMP3=AMPIZ
+       AMP4=AMPI
+       AMRX=1.4
+       GAMRX=.6
+        AMROP =AMRX
+        GAMROP=GAMRX
+ 
+      ENDIF
+      RR=0.3
+      CALL CHOICE(100+JNPI,RR,ICHAN,PROB1,PROB2,PROB3,
+     $            AMROP,GAMROP,AMRX,GAMRX,AMRB,GAMRB)
+      PREZ=PROB1+PROB2
+C TAU MOMENTUM
+      PT(1)=0.
+      PT(2)=0.
+      PT(3)=0.
+      PT(4)=AMTAU
+C
+      CALL RANMAR(RRR,9)
+C
+* MASSES OF 4, 3 AND 2 PI SYSTEMS
+C 3 PI WITH SAMPLING FOR RESONANCE
+CAM
+        RR1=RRR(6)
+        AMS1=(AMP1+AMP2+AMP3+AMP4)**2
+        AMS2=(AMTAU-AMNUTA)**2
+        ALP1=ATAN((AMS1-AMROP**2)/AMROP/GAMROP)
+        ALP2=ATAN((AMS2-AMROP**2)/AMROP/GAMROP)
+        ALP=ALP1+RR1*(ALP2-ALP1)
+        AM4SQ =AMROP**2+AMROP*GAMROP*TAN(ALP)
+        AM4 =SQRT(AM4SQ)
+        PHSPAC=PHSPAC*
+     $         ((AM4SQ-AMROP**2)**2+(AMROP*GAMROP)**2)/(AMROP*GAMROP)
+        PHSPAC=PHSPAC*(ALP2-ALP1)
+ 
+C
+        RR1=RRR(1)
+        AMS1=(AMP2+AMP3+AMP4)**2
+        AMS2=(AM4-AMP1)**2
+        IF (RRR(9).GT.PREZ) THEN
+          AM3SQ=AMS1+   RR1*(AMS2-AMS1)
+          AM3 =SQRT(AM3SQ)
+C --- this part of jacobian will be recovered later
+          FF1=AMS2-AMS1
+        ELSE
+* PHASE SPACE WITH SAMPLING FOR OMEGA RESONANCE,
+        ALP1=ATAN((AMS1-AMRX**2)/AMRX/GAMRX)
+        ALP2=ATAN((AMS2-AMRX**2)/AMRX/GAMRX)
+        ALP=ALP1+RR1*(ALP2-ALP1)
+        AM3SQ =AMRX**2+AMRX*GAMRX*TAN(ALP)
+        AM3 =SQRT(AM3SQ)
+C --- THIS PART OF THE JACOBIAN WILL BE RECOVERED LATER ---------------
+        FF1=((AM3SQ-AMRX**2)**2+(AMRX*GAMRX)**2)/(AMRX*GAMRX)
+        FF1=FF1*(ALP2-ALP1)
+        ENDIF
+C MASS OF 2
+        RR2=RRR(2)
+        AMS1=(AMP3+AMP4)**2
+        AMS2=(AM3-AMP2)**2
+* FLAT PHASE SPACE;
+        AM2SQ=AMS1+   RR2*(AMS2-AMS1)
+        AM2 =SQRT(AM2SQ)
+C --- this part of jacobian will be recovered later
+        FF2=(AMS2-AMS1)
+*  2 RESTFRAME, DEFINE PIZ AND PIPL
+        ENQ1=(AM2SQ-AMP3**2+AMP4**2)/(2*AM2)
+        ENQ2=(AM2SQ+AMP3**2-AMP4**2)/(2*AM2)
+        PPI=         ENQ1**2-AMP4**2
+        PPPI=SQRT(ABS(ENQ1**2-AMP4**2))
+        PHSPAC=PHSPAC*(4*PI)*(2*PPPI/AM2)
+* PIZ   MOMENTUM IN 2 REST FRAME
+        CALL SPHERA(PPPI,PIZ)
+        PIZ(4)=ENQ1
+* PIPL  MOMENTUM IN 2 REST FRAME
+        DO 30 I=1,3
+ 30     PIPL(I)=-PIZ(I)
+        PIPL(4)=ENQ2
+* 3 REST FRAME, DEFINE PIM1
+*       PR   MOMENTUM
+        PR(1)=0
+        PR(2)=0
+        PR(4)=1./(2*AM3)*(AM3**2+AM2**2-AMP2**2)
+        PR(3)= SQRT(ABS(PR(4)**2-AM2**2))
+        PPI  =          PR(4)**2-AM2**2
+*       PIM1  MOMENTUM
+        PIM1(1)=0
+        PIM1(2)=0
+        PIM1(4)=1./(2*AM3)*(AM3**2-AM2**2+AMP2**2)
+        PIM1(3)=-PR(3)
+C --- this part of jacobian will be recovered later
+        FF3=(4*PI)*(2*PR(3)/AM3)
+* OLD PIONS BOOSTED FROM 2 REST FRAME TO 3 REST FRAME
+      EXE=(PR(4)+PR(3))/AM2
+      CALL BOSTR3(EXE,PIZ,PIZ)
+      CALL BOSTR3(EXE,PIPL,PIPL)
+      RR3=RRR(3)
+      RR4=RRR(4)
+      THET =ACOS(-1.+2*RR3)
+      PHI = 2*PI*RR4
+      CALL ROTPOL(THET,PHI,PIPL)
+      CALL ROTPOL(THET,PHI,PIM1)
+      CALL ROTPOL(THET,PHI,PIZ)
+      CALL ROTPOL(THET,PHI,PR)
+* 4  REST FRAME, DEFINE PIM2
+*       PR   MOMENTUM
+        PR(1)=0
+        PR(2)=0
+        PR(4)=1./(2*AM4)*(AM4**2+AM3**2-AMP1**2)
+        PR(3)= SQRT(ABS(PR(4)**2-AM3**2))
+        PPI  =          PR(4)**2-AM3**2
+*       PIM2 MOMENTUM
+        PIM2(1)=0
+        PIM2(2)=0
+        PIM2(4)=1./(2*AM4)*(AM4**2-AM3**2+AMP1**2)
+        PIM2(3)=-PR(3)
+C --- this part of jacobian will be recovered later
+        FF4=(4*PI)*(2*PR(3)/AM4)
+* OLD PIONS BOOSTED FROM 3 REST FRAME TO 4 REST FRAME
+      EXE=(PR(4)+PR(3))/AM3
+      CALL BOSTR3(EXE,PIZ,PIZ)
+      CALL BOSTR3(EXE,PIPL,PIPL)
+      CALL BOSTR3(EXE,PIM1,PIM1)
+      RR3=RRR(7)
+      RR4=RRR(8)
+      THET =ACOS(-1.+2*RR3)
+      PHI = 2*PI*RR4
+      CALL ROTPOL(THET,PHI,PIPL)
+      CALL ROTPOL(THET,PHI,PIM1)
+      CALL ROTPOL(THET,PHI,PIM2)
+      CALL ROTPOL(THET,PHI,PIZ)
+      CALL ROTPOL(THET,PHI,PR)
+C
+* NOW TO THE TAU REST FRAME, DEFINE PAA AND NEUTRINO MOMENTA
+* PAA  MOMENTUM
+      PAA(1)=0
+      PAA(2)=0
+      PAA(4)=1./(2*AMTAU)*(AMTAU**2-AMNUTA**2+AM4**2)
+      PAA(3)= SQRT(ABS(PAA(4)**2-AM4**2))
+      PPI   =          PAA(4)**2-AM4**2
+      PHSPAC=PHSPAC*(4*PI)*(2*PAA(3)/AMTAU)
+      PHSP=PHSP*(4*PI)*(2*PAA(3)/AMTAU)
+* TAU-NEUTRINO MOMENTUM
+      PN(1)=0
+      PN(2)=0
+      PN(4)=1./(2*AMTAU)*(AMTAU**2+AMNUTA**2-AM4**2)
+      PN(3)=-PAA(3)
+C WE INCLUDE REMAINING PART OF THE JACOBIAN
+C --- FLAT CHANNEL
+        AM3SQ=(PIM1(4)+PIZ(4)+PIPL(4))**2-(PIM1(3)+PIZ(3)+PIPL(3))**2
+     $       -(PIM1(2)+PIZ(2)+PIPL(2))**2-(PIM1(1)+PIZ(1)+PIPL(1))**2
+        AMS2=(AM4-AMP2)**2
+        AMS1=(AMP1+AMP3+AMP4)**2
+        FF1=(AMS2-AMS1)
+        AMS1=(AMP3+AMP4)**2
+        AMS2=(SQRT(AM3SQ)-AMP1)**2
+        FF2=AMS2-AMS1
+        FF3=(4*PI)*(XLAM(AM2**2,AMP1**2,AM3SQ)/AM3SQ)
+        FF4=(4*PI)*(XLAM(AM3SQ,AMP2**2,AM4**2)/AM4**2)
+        UU=FF1*FF2*FF3*FF4
+C --- FIRST CHANNEL
+        AM3SQ=(PIM1(4)+PIZ(4)+PIPL(4))**2-(PIM1(3)+PIZ(3)+PIPL(3))**2
+     $       -(PIM1(2)+PIZ(2)+PIPL(2))**2-(PIM1(1)+PIZ(1)+PIPL(1))**2
+        AMS2=(AM4-AMP2)**2
+        AMS1=(AMP1+AMP3+AMP4)**2
+        ALP1=ATAN((AMS1-AMRX**2)/AMRX/GAMRX)
+        ALP2=ATAN((AMS2-AMRX**2)/AMRX/GAMRX)
+        FF1=((AM3SQ-AMRX**2)**2+(AMRX*GAMRX)**2)/(AMRX*GAMRX)
+        FF1=FF1*(ALP2-ALP1)
+        AMS1=(AMP3+AMP4)**2
+        AMS2=(SQRT(AM3SQ)-AMP1)**2
+        FF2=AMS2-AMS1
+        FF3=(4*PI)*(XLAM(AM2**2,AMP1**2,AM3SQ)/AM3SQ)
+        FF4=(4*PI)*(XLAM(AM3SQ,AMP2**2,AM4**2)/AM4**2)
+        FF=FF1*FF2*FF3*FF4
+C --- SECOND CHANNEL
+        AM3SQ=(PIM2(4)+PIZ(4)+PIPL(4))**2-(PIM2(3)+PIZ(3)+PIPL(3))**2
+     $       -(PIM2(2)+PIZ(2)+PIPL(2))**2-(PIM2(1)+PIZ(1)+PIPL(1))**2
+        AMS2=(AM4-AMP1)**2
+        AMS1=(AMP2+AMP3+AMP4)**2
+        ALP1=ATAN((AMS1-AMRX**2)/AMRX/GAMRX)
+        ALP2=ATAN((AMS2-AMRX**2)/AMRX/GAMRX)
+        GG1=((AM3SQ-AMRX**2)**2+(AMRX*GAMRX)**2)/(AMRX*GAMRX)
+        GG1=GG1*(ALP2-ALP1)
+        AMS1=(AMP3+AMP4)**2
+        AMS2=(SQRT(AM3SQ)-AMP2)**2
+        GG2=AMS2-AMS1
+        GG3=(4*PI)*(XLAM(AM2**2,AMP2**2,AM3SQ)/AM3SQ)
+        GG4=(4*PI)*(XLAM(AM3SQ,AMP1**2,AM4**2)/AM4**2)
+        GG=GG1*GG2*GG3*GG4
+C --- JACOBIAN AVERAGED OVER THE TWO
+        IF ( ( (FF+GG)*UU+FF*GG ).GT.0.0D0) THEN
+          RR=FF*GG*UU/(0.5*PREZ*(FF+GG)*UU+(1.0-PREZ)*FF*GG)
+          PHSPAC=PHSPAC*RR
+        ELSE
+          PHSPAC=0.0
+        ENDIF
+* MOMENTA OF THE TWO PI-MINUS ARE RANDOMLY SYMMETRISED
+       IF (JNPI.EQ.1) THEN
+        RR5= RRR(5)
+        IF(RR5.LE.0.5) THEN
+         DO 70 I=1,4
+         X=PIM1(I)
+         PIM1(I)=PIM2(I)
+ 70      PIM2(I)=X
+        ENDIF
+        PHSPAC=PHSPAC/2.
+       ELSE
+C MOMENTA OF PI0'S ARE GENERATED UNIFORMLY ONLY IF PREZ=0.0
+        RR5= RRR(5)
+        IF(RR5.LE.0.5) THEN
+         DO 71 I=1,4
+         X=PIM1(I)
+         PIM1(I)=PIM2(I)
+ 71      PIM2(I)=X
+        ENDIF
+        PHSPAC=PHSPAC/6.
+       ENDIF
+* ALL PIONS BOOSTED FROM  4  REST FRAME TO TAU REST FRAME
+* Z-AXIS ANTIPARALLEL TO NEUTRINO MOMENTUM
+      EXE=(PAA(4)+PAA(3))/AM4
+      CALL BOSTR3(EXE,PIZ,PIZ)
+      CALL BOSTR3(EXE,PIPL,PIPL)
+      CALL BOSTR3(EXE,PIM1,PIM1)
+      CALL BOSTR3(EXE,PIM2,PIM2)
+      CALL BOSTR3(EXE,PR,PR)
+C PARTIAL WIDTH CONSISTS OF PHASE SPACE AND AMPLITUDE
+C CHECK ON CONSISTENCY WITH DADNPI, THEN, CODE BREAKES UNIFORM PION
+C DISTRIBUTION IN HADRONIC SYSTEM
+CAM     Assume neutrino mass=0. and sum over final polarisation
+C      AMX2=AM4**2
+C      BRAK= 2*(AMTAU**2-AMX2) * (AMTAU**2+2.*AMX2)
+C      AMPLIT=CCABIB**2*GFERMI**2/2. * BRAK * AMX2*SIGEE(AMX2,1)
+      IF     (JNPI.EQ.1) THEN
+        CALL DAM4PI(JNPI,PT,PN,PIM1,PIM2,PIZ,PIPL,AMPLIT,HV)
+      ELSEIF (JNPI.EQ.2) THEN
+        CALL DAM4PI(JNPI,PT,PN,PIM1,PIM2,PIPL,PIZ,AMPLIT,HV)
+      ENDIF
+      DGAMT=1/(2.*AMTAU)*AMPLIT*PHSPAC
+C PHASE SPACE CHECK
+C      DGAMT=PHSPAC
+      DO 77 K=1,4
+        PMULT(K,1)=PIM1(K)
+        PMULT(K,2)=PIM2(K)
+        PMULT(K,3)=PIPL(K)
+        PMULT(K,4)=PIZ (K)
+ 77   CONTINUE
+      END

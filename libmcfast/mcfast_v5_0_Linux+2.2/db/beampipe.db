@@ -1,0 +1,13 @@
+
+! ************** Beam pipe ***************
+
+template BPipe(20)
+  char name
+  real rmin
+  real rmax
+  real z0
+  real zlen
+  material mat_fill
+  real bndrthk(4)   ! rmin, rmax, front, back
+  material matrbnd(4)   ! rmin, rmax, front, back
+end BPipe
