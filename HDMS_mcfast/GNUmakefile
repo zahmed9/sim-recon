@@ -159,12 +159,15 @@ clean:
 	$(F77bb) -f77 $(FFLAGS)  -cpp $(FINC) -c $?
 
 .c.o:
-	$(CC) -I/dsk19/halld/source/stdhep/src/inc/ -I. -g -c $(CFLAG) $?
+	$(CC) -I$(STDHEP_DIR)/src/inc/ -I. -g -c $(CFLAG) $?
 
 #
 #$Id$
 #
 #$Log$
+#Revision 1.5  1998/11/19 01:17:45  eugenio
+#fix hard link
+#
 #Revision 1.4  1998/11/19 01:15:45  eugenio
 #fix hard link
 #
