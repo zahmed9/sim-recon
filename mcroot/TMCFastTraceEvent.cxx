@@ -216,7 +216,7 @@ double TMCFastTraceEvent::GetCTOF(int partNo, double R){
   // Function returns a negative number if
   // particle never reached R location
   
-  GetTOF(partNo,kCENTRAL, R);
+  return GetTOF(partNo,kCENTRAL, R);
 }
 
 
