@@ -17,8 +17,13 @@
 #
 ####################### HALL D #####################
 
-To compile just run "make ".  This will make libs, programs,
-and htmldocs.  See tmcfast-docs.html (after the make) to browse
+To compile, build and install
+		% make 
+		% make install  
+
+This will make libs, programs, and htmldocs.  
+
+See tmcfast-docs.html (after the make) to browse
 the TMCFast class structure and documentation. 
 
 
