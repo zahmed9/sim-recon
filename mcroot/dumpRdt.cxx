@@ -107,7 +107,7 @@ int main(int argc, char **argv)
 	  cerr<<"Skipping "<<skipEvents<<" events\n";
 	  break;
         case 'n':
-	  nevents =atoi(++argptr) - 1 ;
+	  nevents =atoi(++argptr)  ;
 	  cerr<<"Dumping "<<nevents<<" events\n";
 	  break;
 	case 'L':
