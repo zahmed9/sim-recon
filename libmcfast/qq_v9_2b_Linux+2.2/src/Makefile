@@ -26,6 +26,8 @@ fromcvs :: $(SUBNAMES)
 
 all ::
 	$(MAKE) -f $(MAKEFILE) depend production debug
+	-(cp Build/$(shell uname)/lib/* ../lib/) 
+	-(ln -s ../lib/libqqlib.a ../lib/libqqlib_noncleo.a) 
 
 $(SUBNAMES) ::
 	@echo ""; echo "***** $@"; echo ""
