@@ -2,13 +2,30 @@
 #  Makefile: General library and executable maker 
 #      ---> uses default user routines 
 ###################################################
+ROOTLIBS      = -L$(ROOTSYS)/lib -lNew -lBase -lCint -lClib -lCont -lFunc \
+                -lGraf -lGraf3d -lHist -lHtml -lMatrix -lMeta -lMinuit -lNet \
+                -lPostscript -lProof -lTree -lUnix -lZip
+ROOTGLIBS     = -lGpad -lGui -lGX11 -lX3d
 
+# Alpha/OSF with g++
+CXX           = g++
+#CXXFLAGS      = -O -I$(ROOTSYS)/include
+CXXFLAGS      = -O -Wall -fno-rtti -fno-exceptions -fPIC -I$(ROOTSYS)/include -g
+LD            = g++
+LDFLAGS       = -g
+SOFLAGS       = -Wl,-expect_unresolved,* shared
+RLIBS          = $(ROOTLIBS) -lg++ -lm
+
+
+#############################
 hostname = $(shell hostname)
 # Machine dependent stuff.
 MAP = 
-F77 = f77
+F77 = f77 
 #F77bb = f77
 #F77bb = f77mcf
+CC=gcc
+CCxx=g++
 CFLAG =
 CRNLIB= /usr/local/lib
 # some options are untested
@@ -48,11 +65,12 @@ ifeq "$(UNAME)" "IRIX64"
   LIBS=-lXm -lXt -lX11 -lftn -lsun -lPW -lm
 endif
 ifeq "$(UNAME)" "OSF1"
+  CFLAG= -fno-builtin -ieee
   FFLAGS = -g
   FP_EXCEPTION = -L/usr/lib
-  LOPTION= -nofor_main
+  LOPTION= -nofor_main  
   MAP    = -Wl,-m > $@.map
-  LIBS=-lXm -lXt -lX11 -lm -lfor -lots
+  LIBS=-lXm -lXt -lX11 -lm -lfor -lots 
 endif
 ifeq "$(UNAME)" "SunOS"
   FFLAGS = -g 
@@ -79,8 +97,8 @@ FINC = -I$(INC1) -I$(INC2) -I$(INC3) -I$(INC4) -I$(INC5) \
 LIB = $(MCFAST_DIR)/lib.$(UNAME)
 
 #User .o files are listed here
-USER_OBJ = usr_analysis.o usr_init.o usr_fill_event.o \
-	usr_summary.o usr_mcfio_out.o
+USER_OBJ = main_args.o usr_analysis.o usr_init.o usr_fill_event.o \
+	usr_summary.o usr_hbsummary.o usr_mcfio_out.o usr_dump.o usr_output.o 
 
 
 #next line is needed for histoscope... Add before PACKLIB
@@ -103,13 +121,22 @@ endif
 .SUFFIXES : .c .F .o .h .inc .hh
 
 #-----------------
-#  Action section 
+#  Action section        removed      main_cxx.o main_args.o   usr_2root.o TMCFastHepEvt.o   $(RLIBS)  $(GLIB)/main_args.o
 #-----------------
+
+
 
 all: mcfast db
 
 mcfast: $(USER_OBJ) 
-	$(F77) $(LOPTION) $(FFLAGS) -o mcfast $(GLIB)/main_args.o $(USER_OBJ) -L$(LIB)  -L$(GLIB)  -lgen -ldatafile -ltrig -lgraph -luser -lmuon -lvertex -ltrack -lsec_int -lgamma -lshower -lgeom -lio -lutil -ldbin_mcfast -ldbin -ldst -lgeneral -lcmd_parse $(STDHEP_DIR)/lib/libstdhep.a $(STDHEP_DIR)/lib/libstdhepC.a $(MCFIO) $(QQLIB) $(TYPSCN) -L$(CRNLIB) -lpacklib -lmathlib -lkernlib $(FP_EXCEPTION) $(LIBS) 
+	$(F77)  $(LOPTION)  $(FFLAGS) -o mcfast   $(USER_OBJ)   -L$(LIB)  -L$(GLIB)  -lgen -ldatafile -ltrig -lgraph -luser -lmuon -lvertex -ltrack -lsec_int -lgamma -lshower -lgeom -lio -lutil -ldbin_mcfast -ldbin -ldst -lgeneral -lcmd_parse $(STDHEP_DIR)/lib/libstdhep.a $(STDHEP_DIR)/lib/libstdhepC.a $(MCFIO) $(QQLIB) $(TYPSCN) -L$(CRNLIB) -lpacklib -lmathlib -lkernlib $(FP_EXCEPTION) $(LIBS)  
+
+main_cxx.o: main_cxx.cxx
+	g++ -O -Wall -fno-rtti -fno-exceptions -fPIC -I/usr/local/root/include -g -c main_cxx.cxx
+
+read_output: read_output.c
+	gcc -I/dsk19/halld/source/stdhep/src/inc/ -I. -g -fno-builtin -ieee read_output.c -o read_output
+
 
 # removed $(MAP) from above
 #
@@ -132,12 +159,15 @@ clean:
 	$(F77bb) -f77 $(FFLAGS)  -cpp $(FINC) -c $?
 
 .c.o:
-	cc -I/dsk19/halld/source/stdhep/src/inc/ -I. -g -c $(CFLAG) $?
+	$(CC) -I/dsk19/halld/source/stdhep/src/inc/ -I. -g -c $(CFLAG) $?
 
 #
 #$Id$
 #
 #$Log$
+#Revision 1.3  1998/11/19 00:14:53  eugenio
+#Added some more usr_code
+#
 #Revision 1.2  1998/10/10 18:06:46  eugenio
 #Added usr_mcfio_out.F
 #
