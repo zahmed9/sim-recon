@@ -8,6 +8,7 @@
 
 #include "DEventProcessor.h"
 #include "DEventLoop.h"
+#include "DTrkHit.h"
 
 #include <TFile.h>
 #include <TH1.h>
@@ -28,9 +29,12 @@ class MyProcessor:public DEventProcessor
 		derror_t erun(void){};				///< Called everytime run number changes, provided brun has been called.
 		derror_t fini(void);					///< Called after last event of last event source has been processed.
 
+		derror_t FindTracks(void);
 		derror_t densityPlot(void);
-		derror_t FillDensityBin(float x, float y);
+		derror_t FillDensityHistogram(TH2F *hist);
 
+		DTrkHit *trkhit[300];
+		int Ntrkhits;
 		DMagneticFieldMap *Bfield;
 
 		TFile *ROOTfile;
@@ -40,7 +44,7 @@ class MyProcessor:public DEventProcessor
 		float cmax;
 		float x,y,z,r,phi;
 		
-		TH2F *density;
+		TH2F *density, *density_work;
 		TLine *lines[500];
 		int Nlines;
 		TEllipse *ellipse[100];
