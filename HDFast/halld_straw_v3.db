@@ -81,13 +81,49 @@ include db/drift.db
 !
 !          #  name  ly cth rmin  rmax   z0      zl     fill   rmin   rmax  front   back   materials
 make Drift 1 "VTX"  3  0   4.95  5.65   80.0  90.000  "SCIN" 0.2000 0.0500 0.2000 0.2000  "CFIB" "CFIB" "CFIB" "CFIB"
+! *************************** Central Drift Chamber
+!
+!
+! *** CDC Chamber Outline
+!          #  name  ly cth rmin  rmax   z0      zl     fill   rmin    rmax   front   back     materials
+make Drift 2 "CDC" 22  1  15.0  60.0   100.0  200.0  "GAS-MX" 0.2000 0.4000 0.9000  0.9000  "CFIB" "CFIB" "ALUM" "ALUM"
+!
+!
+!
 include db/drift_layer.db
 !                     
 !           drift#  anode  rad   zlen  c_sz #wr  IDr IDc phi0 st_t st_of eff_hit eff_dedx siga sib sigc 
-make LayerDRFAno 1   1     5.0   90.0  1.0   25  -1  1   0.   -0.10  0.  .96     0.96     .04  0.0 0.0
-make LayerDRFAno 1   2     5.1   90.0  1.0   25  -1  1   0.   0.0  0.  .96     0.96     .04  0.0 0.0
-make LayerDRFAno 1   3     5.2   90.0  1.0   25  -1  1   0.    0.10    0.  .96     0.96     .04  0.0 0.0
+make LayerDRFAno 1   1     5.0   90.0  1.0   25  -1  1   0.  -0.10   0.  .96     0.96     .04  0.0 0.0
+make LayerDRFAno 1   2     5.1   90.0  1.0   25  -1  1   0.   0.0    0.  .96     0.96     .04  0.0 0.0
+make LayerDRFAno 1   3     5.2   90.0  1.0   25  -1  1   0.   0.10   0.  .96     0.96     .04  0.0 0.0
 !
+!
+!
+! make anode layers
+!
+!           drift#  anode  rad   zlen  c_sz #wr  IDr IDc phi0 st_t st_of eff_hit eff_dedx siga sib sigc 
+make LayerDRFAno 2   1    16.0  200.0  1.0  100  -1  1   0.   0.     0.  .96     0.96    0.020 0.0 0.0
+make LayerDRFAno 2   2    18.0  200.0  1.0  113  -1  0   0.   0.     0.  .96     0.96    0.020 0.0 0.0
+make LayerDRFAno 2   3    20.0  200.0  1.0  126  -1  0   0.   0.104  0.  .96     0.96    0.020 0.0 0.0
+make LayerDRFAno 2   4    22.0  200.0  1.0  139  -1  0   0.   0.104  0.  .96     0.96    0.020 0.0 0.0
+make LayerDRFAno 2   5    24.0  200.0  1.0  152  -1  0   0.   0.     0.  .96     0.96    0.020 0.0 0.0
+make LayerDRFAno 2   6    26.0  200.0  1.0  165  -1  0   0.   0.     0.  .96     0.96    0.020 0.0 0.0
+make LayerDRFAno 2   7    28.0  200.0  1.0  178  -1  0   0.   0.     0.  .96     0.96    0.020 0.0 0.0
+make LayerDRFAno 2   8    30.0  200.0  1.0  191  -1  0   0.   -.104  0.  .96     0.96    0.020 0.0 0.0
+make LayerDRFAno 2   9    32.0  200.0  1.0  204  -1  0   0.   -.104  0.  .96     0.96    0.020 0.0 0.0
+make LayerDRFAno 2  10    34.0  200.0  1.0  217  -1  0   0.   0.     0.  .96     0.96    0.020 0.0 0.0
+make LayerDRFAno 2  11    36.0  200.0  1.0  230  -1  0   0.   0.     0.  .96     0.96    0.020 0.0 0.0
+make LayerDRFAno 2  12    38.0  200.0  1.0  243  -1  0   0.   0.     0.  .96     0.96    0.020 0.0 0.0
+make LayerDRFAno 2  13    40.0  200.0  1.0  256  -1  0   0.   0.104  0.  .96     0.96    0.020 0.0 0.0
+make LayerDRFAno 2  14    42.0  200.0  1.0  269  -1  0   0.   0.104  0.  .96     0.96    0.020 0.0 0.0
+make LayerDRFAno 2  15    44.0  200.0  1.0  282  -1  0   0.   0.     0.  .96     0.96    0.020 0.0 0.0
+make LayerDRFAno 2  16    46.0  200.0  1.0  295  -1  2   0.   0.     0.  .96     0.96    0.020 0.0 0.0
+make LayerDRFAno 2  17    48.0  200.0  1.0  308  -1  2   0.   0.     0.  .96     0.96    0.020 0.0 0.0
+make LayerDRFAno 2  18    50.0  200.0  1.0  321  -1  2   0.   -.104  0.  .96     0.96    0.020 0.0 0.0
+make LayerDRFAno 2  19    52.0  200.0  1.0  334  -1  2   0.   -.104  0.  .96     0.96    0.020 0.0 0.0
+make LayerDRFAno 2  20    54.0  200.0  1.0  347  -1  2   0.   0.     0.  .96     0.96    0.020 0.0 0.0
+make LayerDRFAno 2  21    56.0  200.0  1.0  360  -1  2   0.   0.     0.  .96     0.96    0.020 0.0 0.0
+make LayerDRFAno 2  22    58.0  200.0  1.0  373  -1  2   0.   0.     0.  .96     0.96    0.020 0.0 0.0
 !
 include db/drift_offset.db
 !
@@ -101,43 +137,6 @@ make OffsetDRFAno  1   5  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 !
 ! **********---- END OF VTX ----**********
 !
-!
-! *************************** Central Drift Chamber
-!
-!
-! *** CDC Chamber Outline
-!          #  name  ly cth rmin  rmax   z0      zl     fill   rmin    rmax   front   back     materials
-include db/drift.db
-make Drift 2 "CDC" 22  1  15.0  60.0   100.0  200.0  "GAS-MX" 0.2000 0.4000 0.9000  0.9000  "CFIB" "CFIB" "ALUM" "ALUM"
-!
-! make anode layers
-!
-!           drift#  anode  rad   zlen  c_sz #wr  IDr IDc phi0 st_t st_of eff_hit eff_dedx siga sib sigc 
-include db/drift_layer.db  
-make LayerDRFAno 2   1    16.0  240.0  1.0  100  -1  1   0.   0.     0.  .96     0.96    0.020 0.0 0.0
-make LayerDRFAno 2   2    18.0  240.0  1.0  113  -1  0   0.   0.     0.  .96     0.96    0.020 0.0 0.0
-make LayerDRFAno 2   3    20.0  240.0  1.0  126  -1  0   0.   0.104  0.  .96     0.96    0.020 0.0 0.0
-make LayerDRFAno 2   4    22.0  240.0  1.0  139  -1  0   0.   0.104  0.  .96     0.96    0.020 0.0 0.0
-make LayerDRFAno 2   5    24.0  240.0  1.0  152  -1  0   0.   0.     0.  .96     0.96    0.020 0.0 0.0
-make LayerDRFAno 2   6    26.0  240.0  1.0  165  -1  0   0.   0.     0.  .96     0.96    0.020 0.0 0.0
-make LayerDRFAno 2   7    28.0  240.0  1.0  178  -1  0   0.   0.     0.  .96     0.96    0.020 0.0 0.0
-make LayerDRFAno 2   8    30.0  240.0  1.0  191  -1  0   0.   -.104  0.  .96     0.96    0.020 0.0 0.0
-make LayerDRFAno 2   9    32.0  240.0  1.0  204  -1  0   0.   -.104  0.  .96     0.96    0.020 0.0 0.0
-make LayerDRFAno 2  10    34.0  240.0  1.0  217  -1  0   0.   0.     0.  .96     0.96    0.020 0.0 0.0
-make LayerDRFAno 2  11    36.0  240.0  1.0  230  -1  0   0.   0.     0.  .96     0.96    0.020 0.0 0.0
-make LayerDRFAno 2  12    38.0  240.0  1.0  243  -1  0   0.   0.     0.  .96     0.96    0.020 0.0 0.0
-make LayerDRFAno 2  13    40.0  240.0  1.0  256  -1  0   0.   0.104  0.  .96     0.96    0.020 0.0 0.0
-make LayerDRFAno 2  14    42.0  240.0  1.0  269  -1  0   0.   0.104  0.  .96     0.96    0.020 0.0 0.0
-make LayerDRFAno 2  15    44.0  240.0  1.0  282  -1  0   0.   0.     0.  .96     0.96    0.020 0.0 0.0
-make LayerDRFAno 2  16    46.0  240.0  1.0  295  -1  2   0.   0.     0.  .96     0.96    0.020 0.0 0.0
-make LayerDRFAno 2  17    48.0  240.0  1.0  308  -1  2   0.   0.     0.  .96     0.96    0.020 0.0 0.0
-make LayerDRFAno 2  18    50.0  240.0  1.0  321  -1  2   0.   -.104  0.  .96     0.96    0.020 0.0 0.0
-make LayerDRFAno 2  19    52.0  240.0  1.0  334  -1  2   0.   -.104  0.  .96     0.96    0.020 0.0 0.0
-make LayerDRFAno 2  20    54.0  240.0  1.0  347  -1  2   0.   0.     0.  .96     0.96    0.020 0.0 0.0
-make LayerDRFAno 2  21    56.0  240.0  1.0  360  -1  2   0.   0.     0.  .96     0.96    0.020 0.0 0.0
-make LayerDRFAno 2  22    58.0  240.0  1.0  373  -1  2   0.   0.     0.  .96     0.96    0.020 0.0 0.0
-! ** make drift layer offsets
-include db/drift_offset.db   
 make OffsetDRFAno  2   1  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
 make OffsetDRFAno  2   2  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
 make OffsetDRFAno  2   3  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
@@ -164,8 +163,8 @@ make OffsetDRFAno  2  22  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 ! ** cdc cathode strips:
 include db/drift_cathode.db
 !
-make LayerDRFCatho 2 1 0.1 240. 240 6   1  0. 0.96 0.050 0. 0.
-!make LayerDRFCatho 2 2 0.1 240. 240 12 16  0. 0.96 0.050 0. 0.
+make LayerDRFCatho 2 1 0.1 200. 200 6   1  0. 0.96 0.050 0. 0.
+!make LayerDRFCatho 2 2 0.1 200. 200 12 16  0. 0.96 0.050 0. 0.
 !
 !
 !** extra CDC materials
@@ -192,6 +191,23 @@ make Absorber "SHIT19" "TUBE" 41  53.00 53.00 53.02 53.02 100.0 200.0  "ALUM"
 make Absorber "SHIT21" "TUBE" 41  57.00 57.00 57.02 57.02 100.0 200.0  "ALUM"
 !
 ! **********---- END OF CDC ----**********
+! ** extra FDC MATERIALS
+!
+!  The following puts support material around the forward chambers
+!
+!              name    shape  ty  rmin  rmin  rmax  rmax  z0   zlen    FILL
+make Absorber "SHL7"   "TUBE"  41  60.0  60.0  61.0  61.0  216.0  12.0  "ALUM"
+make Absorber "SHL8"   "TUBE"  41  60.0  60.0  61.0  61.0  280.0  12.0  "ALUM"
+make Absorber "SHL9"   "TUBE"  41  60.0  60.0  61.0  61.0  343.0  12.0  "ALUM"
+make Absorber "SHL10"  "TUBE"  41  60.0  60.0  61.0  61.0  406.0  12.0  "ALUM"
+!
+! Note that KludgeAnnulus is not a MCFast geometry type.
+!                       name      Rmin  Rmax  zLength  zCenter
+!% make KludgeAnnulus "CERENKOV"  20.0  95.0  90.0   455.0
+!
+!            --> CENTRAL TOF <--
+!
+make Absorber "CTOF"  "TUBE"  41  65.0 65.0  66.0 66.0   207.5  415.0  "SCIN"
 !
 !
 ! ********************************* TOF & CERENKOV
@@ -201,19 +217,9 @@ include db/absorberbox.db
 make AbsorberBox "FTOF"  "BOX"  42  -125.0  125.0  -125.0  125.0 0.0 0.0 0.0 0.0 566.27 2.54  "SCIN"
 make AbsorberBox "CERENKOV"  "BOX"  42  -95.0  95.0  -95.0  95.0 0.0 0.0 0.0 0.0 415.5 1.0  "SCIN"
 ! The "!%" is used by GeoDraw.C  and EventDisplay.C to draw the CERENKOV
-! Note that KludgeAnnulus is not a MCFast geometry type.
-!                       name      Rmin  Rmax  zLength  zCenter
-!% make KludgeAnnulus "CERENKOV"  20.0  95.0  90.0   455.0
-!
-include db/absorber.db
-!
-!            --> CENTRAL TOF <--
-!
-make Absorber "CTOF"  "TUBE"  41  65.0 65.0  66.0 66.0   207.5  415.0  "SCIN"
-!
-
 !
 !  ***************************** FORWARD DISK Chambers 
+!
 include db/sidisk.db
 !                   (not really Silicon).
 !            #  name  lyr  zpos
@@ -322,12 +328,12 @@ make LayerSiDi  8  9  "PETHYL"  1   2.5  0.008 3.50 60.00 0. 6.283 6.283  3
 !
 include db/sidisk_wedge.db
 !
-
+!
 !Wedges for the disk drift chambers
 !
-!Each package(det) contains 9 2pi-Wedges (3 anode layers(x,u,v) 
-+ 2 cathode strip layers for each anode layer). 
-
+! Each package(det) contains 9 2pi-Wedges (3 anode layers(x,u,v) 
+! + 2 cathode strip layers for each anode layer). 
+!
 !          speci det lyr nwed nstrp c0_r  c0_f pitch stereo eff  resolutions
 ! anode layers
 make Wedge "ALL"  1   1   1   119   0.000 0.00 1.0   0.000    0.96  0.015  0. 0.
@@ -417,17 +423,6 @@ make Wedge "ALL"  8   6   1   119   0.000 0.00 1.0   0.0000   0.90  1.000  0. 0.
 make Wedge "ALL"  8   7   1   119   0.000 0.00 1.0   2.0944   0.90  1.000  0. 0.
 make Wedge "ALL"  8   8   1   119   0.000 0.00 1.0   0.0000   0.90  1.000  0. 0.
 make Wedge "ALL"  8   9   1   119   0.000 0.00 1.0  -2.0944   0.90  1.000  0. 0.
-!
-!** extra FDC MATERIALS
-!
-!  The following puts support material around the forward chambers
-!
-include db/absorber.db  
-!              name    shape  ty  rmin  rmin  rmax  rmax  z0   zlen    FILL
-make Absorber "SHL7"   "TUBE"  41  60.0  60.0  61.0  61.0  216.0  12.0  "ALUM"
-make Absorber "SHL8"   "TUBE"  41  60.0  60.0  61.0  61.0  280.0  12.0  "ALUM"
-make Absorber "SHL9"   "TUBE"  41  60.0  60.0  61.0  61.0  343.0  12.0  "ALUM"
-make Absorber "SHL10"  "TUBE"  41  60.0  60.0  61.0  61.0  406.0  12.0  "ALUM"
 !
 !
 ! **********---- END OF FDC ----**********
