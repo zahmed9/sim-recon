@@ -45,11 +45,12 @@ $ManyMode = 0;
 @Xmasses=(1.4,1.7,2.0);
 #@Xmasses=(1.4);
 @Xwidths=(0.25);
-
+$nskip=0;
 
 
 for (@ARGV) {
     if(/^-G(.+)/)  { $dbFile = $1;}
+    if(/^-S(.+)/)  { $nskip = $1;}
     if(/^-d/)  { $REMOVE = 0;}
     if(/^-g(.+)/)  { $gamp_flag = " -g"; $gamp_kludge=$1; }
     if(/^-D(.+)/)  { $DEBUG = $1;}
@@ -92,7 +93,8 @@ foreach $beamZ (@Beams){
 
 # Run ascii2stdhep
     
-    $syscomm = "ascii2stdhep -i".$tag.".ascii -o".$tag.".evt -n".$nparts." -N".$nevents.$gamp_flag ;
+    $syscomm = "ascii2stdhep -i".$tag.".ascii -S$nskip -o"
+	.$tag.".evt -n".$nparts." -N".$nevents.$gamp_flag ;
     print $syscomm."\n";
     system($syscomm);
 
@@ -197,6 +199,7 @@ foreach $beamZ (@Beams){
 sub printusage {
     print "  usage: @_[0] [-options]
     -N#         numbers of data events
+    -S#         Skip the first # events
     -t<tag>     tag used to create files like <tag>.ascii
     -n#          number of particles in an event 
     -D#           debug level (default: 0)
