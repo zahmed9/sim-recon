@@ -37,11 +37,12 @@ TMCesr::TMCesr(){
 TMCesr::TMCesr(TMCFastHepEvt &hepevt,TMCFastOfflineTrack &offtrk, 
        TLGDsmears &lgdsmears,TMCFastCalorimeter &bcal){
   Double_t res=-1;
-  Fill(hepevt,offtrk,lgdsmears,bcal,res);
+  Double_t phires = -1;
+  Fill(hepevt,offtrk,lgdsmears,bcal,res,phires);
 }
 TMCesr::TMCesr(TMCFastHepEvt &hepevt,TMCFastOfflineTrack &offtrk, 
-       TLGDsmears &lgdsmears,TMCFastCalorimeter &bcal,Double_t bcal_res){
-  Fill(hepevt,offtrk,lgdsmears,bcal,bcal_res);
+	       TLGDsmears &lgdsmears,TMCFastCalorimeter &bcal,Double_t bcal_res,Double_t phi_res){
+  Fill(hepevt,offtrk,lgdsmears,bcal,bcal_res,phi_res);
 }
 TMCesr::TMCesr(TMCFastHepEvt &hepevt){
   Fill(hepevt);
@@ -58,21 +59,21 @@ void TMCesr::Fill(TMCFastHepEvt &hepevt){
 
 void TMCesr::Fill(TMCFastHepEvt &hepevt,TMCFastOfflineTrack &offtrk, 
        TLGDsmears &lgdsmears,TMCFastCalorimeter &bcal,
-	       Double_t bcal_resolution){
+		  Double_t bcal_resolution, Double_t phi_res){
   fnParticles=0;
   if(!fgParticles) fgParticles = new TClonesArray("TMCParticle",10);
   fParticles = fgParticles;
  
   SetNLGDparticles(makeParticles(hepevt,lgdsmears));
 
-  SetNBCALparticles(makeParticles(hepevt,bcal,bcal_resolution));
+  SetNBCALparticles(makeParticles(hepevt,bcal,bcal_resolution,phi_res));
  
   SetNOFFTRKparticles(makeParticles(hepevt,offtrk));
   SetNparticles(GetNLGDparticles()+GetNBCALparticles()+GetNOFFTRKparticles());
 }
 
 
-Int_t TMCesr::makeParticles(TMCFastHepEvt &hepevt,TMCFastCalorimeter &bcal,Double_t bcal_resolution){
+Int_t TMCesr::makeParticles(TMCFastHepEvt &hepevt,TMCFastCalorimeter &bcal,Double_t bcal_resolution,Double_t phi_res){
   // Create a TMCparticle instance
   // from a TMCFastCalorimeter &bcal 
   // and add the instance to 
@@ -119,9 +120,14 @@ Int_t TMCesr::makeParticles(TMCFastHepEvt &hepevt,TMCFastCalorimeter &bcal,Doubl
     // e is now the total measured electroMagnetic energy for this gamma   
     if(e){
       TMCFastHepParticle heppart = hepevt.GetHepParticle(gammaHepIndex[i]);
-       if(bcal_resolution>0)
-	 new(heparts[fnParticles++]) TMCParticle(heppart,e,bcal_resolution);
-       else
+
+      if((bcal_resolution >= 0 ) && (phi_res >= 0 ))
+	 new(heparts[fnParticles++]) TMCParticle(heppart,e,bcal_resolution,phi_res);
+      else if((bcal_resolution = -1) && (phi_res >= 0 ))
+	 new(heparts[fnParticles++]) TMCParticle(heppart,e,-1.,phi_res);
+       else if((bcal_resolution >= 0) && (phi_res = -1))
+	 new(heparts[fnParticles++]) TMCParticle(heppart,e,bcal_resolution,-1.);
+       else 
 	 new(heparts[fnParticles++]) TMCParticle(heppart,e);
       n_made++;
     }
@@ -396,3 +402,4 @@ int  gampID(int id){
   }
   return((int)p);
 }
+

@@ -51,8 +51,7 @@ public:
   TMCParticle() { }
   TMCParticle(TMCFastHepParticle &heppart,TMCFastOfflineTrack &offtrk,Int_t track);
   TMCParticle(TMCFastHepParticle &heppart,Double_t eSmeared); 
-  TMCParticle(TMCFastHepParticle &heppart,Double_t eSmeared,
-	      Double_t z_resolution); 
+  TMCParticle(TMCFastHepParticle &heppart,Double_t eSmeared,Double_t z_resolution, Double_t phi_res); 
   TMCParticle(TLGDparticle &lgdpart); 
   TMCParticle(TMCFastHepParticle &heppart);
   virtual ~TMCParticle() ;
@@ -95,3 +94,4 @@ ostream &operator<<(ostream &os,TMCParticle &particle);
 
 
 #endif
+

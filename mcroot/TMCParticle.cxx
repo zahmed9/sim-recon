@@ -12,7 +12,8 @@
 #include "TMath.h"
 
 ClassImp(TMCParticle)
-//____________________________________________________________________________
+//___________________________________________________________________________
+
 
 TMCParticle::TMCParticle(TMCFastHepParticle &heppart){
   
@@ -82,12 +83,13 @@ TMCParticle::TMCParticle(TMCFastHepParticle &heppart,Double_t eSmeared){
   SetMaker(MADE_FROM_BCAL) ;
   SetStatis(0); // currently not used
 }  
-TMCParticle::TMCParticle(TMCFastHepParticle &heppart,Double_t eSmeared,Double_t z_resolution){
+TMCParticle::TMCParticle(TMCFastHepParticle &heppart,Double_t eSmeared,Double_t z_resolution,Double_t phi_resolution){
   //
-  // Create a BCAL gamma with uncertainty in z(cm).
+  // Create a BCAL gamma with uncertainty in z(cm) and phi (Lx, Ly).
   //
 
-  Double_t e,P,L,Lx,Ly,Lz,LzSmeared,L_Smeared;
+  Double_t e,P,L,Lx,Ly,Lz,LzSmeared,L_Smeared,z_res_calc,esqrt;
+  double_t phi,phi_smeared,phi_res_calc,LxSmeared,LySmeared,L2;
   
   e=heppart.GetE();
   P=e; //for ease of reading
@@ -102,16 +104,44 @@ TMCParticle::TMCParticle(TMCFastHepParticle &heppart,Double_t eSmeared,Double_t 
   Ly = L*(heppart.GetPy())/P;
   Lz = L*(heppart.GetPz())/P;
   
-  // Smear the vector length
-  LzSmeared = gRandom->Gaus( Lz, z_resolution);
-  L_Smeared = TMath::Sqrt( R*R + LzSmeared*LzSmeared);
+  // calculate phi
+  phi = atan(Ly/Lx);
+  // calculate phi_smeared
+  esqrt = sqrt(P);
+  if(phi_resolution>=0)
+    {
+      //  phi_res_calc = sqrt(pow(0.7/esqrt,2.0)+pow((phi_resolution/1000.),2.0));
+      phi_res_calc = (phi_resolution/1000.)/esqrt;  // convert to radians
+      phi_smeared = gRandom->Gaus(phi,phi_res_calc);
+      // Smear the vector length
+      
+      LxSmeared = Lx*(cos(phi_smeared)/cos(phi));
+      LySmeared = Ly*(sin(phi_smeared)/sin(phi));
+    }
+  else
+    {  
+      LxSmeared = Lx;
+      LySmeared = Ly;
+    }
+  
+  if(z_resolution>=0) 
+    {
+      z_res_calc = sqrt(pow(0.7/esqrt,2.0)+pow(z_resolution,2.0));
+      LzSmeared = gRandom->Gaus( Lz, z_resolution);
+    }
+  else
+    LzSmeared = Lz;
+  
+  L2 = LxSmeared*LxSmeared + LySmeared*LySmeared + LzSmeared*LzSmeared;
+  // L_Smeared = TMath::Sqrt(L2);
+  L_Smeared = sqrt(L2);
   // cerr<<" Lz, z_resolution,  LzSmeared "
   //    <<Lz<<" "<<z_resolution<<" "
   //    <<LzSmeared<<endl;
 
   // Set the smeared four-momentum
-  SetPx(Lx/L_Smeared*eSmeared); 
-  SetPy(Ly/L_Smeared*eSmeared); 
+  SetPx(LxSmeared/L_Smeared*eSmeared); 
+  SetPy(LySmeared/L_Smeared*eSmeared); 
   SetPz(LzSmeared/L_Smeared*eSmeared); 
   SetE(eSmeared) ;
   // set vertex using the generated vertex (which is assigned by mcfast)
@@ -219,3 +249,4 @@ ostream &operator<<(ostream &os, TMCParticle &part){
   part.Print(&os);
   return os;
 }
+

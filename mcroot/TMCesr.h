@@ -43,12 +43,12 @@ public:
   TMCesr(TMCFastHepEvt &hepevt,
          TMCFastOfflineTrack &offtrk, 
          TLGDsmears &lgdsmears,
-	 TMCFastCalorimeter &bcal,Double_t bcal_resolution);
+	 TMCFastCalorimeter &bcal,Double_t bcal_resolution,Double_t phi_res);
   TMCesr(TMCFastHepEvt &hepevt);
   void Fill(TMCFastHepEvt &hepevt,
        TMCFastOfflineTrack &offtrk, 
        TLGDsmears &lgdsmears,
-       TMCFastCalorimeter &bcal,Double_t bcal_resolution);
+	    TMCFastCalorimeter &bcal,Double_t bcal_resolution,Double_t phi_res);
   void Fill(TMCFastHepEvt &hepevt);
   virtual ~TMCesr() ;
   void Clear();
@@ -64,7 +64,7 @@ public:
   TClonesArray *GetParticles() const { return fParticles; }
   Int_t makeParticles(TMCFastHepEvt &hepevt,TLGDsmears &lgd);
   //Int_t makeParticles(TMCFastHepEvt &hepevt,TMCFastCalorimeter &bcal);
-  Int_t makeParticles(TMCFastHepEvt &hepevt,TMCFastCalorimeter &bcal,Double_t bcal_res);
+  Int_t makeParticles(TMCFastHepEvt &hepevt,TMCFastCalorimeter &bcal,Double_t bcal_res,Double_t phi_res);
   Int_t makeParticles(TMCFastHepEvt &hepevt,TMCFastOfflineTrack &offtrk);
   Int_t makeParticles(TMCFastHepEvt &hepevt);
   void DumpGampFormat(ostream *os,Double_t b);
@@ -76,3 +76,4 @@ ostream &operator<<(ostream &os,TMCesr &esr);
 
 
 #endif
+
