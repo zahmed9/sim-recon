@@ -41,7 +41,7 @@ ROOTGLIBS     = $(shell  root-config --glibs)
 TMCFAST_INC = -I$(HALLD_HOME)/src/mcroot
 
 #HDFASTLIBS = -L$(HALLD_HOME)/lib/$(UNAME)  -lTMCFast
-HDFASTLIBS = /home/halld/lib/Linux/libTMCFast.a
+HDFASTLIBS = $(HALLD_HOME)/Linux/libTMCFast.a
 
 #HDFASTLIBS =    TMCFastHepEvt.o  TMCFastHepEvtDict.o TMCFastTOF.o TMCFastTOFDict.o \
 #		TMCFastOfflineTrack.o  TMCFastOfflineTrackDict.o \
