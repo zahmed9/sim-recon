@@ -1,0 +1,170 @@
+#!/usr/local/bin/perl
+############################################
+#
+# run_HDFast: perl script for running
+#  the stdhep translaters and HDFast
+#
+#  Paul M Eugenio
+#  Carnegie Mellon University
+#
+#  created: some time in Sept 1998
+#  last modified by: PME 16-Dec-98
+##########################################
+select((select(STDOUT),$|=1)[$[]);
+
+$GeoFile= $ENV{"HDFAST_DIR"}."/halld_strawman.db";
+if(! -e $GeoFile){
+    print "GEO FILE:".$GeoFile." DOES NOT EXITS!\n\n";
+    
+    exit;
+}
+
+if(! -e "db/"){
+    
+    $syscmd="ln -s ".$ENV{"HDFAST_DIR"}."/db .";
+    print  $syscmd."\n";
+    system($syscmd);
+}
+
+&printusage($0) if($#ARGV == -1);
+
+$label= "none";
+$tail = ".ascii";
+$stdhep_it="ascii2stdhep";
+$unstdhep_it="stdhep2ascii";
+$REMOVE=1;
+$dbFile=0;
+$UseOldOutput = 0;
+$DEBUG =0;
+
+
+for (@ARGV) {
+    if(/^-G(.+)/)  { $dbFile = $1;}
+    if(/^-d/)  { $REMOVE = 0;}
+    if(/^-D(.+)/)  { $DEBUG = $1;}
+    if(/^-n(.+)/)  { $nparts = $1;}
+    if(/^-t(.+)/)  { $tag = $1;}
+    if(/^-N(.+)/)  { $nevents = $1;}
+    if(/^-I(.+)/)  { $tail = ".itape";$stdhep_it="itape2stdhep";$unstdhep_it="stdhep2itape"}
+    if(/^-A(.+)/)  { $tail = ".ascii";}
+    if(/^-u/)  { $UseOldOutput = 1;}
+    if(/^-B(.+)/)  { $beamp = $1;}
+}
+
+
+print "dbFile: ".$dbFile,"\n";
+
+if($#ARGV > 0){
+    $dcmd="\$HDFAST_DIR/HALLD.cmd";
+    
+# Run ascii2stdhep
+    
+    $syscomm = "ascii2stdhep -i".$tag.".ascii -o".$tag.".evt -n".$nparts." -N".$nevents ;
+    print $syscomm."\n";
+    system($syscomm);
+
+# create sym link
+#    if(-f "db")
+#    {system("rm db");}
+#    $syscomm = "ln -s \$MCFAST_DIR/db .";
+#    print $syscomm."\n";
+#    system($syscomm);
+
+############
+# Run HDFast
+############
+
+#
+# make the command file
+#
+    $syscomm = "sed \"s/input.evt/".$tag.".evt/g\" " ;
+    $syscomm =  $syscomm." ".$dcmd." >".$tag.".cmd";
+    print  $syscomm."\n";
+    system($syscomm);
+    $syscomm =  "sed \"s/output.evt/".$tag.".mcfasted.evt/g\" " ;
+    $syscomm =  $syscomm." ".$tag.".cmd > tmp";
+    print  $syscomm."\n";
+    system($syscomm);
+    print  "cp tmp tmp2\n";
+    system("cp tmp tmp2");
+    if($dbFile ){
+	$syscomm =  "sed \"s/\\/home\\/halld\\/src\\/HDFast\\/HDFast.db/";
+	$syscomm =  $syscomm.$dbFile."/g\" tmp > tmp2";
+	print  $syscomm."\n";
+	system($syscomm);
+    }
+    $syscomm =  "sed \"s/25000/".$nevents."/g\" " ;
+    $syscomm =  $syscomm." tmp2 >".$tag.".cmd";
+    print  $syscomm."\n";
+    system($syscomm);
+    $syscomm = "rm tmp tmp2";
+    print  $syscomm."\n";
+    system($syscomm);
+#
+# create HDFast command
+#
+    $RdtFile = $tag.".rdt ";
+     if($UseOldOutput){
+	 $RdtFile = "-";
+     }
+  
+
+    $syscomm = "HDFast -f ".$tag.".cmd -o ".$RdtFile." -l ".$tag.".log -hb ".$tag.".hbook";
+    if($UseOldOutput){
+	$syscomm = $syscomm." -u -";
+    }
+    if($DEBUG){
+	$syscomm = $syscomm." -d ".$DEBUG." ";
+    }
+    print  $syscomm."\n";
+    system($syscomm);
+
+#
+# Remove stdhep input file and the created cmd file
+#
+    if($REMOVE==1){
+	$syscomm = "rm ".$tag.".evt";
+	print  $syscomm."\n";
+	system($syscomm);
+	$syscomm = "rm ".$tag.".cmd";
+	print  $syscomm."\n";
+	system($syscomm);
+    }
+
+#
+# Run stdhep2ascii
+# 
+    if($UseOldOutput){
+    $syscomm = "stdhep2ascii -i".$tag.".mcfasted.evt -o".$tag.".mcfasted.ascii -n".$nparts." -N".$nevents ;
+    print  $syscomm."\n";
+    system($syscomm);
+
+#
+#remove stdhep output file
+#
+    if( $REMOVE==1){
+        $syscomm = "rm ".$tag.".mcfasted.evt";
+        print  $syscomm."\n";
+        system($syscomm);
+	
+    }
+  }
+
+}
+
+
+
+sub printusage {
+    print "  usage: @_[0] [-options]
+    -N#         numbers of data events
+    -t<tag>     tag used to create files like <tag>.ascii
+    -n#          number of particles in an event 
+    -D#           debug level (default: 0)
+       
+    -u          use old mcfast output (*.evt file)
+    -G<dbFile>  use a nonstardard geo file(mostly used for debugging)     
+    -d          don't remove files(used for debuging)
+
+    typical usage:  @_[0] -N100 -texample -n6\n";
+
+}
