@@ -89,7 +89,7 @@ if ( $opt_g == 1 ) {
 }
 #
 if ( $opt_G ne "" ) { $dbFile=$opt_G;
-}else { $dbFile= 0}#$GeoFile}
+}else { $dbFile=$GeoFile}
 if ( $opt_D ne "" ) { $DEBUG=$opt_D;}
 if ( $opt_n ne "" ) { $nparts=$opt_n;}
 if ( $opt_t ne "" ) { $tag=$opt_t;}
@@ -119,6 +119,7 @@ print "\n Making mcfast command file:\n";
 #
 # Change the input file name:
 #
+print "Change the evt input file name.\n";
 $syscomm = "sed \"s/input.evt/".$tag.".evt/g\" " ;
 $syscomm =  $syscomm." ".$dcmd." > tmp1";
 print  $syscomm."\n";
@@ -126,6 +127,7 @@ system($syscomm);
 #
 # Change the output file name:
 #    
+print "Change the evt output file name.\n";
 $syscomm =  "sed \"s/output.evt/".$tag.".mcfasted.evt/g\" " ;
 $syscomm =  $syscomm." tmp1 > tmp2";
 print  $syscomm."\n";
@@ -133,17 +135,20 @@ system($syscomm);
 #
 # Change the database file:
 #
-if($dbFile ){
-    $syscomm =  "sed \"s/Geo.db/$dbFile/g\" tmp2 > tmp3"  ;
+print "Change the HDFast geometry db file\n"; 
+#if($dbFile ){
+#    $syscomm =  "sed \"s/Geo.db/$dbFile/g\" tmp2 > tmp3"  ;
+    $syscomm =  "sed \"s:HDFast.db:$dbFile:g\" tmp2 > tmp3"  ;
     print  $syscomm."\n";
     system($syscomm);
-}else {
-    system("cp $GeoFile Geo.db");
-    system("cp tmp2  tmp3");
-}
+#}else {
+#    system("cp $GeoFile Geo.db");
+#    system("cp tmp2  tmp3");
+#}
 #
 # Change the number of events:
 #
+print "Change the number of events\n";
 $syscomm =  "sed \"s/25000/".$nevents."/g\" " ;
 $syscomm =  $syscomm." tmp3 >".$tag.".cmd";
 print  $syscomm."\n";
@@ -170,17 +175,6 @@ if($DEBUG){
 print  $syscomm."\n";
 system($syscomm);
 
-#
-# Remove stdhep input file and the created cmd file
-#
-if($REMOVE==1){
-    $syscomm = "rm ".$tag.".evt";
-    print  $syscomm."\n";
-    system($syscomm);
-    $syscomm = "rm ".$tag.".cmd";
-    print  $syscomm."\n";
-    system($syscomm);
-}
 
 #
 # Run stdhep2ascii
@@ -190,13 +184,17 @@ if($SaveBadEvents || $SaveOldFormat){
     print  $syscomm."\n";
     system($syscomm);
 }
+
 #
 # clean up loose files 
 #
-
-
-if( $REMOVE==1){
-    system("rm Geo.db");
+if($REMOVE==1){
+    $syscomm = "rm ".$tag.".evt";
+    print  $syscomm."\n";
+    system($syscomm);
+    $syscomm = "rm ".$tag.".cmd";
+    print  $syscomm."\n";
+    system($syscomm);
     $syscomm = "rm ".$tag.".mcfasted.evt";
     print  $syscomm."\n";
     system($syscomm);
