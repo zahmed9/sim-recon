@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 ############################################
 #
 # run_HDFast: perl script for running
@@ -9,204 +9,214 @@
 #
 #  created: some time in Sept 1998
 #  last modified by: PME 16-Dec-98
+#
+#  Modified: 14 May 2004, C.A.Meyer
+#  Clean up the parsing of command line arguments.
+#
 ##########################################
-select((select(STDOUT),$|=1)[$[]);
-
-
-$GeoFile= $ENV{"HALLD_HOME"}."/src/HDFast/HDFast.db";
-
-if(! -e $GeoFile){
-    print "GEO FILE:".$GeoFile." DOES NOT EXITS!\n\n";
-    
-    exit;
+#
+if($#ARGV == -1) {
+    &printusage($0);
+    exit(0);
 }
 
+if ( $opt_h == 1 ) {
+    &printusage($0);
+    exit(0);
+}
+
+require "getopts.pl";
+require "getopt.pl";
+#
+&Getopt('ntBDGIN');
+&Getopts(':dghuvA');
+#
+select((select(STDOUT),$|=1)[$[]);
+#
+# If there are no arguments or the -h flag is given.
+#
+#print "opts arguments = $ret  \n";
+
+
+#
+
+#
+# Make sure that there is a link to the directory containing
+# the mcfast db files:
+#
 if(! -e "db/"){
     
     $syscmd="ln -s ".$ENV{"HALLD_HOME"}."/src/HDFast/db .";
     print  $syscmd."\n";
     system($syscmd);
 }
-
-&printusage($0) if($#ARGV == -1);
-
+#
+# Look for the defualt geometry and command files in the
+# HDFast area.
+#
+$GeoFile= $ENV{"HALLD_HOME"}."/src/HDFast/HDFast.db";
+$dcmd=$ENV{"HALLD_HOME"}."/src/HDFast/HALLD.cmd";
+#
+if(! -e $GeoFile){
+    print "GEO FILE:".$GeoFile." DOES NOT EXITS!\n\n";
+    exit;
+}
+if(! -e $dcmd){
+    print "cmd file:".$dcmd." DOES NOT EXITS!\n\n";
+    exit;
+}
+#
+# Setup default values for various options:
+#
 $label= "none";
 $tail = ".ascii";
 $stdhep_it="ascii2stdhep";
 $unstdhep_it="stdhep2ascii";
 $REMOVE=1;
-$dbFile=0;
 $SaveBadEvents = 0;
 $DEBUG =0;
-$ManyMode = 0;
 #
-# Used in ManyMode
-#@Beams=(5,6,8,10,12);
-@Beams=(5,8,12);
-@Xmasses=(1.4,1.7,2.0);
-#@Xmasses=(1.4);
-@Xwidths=(0.25);
-
-
-
-for (@ARGV) {
-    if(/^-G(.+)/)  { $dbFile = $1;}
-    if(/^-d/)  { $REMOVE = 0;}
-    if(/^-g(.+)/)  { $gamp_flag = " -g"; $gamp_kludge=$1; }
-    if(/^-D(.+)/)  { $DEBUG = $1;}
-    if(/^-n(.+)/)  { $nparts = $1;}
-    if(/^-t(.+)/)  { $tag0 = $1;}
-    if(/^-M/)  { $ManyMode = 1;}
-    if(/^-N(.+)/)  { $nevents = $1;}
-    if(/^-I(.+)/)  { $tail = ".itape";$stdhep_it="itape2stdhep";$unstdhep_it="stdhep2itape"}
-    if(/^-A(.+)/)  { $tail = ".ascii";}
-    if(/^-v/)  { $SaveOldFormat = 1;}
-    if(/^-u/)  { $SaveBadEvents = 1;}
-    if(/^-B(.+)/)  { $beamp = $1;}
+# Parse the remaining command line options:
+# 
+#
+if ( $opt_d == 1  ) { $REMOVE=0;}
+if ( $opt_u == 1  ) { $SaveBadEvents=1;}
+if ( $opt_v == 1  ) { $SaveOldFormat=1;}
+if ( $opt_A == 1  ) { $tail = ".ascii";}
+if ( $opt_g == 1 ) { 
+    $gamp_flag = " -g"; 
+    $gamp_kludge=$1; 
 }
-
-if($ManyMode==0){
-@Beams=(-1);
-@Xmasses=(1);
-@Xwidths=(1);
+#
+if ( $opt_G ne "" ) { $dbFile=$opt_G;
+}else { $dbFile= 0}#$GeoFile}
+if ( $opt_D ne "" ) { $DEBUG=$opt_D;}
+if ( $opt_n ne "" ) { $nparts=$opt_n;}
+if ( $opt_t ne "" ) { $tag=$opt_t;}
+if ( $opt_N ne "" ) { $nevents=$opt_N;}
+if ( $opt_B ne "" ) { $beamp = $opt_B;}
+if ( $opt_I ne "" ) { 
+    $tail = ".itape";
+    $stdhep_it="itape2stdhep";
+    $unstdhep_it="stdhep2itape";
 }
-
-
-
-if($#ARGV > 0){
-    $dcmd="\$HDFAST_DIR/HALLD.cmd";
-    
-foreach $beamZ (@Beams){
-    foreach $Xmass (@Xmasses){
-	foreach $Xwidth (@Xwidths){
 #
-# Create name tag which is used to make I/O file names
+# End parsing: -----------------------------
 #
-	    if($beamZ == -1){
-		$key="";
-	    }else{
-		$key=":B".$beamZ."M".$Xmass."W".$Xwidth;
-	    }
-	    $tag = $tag0.$key;
-	    print "Using nametag of ".$tag."\n";
-
 # Run ascii2stdhep
-    
-    $syscomm = "ascii2stdhep -i".$tag.".ascii -o".$tag.".evt -n".$nparts." -N".$nevents.$gamp_flag ;
-    print $syscomm."\n";
-    system($syscomm);
-
-# create sym link
-#    if(-f "db")
-#    {system("rm db");}
-#    $syscomm = "ln -s \$MCFAST_DIR/db .";
-#    print $syscomm."\n";
-#    system($syscomm);
-
+#    
+$syscomm = "ascii2stdhep -i".$tag.".ascii -o".$tag.".evt -n".$nparts." -N".$nevents.$gamp_flag ;
+print $syscomm."\n";
+system($syscomm);
+#
 ############
 # Run HDFast
 ############
-
 #
 # make the command file
 #
-    print "Making mcfast command file:\n";
-    $syscomm = "sed \"s/input.evt/".$tag.".evt/g\" " ;
-    $syscomm =  $syscomm." ".$dcmd." >".$tag.".cmd";
+print "\n Making mcfast command file:\n";
+#
+# Change the input file name:
+#
+$syscomm = "sed \"s/input.evt/".$tag.".evt/g\" " ;
+$syscomm =  $syscomm." ".$dcmd." > tmp1";
+print  $syscomm."\n";
+system($syscomm);
+#
+# Change the output file name:
+#    
+$syscomm =  "sed \"s/output.evt/".$tag.".mcfasted.evt/g\" " ;
+$syscomm =  $syscomm." tmp1 > tmp2";
+print  $syscomm."\n";
+system($syscomm);
+#
+# Change the database file:
+#
+if($dbFile ){
+    $syscomm =  "sed \"s/Geo.db/$dbFile/g\" tmp2 > tmp3"  ;
     print  $syscomm."\n";
     system($syscomm);
-    
-    $syscomm =  "sed \"s/output.evt/".$tag.".mcfasted.evt/g\" " ;
-    $syscomm =  $syscomm." ".$tag.".cmd > tmp";
-    print  $syscomm."\n";
-    system($syscomm);
-    print  "cp tmp tmp2\n";
-    system("cp tmp tmp2");
-    if($dbFile ){
-	$syscomm =  "sed \"s/Geo.db/$dbFile/g\" tmp > tmp2"  ;
-	print  $syscomm."\n";
-	system($syscomm);
-    }else {
-	system("cp $GeoFile Geo.db");
-	system("cp tmp  tmp2");
-    }
-    $syscomm =  "sed \"s/25000/".$nevents."/g\" " ;
-    $syscomm =  $syscomm." tmp2 >".$tag.".cmd";
-    print  $syscomm."\n";
-    system($syscomm);
-    $syscomm = "rm tmp tmp2";
-    print  $syscomm."\n\n";
-    system($syscomm);
+}else {
+    system("cp $GeoFile Geo.db");
+    system("cp tmp2  tmp3");
+}
+#
+# Change the number of events:
+#
+$syscomm =  "sed \"s/25000/".$nevents."/g\" " ;
+$syscomm =  $syscomm." tmp3 >".$tag.".cmd";
+print  $syscomm."\n";
+system($syscomm);
+$syscomm = "rm tmp1 tmp2 tmp3";
+print  $syscomm."\n\n";
+system($syscomm);
 #
 # create HDFast command
 #
-    print "Running HDFast:\n";
-    $RdtFile = $tag.".rdt ";
-    
-    $syscomm = "HDFast -f ".$tag.".cmd -o ".$RdtFile." -l ".$tag.".log -hb ".$tag.".hbook";
-    if($SaveBadEvents){
-	$syscomm = $syscomm." -u -";
-    }
-     if($SaveOldFormat){
-	$syscomm = $syscomm." -v -";
-    }
-    if($DEBUG){
-	$syscomm = $syscomm." -d ".$DEBUG." ";
-    }
-    print  $syscomm."\n";
-    system($syscomm);
+print "Running HDFast:\n";
+$RdtFile = $tag.".rdt ";
+	    
+$syscomm = "HDFast -f ".$tag.".cmd -o ".$RdtFile." -l ".$tag.".log -hb ".$tag.".hbook";
+if($SaveBadEvents){
+    $syscomm = $syscomm." -u -";
+}
+if($SaveOldFormat){
+    $syscomm = $syscomm." -v -";
+}
+if($DEBUG){
+    $syscomm = $syscomm." -d ".$DEBUG." ";
+}
+print  $syscomm."\n";
+system($syscomm);
 
 #
 # Remove stdhep input file and the created cmd file
 #
-    if($REMOVE==1){
-	$syscomm = "rm ".$tag.".evt";
-	print  $syscomm."\n";
-	system($syscomm);
-	$syscomm = "rm ".$tag.".cmd";
-	print  $syscomm."\n";
-	system($syscomm);
-    }
+if($REMOVE==1){
+    $syscomm = "rm ".$tag.".evt";
+    print  $syscomm."\n";
+    system($syscomm);
+    $syscomm = "rm ".$tag.".cmd";
+    print  $syscomm."\n";
+    system($syscomm);
+}
 
 #
 # Run stdhep2ascii
 # 
-    if($SaveBadEvents || $SaveOldFormat){
+if($SaveBadEvents || $SaveOldFormat){
     $syscomm = "stdhep2ascii -i".$tag.".mcfasted.evt -o".$tag.".mcfasted.ascii -n".$nparts." -N".$nevents." ".$gamp_flag.$gamp_kludge ;
     print  $syscomm."\n";
     system($syscomm);
-   }
+}
 #
 # clean up loose files 
 #
-    if( $REMOVE==1){
-	 system("rm Geo.db");
-        $syscomm = "rm ".$tag.".mcfasted.evt";
-        print  $syscomm."\n";
-        system($syscomm);
-	
-    }
-	}
-    }
- }
 
+
+if( $REMOVE==1){
+    system("rm Geo.db");
+    $syscomm = "rm ".$tag.".mcfasted.evt";
+    print  $syscomm."\n";
+    system($syscomm);
 }
 
 
 
 sub printusage {
     print "  usage: @_[0] [-options]
-    -N#         numbers of data events
-    -t<tag>     tag used to create files like <tag>.ascii
-    -n#          number of particles in an event 
-    -D#           debug level (default: 0)
-    -M          many mode -- loop over masses and widths (must edit me) 
-    -g<beamE>   use gamp input file format
-    -v          save old event format (*.evt file)
-    -u          save broken events (*.evt file do not use w/ -v )
-    -G<dbFile>  use a nonstardard geo file(mostly used for debugging)     
-    -d          don't remove files(used for debuging)
+    -N #         numbers of data events
+    -t <tag>     tag used to create files like <tag>.ascii
+    -n #         number of particles in an event 
+    -D #          debug level (default: 0)
+    -v           save old event format (*.evt file)
+    -u           save broken events (*.evt file do not use w/ -v )
+    -G <dbFile>  use a nonstardard geo file(mostly used for debugging)     
+    -d           don't remove files(used for debuging)
+    -h           print this message.
 
-    typical usage:  @_[0] -N100 -texample -n6\n";
+    typical usage:  @_[0] -N 100 -t example -n 6
 
+     \n";
 }
