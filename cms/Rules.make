@@ -158,9 +158,6 @@ CERN_SunOS4 =           -L/usr/local/lib
 
 CERN := $(CERN_$(OS_NAME))
 
-ifndef CERNLIBDIR
-CERNLIBDIR:=	$(CLAS_LIB)
-endif
 
 #
 # Additional C libraries
@@ -195,7 +192,7 @@ endif
 
 CC_default:=		gcc
 CC_Linux:=		gcc
-CC_SunOS:=		gcc
+CC_SunOS:=		cc
 CC_HP-UX:= 	        cc
 CC_IRIX:=               cc
 CC_OSF1:=               gcc

@@ -38,7 +38,7 @@ FOBJ =${FSRC:.f=.o}
 OBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
 
 $(PROGRAM): $(OBJS) $(FOBJ)
-	$(CC) -v -o $@ $(CDBG) $(FINCLUDE) $^ $(LIBS)
+	$(FC) -v -o $@ $(CDBG) $(FINCLUDE) $^ $(LIBS)
 
 install: mcfilter
 	mv -f mcfilter $(TOP_DIR)/bin/$(OS_NAME)
@@ -60,6 +60,7 @@ env:
 	@echo CFLAGS $(CFLAGS)
 	@echo CERN_ROOT $(CERN_ROOT)
 	@echo CERNLIB $(CERNLIB)
+	@echo CERNLIBDIR $(CERNLIBDIR)
 
 
 
