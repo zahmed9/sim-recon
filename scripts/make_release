@@ -6,10 +6,12 @@ if($#ARGV<0){&Usage();}
 
 # Check if we are checking out an existing tag or just grabbing the latest
 if($release eq "latest"){
+	$making_latest = 1;
 	print "\"latest\" specified, no tag will be used for checkout.\n";
 	$release = `date +"build_%F"`;
 	chomp($release);
 }else{
+	$making_latest = 0;
 	$tags = "-r $release";
 }
 
@@ -29,8 +31,7 @@ chdir $release;
 
 # Checkout release to new directory
 print "\nChecking out source code ....\n\n";
-$filter = "|& grep -v \"cvs checkout: Updating\"";  # remove uneeded messages from stderr
-system("cvs -d /group/halld/Repositories/cvsroot co $tags release $filter");
+system("cvs -d /group/halld/Repositories/cvsroot co $tags release");
 
 # For now, just move these things by hand. They should be moved
 # in the repository itself eventually
@@ -68,6 +69,8 @@ chdir "$halld_home/src/programs/Simulation/hdds";
 system("make");
 chdir "$halld_home/src/programs/Simulation/stdhep_translators";
 system("make install");
+chdir "$halld_home/src/programs/Simulation/genr8_2_hddm";
+system("make install");
 chdir "$halld_home/src/programs/Simulation/mcroot";
 system("make install");
 chdir "$halld_home/src/programs/Simulation/HDFast";
@@ -83,7 +86,8 @@ system("make");
 # Rebuild documentation
 chdir "$halld_home/src/doc";
 system("make clean ; make");
-if($release eq "latest"){
+system("$halld_home/scripts/make_CVSreport ; mv CVSstats html");
+if($making_latest != 0){
 	system("make install");
 }
 
