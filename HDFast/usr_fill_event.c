@@ -182,8 +182,8 @@ int fill_hepevt(int nparts, mc_part_t *part){
   
   nevent++;
   /* hepevt header info 
-  hepevt_.nevhep=nevent;
-  hepevt_.nhep=nparts;*/
+  hepevt_.nevhep=nevent;*/
+  hepevt_.nhep=nparts;
   if(debug>1)
     fprintf(stderr,"EventNo: %d\n",nevent);
 

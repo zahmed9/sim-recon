@@ -14,7 +14,7 @@ struct trace_s {
   int hep;            /* Position of track in /HEPEVT/ list */
   int type;           /* Trace type (see trace_type.inc) */
   int plane;          /* Radial or z plane number */
-  int hit;            /* # of hits in hit track list */
+  int hit;            /* hit index  (NOTE MCFast comments called this nhits)*/
   struct wtrack_struct w;  /* Track parameters at interaction */
   double eta[3];      /* Direction cosines of normal to plane */
   double path;        /* Total track length up to this hit */

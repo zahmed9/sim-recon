@@ -35,7 +35,7 @@
 void PrintUsage(char *processName);
 TROOT HDFast("HDFast","The Hall D Fast MC Package");
 extern "C" void mcfast_main(int argc, char **argv);
-Int_t counter=0,Nevents=0,Debug=0,SaveUsingMCFIO =0;
+Int_t counter=0,Nevents=0,Debug=0,SaveBrokenEvents =0,SaveOldFormat =0;
 
 int main(int argc, char **argv)
 {
@@ -56,8 +56,11 @@ int main(int argc, char **argv)
       if ((*argptr == '-') && (strlen(argptr) > 1)) {
         argptr++;
         switch (*argptr) {
-	  case 'u':
-          SaveUsingMCFIO =1;
+	case 'v':
+	  SaveOldFormat=1;
+	  break;
+	case 'u':
+          SaveBrokenEvents =1;
           break;
         case 'd':
 	  argptr+=2;
@@ -86,6 +89,11 @@ int main(int argc, char **argv)
         }
       }
     }
+
+    if(SaveOldFormat==1 && SaveBrokenEvents==1){
+      fprintf(stderr,"Sorry, one cannot use the -u and -v option together\n");
+      exit(-1);
+    }
     /*
      * Seed drand48() ; we use it outside of MCFast in usr_lgd.cxx .
      */
@@ -97,26 +105,26 @@ int main(int argc, char **argv)
      */
     Int_t comp   = 5;       // 0=no 1=min(but fast) , ... 9=max(but slow) compression 
     TFile *rdtfile=0;
-    if(! SaveUsingMCFIO){
-      rdtfile = new TFile(outputfile,"RECREATE","TTree Hall D ROOT file");
-      rdtfile->SetCompressionLevel(comp);
-    }
+    
+    rdtfile = new TFile(outputfile,"RECREATE","TTree Hall D ROOT file");
+    rdtfile->SetCompressionLevel(comp);
+    
     /*
      * Now call the mcfast framework
      */
-  mcfast_main(argc, argv);
+    mcfast_main(argc, argv);
+    
+    
+    /*
+     * Close the Root I/O
+     */
+    
+    cout<<"\n\nEvents Written: "<<counter<<endl;
+    // remember to write and close the file
+    rdtfile->Write();
+    rdtfile->Close();
 
-
-  /*
-   * Close the Root I/O
-   */
-   if(! SaveUsingMCFIO){
-     cout<<"\n\nEvents Written: "<<counter<<endl;
-     // remember to write and close the file
-     rdtfile->Write();
-     rdtfile->Close();
-   }
-  return 1;
+    return 1;
 }
 
 void PrintUsage(char *processName){
@@ -125,7 +133,8 @@ void PrintUsage(char *processName){
   cerr<< "\t-f <cmdfile> The mcfast command file.\n";
   cerr<< "\t-o <rdtfile> The output  file.\n";
   cerr<< "\t-l <logfile> The log file.\n";
-  cerr<< "\t-u           Use the old mcfast output (*.evt file).\n";
+  cerr<< "\t-v           Save in old Event Format  (*.evt file).\n";
+  cerr<< "\t-u           Save Broken Events  (*.evt file do not use w/ -v ).\n";
   cerr<< "\t-hb <hbookfile> A hbook file used for testing.\n";
   cerr<< "\t-d <level> Debug level --use level=1 for basic debug\n";
   cerr<< "\t-h Print this help message\n\n";

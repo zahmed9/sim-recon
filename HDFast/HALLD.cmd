@@ -2,6 +2,7 @@
 ! Cebaf HallD Meson Spectrometer command file for MCFast.
 !
 max_ev    25000                    !Max number of events
+!max_ev    25                    !Max number of events
 max_print 4                      !max # events to print
 ! Change the geofile location below to the value of $HDMS_MCFAST_DIR 
 ! note that mcfast needs that actual name and not the env var.
@@ -15,6 +16,7 @@ batch ON
 !
 make_decays FALSE
 make_pair_convert FALSE
-trace_integrated FALSE
+trace_integrated TRUE
+trk_max_turns 1
 
 

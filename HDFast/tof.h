@@ -1,8 +1,8 @@
 /************************************************
- * tof.h          TOF PARAMETERS
+ * tof.h          TOF and Cerenkov PARAMETERS
  * 
  * This file contains the hardwired parameters
- * for the Hall D TOF mc package. These parameters
+ * for the Hall D TOF & Cerenkov mc package. These parameters
  * are used in usr_dump()
  *
  * Paul Eugenio
@@ -26,16 +26,17 @@
  * Trace types
  */
 #define PRODUCTION 4
-/* Old tracing code defines */
+/* Old tracing code defines 
 #define CENTRAL 1
 #define FORWARD 2
 #define TMCFAST_CENTRAL_TRACE 1
 #define TMCFAST_FORWARD_TRACE 2
+*****/
 
-/******* USE THESE VALUES FOR THE NEW MCFAST TRACER
+/******* USE THESE VALUES FOR THE NEW MCFAST TRACER */
 #define CENTRAL 13
 #define FORWARD 13
-************/
+
 
 
 /* TMCFAST trace types must match those defined in TMCFastTOF.h 
@@ -57,6 +58,11 @@
  * plane id is "0".
  */
 #define PRODUCTION_PLANE 0
+/*
+ * Cerenkov Parameters (added 9 Apr 1999 PME)
+ */
+#define CERENKOV_Z 460.0 
+
 
 
 #endif

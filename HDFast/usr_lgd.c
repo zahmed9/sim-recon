@@ -35,9 +35,19 @@
 
 /* PDG numbering scheme see PDG Review of Particle Physics */
 #define PDG_GAMMA 22
-#define LGD_X_LIMIT 122.0
-#define LGD_Y_LIMIT 66.0
+#define LGD_X_LIMIT 86.0
+#define LGD_Y_LIMIT 86.0
 #define LGD_BEAMHOLE 8.0
+#define LGD_Z_LOCATION  560.0 /* was at 487.5, 587.5 */
+
+
+struct hepGamma_t{
+  int index;
+  int isaBCALgamma;
+  double phep[3];
+};
+
+int isaBCALgamma(int );
 
 int usr_lgd(void){  
   /*
@@ -46,25 +56,28 @@ int usr_lgd(void){
    * tracking routines.
    */
   int i,j,k;
-  double p[3],phep[20][3],cos_theta,x,y,z,vx,vy,vz;
-  int hepGammaIndex[20],nHepGammas=0;
+  struct hepGamma_t hepGamma[20];
+  double p[3],cos_theta,x,y,z,vx,vy,vz;
+  int nHepGammas=0,nBCALgammas=0;
   int smearedGammaIndex[20],nSmearedGammas=0;
-  int foundAll,found,nphep,dumpGamma;
+  int foundAll,isaBCALgam;
   lgd_smearedpart_t part[20];
   extern int Debug;
   extern lgd_smearedparts_t *LgdParts;
 
-  for(i=0,nphep=0;i< hepevt_.nhep;i++)
+  for(i=0;i< hepevt_.nhep;i++)
     if(hepevt_.idhep[i] == PDG_GAMMA){
-      hepGammaIndex[nHepGammas++]= i+1;
-      for(j=0;j<3;j++)/* get  the momentum */
-	p[j]=hepevt_.phep[i][j];/* px,py,pz*/
-      
+      hepGamma[nHepGammas].index=i+1;
+      hepGamma[nHepGammas].isaBCALgamma=
+	isaBCALgamma(hepGamma[nHepGammas].index);
+      for(j=0;j<3;j++){/* get  the momentum */
+	hepGamma[nHepGammas].phep[j]=hepevt_.phep[i][j];/* px,py,pz*/
+	p[j]=hepevt_.phep[i][j];/* copy momenta */
+      }
+      isaBCALgam = hepGamma[nHepGammas++].isaBCALgamma;
       cos_theta = p[2]/sqrt( p[0]*p[0] + p[1]*p[1] + p[2]*p[2] );
-      for(j=0;j<3;j++)/* copy p for debugging */
-	phep[nHepGammas -1][j]=p[j];
-      
-      if(cos_theta >0.707 ){/* It's at least going forward (0.707=45deg) */
+      nBCALgammas += isaBCALgam;
+      if(cos_theta >0.707 && !isaBCALgam ){/* It's at least going forward (0.707=45deg), and it was not detected in the BCAL. */
 	/*
 	 * Find x and y at the lgd face.
 	 *
@@ -74,10 +87,13 @@ int usr_lgd(void){
 	 * the same for the gammas; else
 	 * use center-of-target(x,y,z)= (0,0,50) cm
 	 */ 
-	if(trk_off1_.trk_off_num){ /* vhep[part#][x,y,z,t]*/
-	  vx=hepevt_.vhep[0][0];
-	  vy=hepevt_.vhep[0][1];
-	  vz=hepevt_.vhep[0][2];
+	if(trk_off1_.trk_off_num){ /* 
+				    * vhep[part#][x,y,z,t]
+				    * HEPEVT units are in mm and not cm 
+				    */
+	  vx=hepevt_.vhep[i][0]/10.0;
+	  vy=hepevt_.vhep[i][1]/10.0;
+	  vz=hepevt_.vhep[i][2]/10.0;
 	}
 	else{/* All neutrals use target center for production vertex */
 	  vx=0.0;
@@ -87,38 +103,30 @@ int usr_lgd(void){
 	/*
 	 * Get the triangular lengths.
 	 */
-	z =  487.5 - vz;/* lgd_z - production_z */
+	z =  LGD_Z_LOCATION - vz;/* lgd_z - production_z */
 	x = z*p[0]/p[2];/* px/pz should equal x/z */
 	y = z*p[1]/p[2];
+	if(Debug==5)
+	  fprintf(stderr,"Gamma trace2lgd (x,y,z): (%f,%f,%f)\n",x,y,z);
 	if((x+vx)*(x+vx) <  LGD_X_LIMIT*LGD_X_LIMIT && 
 	   (y+vy)*(y+vy) <  LGD_Y_LIMIT*LGD_Y_LIMIT && 
-	   (x+vx)*(x+vx) > LGD_BEAMHOLE*LGD_BEAMHOLE && 
-	   (y+vy)*(y+vy) > LGD_BEAMHOLE*LGD_BEAMHOLE){
-	  /*
-	   * Reject gamma if it also hits the barrel calorimeter
-	   */
-	  for(j=0,dumpGamma=0;j<MCFNumHitCal[0];j++)/* loop over cal hits */
-	    for(k=0;k<MCFCalHits[0][j]->n_tracks; k++) /* loop over hit info's */
-	      if( i+1 ==  MCFCalHits[0][j]->info_tr[k].tr_num){
-		dumpGamma=1;
-		
-	      }
-	  if(!dumpGamma){
-	    smearLGDgamma(p);
-	    smearedGammaIndex[nSmearedGammas] = i+1;
-	    /* make local lgd structure */
-	   part[nSmearedGammas].hepIndex= i+1;
-	   part[nSmearedGammas].type =1;
-	   part[nSmearedGammas].xlocal = x;
-	   part[nSmearedGammas].ylocal = y;
-	   part[nSmearedGammas].px = p[0];
-	   part[nSmearedGammas].py = p[1];
-	   part[nSmearedGammas].pz = p[2];
-	   part[nSmearedGammas].vx = vx;
-	   part[nSmearedGammas].vy = vy;
-	   part[nSmearedGammas++].vz = vz;
-	   
-	  }
+	   ((x+vx)*(x+vx) > LGD_BEAMHOLE*LGD_BEAMHOLE || 
+	   (y+vy)*(y+vy) > LGD_BEAMHOLE*LGD_BEAMHOLE) ){
+	  
+	  
+	  smearLGDgamma(p);
+	  smearedGammaIndex[nSmearedGammas] = i+1;
+	  /* make local lgd structure */
+	  part[nSmearedGammas].hepIndex= i+1;
+	  part[nSmearedGammas].type =1;
+	  part[nSmearedGammas].xlocal = x;
+	  part[nSmearedGammas].ylocal = y;
+	  part[nSmearedGammas].px = p[0];
+	  part[nSmearedGammas].py = p[1];
+	  part[nSmearedGammas].pz = p[2];
+	  part[nSmearedGammas].vx = vx;
+	  part[nSmearedGammas].vy = vy;
+	  part[nSmearedGammas++].vz = vz;
 	}
       }
     }
@@ -145,44 +153,24 @@ int usr_lgd(void){
 
   /*
    * Now check if all gammas where detected
-   */
-  if(Debug==5){ 
+   */ 
+
+  if(Debug==5){  
     fprintf(stderr,"nHepGammas: %d \n",nHepGammas);
     for(i=0;i<nHepGammas;i++){
-      fprintf(stderr,"\thepGammaIndex[%d]: %d ",i,hepGammaIndex[i]);
-      fprintf(stderr,"\tphep[%d] (px,py,pz): %lf %lf %lf\n",
-	      i,phep[i][0],phep[i][1],phep[i][2]);
-    }
-    
-    
+      fprintf(stderr,"\thepGamma[%d].index: %d ",i,hepGamma[i].index);
+      fprintf(stderr,"\thepGamma[%d].phep (px,py,pz): %lf %lf %lf\n",
+	      i,hepGamma[i].phep[0],hepGamma[i].phep[1],hepGamma[i].phep[2]);
+    }    
     fprintf(stderr,"nSmearedGammas: %d ",nSmearedGammas);
-    fprintf(stderr,"nBCALhits: %d \n",MCFNumHitCal[0]);
+    fprintf(stderr,"nBCALgammas: %d \n",nBCALgammas);
     for(i=0;i<nSmearedGammas;i++)
       fprintf(stderr,"smearedGammaIndex[%d]: %d ",i,smearedGammaIndex[i]);
     fprintf(stderr,"\n");
-  }  
-  
-
-  foundAll=1;
-  for(i=0;i<nHepGammas ;i++){
-    found=0;
-    /* check if LGD detected the  Hep gamma*/
-    for(j=0;j<nSmearedGammas;j++){ /* was the hep gamma found in the LGD? */
-      if(hepGammaIndex[i]==smearedGammaIndex[j])
-	found=1;
-    }
-    /* check if Barrel Calorimeter detected the Hep gamma*/
-    for(j=0;j<MCFNumHitCal[0];j++)
-      for(k=0;k<MCFCalHits[0][j]->n_tracks; k++)
-	if(hepGammaIndex[i]== MCFCalHits[0][j]->info_tr[k].tr_num){
-	  found =1;
-	  if(Debug==5)
-	    fprintf(stderr,"hepGammaIndex[%d] found in MCFCalHits[0][%d]->tr_num: %d\n",
-		    i,j,(MCFCalHits[0][j]->info_tr)->tr_num);
-	}
-    if(!found)
-      foundAll=0;
   }
+  foundAll=0;
+  if(nHepGammas == nBCALgammas + nSmearedGammas)
+    foundAll=1;
 
   return foundAll;
 }
@@ -205,7 +193,11 @@ void smearLGDgamma(double *p){
   const double LgdRes=2.36;
 
   e = sqrt(p[0]*p[0] + p[1]*p[1] + p[2]*p[2]);
-  eSigma = LgdRes*(0.06*sqrt(e)+0.02*e);
+  /* Use
+   * eSigma = LgdRes*(0.06*sqrt(e)+0.02*e);
+   * with the GEANT showers library otherwise use
+   */
+  eSigma = (0.06*sqrt(e)+0.02*e);
   eSmear=Gauss(0,eSigma);
   eSmeared = e+eSmear;
   for(i=0;i<3;i++)

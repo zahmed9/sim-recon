@@ -113,7 +113,7 @@ endif
 ifeq "$(UNAME)" "OSF1"
   FFLAG = -g
   FP_EXCEPTION = -L/usr/lib
-  LOPTION=
+  LOPTION= -O0 -W1,-taso
   LIBS=-lXm -lXt -lX11 -lm -lfor -lots -lc_r -lUfor -lfor -lutil -lFutil
   MAP    = 
 # More ROOT Crap for Alpha/OSF with g++
@@ -146,6 +146,8 @@ endif
 # Include files
 incdirs =  $(MCFINC)/event $(MCFINC)/geom $(MCFINC)/trig \
            $(MCFINC)/tracing $(MCFINC)/trig \
+           $(MCFAST_DIR)/simulator/showering/src \
+           $(MCFAST_DIR)/simulator/tracing/src \
            $(MCFINC)/dst $(MCFINC)/dbin_mcfast \
            $(STDHEP_DIR)/src/inc $(MCFIO_DIR)/src  .
 
@@ -158,7 +160,8 @@ BLDDIR := $(PWD)
 # User .o files are listed here
 USER_OBJ = usr_main.o main_args.o usr_analysis.o usr_init.o usr_fill_event.o \
         usr_summary.o usr_hbsummary.o usr_mcfio_out.o usr_dump.o \
-	usr_mcfast2root.o usr_lgd.o
+	usr_mcfast2root.o usr_lgd.o usr_hits.o usr_dumpCalor.o \
+        usr_calor.o DetCalorimeter.o prgeom.o
 
 
 
@@ -192,7 +195,7 @@ MCFIO = $(MCFAST_DIR)/lib.$(UNAME)/libFmcfio.a
 
 
 .$(SrcSuf).o:
-	$(CXX) $(TMCFAST_INC) $(CXXFLAGS) -c $<
+	$(CXX) $(TMCFAST_INC) -I. $(FINC)  $(CXXFLAGS) -c $<
 
 
 
@@ -225,7 +228,7 @@ HDFast: $(USER_OBJ)
 	-lutil \
 	-ldbin_mcfast \
 	-ldbin \
-	-ldst \
+	-ldst -luser \
 	-lgeneral \
 	-lcmd_parse \
 	$(STDHEP_DIR)/lib/libstdhep.a \

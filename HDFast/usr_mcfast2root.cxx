@@ -10,7 +10,7 @@
 //
 //  
 ////////////////////////////////////////////////////////////////////////
-
+ 
 
 #include <iostream.h>
 #include <fstream.h>
@@ -29,6 +29,9 @@
 #include "TMCFastOfflineTrack.h"
 #include "TMCFastCalorimeter.h"
 #include "TLGDsmears.h"
+#include "TMCFastHits.h"
+#include "TMCFastCerenkov.h"
+
 
 struct cal_hits_t{
   int nCalHits;
@@ -36,12 +39,14 @@ struct cal_hits_t{
 };
 
 struct event_t {
-  struct ntraces_t traces;    // defined in TMCFastTOF.h
+  struct traces_t traces;    // defined in TMCFastTOF.h
+  struct traces_t ctraces;    // cerenkov trace points
   struct hepevt_t  mcevt;  // defined in TMCFastHepEvt.h
   struct ntrkoff_t offtrk;  // defined in TMCFastOfflineTrack.h
   struct cal_hits_t calor0; // defined in TMCFastCalorimeter.h
   lgd_smearedparts_t *lgdSmears;   
-  
+  dev_hits_t *devhits;
+  dev_hits_t *devhits_cdc;
 };
 
 //______________________________________________________________________________
@@ -62,7 +67,10 @@ extern "C" int usr_mcfast2root(event_t *event)
   static TMCFastHepEvt *hepevt=0;
   static TMCFastTOF *tof_trace=0;
   static TMCFastOfflineTrack *offtrk=0;
-  
+  static TMCFastHits *vtx_hits=0;
+  static TMCFastHits *cdc_hits=0;
+  static TMCFastCerenkov *ceren=0;
+
   static TMCFastCalorimeter *bcal=0;
   //static TMCFastCalorimeter *calor1=0;
   static TLGDsmears *lgdSmears=0;
@@ -77,15 +85,15 @@ extern "C" int usr_mcfast2root(event_t *event)
     firstPass=0;    
     
 
-    // A roor file was opened in usr_main.cxx
+    // A root file was opened in usr_main.cxx
     
     
     
    
     //tree->SetAutoSave(1000000000);  // autosave when 1 Gbyte written
-    tree->SetAutoSave(10000000);  // autosave when 10 Mbyte written
+    tree->SetAutoSave(100000000);  // autosave when 100 Mbyte written
     Int_t bufsize = 256000;
-    Int_t split  = 1;  // by default, split Event in sub branches
+    Int_t split  = 0;  // by default, split Event in sub branches
     if (split)  bufsize /= 4;
     
     // TTree *tree;
@@ -96,10 +104,18 @@ extern "C" int usr_mcfast2root(event_t *event)
     hepevt = new TMCFastHepEvt(&(event->mcevt));
     tof_trace = new TMCFastTOF(&(event->traces));
     offtrk = new TMCFastOfflineTrack(&(event->offtrk));
-     
+    
+    vtx_hits = new TMCFastHits(event->devhits);
+    cdc_hits = new TMCFastHits(event->devhits_cdc);
+    //cerr<<"First event\n"<<*vtx_hits;
     bcal = new TMCFastCalorimeter(event->calor0.nCalHits,event->calor0.calhits);
     //calor1 = new TMCFastCalorimeter(event->calor1.nCalHits,event->calor1.calhits);
     lgdSmears = new TLGDsmears(event->lgdSmears);
+    ceren = new TMCFastCerenkov(&(event->ctraces));
+
+    //
+    // Set branch address
+    //
 
     static TBranch *b1=tree->Branch("hepevt", "TMCFastHepEvt", 
 			     &hepevt, bufsize,split);
@@ -113,7 +129,16 @@ extern "C" int usr_mcfast2root(event_t *event)
     //static TBranch *b5=tree->Branch("calor1", "TMCFastCalorimeter", 
     //			    &calor1, bufsize,split);
     static TBranch *b5=tree->Branch("lgdSmears", "TLGDsmears", 
-			     &lgdSmears, bufsize,split);		     
+			     &lgdSmears, bufsize,split);
+    Int_t Branch_Hits=0;
+    if(Branch_Hits){
+      static TBranch *b6=tree->Branch("vtx_hits", "TMCFastHits", 
+				      &vtx_hits, bufsize,split);	    
+      static TBranch *b7=tree->Branch("cdc_hits", "TMCFastHits", 
+				      &cdc_hits, bufsize,split);	    
+    }
+    static TBranch *b8=tree->Branch("ceren", "TMCFastCerenkov", 
+				    &ceren, bufsize,split);	    
     
   }else{
     // create replace the objects objects 
@@ -125,10 +150,14 @@ extern "C" int usr_mcfast2root(event_t *event)
     hepevt->Fill(&(event->mcevt));
     tof_trace->Fill(&(event->traces));
     offtrk->Fill(&(event->offtrk));
-    
+  
+    vtx_hits->Fill(event->devhits);
+    cdc_hits->Fill(event->devhits_cdc);
     bcal->Fill(event->calor0.nCalHits,event->calor0.calhits);
     //calor1->Fill(event->calor1.nCalHits,event->calor1.calhits);
     lgdSmears->Fill(event->lgdSmears);
+    ceren->Fill(&(event->ctraces));
+    //cerr<<"Not the first event\n"<<*vtx_hits;
   }
   counter++;
   //if(counter%25==0)
@@ -141,13 +170,19 @@ extern "C" int usr_mcfast2root(event_t *event)
     //cerr <<  *offtrk;
     //cerr << *bcal << *calor1;
     //cerr<<"calor1 is "<<*calor1;
+    //cerr<<"vtx_hits:\n"<< *vtx_hits;
   }
 
   // clear Particle container
-  hepevt->GetHepParticles()->Clear();
+  hepevt->Clear();
   bcal->Clear();
+  ceren->Clear();
   lgdSmears->Clear();
+  vtx_hits->Clear();
+  cdc_hits->Clear();
   //calor1->Clear();
   return 1;
 }
+
+
 
