@@ -19,6 +19,7 @@ print "\nMaking release \"$release\" ($halld_home)\n\n";
 
 # Move old "$release" out of the way (if it exists) and make new one
 if(-e $release){
+	print "\nMoving old \"$release\" directory to junk\n";
 	print `mkdir -p junk`;
 	print `rm -rf junk/$release`;
 	print `mv -f $release junk`;
@@ -27,7 +28,9 @@ mkdir $release;
 chdir $release;
 
 # Checkout release to new directory
-system("cvs -d /group/halld/Repositories/cvsroot co $tags release");
+print "\nChecking out source code ....\n\n";
+$filter = "|& grep -v \"cvs checkout: Updating\"";  # remove uneeded messages from stderr
+system("cvs -d /group/halld/Repositories/cvsroot co $tags release $filter");
 
 # For now, just move these things by hand. They should be moved
 # in the repository itself eventually
@@ -44,7 +47,7 @@ print "\n...generating hddm C/C++ source ...\n";
 system("rm -f event.xml");
 system("schema-hddm event.xsd > event.xml");
 system("hddm-c event.xml");
-system("cp hddm_s.h hddm_s.hpp ../../../libraries/include");
+system("cp hddm_s.h ../../../libraries/include");
 
 # Build libraries
 print "\nBuilding Libraries ...\n\n";
