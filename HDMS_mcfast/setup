@@ -1,7 +1,28 @@
-#!/bin/csh
+##################################################
 #
-# 
+# Source this file after modifying below
+#
+#################################################
 
+# Set YOUR cern lib location
+# below is the location on jlabs2 
+setenv CRNLIB /apps/cernlib/sun4_solaris2/97a/lib
+
+# The first 2 packages below can be obtained from the Halld CVS repository
+# now set these locations
+setenv HDMS_MCFAST_DIR /work/halld/mc/HDMS_mcfast
+setenv STDHEP_TRANS_DIR /work/halld/mc/stdhep_translators
+
+
+# below are fermi lab products (See above about fermi lab products)
+# and finally  set these locations
+setenv MCFAST_DIR /work/halld/mc/mcfast
+setenv STDHEP_DIR /work/halld/mc/stdhep
+setenv QQ_DIR /work/halld/mc/qq
+#
+# Modify the above and do not change anything below
+#
+# pulled out of $MCFAST_DIR/setup.csh and modified for our use
 setenv UNAME `uname`
 setenv MCFLIB $MCFAST_DIR/lib.$UNAME
 setenv MCFBIN $MCFAST_DIR/bin.$UNAME
@@ -12,6 +33,11 @@ setenv MCFIO_DIR $MCFAST_DIR/mcfio
 setenv UTIL_DIR $MCFAST_DIR/util
 setenv GLIB $MCFAST_DIR/lib.$UNAME
 setenv MCFREL v2_6_2
-
-
 set path=($path $MCFAST_DIR/bin)
+#
+# now source stdhep and qq setup
+source $STDHEP_DIR/ups/setup.csh
+source $QQ_DIR/ups/setup.csh
+#
+# 
+
