@@ -4,16 +4,18 @@
 $release = $ARGV[0];
 if($#ARGV<0){&Usage();}
 
-$halld_home = $ENV{"PWD"}."/$release";
-$ENV{"HALLD_HOME"} = $halld_home;
-print "\nMaking release \"$release\" ($halld_home)\n\n";
-
 # Check if we are checking out an existing tag or just grabbing the latest
 if($release eq "latest"){
 	print "\"latest\" specified, no tag will be used for checkout.\n";
+	$release = `date +"build_%F"`;
+	chomp($release);
 }else{
 	$tags = "-r $release";
 }
+
+$halld_home = $ENV{"PWD"}."/$release";
+$ENV{"HALLD_HOME"} = $halld_home;
+print "\nMaking release \"$release\" ($halld_home)\n\n";
 
 # Move old "$release" out of the way (if it exists) and make new one
 if(-e $release){
