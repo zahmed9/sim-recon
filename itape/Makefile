@@ -1,7 +1,7 @@
 
 include $(BUILDS)/cms/Rules.make
 
-DATA_CSRCS = data.c tapeIO.c tapeIoctl.c dataIO.c crc.c
+DATA_CSRCS = data.c tapeIO.c tapeIoctl.c dataIO.c crc.c endian.c
 
 DATA_COBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(DATA_CSRCS))
 
@@ -9,6 +9,7 @@ libs: libdata$(ADD_DEBUG).a
 
 libdata$(ADD_DEBUG).a: $(DATA_COBJS)
 	ar rv $@ $^
+	$(VDIR) $(HALLDLIB)
 	mv $@ $(HALLDLIB)/$@
 
 clean:
