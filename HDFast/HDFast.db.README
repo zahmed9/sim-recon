@@ -1,0 +1,4 @@
+[HDFast Detector Geometry]
+		
+	HDFast requires the detector geometry file "HDFast.db".  To build and install this geometry
+	database file see the "hdds" package.

@@ -9,7 +9,14 @@
 
 The GlueX Spectrometer for Hall D
 
-HDFast is a fast and flexible simulation program based upon the MCFast framework developed by the simulation group at Fermilab. MCFast consists of a set of modularized Monte Carlo library routines; it is designed to perform parameterized tracking by assembling a covariance matrix for each track that takes into account materials, efficiencies, and resolutions for all measurements planes, and use this matrix to smear the track parameters randomly. In principle, the distribution of smeared tracks produced by this method would be similar to the distribution of real tracks that were measured by a real detector(with the same parameters) and analyzed with an idealized track fitting procedure. 
+HDFast is a fast and flexible simulation program based upon the MCFast framework developed 
+by the simulation group at Fermilab. MCFast consists of a set of modularized Monte Carlo 
+library routines; it is designed to perform parameterized tracking by assembling a covariance 
+matrix for each track that takes into account materials, efficiencies, and resolutions for all 
+measurements planes, and use this matrix to smear the track parameters randomly. In principle, 
+the distribution of smeared tracks produced by this method would be similar to the distribution 
+of real tracks that were measured by a real detector(with the same parameters) and analyzed 
+with an idealized track fitting procedure. 
 
 
 [Before Building HDFast]
@@ -26,7 +33,7 @@ HDFast is a fast and flexible simulation program based upon the MCFast framework
 				% setenv CVSROOT $USER@cvs.jlab.org:/group/halld/cvsroot
 				% setenv CVS_RSH ssh
 				% cd $HALLD_HOME/src
-				% cvs checkout HDFast mcroot stdhep_translators genr8
+				% cvs checkout HDFast mcroot stdhep_translators genr8 hdds
 
 		Get the MCFast tarball
 				% wget  http://www.jlab.org/Hall-D/software/mcfast_v5_2.tgz  $HALLD_HOME/src/.
@@ -65,6 +72,18 @@ HDFast is a fast and flexible simulation program based upon the MCFast framework
 	
 			% make HDFast
 			% make install
+
+
+
+
+
+
+[HDFast Detector Geometry]
+		
+	HDFast requires the detector geometry file "HDFast.db".  To build and install this geometry
+	database file see the "hdds" package.
+
+
 
 
 
