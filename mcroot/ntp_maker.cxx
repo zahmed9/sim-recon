@@ -290,7 +290,14 @@ int main(int argc, char **argv)
       while( TMCParticle *particle = ( TMCParticle *)nextesr()){
 	Int_t hepIndex =  particle->GetHepIndex();
 	TMCFastHepParticle hepParticle =  hepevt->GetHepParticle(hepIndex);
-	
+
+	// book particle maker
+	values[n_vectors++] = particle->GetMaker();
+	if(firstEvent){
+	  sprintf(label,"DETid%d",nparts);
+	  vnames->Add(label);
+	}
+
 	// book particle ID
 	Int_t PDGid =  particle->GetIdHep();
 	values[n_vectors++] = PDGid;
