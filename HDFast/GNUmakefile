@@ -4,15 +4,15 @@
 #
 #
 # Created  1998/12/16  eugenio
-# Modified 26-Jan-1999  eugenio
+# Last Modified 1-Nov-1999  eugenio
 #
 # This makefile is currently working 
-# for OSF only. Contact Paul Eugenio (CMU)
+# for OSF1 and Linux only. Contact Paul Eugenio (CMU)
 # to implement other platforms or see
 # the osf implementation which links
 # to the root libs
 #
-# Before making anything; source setup4.1 and
+# Before making anything; source setup4.4 and
 # the standard .halldrc file.  ALSO, you need
 # to make libTMCfast.a in the mcroot development
 #################################################
@@ -34,7 +34,8 @@ ROOTGLIBS     = -lGpad -lGui -lGX11 -lX3d
 
 TMCFAST_INC = -I$(HALLD_HOME)/src/mcroot
 
-HDFASTLIBS = -L$(HALLD_HOME)/lib/$(UNAME)  -lTMCFast
+#HDFASTLIBS = -L$(HALLD_HOME)/lib/$(UNAME)  -lTMCFast
+HDFASTLIBS = /home/halld/lib/Linux/libTMCFast.a
 
 #HDFASTLIBS =    TMCFastHepEvt.o  TMCFastHepEvtDict.o TMCFastTOF.o TMCFastTOFDict.o \
 #		TMCFastOfflineTrack.o  TMCFastOfflineTrackDict.o \
@@ -55,7 +56,7 @@ HDFASTLIBS = -L$(HALLD_HOME)/lib/$(UNAME)  -lTMCFast
 hostname = $(shell hostname)
 MAP = 
 COM = g++
-F77bb = f77mcf
+F77bb = g77
 CFLAG = -g
 DPG	:= get_c_dep
 FDPG	:= mdep
@@ -101,13 +102,32 @@ ifeq "$(UNAME)" "IRIX64"
   #MAP    = -Wl,-m > $@.map
   LIBS=-lXm -lXt -lX11 -lftn -lsun -lPW -lm
 endif
+#
+#
 ifeq "$(UNAME)" "Linux"
   FFLAG = -g 
-  ABSOFT:= -absoft # Tells f77mcf to use absoft
-  LIBS := -L/usr/local/lib -lU77 -lV77 -lf77math -lfio   #ABSOFT run time
-  LIBS += -L/usr/local/packages/egcs/lib/gcc-lib/i586-pc-linux-gnu/egcs-2.91.57
+  FP_EXCEPTION = -L/usr/lib
+  LOPTION= -O0 -W1,-taso
+
+#  ABSOFT:= -absoft # Tells f77mcf to use absoft
+  LIBS := -L. -lU77 -lV77 -lf77math -lfio   #ABSOFT run time 
+#  LIBS += -L/usr/local/packages/egcs/lib/gcc-lib/i586-pc-linux-gnu/egcs-2.91.57
   LIBS += -lg2c                                          #g77 runtime
-  LIBS += -lm                                            #math lib
+  LIBS += -lm    
+                                        #math lib
+# More ROOT defines with g++
+CXX           = g++
+#CXXFLAGS      = -O -I$(ROOTSYS)/include
+CXXFLAGS      = -O -g -Wall -fno-rtti -fno-exceptions  -fPIC -I$(ROOTSYS)/include \
+		 -I/home/halld/include 
+LD            = g++
+LDFLAGS       = -g  
+SOFLAGS       = -shared
+RLIBS          = $(ROOTLIBS) -lm -ldl -rdynamic
+
+GLIBS         = $(ROOTLIBS) $(ROOTGLIBS)  -L/usr/X11R6/lib -lXpm \
+		-lX11 -lm -ldl -rdynamic
+
 endif
   
 ifeq "$(UNAME)" "OSF1"
@@ -125,8 +145,10 @@ LDFLAGS       = -g
 SOFLAGS       = -Wl,-expect_unresolved,* -shared
 RLIBS          = $(ROOTLIBS) -lg++ -lm
 GLIBS         = $(ROOTLIBS) $(ROOTGLIBS) -lXpm -lX11 -lg++ -lm -lPW
-
 endif
+
+#
+#
 ifeq "$(UNAME)" "SunOS"
   FFLAG = -g
   FP_EXCEPTION =
@@ -148,6 +170,7 @@ incdirs =  $(MCFINC)/event $(MCFINC)/geom $(MCFINC)/trig \
            $(MCFINC)/tracing $(MCFINC)/trig \
            $(MCFAST_DIR)/simulator/showering/src \
            $(MCFAST_DIR)/simulator/tracing/src \
+           $(MCFAST_DIR)/simulator/calorimetry/src \
            $(MCFINC)/dst $(MCFINC)/dbin_mcfast \
            $(STDHEP_DIR)/src/inc $(MCFIO_DIR)/src  .
 
@@ -160,11 +183,13 @@ BLDDIR := $(PWD)
 # User .o files are listed here
 USER_OBJ = usr_main.o main_args.o usr_analysis.o usr_init.o usr_fill_event.o \
         usr_summary.o usr_hbsummary.o usr_mcfio_out.o usr_dump.o \
-	usr_mcfast2root.o usr_lgd.o usr_hits.o usr_dumpCalor.o \
+        usr_mcfast2root.o usr_lgd.o usr_hits.o usr_dumpCalor.o \
         usr_calor.o DetCalorimeter.o prgeom.o
 
+TEST_OBJ = usr_main.o main_args.o usr_test.o
 
-
+USR_LITE_OBJ = usr_main.o main_args.o usr_analysis_lite.o usr_fill_event.o \
+	usr_init.o usr_summary.o prgeom.o usr_mcfio_out.o
 
 # List of files for which to build the depend information: all .c, .cc
 # and .F files in this directory.
@@ -197,13 +222,97 @@ MCFIO = $(MCFAST_DIR)/lib.$(UNAME)/libFmcfio.a
 .$(SrcSuf).o:
 	$(CXX) $(TMCFAST_INC) -I. $(FINC)  $(CXXFLAGS) -c $<
 
+usr_mcfio_out.o:usr_mcfio_out.F
+	f77 -O -w -g -fno-second-underscore -c $(FINC) -I. usr_mcfio_out.F
+
 
 
 #-----------------
 #  Action section 
 #-----------------
+:all
 
-all: depend mcfast db HDFast
+all:  HDFast HDFast_lite mctest
+
+HDFast_lite: $(USR_LITE_OBJ)
+	make  HDFast_Lite "HDFAST_LITE=on"
+
+HDFast_Lite: $(USR_LITE_OBJ)
+	$(COM) $(LOPTION) $(LDFLAGS) -o HDFast_lite \
+	$(USR_LITE_OBJ)  $(RLIBS) \
+        -L$(MCFLIB)  \
+	-lgen \
+	-ldatafile \
+	-ltrig \
+	-lgraph \
+	-luser \
+	-ltracing \
+	-lshowering \
+	-lcalorimetry \
+	-lmuon \
+	-lvertex \
+	-ltrack \
+	-lfitters \
+	-lsec_int \
+	-lgamma \
+	-lshower \
+	-lgeom \
+	-lio \
+	-lutil \
+	-ldbin_mcfast \
+	-ldbin \
+	-ldst -luser \
+	-lgeneral \
+	-lcmd_parse \
+	$(STDHEP_DIR)/lib/libstdhep.a \
+	$(MCFIO) \
+	$(QQLIB) $(TYPSCN) $(QQ_DIR)/lib/ranp.o \
+	-L$(CRNLIB) \
+	-lpacklib \
+	-lmathlib \
+	-lpacklib \
+	$(FP_EXCEPTION) \
+	$(LIBS) $(MAP)
+
+
+mctest: $(TEST_OBJ)
+	$(COM) $(LOPTION) $(LDFLAGS) -o mctest \
+	$(TEST_OBJ)  $(RLIBS) \
+        -L$(MCFLIB)  \
+	-lgen \
+	-ldatafile \
+	-ltrig \
+	-lgraph \
+	-luser \
+	-ltracing \
+	-lshowering \
+	-lcalorimetry \
+	-lmuon \
+	-lvertex \
+	-ltrack \
+	-lfitters \
+	-lsec_int \
+	-lgamma \
+	-lshower \
+	-lgeom \
+	-lio \
+	-lutil \
+	-ldbin_mcfast \
+	-ldbin \
+	-ldst -luser \
+	-lgeneral \
+	-lcmd_parse \
+	$(STDHEP_DIR)/lib/libstdhep.a \
+	$(MCFIO) \
+	$(QQLIB) $(TYPSCN) $(QQ_DIR)/lib/ranp.o \
+	-L$(CRNLIB) \
+	-lpacklib \
+	-lmathlib \
+	-lpacklib \
+	$(FP_EXCEPTION) \
+	$(LIBS) $(MAP)
+
+
 
 HDFast: $(USER_OBJ)
 	$(COM) $(LOPTION) $(LDFLAGS) -o HDFast \
@@ -216,6 +325,7 @@ HDFast: $(USER_OBJ)
 	-luser \
 	-ltracing \
 	-lshowering \
+	-lcalorimetry \
 	-lmuon \
 	-lvertex \
 	-ltrack \
@@ -267,7 +377,7 @@ test:
 	$(F77bb) $(ABSOFT) -f77 "$(FFLAG)" -cpp "$(FINC)" $<
 
 .c.o:
-	gcc -c -I. $(FINC) $(CFLAG) $<
+	gcc -c -I.  $(FINC) $(CFLAG) $<
 
 .cc.o:
 	g++ -c $(CFLAG) $<

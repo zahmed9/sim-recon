@@ -6,6 +6,7 @@
  * Paul Eugenio
  * Carnegie Mellon University
  * 1 Oct 98
+ * Last Modified: 11 Nov 99
  **********************************************/
 
 #include<stdio.h>
@@ -42,7 +43,6 @@ void usr_fill_event(int nparts){
   int ret;
   static int written=0;
   mc_part_t parts[MAX_PARTS];
-  struct hepevt *evt;
 
   /*
    * get the fortran common block structure
@@ -54,12 +54,6 @@ void usr_fill_event(int nparts){
    * fill the stdhep event stucture
    */
     fill_hepevt(nparts, parts);
-   
-    /*
-     *  Fill Root file.
-     **/
-    evt = &(hepevt_);
-    /*  usr_output(evt); */
 
   if(!(++written %100))
     fprintf(stderr,"McFast events Written: %d\r",written);
@@ -74,19 +68,45 @@ int fill_parts(int nparts, mc_part_t *part){
   float value,weight=1.0 ,nTuple_values[100];
   extern struct trk_off2 trk_off2_ ;
   double tmpdf,stmpdf;
+  extern int Debug;
 
   for(i=0;i<nparts;i++){ 
+    /*
+     * dump common block
+     */
+    if(Debug==1){
+      fprintf(stderr,"i= %d 
+trk_off2_.trk_off[i].hep =%d
+hepevt_.idhep[trk_off2_.trk_off[i].hep -1] = %d
+hepevt_.isthep[trk_off2_.trk_off[i].hep -1]= %d
+trk_off2_.trk_off[i].mass = %f
+trk_off2_.trk_off[i].w.px = %f
+trk_off2_.trk_off[i].w.py = %f
+trk_off2_.trk_off[i].w.pz = %f
+trk_off2_.trk_off[i].w.e = %f\n",i,trk_off2_.trk_off[i].hep  ,
+	      hepevt_.idhep[trk_off2_.trk_off[i].hep -1 ],
+	      hepevt_.isthep[trk_off2_.trk_off[i].hep -1],
+	      trk_off2_.trk_off[i].mass,
+	      trk_off2_.trk_off[i].w.px,
+	      trk_off2_.trk_off[i].w.py,
+	      trk_off2_.trk_off[i].w.pz,
+	      trk_off2_.trk_off[i].w.e
+
+);
+      
+    }
 
     /*
      * fill the particle structure
      */
-    part[i].pid = hepevt_.idhep[trk_off2_.trk_off[i].hep -1 ];/* the -1 is because fortran starts counting at 1 */
+    part[i].pid = hepevt_.idhep[trk_off2_.trk_off[i].hep -1 ];
+    /* the -1 is because fortran starts counting at 1 */
     part[i].statusCode = hepevt_.isthep[trk_off2_.trk_off[i].hep -1];
     part[i].mass = trk_off2_.trk_off[i].mass;
     part[i].p.space.x = trk_off2_.trk_off[i].w.px;
     part[i].p.space.y = trk_off2_.trk_off[i].w.py;
     part[i].p.space.z = trk_off2_.trk_off[i].w.pz;
-    part[i].p.t = trk_off2_.trk_off[i].w.E;
+    part[i].p.t = trk_off2_.trk_off[i].w.e;
     part[i].v.x = trk_off2_.trk_off[i].w.x;
     part[i].v.y = trk_off2_.trk_off[i].w.y;
     part[i].v.z = trk_off2_.trk_off[i].w.z;
@@ -120,25 +140,6 @@ int fill_parts(int nparts, mc_part_t *part){
 	    hepevt_.phep[trk_off2_.trk_off[i].hep -1][0] +
 	    hepevt_.phep[trk_off2_.trk_off[i].hep -1][1]*
 	    hepevt_.phep[trk_off2_.trk_off[i].hep -1][1])) ; /* pt */
-    /**                                       
-    nTuple_values[k++]= hepevt_.phep[trk_off2_.trk_off[i].hep -1][2] /
-                             sqrt( (double)
-			     (hepevt_.phep[trk_off2_.trk_off[i].hep -1][0]*
-			     hepevt_.phep[trk_off2_.trk_off[i].hep -1][0] +
-			     hepevt_.phep[trk_off2_.trk_off[i].hep -1][1]*
-			     hepevt_.phep[trk_off2_.trk_off[i].hep -1][1] +
-			     hepevt_.phep[trk_off2_.trk_off[i].hep -1][2]*
-			     hepevt_.phep[trk_off2_.trk_off[i].hep -1][2])  
-			    ); 
-			                                     cos(theta) ****/
-    /*nTuple_values[k++]=0.5*log( 
-    *		       (hepevt_.phep[trk_off2_.trk_off[i].hep -1][3]+
-    *			hepevt_.phep[trk_off2_.trk_off[i].hep -1][2])/
-    *		(hepevt_.phep[trk_off2_.trk_off[i].hep -1][3]-
-    *			hepevt_.phep[trk_off2_.trk_off[i].hep -1][2]));
-    */
-
-
 
     /*
      * smeared events
@@ -148,20 +149,9 @@ int fill_parts(int nparts, mc_part_t *part){
     nTuple_values[k++]=part[i].p.space.y;
     nTuple_values[k++]=part[i].p.space.z;
    
-    nTuple_values[k++]=(float) 
-      sqrt( (double)(part[i].p.space.x * part[i].p.space.x +
+    nTuple_values[k++]=
+      sqrt( (part[i].p.space.x * part[i].p.space.x +
 		     part[i].p.space.y * part[i].p.space.y));
-    /****************************
-    nTuple_values[k++]=part[i].p.space.z/
-      sqrt((double)(part[i].p.space.x * part[i].p.space.x +
-	   part[i].p.space.y * part[i].p.space.y +
-	   part[i].p.space.z * part[i].p.space.z) );     cos(theta) *******/
-    /*
-     *nTuple_values[k++]= 0.5 *logf( 
-     *				 (part[i].p.t + part[i].p.space.z)/
-     *			 (part[i].p.t - part[i].p.space.z));
-     */
-
 
     /*
      * Now book the ntuple
@@ -178,13 +168,13 @@ int fill_parts(int nparts, mc_part_t *part){
  *******************/
 int fill_hepevt(int nparts, mc_part_t *part){
   int i;
-  static int nevent=0,debug=0;
-  
+  static int nevent=0;
+  extern int Debug;
   nevent++;
   /* hepevt header info 
-  hepevt_.nevhep=nevent;*/
-  hepevt_.nhep=nparts;
-  if(debug>1)
+  hepevt_.nevhep=nevent;
+  hepevt_.nhep=nparts;*/
+  if(Debug==1)
     fprintf(stderr,"EventNo: %d\n",nevent);
 
   /* 
@@ -207,16 +197,6 @@ int fill_hepevt(int nparts, mc_part_t *part){
     /* file the left overs */
     /* hepevt_.jmohep[i]  */
 
-    /* debug=1; */
-    if(debug){
-      fprintf(stderr,"staus Code: %d   pid: %d  mass: %lf\n",
-	part[i].statusCode,part[i].pid,part[i].mass);
-       fprintf(stderr,"4 momentum: %lf %lf %lf %lf\n",
-	       part[i].p.space.x,part[i].p.space.y,
-	       part[i].p.space.z,part[i].p.t);
-       fprintf(stderr,"vert: %lf %lf %lf\n",part[i].v.x,
-	       part[i].v.y,part[i].v.z);
-    }
   }
   return 1; 
 }

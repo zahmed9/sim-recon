@@ -103,12 +103,12 @@ int main(int argc, char **argv)
     /*
      *  Open the data file.
      */
-    Int_t comp   = 5;       // 0=no 1=min(but fast) , ... 9=max(but slow) compression 
+    Int_t comp   = 5;    // 0=no 1=min(but fast) , ... 9=max(but slow) compression 
     TFile *rdtfile=0;
-    
+#ifndef HDFAST_LITE     
     rdtfile = new TFile(outputfile,"RECREATE","TTree Hall D ROOT file");
     rdtfile->SetCompressionLevel(comp);
-    
+#endif
     /*
      * Now call the mcfast framework
      */
@@ -120,10 +120,11 @@ int main(int argc, char **argv)
      */
     
     cout<<"\n\nEvents Written: "<<counter<<endl;
+#ifndef HDFAST_LITE
     // remember to write and close the file
     rdtfile->Write();
     rdtfile->Close();
-
+#endif
     return 1;
 }
 
@@ -131,12 +132,16 @@ void PrintUsage(char *processName){
   
   cerr<< processName << " usage: [switches]" << endl;
   cerr<< "\t-f <cmdfile> The mcfast command file.\n";
-  cerr<< "\t-o <rdtfile> The output  file.\n";
-  cerr<< "\t-l <logfile> The log file.\n";
-  cerr<< "\t-v           Save in old Event Format  (*.evt file).\n";
   cerr<< "\t-u           Save Broken Events  (*.evt file do not use w/ -v ).\n";
+  cerr<< "\t-l <logfile> The log file.\n";
   cerr<< "\t-hb <hbookfile> A hbook file used for testing.\n";
   cerr<< "\t-d <level> Debug level --use level=1 for basic debug\n";
+#ifdef HDFAST_LITE
+  cerr<< "\t-o <rdtfile> The output  file.\n";
+  cerr<< "\t-v           Save in old Event Format  (*.evt file).\n";
+#endif
+
+
   cerr<< "\t-h Print this help message\n\n";
 
 }
