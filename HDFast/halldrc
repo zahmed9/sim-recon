@@ -1,0 +1,16 @@
+setenv CVSROOT  :pserver:${USER}@jlabs2.cebaf.gov:/group/halld/cvsroot
+setenv OS_NAME `uname`
+setenv TOP_DIR /home/halld
+setenv BUILDS $TOP_DIR/source
+setenv CLAS_CMS $TOP_DIR/source/cms
+setenv HALLDLIBS $TOP_DIR/lib/$OS_NAME
+setenv HALLDLIB $HALLDLIBS
+setenv HALLD_HOME $TOP_DIR
+
+set path=($path  $HALLD_HOME/bin.$OS_NAME   $HALLD_HOME/bin )
+
+#
+# MCFast environments
+#
+
+source $HALLD_HOME/src/HDFast/setup4.1
