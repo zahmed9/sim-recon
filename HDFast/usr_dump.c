@@ -134,14 +134,15 @@ void usr_dump(void){
 		trace_par_c_.trace_par[i].w.y * 
 		trace_par_c_.trace_par[i].w.y);
       fprintf(stderr,
-	"typ: %d plane: %d hit: %d path: %lf time: %lf tau: %lf loc(r,z): %lf %lf \n",
-		trace_par_c_.trace_par[i].type,
-		trace_par_c_.trace_par[i].plane,
-		trace_par_c_.trace_par[i].hit,
-		trace_par_c_.trace_par[i].path,
-		trace_par_c_.trace_par[i].time,
-	       trace_par_c_.trace_par[i].tau,
-		rloc,zloc);
+	"typ: %d plane: %d hit: %d hep: %d path: %lf time: %lf tau: %lf loc(r,z): %lf %lf \n",
+	      trace_par_c_.trace_par[i].type,
+	      trace_par_c_.trace_par[i].plane,
+	      trace_par_c_.trace_par[i].hit,
+	      trace_par_c_.trace_par[i].hep,
+	      trace_par_c_.trace_par[i].path,
+	      trace_par_c_.trace_par[i].time,
+	      trace_par_c_.trace_par[i].tau,
+	      rloc,zloc);
     }/* end of debug */
 
     if(((trace_par_c_.trace_par[i].type ==PRODUCTION && 
@@ -181,10 +182,11 @@ void usr_dump(void){
 		trace_par_c_.trace_par[i].w.y * 
 		trace_par_c_.trace_par[i].w.y);	
       fprintf(stderr,
-	      "typ: %d plane: %d nhit: %d path: %lf time: %lf tau: %lf loc(r,z): %lf %lf q:%lf\n",
+	      "typ: %d plane: %d nhit: %d hep: %d path: %lf time: %lf tau: %lf loc(r,z): %lf %lf q:%lf\n",
 	      trace_par_c_.trace_par[i].type,
 	      trace_par_c_.trace_par[i].plane,
 	      trace_par_c_.trace_par[i].hit,
+	      trace_par_c_.trace_par[i].hep,
 	      trace_par_c_.trace_par[i].path,
 	      trace_par_c_.trace_par[i].time,
 	      trace_par_c_.trace_par[i].tau,

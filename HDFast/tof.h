@@ -51,7 +51,7 @@
  * IMPORTANT!! CTOF_R &  FTOF_Z MUST AGREE WITH THE VALUES IN the geo.db FILE!
  */
 #define CTOF_R 65.0  /* rmin */
-#define FTOF_Z 550.0 /* z0 - zlength/2 */
+#define FTOF_Z 565.0 /* z0 - zlength/2 */
 
 /* The production trace is the 
  * first trace in the trace list. It's
@@ -61,7 +61,7 @@
 /*
  * Cerenkov Parameters (added 9 Apr 1999 PME)
  */
-#define CERENKOV_Z 460.0 
+#define CERENKOV_Z 415.5 
 
 
 

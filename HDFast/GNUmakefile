@@ -118,6 +118,7 @@ ifeq "$(UNAME)" "Linux"
 # ABLIBS = $(HALLDLIBS)
  F90LIBS = $(HALLD_HOME)/src/f90_libs
   LIBS := -L$(F90LIBS) -lU77 -lV77 -lf77math -lfio    
+MEM_CHECK = -lchecker
 #  LIBS += -L/usr/local/packages/egcs/lib/gcc-lib/i586-pc-linux-gnu/egcs-2.91.57
   LIBS += -lg2c                                          #g77 runtime
   LIBS += -lm    
@@ -242,7 +243,7 @@ HDFast_lite: $(USR_LITE_OBJ)
 	make  HDFast_Lite "HDFAST_LITE=on"
 
 HDFast_Lite: $(USR_LITE_OBJ)
-	$(COM) $(LOPTION) $(LDFLAGS) -o HDFast_lite \
+	$(COM) $(LOPTION) -fcheck-memory-usage $(LDFLAGS) -o HDFast_lite \
 	$(USR_LITE_OBJ)  $(RLIBS) \
         -L$(MCFLIB)  \
 	-lgen \

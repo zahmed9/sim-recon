@@ -325,7 +325,7 @@ include db/sidisk_wedge.db
 
 !Wedges for the disk drift chambers
 !
-Each package(det) contains 9 2pi-Wedges (3 anode layers(x,u,v) 
+!Each package(det) contains 9 2pi-Wedges (3 anode layers(x,u,v) 
 + 2 cathode strip layers for each anode layer). 
 
 !          speci det lyr nwed nstrp c0_r  c0_f pitch stereo eff  resolutions

@@ -22,12 +22,13 @@ struct trace_s {
   double time;        /* Time at which track made hit */
   double tau;         /* Proper flight time to intersection */
   int material;       /* Position in material list */
+  int dummy;           /* Pad to align structure */
   double radl;        /* # of radiation lengths in material */
   double dedx;        /* dE/dx of material */
 } ;
 
 
-#define TRACE_MAX 20000
+#define TRACE_MAX 50000
 
 struct trace_par_c {
   int trace_num;      /* Number of track intersections */
