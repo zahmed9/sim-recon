@@ -72,7 +72,7 @@ system("make");
 chdir "$halld_home/src/programs/Simulation/stdhep_translators";
 system("make install");
 chdir "$halld_home/src/programs/Simulation/genr8_2_hddm";
-system("make install");
+system("make");
 chdir "$halld_home/src/programs/Simulation/mcroot";
 system("make install");
 chdir "$halld_home/src/programs/Simulation/HDFast";
