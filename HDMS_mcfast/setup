@@ -19,7 +19,11 @@ setenv STDHEP_TRANS_DIR /work/halld/mc/stdhep_translators
 setenv MCFAST_DIR /work/halld/mc/mcfast
 setenv STDHEP_DIR /work/halld/mc/stdhep
 setenv QQ_DIR /work/halld/mc/qq
+##########################################
 #
+# Now edit HDMS.cmd and change the  HDMS_MCFAST_DIR location 
+#
+#############################################
 # Modify the above and do not change anything below
 #
 # pulled out of $MCFAST_DIR/setup.csh and modified for our use
