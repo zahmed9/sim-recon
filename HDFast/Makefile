@@ -65,7 +65,7 @@ ifndef TYPSCN
 endif
 
 
-TMCFAST_INC = -I$(HALLD_HOME)/src/mcroot
+TMCFAST_INC = -I$(HALLD_HOME)/src/mcroot -I../mcroot
 
 HDFASTLIBS = $(HALLD_HOME)/lib//Linux/libTMCFast.a
 #HDFASTLIBS = $(HALLD_HOME)/src/mcroot/libTMCFast.a
