@@ -1,0 +1,17 @@
+#!/bin/csh
+#
+# 
+
+setenv UNAME `uname`
+setenv MCFLIB $MCFAST_DIR/lib.$UNAME
+setenv MCFBIN $MCFAST_DIR/bin.$UNAME
+setenv MCFINC $MCFAST_DIR/mcfast/inc
+setenv MCFSRC $MCFAST_DIR/mcfast/src
+setenv EVGEN_DIR $MCFAST_DIR/evgen
+setenv MCFIO_DIR $MCFAST_DIR/mcfio
+setenv UTIL_DIR $MCFAST_DIR/util
+setenv GLIB $MCFAST_DIR/lib.$UNAME
+setenv MCFREL v2_6_2
+
+
+set path=($path $MCFAST_DIR/bin)
