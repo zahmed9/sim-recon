@@ -18,7 +18,7 @@ ROOTGLIBS     = -lGpad -lGui -lGX11 -lX3d
 ROOTLIBS      = $(shell root-config --libs)
 ROOTGLIBS     = $(shell  root-config --glibs)   
 
-LIBPP = -L$(PWA2000_ROOT)/lib -lpp 
+UNAME = $(shell uname)
 
 #
 # Machine dependent stuff.
@@ -82,8 +82,6 @@ TMCFastS        = TMCFastHepEvt.cxx  \
 TMCFast_LIB       = libTMCFast.a
 
 
-MAIN1O    = mcfast2root.o
-MAIN1S    = mcfast2root.cxx
 
 MAIN2O        = dumpRdt.o
 MAIN2S        = dumpRdt.cxx
@@ -93,25 +91,27 @@ TOF2S           = tof2.C
 
 NTP_MAKERO      = ntp_maker.o TNtupleUtil.o
 
-TMCFast         = mcfast2root
-TMCFast2         = dumpRdt
+
 TMCFastSO       = libTMCFast.so
 
 
 OBJS          = $(TMCFastO) $(MAIN2O) $(TOF2O) $(NTP_MAKERO) 
 
-PROGRAMS      = dumpRdt  
+PROGRAMS      = dumpRdt ntp_maker
+
+all:          lib  $(PROGRAMS) docs
+
+ 
 lib:	$(TMCFast_LIB)
 
-all:            $(PROGRAMS) lib
-
+docs: 
+	rm -rf htmldoc
+	root -q -l .x DocTMCFast.C 
 
 
 install: $(TMCFast_LIB) $(PROGRAMS) 
 	mv $(TMCFast_LIB)  $(HALLD_HOME)/lib/$(UNAME)/$(TMCFast_LIB)
 	mv dumpRdt $(HALLD_HOME)/bin/$(UNAME)/.
-
-install-ntp_maker: ntp_maker
 	mv ntp_maker $(HALLD_HOME)/bin/$(UNAME)/.    
 
 
