@@ -7,6 +7,23 @@
 # more details.
 #
 
+# Set up some important environment variables. This is important
+# for two reasons:
+#
+# 1. This makes the build less dependant on my private .cshrc file
+#
+# 2. cron jobs don't source .login so the environment used is not
+#    even exactly what is used by my account anyway.
+#
+#
+# Note: the make_release script is perl so it's not so easy to
+#       source the env_jalb.csh script there as it is here.
+#       Consequently, we have to source the copy in the
+#       /group/halld/Software/scripts directory rather than the
+#       one we check out.
+source /group/halld/Software/scripts/env_jlab.csh
+
+
 # checkout and build the Hall-D source code
 cd /group/halld/Software/builds
 rm -f latest.out
