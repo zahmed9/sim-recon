@@ -1,59 +1,24 @@
-################ JLAB Environment ##########################
-#   See Code Development at http://www.phys.cmu.edu/halld/MCS.html   
+################ MCROOT Environment ##########################
+#  
 #
-# These items are need to run root. Include them
-# in you .cshrc file.
-#
-# if you don't have $UNAME defined then define it
-setenv $UNAME `uname`
-setenv ROOTSYS /work/halld/root.$UNAME 
+# To compile and build the objects in the
+# mcroot directory you will need to have
+# the package "root" installed and properly 
+# set up (i.e.you must have defined $ROOTSYS,  include
+# $ROOTSYS/lib in your $LD_LIBRARY_PATH, and $ROOTSYS/bin in 
+# your $path.)
 # 
-# Using  egcs1.1.1
-setenv EGCS   /work/halld/local.$UNAME
-
 #
-# set paths
-# try to keep the over so that you don't
-# end up using the wrong root or g++ executables
-set path=( $EGCS/bin  $ROOTSYS/bin $path)
-
-# set path for shared libs
-setenv LD_LIBRARY_PATH $ROOTSYS/lib:$EGCS/lib
+# For information on root see:
+#   http://root.cern.ch
 #
-# 
+#  If you have root installed then the make
+#  should work with no problems.
+#
 ####################### HALL D #####################
 
-In /work/halld/stage1_physics there exist data files (*.rdt) which have
-been processed through HDFast --the simulation program based upon the Fermilab MCFast framework.  HDFast creates and writes data utilizing ROOT I/O. The data format is a ROOT tree which is a data container similar to but with much less limitations than itape or BOS. Each event occupies a super-branch in the tree which in turns contains sub-branches(a sub-branch is like a itape group or BOS bank). Each sub-branch contains the data structure defined by a C++ object. Adding new branches reduces to creating C++ classes. Currently HDFast save 5 branches, and 1 virtual branch. 
+To compile just run "make ".  This will make libs, programs,
+and htmldocs.  See tmcfast-docs.html (after the make) to browse
+the TMCFast class structure and documentation. 
 
-  o hepevt    --contains generated mc information
-  o offtrk    --contains the offline(smeared) charged track information
-  o tof_trace --contains time-of-flight information 
-  o bcal      --contains barrel calorimetry hit in formation
-  o ldgSmear  --contains smeared (energy only) lgd gamma information 
-  
-  + esr       --a virtual event summary constructed from the about branches
-
-
-
-See http://www.phys.cmu.edu/halld/MCS.html for more information on the Monte Carlo Framework.
-
-In addition to the data files,  /work/halld/stage1_physics contains links to example macros (*.C) and executables. To run a macro first run "root" then at the root prompt type ".x macro.C" or just execute "root .x macro.C"
-
-Macros:
-
-	tof.C -an example of opening a data file and generating histograms
-
-	EventDisplay.C -an event displayer that reads and displays the HDFast 
-		geometry and traces particles through the apparatus
-
-Executables:
-
-
-	dumpRdt -an ascii dumper of the data
-		(see /work/halld/src/mcroot/ subsystem on building it) 
-		"dumpRdt -h" will provide command line help, and 
-		"dumpRdt -n1 file.rdt" will dump one event from file.rdt 
-
-	ntuple_maker -a ntuple maker summarizing the event
 
