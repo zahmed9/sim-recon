@@ -190,13 +190,13 @@ if($SaveBadEvents || $SaveOldFormat){
 #
 if($REMOVE==1){
     $syscomm = "rm ".$tag.".evt";
-    print  $syscomm."\n";
+    if($DEBUG){    print  $syscomm."\n";}
     system($syscomm);
     $syscomm = "rm ".$tag.".cmd";
-    print  $syscomm."\n";
+    if($DEBUG){   print  $syscomm."\n";}
     system($syscomm);
-    $syscomm = "rm ".$tag.".mcfasted.evt";
-    print  $syscomm."\n";
+    $syscomm = "rm $tag.mcfasted.evt $tag.hbook";
+    if($DEBUG){    print  $syscomm."\n";}
     system($syscomm);
 }
 
