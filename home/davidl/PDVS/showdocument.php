@@ -24,6 +24,7 @@ function ShowDocument($id, $version)
 	$query = "SELECT version from files WHERE id=\"$id\" ";
 	$query .= "AND version!=\"$version\" GROUP BY version ORDER BY version DESC";
 	$mysql_result = mysql_query($query) or die(mysql_error());
+	$versions = array();
 	while($row = mysql_fetch_array($mysql_result))$versions[] = $row["version"];
 
 	?>
