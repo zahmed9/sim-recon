@@ -16,7 +16,10 @@ TCalHitTracks::TCalHitTracks(Int_t index,struct cal_hit_tracks_t *info)
 {
   this->SetCalHitIndex(index);
   this->SetHepIndex(info->tr_num);
-  this->SetPercent(info->percent_e_tot);
+  this->SetEmip(info->e_mip);
+  this->SetEem(info->e_em);
+  this->SetEhad(info->e_had);
+
 }
 
 
@@ -41,7 +44,10 @@ void TCalHitTracks::Print(ostream *os){
   
   *os<<"\tCalHitIndex: "<<this->GetCalHitIndex()
     <<" HEPEVT index: "<<this->GetHepIndex()
-    <<" percent_e_tot: "<<this->GetPercent()
+    <<endl;
+  *os<<"\t\tEmip: "<<this->GetEmip()
+     <<"\t\tEem: "<<this->GetEem()
+     <<"\t\tEhad: "<<this->GetEhad()
     <<endl;
     
 }

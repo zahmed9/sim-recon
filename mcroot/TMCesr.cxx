@@ -96,7 +96,8 @@ Int_t TMCesr::makeParticles(TMCFastHepEvt &hepevt,TMCFastCalorimeter &bcal,Doubl
 	  while(TCalHitTracks* info = (TCalHitTracks *)nextInfo())
 	    if(info->GetCalHitIndex() == calhit->GetHitIndex() &&
 	      gammaHepIndex[i] == info->GetHepIndex() ){
-	      e += info->GetPercent() *  calhit->GetEtotal(); 
+	      e += info->GetEem() + info->GetEmip() + info->GetEhad() ;
+	      // the gamma energy can be smeared by hadrons...
 	      // Now we have a cal hit that belongs to
 	      // the gamma -- there can be many hits to oner gamma.
 
@@ -111,7 +112,8 @@ Int_t TMCesr::makeParticles(TMCFastHepEvt &hepevt,TMCFastCalorimeter &bcal,Doubl
     // The new calor code needs less of a correction
     // This value is based on the average correction needed to
     // get the correct pizero mass at B5:m1.4 and B12M2.0
-    e *= 1.03; 
+    // for mcfast version 4_2  it it unknown for v4_4
+    // e *= 1.03; 
 
 
     // e is now the total measured electroMagnetic energy for this gamma   

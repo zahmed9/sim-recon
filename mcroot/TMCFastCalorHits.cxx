@@ -41,10 +41,7 @@ void  TMCFastCalorHits::Fill(Int_t index, struct cal_hit_t *calorhit){
   SetHitIndex(index);
   SetX1CellIndex(calorhit->icr1);
   SetX2CellIndex(calorhit->icr2);
-  SetEmip(calorhit->e_mip);
-  SetEem(calorhit->e_em);
-  SetEhad(calorhit->e_had);
-  SetStatus(calorhit->status);
+  SetE(calorhit->e_tot);
   SetNtracks(calorhit->n_tracks);
 
 }
@@ -56,15 +53,7 @@ TMCFastCalorHits::~TMCFastCalorHits()
   //
   this->Clear();
 }
-//____________________________________________________________________________
-Double_t TMCFastCalorHits::GetEtotal()
-{
-  // Return Etotal = Ehad + Eem + Emip
-  //
-  
-  Double_t Etotal = GetEem() + GetEmip() + GetEhad();
-  return Etotal;
-}
+
 
 //____________________________________________________________________________
 void TMCFastCalorHits::Print(ostream *os){
@@ -83,13 +72,10 @@ void TMCFastCalorHits::Print(ostream *os){
       <<" X1CellIndex: "<< this->GetX1CellIndex()
       <<" X2CellIndex: "<< this->GetX2CellIndex()
       << endl;
-    *os<<"Emip: "<<this->GetEmip()
-      <<" Eem: "<<this->GetEem()
-      <<" Ehad: "<<this->GetEhad()
-      <<endl;
+    *os<<"E: "<<this->GetE()
+       <<endl;
     *os<<"Ntracks: "<<this->GetNtracks()
-      <<" status: "<<this->GetStatus()
-      <<endl;
+       <<endl;
     
    
 }
