@@ -4,49 +4,78 @@
 *                 smear it according to defined resolutions.
 *
 
-*        Modified: 14 May 1998
+      Implicit None
 *
+      Real   p(4)
 *
-      real   pi      
-      Parameter (pi=3.1415927)
+      Include "det_resol.h"
 *
-      Real   Dipole_angle
-      Parameter (Dipole_angle = 8.50*pi/180.0)
+      Integer i
 *
-      real   delta_Z /0.002/     ! Resolution of the chambers (meters)
-      real   delta_R /0.0002/    ! Resolution in r-phi
-      real   L_z     /1.000/     ! Path length of the tracks  (meters)
-      real   X0      /340./      ! Radiation length of Ethane (meters)
-      real   B       /2.24/      ! Solenoid field (tesla)
-      real   rmax    /0.925/     ! Bore radius(meters)
-      real   ltot    /3.20/      ! Total length of solenoid (meters)
-      real   tgtpos  /1.00/      ! distance from upstream end of mag. to tgt.
-      real   L_scat              ! path length of the track
-      real   N_turns             ! how many loops?
+*        pt:     Transverse Momentum
+*        ptsq:   Transverse Momentum Squared
+*        pt_new: Smeared transverse momentum
+*        pmag:   Total Momentum
+*        pmagsq: Total Momentum squared.
+*        pnew:   Smeared total momentum.
+*        msq:    Particle Mass squared.
+*
+      real pt , ptsq , pt_new , pmag , pmagsq , pnew , msq
+*
+*        theta:   Angle of track from beam direction.
+*        the_new: Smeared Theta
+* 
+      real theta , the_new
+*
+*        radius: radius if curvature of the track
+*        Z_path: Path length of the track in Z
+*        R_path: Path length of the track in R
+*        L_scat: path length of the track for multiple scattering.
+*        Z_final:
+*
+      real radius , Z_path , R_path , L_scat , Z_final
+*
+*        N_turns:     How amny turns
+*        N_turns_end: How many turns to the end of the magnet
+*        N_turns_bor: How many turns to the magnet bore
+*
+      real   N_turns           
       real   N_turns_end
       real   N_turns_bor
 *
 *        sig_p: delta_pt/pt
 *        sig_t: delta_theta/theta
 *
-      real   sig_p
-      real   sig_t
-      real   the_new
-      real   pt_new
+      real   sig_p , sig_t
 *
-      logical enter /.false./
-      save    enter
 *
-      real p(4),msq,pmagsq,ptsq
+*
+      real     gausran,dummy
+      external gausran
+*
+*             2 pi
+*        Q = -----
+*             eB
+*
+      Real Q
+      Save Q
+*
+*       L_first: Control initialization upon first call.
+*
+      logical L_first 
+      save    L_first
+*
+      Data    L_first /.True./
+      Data    Q       / 0.0 /
 *
 *     ****************************************************
 *
 *
 *        convert from GeV to meters.
 *
-      if(.not.enter) then
-         enter=.true.
-         Q = 2. * pi / (0.3*B) 
+      if ( L_first ) then
+         Q = 2. * pi / (0.3*B_sol) 
+         L_first = .False.
       endif
 *
 *        Compute the transverse momentum, total momentum, 
@@ -75,16 +104,17 @@ c
 *
       if ( theta .le. Dipole_Angle ) then
 *
-*           angle is less than 8.5 degrees, assume reconstruction by
-*           the dipole spectrometer with 1/2% resolution on the total
-*           momentum. Additionally, assume that theta is measured
-*           perfectly. 
+*           The track is detected in the dipole if we are inside
+*           Dipole_Angle. In this case smear the total momentum
+*           using the Dipole_res value. We also will assume that
+*           theta is measured perfectly here.
 *
-         pnew = pmag * (1.00 + 0.005 * gausran(dummy) )
+ 100     pnew = pmag * (1.00 + Dipole_res * gausran(dummy) )
+         If ( pnew .le. 0.0 ) Goto 100
 *
-         do 100 i = 1,3
+         do 200 i = 1,3
             p(i) = p(i) * pnew / pmag
- 100     continue
+ 200     continue
 *
 *           Set energy to match the particle.
 *
@@ -97,10 +127,13 @@ c
 *---# Pure Solenoid Measurement #
 *   #############################
 *
-*           angle is greater than 8.5 degrees, assume reconstruction by
-*           solenoidal spectrometer. Get the track radius.
+*           The angle is greater than Dipole_Angle, assume reconstruction 
+*           by the solenoidal spectrometer.
+*                                           P_T
+*           The radius of the track is  r = ---
+*                                           eB
 *
-         radius = pt / (0.3*B)
+         radius = pt / (0.3*B_sol)
 *
 *           figure out which end of the magnet it should  hit, is it going
 *           forward or backwards? (Might hit something before that)
@@ -111,32 +144,74 @@ c
             z_final = ltot - tgtpos 
          endif
 *
-*           Get the path length in z of the track:
+*           Get the path length in z of the track:  tan(theta) = r/z,
+*           but if we get to rmax_inst, then we no longer get any
+*           z measurements:
 *
-         Z_path = min( (rmax / tan(theta)),abs(z_final) )
+*           rmax_inst / tan(theta) == z length where we leave instrumentation.
+*           abs(z_final)           == Exit the ends of the magnet.
 *
-*           In the case where we are near 90 degrees, fix the error
-*           in theta to a finite number. We treat the sqrt-factor
-*           as simply one here.
-* 
+         Z_path = min( (rmax_inst/tan(theta)) , abs(z_final) )
+*
+*           We use the z-path length in conjunction with the z-resolution
+*           to compute the error in theta.
+*
 *                       sig_z
 *           sig_theta = ------ * sqrt{[12(N-1)]/[N(N+1)]}
 *                        L_z
 *
+*           In the case where we are near 90 degrees, fix the error
+*           in theta to a finite number. We treat the sqrt-factor
+*           as simply one here. This can be improved as we determine
+*           more precisely what the chamber spacing is.
 *
          If ( Z_path .le. 57.3*Delta_z ) Then
+*
             sig_t = (0.01745)**2
+*
          Else
+*
             sig_t = (Delta_z / Z_path)**2
+*
          Endif
 *
+*           Now we want to compute the error in P_T. The formula for a
+*           set of equally spaced measurements of fixed r-phi resolution
+*           is:
+*   
+*                                sig_rf        720
+*           sig_pt = ( pt**2 ) * ------- sqrt{------}
+*                                eB R**2       N+4
+*
+*           where sig_rf is the r-phi resolution, R is the "radial"
+*           length of the track, and N is the number of measurements.
+*
+*           Compute the "radial" length of the track. This is at most
+*           rmax_inst, but could be limited to Z_path * tan(theta)
+*
+         R_path = Min ( rmax_inst , abs ( Z_path * tan(theta) ) )
+*
+*           Compute sig_p. Note that the "7" is assuming that N=10. This
+*           can also be improved as we understand the geometry better.
+*
+         sig_p = 7.0 * Ptsq * Delta_R / (0.30 * B_sol * R_path**2 ) 
+*
+*           Generate a smeared transverse momentum. However, limit
+*           ourselves to at most a 90% error.
+*
+ 300     pt_new = sig_p * gausran(dummy)
+         If ( abs(pt_new) .gt. 0.9*pt ) Goto 300
+         pt_new = pt + pt_new
+*
 *           Next compute the length, L_scat to put into multiple
-*           scattering.
+*           scattering. We need to worry about the instrumented
+*           radius here, and assume that anything that wraps
+*           back in is ignored.
 *
-         if( radius .le. ( 0.5 * rmax ) ) then
+         if( radius .le. ( 0.5 * rmax_inst ) ) then
 *
-*              track cannot reach bore, must escape via an end.
-*              calculate the track length used in the multiple
+*              Track will not get out of the instrumented region.
+*              Calculate the track length used in the multiple
 *              scattering contribution, assume we use one turn
 *              for particle reconstruction. There are several
 *              special cases. If p_z = 0, then we are stuck,
@@ -150,7 +225,7 @@ c
                N_turns = ( pt / p(3) ) * (z_final / radius) / (2.*pi)
             ENDIF
 *
-            if ( nturns .le. 1. ) then
+            if ( N_turns .le. 1. ) then
 *
 *                 particle escapes (fore or aft) before going around once
 *
@@ -168,11 +243,12 @@ c
 *
          else
 *
-*              track may reach bore, may hit an end.
+*              The track can get outside the instrumented resion. It may 
+*              reach the bore or may hit an end.
 *              Calculate how many radians to hit the end,
 *              how many radians to hit the bore.
 *
-            If ( P(3) .EQ. 0.0 ) Then
+            If ( p(3) .eq. 0.0 ) Then
                N_turns_end = 1.0
             ElseIf ( radius .eq. 0.0 ) Then
                N_turns_end = 0.0
@@ -183,12 +259,12 @@ c
             IF ( radius .eq .0.0) Then
                N_turns_bor = 0.0
             Else
-               N_turns_bor = (2.*radius**2-rmax**2) / (2.*radius)
+               N_turns_bor = (2.*radius**2-rmax_inst**2) / (2.*radius)
                IF ( Abs(N_turns_bor) .gt. 1.0) Then
-                  N_turns_bor = 0
+                  N_turns_bor = 1.0
                Else
                   N_turns_bor = 
-     &            acos( (2.*radius**2-rmax**2) / (2.*radius) )
+     &            acos( (2.*radius**2-rmax_inst**2) / (2.*radius) )
 
                Endif
             Endif
@@ -203,34 +279,25 @@ c
 *
          endif
 *
-*           Now we want to compute the error in P_T
-*
-*        first two terms are chamber resolution,
-*        third is multiple scattering.
-*
-         R_path = Min(rmax,abs(3.50*tan(theta)))
-*
-         sig_p = 8.0 * Ptsq * Delta_R / (0.30 * B * R_path**2 ) 
-*
-*           Generate a smeared transverse momentum. However, limit
-*           ourselves to at most a 90% error.
-*
- 300     pt_new = sig_p * gausran(dummy)
-         If ( abs(pt_new) .gt. 0.9*pt ) Goto 300
-         pt_new = pt + pt_new
+*           Add the (sig_t)**2 from the z-measurement to theta error
+*           from multiple scattering.
 *
          sig_t = sig_t
-     &         + ( 0.0136 * p(4) * sqrt( L_scat/X0 ) / pmagsq )**2 
+     &         + ( 0.0136 * p(4) * sqrt( L_scat/X0_gas ) / pmagsq )**2 
+*
          sig_t = sqrt(sig_t)
 *
- 400     th_new = sig_t * gausran(dummy)
-         if ( ( th_new + theta ) .lt. 0.0 ) goto 400
+*           Compute the modified theta. We pull a bit of a cheat here in that
+*           we do not let theta get negative or larger than pi.
 *
-         th_new = theta + th_new
+ 400     the_new = theta + sig_t * gausran(dummy)
+         if ( ( the_new .lt. 0.0 ) .or. ( the_new .gt. pi  ) ) goto 400
+*
+*           Compute the smeared momentum vector.
 *
          p(1) = p(1) * pt_new/pt
          p(2) = p(2) * pt_new/pt
-         p(3) = pt_new / tan(th_new)
+         p(3) = pt_new / tan(the_new)
          p(4) = sqrt ( p(1)**2 + p(2)**2 + p(3)**2 + msq )
 *
       endif
