@@ -14,7 +14,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 
-#include <iostream.h>
+#include <stdio.h>
 #include <fstream.h>
 #include <stdlib.h>
 #include <TROOT.h>
@@ -31,7 +31,7 @@
 #include "TMCFastOfflineTrack.h"
 
 struct event_t {
-  struct ntraces_t traces;    // defined in TMCFastTOF.h
+  struct traces_t traces;    // defined in TMCFastTOF.h
   struct hepevt_t  mcevt;  // defined in TMCFastHepEvt.h
   struct ntrkoff_t offtrk;  // defined in TMCFastOfflineTrack.h
 };
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
   
   event_t event;
 
-  gSystem->Load("libTMCFast.so");
+  //  gSystem->Load("libTMCFast.so");
 
   Int_t comp   = 1;       // by default file is compressed
   Int_t split  = 1;       // by default, split Event in sub branches
@@ -181,7 +181,7 @@ int  ReadEvent(ifstream &inFile, event_t *event){
   event->offtrk.ntracks = ntracks;
   event->offtrk.trk_off = trk_off;
   event->traces.ntraces = ntraces;
-  event->traces.trace_par = trace;
+  event->traces.trace = trace;
   }
   return status;
 }

@@ -355,7 +355,9 @@ void TMCFastTrace::Print(ostream *os){
     GetPx()<<","<<
     GetPy()<<","<<
     GetPz()<<","<<
-    GetE() <<","<< ")"<<endl;
+    GetE() <<","<< ")  mass: "<<
+    sqrt(-( GetPx()* GetPx()+GetPy()* GetPy()+GetPz()* GetPz())
+	 +GetE()* GetE())<<endl;
   // line
   *os<<"\t\t (x,y,z): ("<< 
     GetX()<<","<<

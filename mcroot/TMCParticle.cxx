@@ -197,7 +197,10 @@ void TMCParticle::Print(ostream *os){
      << GetPx()<<","
      << GetPy()<<","
      << GetPz()<<","
-     << GetE()<<")"<<endl;
+     << GetE()<<")  Mass: "
+     <<  sqrt(-( GetPx()* GetPx()+GetPy()* GetPy()+GetPz()* GetPz())
+	      +GetE()* GetE())
+     <<endl;
 
   *os<<"Vertex"
      <<"\t v(x,y,z): ("

@@ -319,7 +319,10 @@ void TMCFastTOF::Print(ostream *os){
       GetPx(j)<<","<<
       GetPy(j)<<","<<
       GetPz(j)<<","<<
-      GetE(j) <<","<< ")"<<endl;
+      GetE(j) <<","<< ")  mass: "<<
+      sqrt(-( GetPx(j)* GetPx(j)+GetPy(j)* GetPy(j)+GetPz(j)* GetPz(j))
+	   +GetE(j)* GetE(j))<<endl;
+
     // line
     *os<<"\t\t (x,y,z): ("<< 
       GetX(j)<<","<<
