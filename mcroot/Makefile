@@ -28,7 +28,7 @@ LIBPP = -L$(PWA2000_ROOT)/lib -lpp
 ifeq "$(UNAME)" "Linux"
 # Linux with egcs
 CXX           = g++
-CXXFLAGS      = -O2 -g -Wall -fno-rtti -fno-exceptions -fPIC -I$(ROOTSYS)/include -I/home/halld/include  -I$(PWA2000_ROOT)/include
+CXXFLAGS      = -O2 -g -Wall -fno-exceptions -fPIC -I$(ROOTSYS)/include -I/home/halld/include  -I$(PWA2000_ROOT)/include
 LD            = g++
 LDFLAGS       = -g
 SOFLAGS       = -shared
