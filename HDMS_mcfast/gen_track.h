@@ -1,6 +1,6 @@
 /************************************************
  * gen_track.h   see gen_track.inc
- * Map2Fortran Common Block Structure
+ * Map FORTRAN common block to C data structure
  * Paul Eugenio
  * Carnegie Mellon University
  * 28 Sept 98

@@ -1,6 +1,6 @@
 /************************************************
  * offline_track.h 
- * Map2Fortran Common Block Structure
+ * Map FORTRAN common block to C data structure
  * Paul Eugenio
  * Carnegie Mellon University
  * 28 Sept 98
@@ -48,7 +48,7 @@ struct trk_off1 {
 extern struct trk_off1 trk_off1_ ;
 extern struct trk_off2 trk_off2_ ;
 
-#endif
+
 
 /*
  * trk_off1.trk_off_num = the number of smeared tracks
@@ -57,3 +57,5 @@ extern struct trk_off2 trk_off2_ ;
  *                           i'th smeared track
  */
 
+
+#endif

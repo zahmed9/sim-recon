@@ -54,7 +54,7 @@ The above packages support only the following platforms:
 	setenv MCFAST_DIR /dsk19/halld/source/mcfast
 	setenv STDHEP_DIR /dsk19/halld/source/stdhep
 	setenv QQ_DIR /dsk19/halld/source/qq
-	source $MCFAST_DIR/ups/setup.csh
+	source $HDMS_MCFAST_DIR/setup
 	source $STDHEP_DIR/ups/setup.csh
 	source $QQ_DIR/ups/setup.csh
 
