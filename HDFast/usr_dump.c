@@ -17,15 +17,14 @@
 #include<stdcnt.h>
 #include<offline_track.h>
 #include<trace.h>
-#include<tof.h>
 #include<calor_hits.h>
 #include<usr_lgd.h>
-#include <dev_hit.h>
-#include <hit_track.h>
+//#include <dev_hit.h>
+//#include <hit_track.h>
 
 
 struct offline_track_struct *trk_off;
-struct trace_s *trace,tmp_trace[50],tmp2_trace[20];
+struct trace_s *trace,*trace_point,tmp_trace[50],tmp2_trace[20];
 struct heppart_t *heppart;
 
 struct ntraces_t {
@@ -49,17 +48,16 @@ struct cal_hits_t {
 */
 
 struct event_t {
-  struct ntraces_t traces;    /* defined in TMCFastTOF.h */
-  struct ntraces_t ctraces;    /* cerenkov trace points */
-  struct hepevt_t  mcevt;  /* defined in TMCFastHepEvt.h */
-  struct ntrkoff_t offtrk;  /* defined in TMCFastOfflineTrack.h  */
-  struct cal_hits_t calor0; /* defined in TMCFastCalorimeter.h */
+  struct ntraces_t traces;    // defined in TMCFastTraceEvent.h 
+  struct hepevt_t  mcevt;  // defined in TMCFastHepEvt.h 
+  struct ntrkoff_t offtrk;  // defined in TMCFastOfflineTrack.h 
+  struct cal_hits_t calor0; // defined in TMCFastCalorimeter.h 
   lgd_smearedparts_t *lgdSmears;  
-  struct dev_hits_t *devhits; 
-  struct dev_hits_t *devhits_cdc;  
+  //  struct dev_hits_t *devhits; 
+  //struct dev_hits_t *devhits_cdc;  
 };
 
-int usr_hits(int devtype,int devnum,struct dev_hits_t *devhits);
+//int usr_hits(int devtype,int devnum,struct dev_hits_t *devhits);
 void usr_calor(struct cal_hits_t *Calor);
 
 void usr_dump(void){ 
@@ -68,17 +66,17 @@ void usr_dump(void){
   double rloc,zloc;
    
   int trk_off_num=0;
-  int trace_num=0,trace_num2=0;
+  int trace_num=0,trace_num2=0,ntrace_points;
   int nevhep,nhep=0;
   extern int Debug,SaveUsingMCFIO;
   struct event_t event;
   extern lgd_smearedparts_t *LgdParts;
 
-  int devtype, devnum;
-  struct dev_hits_t devhits;
-  struct dev_hits_t devhits_cdc;
+  //int devtype, devnum;
+  //struct dev_hits_t devhits;
+  //struct dev_hits_t devhits_cdc;
   /*
-   * Allocate memory and copy the hepevt_ common block
+   * Allocate memory and copy the hepevt_ common block (i.e. the mc input )
    */
   nevhep=hepevt_.nevhep;
   nhep=hepevt_.nhep;
@@ -99,7 +97,7 @@ void usr_dump(void){
   }
 
   /*
-   * Allocate mem and copy the trk_off1_ common block
+   * Allocate mem and copy the trk_off1_ common block (i.e. the smeared tracks)
    */
   trk_off_num=trk_off_c_.trk_off_num;
   trk_off = malloc(sizeof(struct offline_track_struct)*trk_off_num);
@@ -109,247 +107,100 @@ void usr_dump(void){
 
 
   /*
-   * Allocate mem and copy only the TOF traces
+   * Allocate mem and copy traces
    * from the trace_par_c_ common block
    */
-  trace_num=0;
-  trace_num2=0;
-  for(i=0;i<trace_par_c_.trace_num;i++){
-    int haveIt=0, IsAHadShower;
- 
-    /*
-     * Kludge fix the hits (they are missing the the trace index)
-     */
-    /* for consistency use FORTRAN indexology i.e. start w/ 1 */
-    /**
-     * if(trace_par_c_.trace_par[i].hit != 0)
-     * hit_trk_c_.hit_trk[trace_par_c_.trace_par[i].hit - 1].trace = i+1;
-     *
-     **/
+
+
+  // 
+  // alocate and copy
+  //
+  ntrace_points = trace_par_c_.trace_num;
+  trace_point = malloc(sizeof(struct trace_s)*ntrace_points);
+  
+  for(i=0;i< ntrace_points;i++){
+    // if(trace_par_c_.trace_par[i].hit != 0) // Kludge fix the hits (they are missing the the trace index) 
+                                           // for consistency use FORTRAN indexology i.e. start w/ 1
+      //  hit_trk_c_.hit_trk[trace_par_c_.trace_par[i].hit - 1].trace = i+1;
     
-
-    //
-    // Look for hadron conversion in the trace list and skipp all traces after it
-    //
-    switch(trace_par_c_.trace_par[i].type){
-    case  HADRON_SHOWER:
-      IsAHadShower=1;
-      break;
-    case PRODUCTION:
-      IsAHadShower=0;
-      break;
-    default:
-    }
-
-  
-
-    /* find the TOF traces */
-   
-    if(Debug==2){
-      zloc=trace_par_c_.trace_par[i].w.z;
-      rloc=sqrt(trace_par_c_.trace_par[i].w.x * 
-		trace_par_c_.trace_par[i].w.x +
-		trace_par_c_.trace_par[i].w.y * 
-		trace_par_c_.trace_par[i].w.y);
-      fprintf(stderr,
-	"typ: %d plane: %d hit: %d hep: %d path: %lf time: %lf tau: %lf loc(r,z): %lf %lf  m: %lf\n",
-	      trace_par_c_.trace_par[i].type,
-	      trace_par_c_.trace_par[i].plane,
-	      trace_par_c_.trace_par[i].hit,
-	      trace_par_c_.trace_par[i].hep,
-	      trace_par_c_.trace_par[i].path,
-	      trace_par_c_.trace_par[i].time,
-	      trace_par_c_.trace_par[i].tau,
-	      rloc,zloc, sqrt( 
-			      trace_par_c_.trace_par[i].w.e * trace_par_c_.trace_par[i].w.e 
-			      -(trace_par_c_.trace_par[i].w.px * trace_par_c_.trace_par[i].w.px +
-				trace_par_c_.trace_par[i].w.py * trace_par_c_.trace_par[i].w.py +
-				trace_par_c_.trace_par[i].w.pz * trace_par_c_.trace_par[i].w.pz ))
-
-);
-
-
-
-    }/* end of debug */
-    if( ! IsAHadShower)
-    if(((trace_par_c_.trace_par[i].type ==PRODUCTION && 
-       trace_par_c_.trace_par[i].plane == PRODUCTION_PLANE) ||
-       (trace_par_c_.trace_par[i].type ==CENTRAL &&
-	(int)(sqrt(trace_par_c_.trace_par[i].w.x * 
-		   trace_par_c_.trace_par[i].w.x +
-		   trace_par_c_.trace_par[i].w.y * 
-		   trace_par_c_.trace_par[i].w.y )+ 0.5)
-        == (int)(CTOF_R)) ||
-       (trace_par_c_.trace_par[i].type ==FORWARD &&
-	(int)(trace_par_c_.trace_par[i].w.z +.5) == (int)(FTOF_Z))) &&
-       trace_par_c_.trace_par[i].w.q){
-      /* 
-       * we have a TOF trace 
-       */
-      if(Debug==2)
-	fprintf(stderr, "\t^^^^ Found a tof trace point ^^^^^\n");
-      haveIt=1;
-      tmp_trace[trace_num] = trace_par_c_.trace_par[i];
-      trace_num++;
-    }
-    /*
-     * Get the Cerenkov trace points
-     */
-    if( ! IsAHadShower)
-    if(trace_par_c_.trace_par[i].type ==FORWARD && 
-       (int)(trace_par_c_.trace_par[i].w.z +.5) == (int)(CERENKOV_Z)){
-      /* 
-       * we have a CERENKOV trace point 
-       */
-      if(Debug==2)
-	fprintf(stderr, "\t^^^^ Found a ceren trace point ^^^^^\n");
-      haveIt=1;
-      tmp2_trace[trace_num2] = trace_par_c_.trace_par[i];
-      trace_num2++;
-    }
-    if(Debug==1&&haveIt==1){    
-      zloc=trace_par_c_.trace_par[i].w.z;
-      rloc=sqrt(trace_par_c_.trace_par[i].w.x * 
-		trace_par_c_.trace_par[i].w.x +
-		trace_par_c_.trace_par[i].w.y * 
-		trace_par_c_.trace_par[i].w.y);	
-      fprintf(stderr,
-	      "typ: %d plane: %d nhit: %d hep: %d path: %lf time: %lf tau: %lf loc(r,z): %lf %lf q:%lf\n",
-	      trace_par_c_.trace_par[i].type,
-	      trace_par_c_.trace_par[i].plane,
-	      trace_par_c_.trace_par[i].hit,
-	      trace_par_c_.trace_par[i].hep,
-	      trace_par_c_.trace_par[i].path,
-	      trace_par_c_.trace_par[i].time,
-	      trace_par_c_.trace_par[i].tau,
-	      rloc,zloc,trace_par_c_.trace_par[i].w.q );
-    }
-  }
-  /* alocate and copy */
-  trace = malloc(sizeof(struct trace_s)*trace_num);
-  for(i=0;i<trace_num;i++){
-    trace[i]= tmp_trace[i];
-    /*
-     * Change trace type to 41 for CTOF & 42 for FTOF
-     */
     
-    if( trace[i].type ==CENTRAL &&
-	(int)(trace[i].w.x * trace[i].w.x + trace[i].w.y * trace[i].w.y + 0.1)
-	== (int)(CTOF_R*CTOF_R)){
-      trace[i].type = 41 /*TMCFAST_CENTRAL_TRACE*/;
-    }
-    if(trace[i].type ==FORWARD &&
-       (int)(trace[i].w.z) == (int)(FTOF_Z))
-      trace[i].type = 42 /*TMCFAST_FORWARD_TRACE*/;
+    
+    trace_point[i]=trace_par_c_.trace_par[i];
+    if(Debug==2) 
+      fprintf(stderr,
+	      "trace typ: %d plane: %d hit: %d hep: %d path: %lf time: %lf tau: %lf \n",
+	      trace_point[i].type,
+	      trace_point[i].plane,
+	      trace_point[i].hit,
+	      trace_point[i].hep,
+	      trace_point[i].path,
+	      trace_point[i].time,
+	      trace_point[i].tau);
+    
   }
-  
-  
 
-
-
-  /*
-   * Get the tracking hits for devtype 3 devnum 1
-   */
-  /* VTX Hits */
-  if(usr_hits(3,1,&devhits)){ } 
-    /* we have some hits */
+  //
+  // Get the tracking hits for devtype 3 devnum 1
+   //
+  // VTX Hits
+  //if(usr_hits(3,1,&devhits)){ } 
+  // we have some hits
 
   
-  /* CDC Hits */
-  usr_hits(3,2,&devhits_cdc); 
+  // CDC Hits 
+  //usr_hits(3,2,&devhits_cdc); 
 
-  /*
-   *  Get the Colorimetry hits
-   * Calorimetry Debug=3
-   */
+
+
+
+  //
+  //  Get the Colorimetry hits
+  // Calorimetry Debug=3
+  //
   if(Debug==3)
     usr_dumpCalor();
-  usr_calor(&(event.calor0));
+
+
+  //
+  // Now set the event pointers.
+  //
+
+  usr_calor(&(event.calor0)); //  Get the Colorimetry hits
  
-  /* 
-  { * This is old code and not used in HDFast after 1 Apr 1999.
-   * It will eventually be remove after the new mcfast code
-   * is well verified.
-   *
-    int i,j,ical=0;
-    cal_hit *hit;
-    cal_hit_tracks *tr;
-    
-    if(Debug==3){
-      for(i=0;i<1;i++)
-	fprintf(stderr,"Num_cal_hits(%d)= %d\n",i,num_cal_hits_(i));
-      
-      for(i=0; i< MCFNumHitCal[ical]; i++) {
-	hit = MCFCalHits[ical][i];
-	if (hit == NULL){
-	  fprintf(stderr," Colorimeter hit has null pointer\n");
-	  continue;
-	}
-	**************** Now dump cal info ***************
-	fprintf(stderr,
-		"coord1 cell#: %d coord2 cell#: %d e_mip: %f  e_em: %f  e_had: %f\n",
-		hit->icr1,hit->icr2,hit->e_mip,hit->e_em,hit->e_had);
-	fprintf(stderr,"Ntracks: %d status: %d\n",hit->n_tracks,hit->status);
-	for (j=0, tr=hit->info_tr; j<hit->n_tracks; j++, tr++) 
-	  fprintf(stderr,"\ttrackNum: %d percent_e_tot: %f\n",tr->tr_num,tr->percent_e_tot);
-	fprintf(stderr,"\n");
-      }
-    }
-  }*******************/
-
-
-
-
-  /*
-   * Now set the event pointers.
-   */
   event.mcevt.nevhep= nevhep;
   event.mcevt.nhep= nhep;
   event.mcevt.heppart= heppart;
-
+  
   event.offtrk.ntracks= trk_off_num;
   event.offtrk.trk_off= trk_off;
-
-  event.traces.ntraces= trace_num;
-  event.traces.trace_par= trace;
-
-  event.ctraces.ntraces= trace_num2;
-  event.ctraces.trace_par= tmp2_trace;
   
-  
-  /* 
-  event.calor0.nCalHits =  MCFNumHitCal[0];
-  event.calor0.CalorHits = MCFCalorHitss[0];
-  */
+  event.traces.ntraces= ntrace_points;
+  event.traces.trace_par= trace_point;
 
-
-  /*
-   * event.calor1.nCalorHitss = MCFNumHitCal[1];
-   * event.calor1.CalorHits = MCFCalorHitss[1];  
-   */
   event.lgdSmears = LgdParts;
   
-  /*
-   * set device hits pointers.
-   */
-  event.devhits = &devhits; 
+  ///
+  // set device hits pointers.
+  ///
+  //event.devhits = &devhits; 
 
-  event.devhits_cdc = &devhits_cdc; 
-  /*
-   * Create C++ objects and save 
-   * them to a ROOT Tree.
-   */
+  //event.devhits_cdc = &devhits_cdc; 
+  
+
+  //
+  // Create C++ objects and save 
+  // them to a ROOT Tree.
+  //
   usr_mcfast2root(&event);
 
-   /*
-    * Free the allocated memory
-    */
+   
+  // Free the allocated memory
+  //
    free(heppart);
    free(trk_off);
-   free(trace);
- /*
-   * Free the calor pointer memory
-   */
+   free(trace_point);
+ 
+   // Free the calor pointer memory   
   for(i=0;i<event.calor0.nCalHits;i++){
     free(event.calor0.CalorHits[i]->info_tr);
     free(event.calor0.CalorHits[i]);

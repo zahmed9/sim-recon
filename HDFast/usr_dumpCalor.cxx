@@ -12,8 +12,8 @@
 ////////////////////////////////////////////////////////////////////////
  
 
-#include <iostream.h>
-#include <fstream.h>
+#include <iostream>
+#include <fstream>
 #include <stdlib.h>
 #include <vector>
 #include <CalorInfo.hh>

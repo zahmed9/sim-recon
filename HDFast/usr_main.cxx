@@ -15,8 +15,9 @@
 ////////////////////////////////////////////////////////////////////////
 
 
-#include <iostream.h>
-#include <fstream.h>
+#include <iostream>
+#include <fstream>
+
 #include <stdlib.h>
 #include <time.h>
 #include <TROOT.h>
@@ -29,8 +30,11 @@
 #include <TSystem.h>
 
 #include "TMCFastHepEvt.h"
-#include "TMCFastTOF.h"
+//#include "TMCFastTOF.h"
 #include "TMCFastOfflineTrack.h"
+
+
+using namespace std;
 
 // undefined reference errors occur because errno is not defined
 // on RHEL3 GCC3.2. Define it here to avoid this.
