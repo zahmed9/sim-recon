@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 ############################################
 #
 # run_mcfast: perl script for running
