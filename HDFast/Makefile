@@ -37,8 +37,32 @@ OutPutOpt     = -o
 
 ROOTLIBS      = $(shell root-config --libs)
 ROOTGLIBS     = $(shell  root-config --glibs)
-    
+ROOTCFLAGS     = $(shell  root-config --cflags)
 
+
+# Substitute some reasonable settings for some variables
+# that may not be set from the environment
+ifndef UNAME
+   UNAME = $(shell uname)
+endif
+ifndef MCFINC
+   MCFINC = $(MCFAST_DIR)/inc
+endif
+ifndef MCFLIB
+   MCFLIB = $(MCFAST_DIR)/lib.$(UNAME)
+endif
+ifndef CRNLIB
+   CRNLIB = $(CERN)/$(CERN_LEVEL)/lib
+endif
+ifndef QQLIB
+   QQLIB = $(QQ_DIR)/lib/libqqlib_noncleo.a
+endif
+ifndef KORB
+   KORB = $(QQ_DIR)/lib/libkorb.a
+endif
+ifndef TYPSCN
+   TYPSCN = $(QQ_DIR)/lib/libcleoks.a
+endif
 
 
 TMCFAST_INC = -I$(HALLD_HOME)/src/mcroot
@@ -51,7 +75,8 @@ hostname = $(shell hostname)
 MAP = 
 COM = g++
 F77bb = g77
-CFLAG = -g
+CFLAG = -g $(ROOTCFLAGS) -I../mcroot
+CXXFLAGS = $(CFLAG)
 DPG	:= get_c_dep
 FDPG	:= mdep
 DEPFILE  := GNUmakefile.depend
@@ -104,8 +129,12 @@ ifeq "$(UNAME)" "Linux"
   LOPTION= -O0 -W1,-taso
 
 # ABLIBS = $(HALLDLIBS)
- F90LIBS = $(HALLD_HOME)/src/f90_libs
-  LIBS := -L$(F90LIBS) -lU77 -lV77 -lf77math -lfio    
+ifdef HALLD_EXTERNALPACKAGES
+  F90LIBS = $(HALLD_EXTERNALPACKAGES)/f90_libs
+else
+  F90LIBS = $(HALLD_HOME)/src/f90_libs
+endif  
+  LIBS += -L$(F90LIBS) -lU77 -lV77 -lf77math -lfio    
 MEM_CHECK = -lchecker
 #  LIBS += -L/usr/local/packages/egcs/lib/gcc-lib/i586-pc-linux-gnu/egcs-2.91.57
   LIBS += -lg2c                                          #g77 runtime
