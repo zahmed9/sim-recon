@@ -11,7 +11,7 @@
 
 # The first 2 packages below can be obtained from the Halld CVS repository
 # now set these locations
-setenv HDFAST_DIR $HALLD_HOME/src/HDFast_Linux
+setenv HDFAST_DIR $HALLD_HOME/src/HDFast
 setenv STDHEP_TRANS_DIR $HALLD_HOME/src/stdhep_translators_linux
 
 
