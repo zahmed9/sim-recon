@@ -51,8 +51,10 @@ derror_t MyProcessor::init(void)
 	float cmax = 120.0; // in cm.
 
 	axes = new TH2F("axes","",10,-cmax,cmax,10,-cmax,cmax);
+	axes->SetStats(0);
 
 	axes_phiz = new TH2F("axes_phiz","",10,0.0,650.0, 10, -2.0*M_PI, 2.0*M_PI);
+	axes_phiz->SetStats(0);
 
 	return NOERROR;
 }
