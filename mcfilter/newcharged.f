@@ -32,8 +32,9 @@
 *        R_path: Path length of the track in R
 *        L_scat: path length of the track for multiple scattering.
 *        Z_final:
+*        Z_one:  z coordinate at which we get our first hit.
 *
-      real radius , Z_path , R_path , L_scat , Z_final
+      real radius , Z_path , R_path , L_scat , Z_final , Z_one
 *
 *        N_turns:     How amny turns
 *        N_turns_end: How many turns to the end of the magnet
@@ -151,7 +152,9 @@ c
 *           rmax_inst / tan(theta) == z length where we leave instrumentation.
 *           abs(z_final)           == Exit the ends of the magnet.
 *
-         Z_path = min( (rmax_inst/tan(theta)) , abs(z_final) )
+         Z_path = min( abs(rmax_inst*cos(theta)/sin(theta)) 
+     &               , abs(z_final))
+         Z_one  = abs(rlyr1*cos(theta)/sin(theta))
 *
 *           We use the z-path length in conjunction with the z-resolution
 *           to compute the error in theta.
@@ -165,13 +168,13 @@ c
 *           as simply one here. This can be improved as we determine
 *           more precisely what the chamber spacing is.
 *
-         If ( Z_path .le. 57.3*Delta_z ) Then
+         If ( (Z_path-Z_one) .le. 57.3*Delta_z ) Then
 *
             sig_t = (0.01745)**2
 *
          Else
 *
-            sig_t = (Delta_z / Z_path)**2
+            sig_t = (Delta_z / (Z_path-Z_one) )**2
 *
          Endif
 *
@@ -187,9 +190,12 @@ c
 *           length of the track, and N is the number of measurements.
 *
 *           Compute the "radial" length of the track. This is at most
-*           rmax_inst, but could be limited to Z_path * tan(theta)
+*           rmax_inst, but could be limited to Z_path * tan(theta).
+*           To avoid divide-by-zero, we make sure the radius never
+*           gets smaller than 1cm.
 *
          R_path = Min ( rmax_inst , abs ( Z_path * tan(theta) ) )
+         R_path = Max ( 0.01 , R_path-rlyr1 )
 *
 *           Compute sig_p. Note that the "7" is assuming that N=10. This
 *           can also be improved as we understand the geometry better.
