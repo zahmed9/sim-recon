@@ -158,8 +158,9 @@ derror_t MyProcessor::PlotSlope(void)
 		TH1F *hist = factory->GetSlopeDensityHistogram(i);
 		if(hist){
 			hist->SetLineColor(colors[i%5]);
-			hist->Fit("gaus","0");
-			hist->GetFunction("gaus")->ResetBit(1<<9); // make function draw with histo (deep in TH1 document)
+			float maxloc = hist->GetBinCenter(hist->GetMaximumBin());
+			hist->Fit("gaus","0", "", maxloc-0.002, maxloc+0.002);
+			//hist->GetFunction("gaus")->ResetBit(1<<9); // make function draw with histo (deep in TH1 document)
 			hist->Draw("same");
 		}
 	}
