@@ -13,6 +13,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "TObject.h"
+#include "TRandom.h"
+#include "TMath.h"
 #include "TClonesArray.h"
 #include "TMCFastOfflineTrack.h"
 #include "TMCFastHepParticle.h"
@@ -46,7 +48,9 @@ private:
 public:
   TMCParticle() { }
   TMCParticle(TMCFastHepParticle &heppart,TMCFastOfflineTrack &offtrk,Int_t track);
-  TMCParticle(TMCFastHepParticle &heppart,Double_t eSmeared);  
+  TMCParticle(TMCFastHepParticle &heppart,Double_t eSmeared); 
+  TMCParticle(TMCFastHepParticle &heppart,Double_t eSmeared,
+	      Double_t z_resolution); 
   TMCParticle(TLGDparticle &lgdpart);  
   virtual ~TMCParticle() ;
 

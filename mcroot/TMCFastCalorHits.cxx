@@ -56,6 +56,15 @@ TMCFastCalorHits::~TMCFastCalorHits()
   //
   this->Clear();
 }
+//____________________________________________________________________________
+Double_t TMCFastCalorHits::GetEtotal()
+{
+  // Return Etotal = Ehad + Eem + Emip
+  //
+  
+  Double_t Etotal = GetEem() + GetEmip() + GetEhad();
+  return Etotal;
+}
 
 //____________________________________________________________________________
 void TMCFastCalorHits::Print(ostream *os){

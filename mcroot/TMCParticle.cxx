@@ -49,6 +49,49 @@ TMCParticle::TMCParticle(TMCFastHepParticle &heppart,Double_t eSmeared){
   SetMaker(MADE_FROM_BCAL) ;
   SetStatis(0); // currently not used
 }  
+TMCParticle::TMCParticle(TMCFastHepParticle &heppart,Double_t eSmeared,Double_t z_resolution){
+  //
+  // Create a BCAL gamma with uncertainty in z(cm).
+  //
+
+  Double_t e,P,L,Lx,Ly,Lz,LzSmeared,L_Smeared;
+  
+  e=heppart.GetE();
+  P=e; //for ease of reading
+  
+  const Double_t R=65.0; // Inner radius of the BCAL
+  
+  // find vector length from vertex to hit
+  L = R*P/(heppart.GetPt());
+
+  // find components of L 
+  Lx = L*(heppart.GetPx())/P;
+  Ly = L*(heppart.GetPy())/P;
+  Lz = L*(heppart.GetPz())/P;
+  
+  // Smear the vector length
+  LzSmeared = gRandom->Gaus( Lz, z_resolution);
+  L_Smeared = TMath::Sqrt( R*R + LzSmeared*LzSmeared);
+  // cerr<<" Lz, z_resolution,  LzSmeared "
+  //    <<Lz<<" "<<z_resolution<<" "
+  //    <<LzSmeared<<endl;
+
+  // Set the smeared four-momentum
+  SetPx(Lx/L_Smeared*eSmeared); 
+  SetPy(Ly/L_Smeared*eSmeared); 
+  SetPz(LzSmeared/L_Smeared*eSmeared); 
+  SetE(eSmeared) ;
+  // set vertex using the generated vertex (which is assigned by mcfast)
+  SetX(heppart.GetVx()) ; 
+  SetY(heppart.GetVy()) ;
+  SetZ(heppart.GetVz()) ;
+  
+  SetCharge(0);
+  SetIdHep(heppart.GetIdhep()) ; // this better be a gamma!
+  SetHepIndex(heppart.GetIndex());
+  SetMaker(MADE_FROM_BCAL) ;
+  SetStatis(0); // currently not used
+}  
 
 TMCParticle::TMCParticle(TLGDparticle &lgdpart){
 

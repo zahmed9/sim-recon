@@ -27,7 +27,9 @@ private:
   static TClonesArray *fgParticles; // dummy needed to init TClonesArray
 public:
   TMCFastHepEvt();    
-  TMCFastHepEvt(struct hepevt_t *evt);
+  //  TMCFastHepEvt(TMCFastHepEvt &hepevt); //  copy constructure
+  // void operator=(TMCFastHepEvt &hepevt); // assignment operator
+  TMCFastHepEvt(struct hepevt_t *evt);  
   virtual ~TMCFastHepEvt() ;
   void Clear();
   Int_t  GetNevhep() const { return fnevhep; }

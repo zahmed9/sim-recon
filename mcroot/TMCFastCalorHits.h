@@ -65,6 +65,7 @@ public:
   Int_t GetHitIndex() const{return this->fHitIndex;}
   Int_t GetX1CellIndex() const { return this->fX1CellIndex; }
   Int_t GetX2CellIndex() const { return this->fX2CellIndex; }
+  Double_t GetEtotal();
   Float_t GetEmip() const { return this->fEmip; }
   Float_t GetEem() const { return this->fEem; }
   Float_t GetEhad() const { return this->fEhad; }

@@ -61,6 +61,12 @@ TMCFastHepParticle::~TMCFastHepParticle()
   // call Clear()
    Clear();
 }
+//____________________________________________________________________________
+Double_t TMCFastHepParticle::GetPt()
+{
+  // return Sqrt( Px*Px +Py*Py)
+  return TMath::Sqrt(GetPx()*GetPx() + GetPy()*GetPy());
+}
 
 //____________________________________________________________________________
 void TMCFastHepParticle::Print(ostream *os){

@@ -1,130 +1,247 @@
-<!DOCTYPE HTML PUBLIC "-// IETF/DTD HTML 2.0// EN">
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
 <html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.36 i686) [Netscape]">
+   <title> Hall D Monte Carlo Framework</title>
 <!--                                             -->
 <!-- Author: ROOT team (rootdev@hpsalo.cern.ch)  -->
 <!--                                             -->
 <!--   Date: Thu Jan  7 10:01:39 1999            -->
 <!--                                             -->
-<head>
-<title> Hall D Monte Carlo Framework</title>
 </head>
-<body BGCOLOR="#ffffff" LINK="#0000ff" VLINK="#551a8b" ALINK="#ff0000" TEXT="#000000">
-<a name="TopOfPage"></a>
-<!--BEGIN-->
+<body text="#000000" bgcolor="#FFFFFF" link="#0000FF" vlink="#551A8B" alink="#FF0000">
+<a NAME="TopOfPage"></a><!--BEGIN-->
 <center>
-<h1> Hall D Monte Carlo Framework</h1><img   SRC="mcflow.gif" align=center> 
-<hr width=300>
-</center>
+<h1>
+<b><font face="Arial,Helvetica"><font size=+4>Monte Carlo Framework</font></font></b></h1></center>
 
-A Monte Carlo framework has been developed to understand the performance of key aspects of the HALL D  detector systems.  The Monte Carlo program is in general a pipeline of modules.  These modules consist of individual programs and library routines which utilize common event I/O formats.
-<P>
-First, a Monte Carlo four-vector generator is used for generating phase-space distributed events.  Next in the pipeline is the detector simulation, HDFast, which is a fast and flexible simulation program based upon the MCFast framework developed by the simulation group at Fermilab. The Monte Carlo output is a ROOT Tree data file ( *.rdt file  -root data tree).
+<center><img SRC="mcflow.gif" hight="400"  align=CENTER></center>
 
-<h1><h3>
-<ul> Main Topics<p>
-<li><a href="#genr8">genr8</a>
-<li><a href="#hdfast ">HDFast</a>
-<li><a href="#rootio ">ROOT I/O</a>
-<li><a href="#output ">HDFast output structure</a>
-<li><a href="#mcroot ">Hall D MCRoot Development</a>
+<center>
+<h2>
+<b><font face="Times New Roman,Times"><font size=+1>&nbsp;http://www.phys.cmu.edu/halld/MCS/mc_framework.html</font></font></b></h2></center>
+
+<center>
+<hr width=500>
+<hr width=500></center>
+A Monte Carlo framework has been developed to understand the performance
+of key aspects of the HALL D detector systems. The Monte Carlo program
+is in general a pipeline of modules. These modules consist of individual
+programs and library routines which utilize common event I/O formats.
+<p>First, a Monte Carlo four-vector generator is used for generating phase-space
+distributed events. Next in the pipeline is the detector simulation, HDFast,
+which is a fast and flexible simulation program based upon the MCFast framework
+developed by the simulation group at Fermilab. The Monte Carlo output is
+a ROOT Tree data file ( *.rdt file -root data tree).
+<h2><ul>Main Topics
+<br>&nbsp;
+<br>&nbsp;
+<li>
+<a href="#genr8">Genr8</a></li>
+
+<li>
+<a href="#hdfast">HDFast</a></li>
+
+<li>
+<a href="#rootio">ROOT I/O</a></li>
+
+<li>
+<a href="#output">HDFast output structure</a></li>
+
+<li>
+<a href="#mcroot">Hall D MCRoot Development</a></li>
 </ul>
-</h3></h1>
+</h2>
+<h2>
+<a NAME="genr8" href="http://www.phys.cmu.edu/halld/halld_notes/Note_011"></a><a href="http://www.phys.cmu.edu/halld/halld_notes/Note_011" name="genr8">Genr8</a></h2>
+Monte Carlo events can be generated using the program <i>genr8 </i>or <i>cwrap
+</i>. Both programs generate peripheral phase space Monte Carlo events
+where events can be produced which describe a complex decay chain of intermediary
+states. Both meson and baryon decay chains are allowed, but with a limiting
+assumption of a <i>t</i>-channel production process.
+<h2>
+<a NAME="hdfast"></a>HDFast</h2>
+HDFast is a fast and flexible simulation program based upon the <a href="http://www-pat.fnal.gov/mcfast.html">MCFast</a>
+framework developed by the simulation group at Fermilab. MCFast consists
+of a set of modularized Monte Carlo library routines; it is designed to
+perform parameterized tracking by assembling a covariance matrix for each
+track that takes into account materials, efficiencies, and resolutions
+for all measurements planes, and use this matrix to smear the track parameters
+randomly. In principle, the distribution of smeared tracks produced by
+this method would be similar to the distribution of real tracks that were
+measured by a real detector(with the same parameters) and analyzed with
+an idealized track fitting procedure.
+<h2>
+<a NAME="root" href="http://root.cern.ch"></a><a href="http://root.cern.ch" name="root">ROOT</a></h2>
 
-<h3><a name="genr8" href=http://www.phys.cmu.edu/halld/halld_notes/Note_011 >genr8 </a></h3>
-Monte Carlo events can be generated using the program <em> genr8 </em> or  <em> cwrap </em>.  Both programs generate peripheral phase space Monte Carlo events where events can be produced which describe a complex decay chain of intermediary states.  Both meson and baryon decay chains are allowed, but with a limiting assumption of a <em>t</em>-channel production process. 
-
-<P>
-<h3><a name="hdfast">HDFast </a></h3>
-HDFast is a fast and flexible simulation program based upon the <a href="http://www-pat.fnal.gov/mcfast.html">MCFast</a> framework developed by the simulation group at Fermilab.  MCFast consists of a set of modularized Monte Carlo library routines; it is designed to perform parameterized tracking by assembling a covariance matrix for each track that takes into account  materials, efficiencies, and resolutions for all measurements planes, and  use this matrix to smear the track parameters randomly. In principle, the distribution of smeared tracks produced by this method would be similar to the distribution of real tracks that were measured by a real detector(with the same parameters) and analyzed with an idealized track fitting procedure.
-
-<P>
-<h3><a name="rootio" href="http://root.cern.ch" >ROOT</a> I/O </h3>
-Currently, the Hall D Collaboration does not subscribe to any standard input/output formats. It is expected that Hall D software development will have its foundation based on the C++ object-oriented programing language.  Root is not a computer program, but instead it is a set of over 300 C++ classes (a class is a piece of C++ code that defines variables and functions related to a specific purpose) and a interactive C++ interpreter.
-<P>
-The ROOT framework includes a set of classes to support I/O to/from machine independent files.  The I/O system is designed to be particularly efficient for objects frequently manipulated by modern high volume data experiments.
-
-<P>
-<h3><a name="output"> HDFast output structure</h3>
-HDFast creates and writes data to a ROOT data tree file.  A ROOT tree is a dtat container similar to but with much less limitations than itape or BOS.  Each event is contained in a super-branch which in turns contains the data branches(a data branch is like a itape group or BOS bank).  Each branch contains the data structure of a defined class.  Adding new branches reduces to creating a class which inherits from the ROOT TObject class.
-
-Currently HDFast save 3 branches:
+<center>
+<h2>
+What is ROOT?</h2></center>
+Root is not a computer program, but instead it is a set of over 300 C++
+classes (a class is a piece of C++ code that defines variables and functions
+related to a specific purpose) and a interactive C++ interpreter. The description
+below is taken from the <a href="http://root.cern.ch/root/Mission.html">ROOT
+mission statement</a>.
+<p>&nbsp;<i>"The ROOT system provides a set of OO frameworks with all the
+functionality needed to handle and analyse large amounts of data in a very
+efficient way. Having the data defined as a set of objects, specialised
+storage methods are used to get direct access to the separate attributes
+of the selected objects, without having to touch the bulk of the data.
+Included are histogramming methods in 1, 2 and 3 dimensions, curve fitting,
+function evaluation, minimisation, graphics and visualization classes to
+allow the easy setup of an analysis system that can query and process the
+data interactively or in batch mode.</i>
+<p><i>Thanks to the builtin CINT C++ interpreter the command language,
+the scripting, or macro, language and the programming language are all
+C++. The interpreter allows for fast prototyping of the macros since it
+removes the time consuming compile/link cycle. It also provides a good
+environment to learn C++. If more performance is needed the interactively
+developed macros can be compiled using a C++ compiler.</i>
+<p><i>The system has been designed in such a way that it can query its
+databases in parallel on MPP machines or on clusters of workstations or
+high-end PC's. ROOT is an open system that can be dynamically extended
+by linking external libraries. This makes ROOT a premier platform on which
+to build data acquisition, simulation and data analysis systems."</i>
+<p>For more information on ROOT visit the ROOT web pages from <a href="http://root.cern.ch">http://root.cern.ch/</a>.
+<h2><center>
+Using &nbsp;<a NAME="rootio" href="http://root.cern.ch"></a><a href="http://root.cern.ch" name="rootio">ROOT</a>
+I/O</h2></center>
+Currently, the Hall D Collaboration does not subscribe to any standard
+input/output formats. It is expected that Hall D software development will
+have its foundation based on the C++ object-oriented programing language.
+<p>The ROOT framework includes a set of classes to support I/O to/from
+machine independent files. The I/O system is designed to be particularly
+efficient for objects frequently manipulated by modern high volume data
+experiments.
+<h2>
+<a NAME="output"></a>HDFast output structure</h2>
+HDFast creates and writes data to a ROOT data tree. A ROOT tree is a data
+container similar to but with much less limitations than itape or BOS.
+Each event is contained in a super-branch which in turns contains the data
+branches(a data branch is like a itape group or BOS bank). Each branch
+contains the data structure of a defined class. Adding new branches reduces
+to creating a class which inherits from the ROOT TObject class. Currently
+HDFast save 5 branches:
 <ul>
-<li> <em>hepevt</em> an instance of the <a href="TMCFastHepEvt.html">
-	TMCFastHepEvt </a> class
-<li> <em>tof_trace</em> an instance of the  <a href="TMCFastTOF.html">
-	TMCFastTOF  </a>class
-<li> <em>offtrk</em> an instance of the  <a href="TMCFastOfflineTrack.html">
-	TMCFastOfflineTrack </a> class
+<li>
+<i>hepevt</i> an instance of the <a href="TMCFastHepEvt.html">TMCFastHepEvt
+</a>class</li>
+
+<li>
+<i>tof_trace</i> an instance of the <a href="TMCFastTOF.html">TMCFastTOF
+</a>class</li>
+
+<li>
+<i>offtrk</i> an instance of the <a href="TMCFastOfflineTrack.html">TMCFastOfflineTrack
+</a>class</li>
+
+<li>
+<i>bcal</i> an instance of the <a href="TMCFastCalorimeter.html">TMCFastCalorimeter
+</a>class</li>
+
+<li>
+<i>lgdSmears</i> an instance of the <a href="TLGDsmears.html">TLGDsmears
+</a>class</li>
 </ul>
-<P>
-<h3><a name="mcroot"> Hall D MCRoot Development </h3>
-In the mcroot development (Hall D CVS repository <em>mcroot</em>) there exists programs and macros designed to access the data from a rdt file.  The program <em>dumpRdt</em> reads a rdt file and prints out the event objects.
-<h4> Usage:</h4>
-<pre>
-exotic 167% dumpRdt -h
+In addition there is one virtual or constructed branch:
+<ul>
+<li>
+<i>esr</i> an instance of the <a href="TMCesr.html">TMCesr </a>class constructed
+from the: hepevt,offtrk, bcal, and lgdSmears branches.</li>
+</ul>
+
+<h2>
+<a NAME="mcroot"></a>Hall D MCRoot Development</h2>
+In the mcroot development (Hall D CVS repository <i>mcroot</i>) there exists
+programs and macros designed to access the data from a rdt file. The program
+<i>dumpRdt</i> reads a rdt file and prints out the event objects.
+<h2>
+DumpRdt Usage:</h2>
+
+<pre>exotic 167% dumpRdt -h
 
 dumpRdt usage: [switches] inputfile
-        -n<nevents> The number of event to read (default all).
-        -L   List branch names of first event
-        -Bbranch1,branch2,... Dump only these branches
-        -h Print this help message
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -n<nevents> The number of event to read (default all).
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -L&nbsp;&nbsp; List branch names of first event
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -Bbranch1,branch2,... Dump only these branches
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -h Print this help message
 
 </pre>
-<h4> Listing branches in file:</h4>
-<pre>
-exotic 168% dumpRdt -L test.rdt
+
+<h3>
+Listing branches in file:</h3>
+
+<pre>exotic 168% dumpRdt -L test.rdt
 Opening test.rdt for input
 Branch list:
-        hepevt
-        tof_trace
-        offtrk
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; hepevt
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; tof_trace
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; offtrk
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bcal
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; lgdSmears
+
 
 </pre>
-<h4> Dumping only one branch:</h4>
-<pre>
-exotic 169% dumpRdt -n1 -Bhepevt test.rdt
+
+<h3>
+Dumping only one branch:</h3>
+
+<pre>exotic 169% dumpRdt -n1 -Bhepevt test.rdt
 Dumping 1 event
 Dumping only these branches:
-        hepevt
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; hepevt
 Opening test.rdt for input
 Branche list:
-        hepevt
-        tof_trace
-        offtrk
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; hepevt
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; tof_trace
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; offtrk
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bcal
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; lgdSmears
 
 
- Nevhep: 2
-         Nhep: 6
-                 Ishep: 1 Idhep: 321 Mass: 0.494
-                 Px: -0.203053 Py: -0.175953 Pz: 1.16301 E: 1.29183
-                 Vx: 0.0123466 Vy: 0.0186673 Vz: 102.158 Vt: 383.947
-                 Ishep: 1 Idhep: 22 Mass: 0
-                 Px: 0.133062 Py: 0.002583 Pz: 0.337673 E: 0.362953
-                 Vx: 0.0123466 Vy: 0.0186673 Vz: 102.158 Vt: 383.947
-                 Ishep: 1 Idhep: 22 Mass: 0
-                 Px: -0.006568 Py: -0.059309 Pz: 0.143684 E: 0.155582
-                 Vx: 0.0123466 Vy: 0.0186673 Vz: 102.158 Vt: 383.947
-                 Ishep: 1 Idhep: -211 Mass: 0.14
-                 Px: -0.565609 Py: -0.216014 Pz: 2.92477 E: 2.99006
-                 Vx: 0.0123466 Vy: 0.0186673 Vz: 102.158 Vt: 383.947
-                 Ishep: 1 Idhep: 321 Mass: 0.494
-                 Px: 0.397965 Py: 0.224851 Pz: 5.0126 E: 5.05758
-                 Vx: 0.0123466 Vy: 0.0186673 Vz: 102.158 Vt: 383.947
-                 Ishep: 1 Idhep: 2112 Mass: 0.939
-                 Px: 0.244203 Py: 0.223843 Pz: 0.418274 E: 1.08001
-                 Vx: 0.0123466 Vy: 0.0186673 Vz: 102.158 Vt: 383.947
+&nbsp;Nevhep: 2
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Nhep: 6
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Ishep: 1 Idhep: 321 Mass: 0.494
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Px: -0.203053 Py: -0.175953 Pz: 1.16301 E: 1.29183
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Vx: 0.0123466 Vy: 0.0186673 Vz: 102.158 Vt: 383.947
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Ishep: 1 Idhep: 22 Mass: 0
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Px: 0.133062 Py: 0.002583 Pz: 0.337673 E: 0.362953
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Vx: 0.0123466 Vy: 0.0186673 Vz: 102.158 Vt: 383.947
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Ishep: 1 Idhep: 22 Mass: 0
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Px: -0.006568 Py: -0.059309 Pz: 0.143684 E: 0.155582
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Vx: 0.0123466 Vy: 0.0186673 Vz: 102.158 Vt: 383.947
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Ishep: 1 Idhep: -211 Mass: 0.14
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Px: -0.565609 Py: -0.216014 Pz: 2.92477 E: 2.99006
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Vx: 0.0123466 Vy: 0.0186673 Vz: 102.158 Vt: 383.947
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Ishep: 1 Idhep: 321 Mass: 0.494
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Px: 0.397965 Py: 0.224851 Pz: 5.0126 E: 5.05758
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Vx: 0.0123466 Vy: 0.0186673 Vz: 102.158 Vt: 383.947
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Ishep: 1 Idhep: 2112 Mass: 0.939
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Px: 0.244203 Py: 0.223843 Pz: 0.418274 E: 1.08001
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Vx: 0.0123466 Vy: 0.0186673 Vz: 102.158 Vt: 383.947
 
 </pre>
 
-In addition, there are some example <a href="examples/macro2.C.html"><b>macros</b></a> which are executed by the ROOT C++ interpreter to create some histograms of the data. Also, the macro GeoDraw.C reads in the MCFast geometry file (.db file) and displays a 2-D view of the detector geometry.
 
-<pre>
-exotic 170% root .x GeoDraw.C
+<h2>Ntp_maker Usage:</h2>
+
+<pre>megux2 56% ntp_maker -h
+
+ntp_maker usage: [switches] inputfile
+        -o<name>    Save output as <name>.root (default: halld.root).
+        -c          Book four-momenta components.
+        -n<nevents> The number of event to read (default all).
+        -s<nevents> The number of events to skip before reading(default=0).
+        -h Print this help message
+
+
+megux2 58% root
   *******************************************
   *                                         *
   *        W E L C O M E  to  R O O T       *
   *                                         *
-  *   Version   2.20/06  18 December 1998   *
+  *   Version   2.20/06   12 January 1999   *
   *                                         *
   *  You are welcome to visit our Web site  *
   *          http://root.cern.ch            *
@@ -134,15 +251,43 @@ exotic 170% root .x GeoDraw.C
 CINT/ROOT C/C++ Interpreter version 5.13.83, Dec 2 1998
 Type ? for help. Commands must be C++ statements.
 Enclose multiple statements between { }.
-root [0] 
+root [0] TFile f("o0.root");// gamma p -> p omega events 
+root [1] TBrowser b;
+root [2] .q
+megux2 59% 
+</pre>
+
+<center><img SRC="browser.gif" hight="400"  align=CENTER></center>
+
+<P><P>
+
+In addition, there are some example <b><a href="examples/macro2.C.html">macros</a></b>
+which are executed by the ROOT C++ interpreter to create some histograms
+of the data. Also, the macro GeoDraw.C reads in the MCFast geometry file
+(.db file) and displays a 2-D view of the detector geometry.
+<pre>exotic 170% root .x GeoDraw.C
+&nbsp; *******************************************
+&nbsp; *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *
+&nbsp; *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; W E L C O M E&nbsp; to&nbsp; R O O T&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *
+&nbsp; *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *
+&nbsp; *&nbsp;&nbsp; Version&nbsp;&nbsp; 2.20/06&nbsp; 18 December 1998&nbsp;&nbsp; *
+&nbsp; *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *
+&nbsp; *&nbsp; You are welcome to visit our Web site&nbsp; *
+&nbsp; *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; http://root.cern.ch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *
+&nbsp; *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *
+&nbsp; *******************************************
+
+CINT/ROOT C/C++ Interpreter version 5.13.83, Dec 2 1998
+Type ? for help. Commands must be C++ statements.
+Enclose multiple statements between { }.
+root [0]&nbsp;
 Processing GeoDraw.C...
 
 </pre>
-<img   SRC="geo.gif" align=center> 
-<hr><br>
-<!--SIGNATURE-->
-<em>Author: <a href=http://www.phys.cmu.edu/~eugenio>  Paul Eugenio </a>6-Jan-99</em><br>
-<br>
-<address>
+<img SRC="geo.gif"  align=CENTER>
+<hr>
+<br><!--SIGNATURE--><i>Author: <a href="http://www.phys.cmu.edu/~eugenio">Paul
+Eugenio </a>6-Jan-99</i>
+<br>&nbsp;
 </body>
 </html>

@@ -25,7 +25,7 @@ http://www-pat.fnal.gov/stdhep.html </a>
 
 
 ClassImp(TMCFastHepEvt)
-
+ 
 
 TClonesArray *TMCFastHepEvt::fgParticles = 0;
 
@@ -44,8 +44,18 @@ TMCFastHepEvt::TMCFastHepEvt(){
   if(!fgParticles) fgParticles = new TClonesArray("TMCFastHepParticle",10);
   fHepParticle = fgParticles;
 }
+/******** Incomplete!!!
+void TMCFastHepEvt::operator=(TMCFastHepEvt &source){
+  // defination of the assignment operator
+  
+  if(this == &source) return;// -- don't assign to self
+  // chain to data memebers;
+  fnevhep = source.fnevhep;
+  fnhep = source.fnhep;
+  fgParticles = source.fgParticles;
 
-
+}
+*************************/
 //____________________________________________________________________________
 void TMCFastHepEvt::AddHepParticle(struct heppart_t *part,Int_t index){
   // Create a TMCFastHepParticle instance
@@ -88,6 +98,8 @@ TMCFastHepParticle TMCFastHepEvt::GetHepParticle(Int_t HepEvtIndex){
   TMCFastHepParticle particle;
   
   TIter next(this->GetHepParticles());
+
+  
   while( TMCFastHepParticle *p = (TMCFastHepParticle *)next()){
     n++;
     if(n == HepEvtIndex){

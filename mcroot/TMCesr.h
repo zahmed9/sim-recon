@@ -40,6 +40,14 @@ public:
          TMCFastOfflineTrack &offtrk, 
          TLGDsmears &lgdsmears,
 	 TMCFastCalorimeter &bcal);
+  TMCesr(TMCFastHepEvt &hepevt,
+         TMCFastOfflineTrack &offtrk, 
+         TLGDsmears &lgdsmears,
+	 TMCFastCalorimeter &bcal,Double_t bcal_resolution);
+  void Fill(TMCFastHepEvt &hepevt,
+       TMCFastOfflineTrack &offtrk, 
+       TLGDsmears &lgdsmears,
+       TMCFastCalorimeter &bcal,Double_t bcal_resolution);
   virtual ~TMCesr() ;
   void Clear();
   Int_t GetNparticles() {return fnParticles;}
@@ -53,7 +61,8 @@ public:
 
   TClonesArray *GetParticles() const { return fParticles; }
   Int_t makeParticles(TMCFastHepEvt &hepevt,TLGDsmears &lgd);
-  Int_t makeParticles(TMCFastHepEvt &hepevt,TMCFastCalorimeter &bcal);
+  //Int_t makeParticles(TMCFastHepEvt &hepevt,TMCFastCalorimeter &bcal);
+  Int_t makeParticles(TMCFastHepEvt &hepevt,TMCFastCalorimeter &bcal,Double_t bcal_res);
   Int_t makeParticles(TMCFastHepEvt &hepevt,TMCFastOfflineTrack &offtrk);
 
   void Print(ostream *os);

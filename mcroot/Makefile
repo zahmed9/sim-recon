@@ -15,6 +15,8 @@ ROOTLIBS      = -L$(ROOTSYS)/lib -lNew -lBase -lCint -lClib -lCont -lFunc \
                 -lPostscript -lProof -lTree -lUnix -lZip
 ROOTGLIBS     = -lGpad -lGui -lGX11 -lX3d
 
+LIBPP = -L/home/halld/lib/$(UNAME) -lpp 
+
 #
 # Machine dependent stuff.
 #
@@ -34,7 +36,7 @@ endif
 ifeq "$(UNAME)" "Linux"
 # Linux with egcs
 CXX           = g++
-CXXFLAGS      = -O2 -g -Wall -fno-rtti -fno-exceptions -fPIC -I$(ROOTSYS)/include
+CXXFLAGS      = -O2 -g -Wall -fno-rtti -fno-exceptions -fPIC -I$(ROOTSYS)/include -I/home/halld/include
 LD            = g++
 LDFLAGS       = -g
 SOFLAGS       = -shared
@@ -79,16 +81,19 @@ MAIN1S    = mcfast2root.cxx
 MAIN2O        = dumpRdt.o
 MAIN2S        = dumpRdt.cxx
 
+TOF2O           = tof2.o
+TOF2S           = tof2.C
 
+NTP_MAKERO      = ntp_maker.o TNtupleUtil.o
 
 TMCFast         = mcfast2root
 TMCFast2         = dumpRdt
 TMCFastSO       = libTMCFast.so
 
 
-OBJS          = $(TMCFastO) $(MAIN1O) 
+OBJS          = $(TMCFastO) $(MAIN2O) $(TOF2O) $(NTP_MAKERO) 
 
-PROGRAMS      = $(TMCFast)  $(TMCFast2) 
+PROGRAMS      = dumpRdt tof2 ntp_maker
 
 all:            $(PROGRAMS)
 
@@ -97,16 +102,20 @@ lib:	$(TMCFast_LIB)
 $(TMCFast_LIB): $(TMCFastO)
 	ar -r  $(HALLD_HOME)/lib/$(UNAME)/$(TMCFast_LIB) $(TMCFastO) 
 
-$(TMCFast):       $(TMCFastO) $(MAIN1O)
-		$(LD) $(SOFLAGS) $(LDFLAGS) $(TMCFastO) $(OutPutOpt) $(TMCFastSO)
-		$(LD) $(LDFLAGS) $(MAIN1O) $(MCFASTLIB) $(LIBS) $(OutPutOpt) $(TMCFast)
-		@echo "$(TMCFast) done"
+TMCFast_LIBS =  $(HALLD_HOME)/lib/$(UNAME)/$(TMCFast_LIB)
 
-$(TMCFast2):       $(TMCFastO) $(MAIN2O)
+dumpRdt:       $(TMCFastO) $(MAIN2O)
 		$(LD) $(SOFLAGS) $(LDFLAGS) $(TMCFastO) $(OutPutOpt) $(TMCFastSO)
 		$(LD) $(LDFLAGS) $(MAIN2O) $(MCFASTLIB) $(LIBS) $(OutPutOpt) $(TMCFast2)
 		@echo "$(TMCFast2) done"
 
+tof2:     $(TMCFastO) $(TOF2O) 
+		$(LD) $(LDFLAGS) $(TOF2O)  $(TMCFast_LIBS) $(GLIBS) $(OutPutOpt) tof2
+		@echo "tof2 done"
+
+ntp_maker:     $(TMCFastO) $(NTP_MAKERO) $(TMCFastO)
+		$(LD) $(LDFLAGS) $(NTP_MAKERO) $(TMCFastO) $(LIBPP) $(LIBS) $(OutPutOpt) ntp_maker
+		@echo "ntp_maker done"
 
 
 
@@ -114,10 +123,11 @@ $(TMCFast2):       $(TMCFastO) $(MAIN2O)
 clean:
 		@rm -f $(OBJS) *Dict.* core
 
-.SUFFIXES: .cxx
+.SUFFIXES: .cxx .C
 
 ###
-
+ntp_maker.o: TNtupleUtil.h
+TNtupleUtil.o: TNtupleUtil.h
 TMCFastHepEvt.o: TMCFastHepEvt.h
 TMCFastTOF.o: TMCFastTOF.h
 TMCFastOfflineTrack.o: TMCFastOfflineTrack.h

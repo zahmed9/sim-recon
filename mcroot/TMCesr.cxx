@@ -34,21 +34,33 @@ TMCesr::TMCesr(){
 
 
 //____________________________________________________________________________
-
-
 TMCesr::TMCesr(TMCFastHepEvt &hepevt,TMCFastOfflineTrack &offtrk, 
        TLGDsmears &lgdsmears,TMCFastCalorimeter &bcal){
+  Double_t res=-1;
+  Fill(hepevt,offtrk,lgdsmears,bcal,res);
+}
+TMCesr::TMCesr(TMCFastHepEvt &hepevt,TMCFastOfflineTrack &offtrk, 
+       TLGDsmears &lgdsmears,TMCFastCalorimeter &bcal,Double_t bcal_res){
+  Fill(hepevt,offtrk,lgdsmears,bcal,bcal_res);
+}
+
+void TMCesr::Fill(TMCFastHepEvt &hepevt,TMCFastOfflineTrack &offtrk, 
+       TLGDsmears &lgdsmears,TMCFastCalorimeter &bcal,
+	       Double_t bcal_resolution){
   fnParticles=0;
   if(!fgParticles) fgParticles = new TClonesArray("TMCParticle",10);
   fParticles = fgParticles;
+ 
   SetNLGDparticles(makeParticles(hepevt,lgdsmears));
-  SetNBCALparticles(makeParticles(hepevt,bcal));
+
+  SetNBCALparticles(makeParticles(hepevt,bcal,bcal_resolution));
+ 
   SetNOFFTRKparticles(makeParticles(hepevt,offtrk));
   SetNparticles(GetNLGDparticles()+GetNBCALparticles()+GetNOFFTRKparticles());
 }
 
 
-Int_t TMCesr::makeParticles(TMCFastHepEvt &hepevt,TMCFastCalorimeter &bcal){
+Int_t TMCesr::makeParticles(TMCFastHepEvt &hepevt,TMCFastCalorimeter &bcal,Double_t bcal_resolution){
   // Create a TMCparticle instance
   // from a TMCFastCalorimeter &bcal 
   // and add the instance to 
@@ -72,7 +84,7 @@ Int_t TMCesr::makeParticles(TMCFastHepEvt &hepevt,TMCFastCalorimeter &bcal){
 	  while(TCalHitTracks* info = (TCalHitTracks *)nextInfo())
 	    if(info->GetCalHitIndex() == calhit->GetHitIndex() &&
 	      gammaHepIndex[i] == info->GetHepIndex() ){
-	      e += info->GetPercent() *  calhit->GetEem(); 
+	      e += info->GetPercent() *  calhit->GetEtotal(); 
 	      // Now we have a cal hit that belongs to
 	      // the gamma -- there can be many hits to oner gamma.
 
@@ -80,11 +92,18 @@ Int_t TMCesr::makeParticles(TMCFastHepEvt &hepevt,TMCFastCalorimeter &bcal){
 	
       }
     }
-    // e is now the total measured electroMagnetic energy for this gamma
+    //
+    // Scale the MCFast energies by a kludge factor.
+    // Without kludge, piz mean is too small by 1/1.055
+    e *= 1.055;
+
+    // e is now the total measured electroMagnetic energy for this gamma   
     if(e){
       TMCFastHepParticle heppart = hepevt.GetHepParticle(gammaHepIndex[i]);
- 
-      new(heparts[fnParticles++]) TMCParticle(heppart,e);
+       if(bcal_resolution>0)
+	 new(heparts[fnParticles++]) TMCParticle(heppart,e,bcal_resolution);
+       else
+	 new(heparts[fnParticles++]) TMCParticle(heppart,e);
       n_made++;
     }
   }

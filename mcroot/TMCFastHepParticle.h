@@ -56,6 +56,7 @@ public:
   Double_t GetPy() const {return fphep[1];}
   Double_t GetPz() const {return fphep[2];}
   Double_t GetE() const {return fphep[3];}
+  Double_t GetPt();
   Double_t GetVx() const {return fvhep[0];}
   Double_t GetVy() const {return fvhep[1];}
   Double_t GetVz() const {return fvhep[2];}
