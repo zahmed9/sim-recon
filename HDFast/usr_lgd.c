@@ -49,12 +49,12 @@
 //#define LGD_Y_LIMIT 86.0
 //#define LGD_BEAMHOLE 8.0 /* SQUARE HOLE OF LENGTH 2*VALUE */
 // NEW RADII (AUG 2004, JK))
-#define LGD_X_LIMIT 120.0
-#define LGD_Y_LIMIT 120.0
+#define LGD_X_LIMIT 122.0
+#define LGD_Y_LIMIT 122.0
 // NEW BEAM HOLE DEFINITION (2x2 BLOCKS + 1 GUARD LAYER)
 #define LGD_BEAMHOLE 8.0
 // ========
-#define LGD_Z_LOCATION  575.0 // zcenter - zlength/2 from the HDFast.db file
+#define LGD_Z_LOCATION  622.6 // zcenter - zlength/2 from the HDFast.db file
 
 // ======== End of changes
 
