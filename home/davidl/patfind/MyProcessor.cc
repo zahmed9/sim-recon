@@ -42,8 +42,10 @@ derror_t MyProcessor::init(void)
 	// Tell factory to keep around a few density histos
 	factory->SetNumDensityHistograms(4);
 
-	// Initialize Nlines Nellipse;
+	// Initialize Nlines Nmarkers Nellipse;
 	Nlines = 0;
+	Nmarkers = 0;
+	Nellipse = 0;
 	
 	// set limits for plot. This represents the space where the center 
 	// of the circle can be. It can be (and often is) outside of the
@@ -55,6 +57,9 @@ derror_t MyProcessor::init(void)
 
 	axes_phiz = new TH2F("axes_phiz","",10,0.0,650.0, 10, -2.0*M_PI, 2.0*M_PI);
 	axes_phiz->SetStats(0);
+
+	axes_hits = new TH2F("axes_hits","",10,-100.0,100.0, 10, -100.0,100.0);
+	axes_hits->SetStats(0);
 
 	return NOERROR;
 }
@@ -203,11 +208,72 @@ derror_t MyProcessor::PlotPhiVsZ(void)
 	return NOERROR;
 }
 
+
+//------------------------------------------------------------------
+// DrawHits
+//------------------------------------------------------------------
+derror_t MyProcessor::DrawHits(void)
+{
+	// Draw the empty screen
+	axes_hits->Draw("AXIS");
+	
+	// Delete old Markers
+	for(int i=0; i<Nmarkers; i++)delete markers[i];
+	Nmarkers = 0;
+
+	// Delete old Ellipses
+	for(int i=0; i<Nellipse; i++)delete ellipse[i];
+	Nellipse = 0;
+
+	// Draw BCAL for reference
+	float R1=65.0;
+	float R2=90.0;
+	ellipse[Nellipse] = new TEllipse(0.0,0.0,R1,R1);
+	ellipse[Nellipse++]->SetLineColor(14);
+	ellipse[Nellipse] = new TEllipse(0.0,0.0,R2,R2);
+	ellipse[Nellipse++]->SetLineColor(14);
+	ellipse[Nellipse] = new TEllipse(0.0,0.0,(R1+R2)/2.0,(R1+R2)/2.0);
+	ellipse[Nellipse]->SetLineWidth(56);
+	ellipse[Nellipse++]->SetLineColor(16); // 16= light grey
+	
+	// Draw circles based on MCTrackCandidates
+	DContainer *mctc = event_loop->Get("MCTrackCandidates");
+	MCTrackCandidate_t *tc = (MCTrackCandidate_t*)mctc->first();
+	for(int i=0;i<mctc->nrows;i++, tc++){
+		float x0 = tc->x0;
+		float y0 = -tc->y0;
+		float r0 = sqrt(x0*x0 + y0*y0);
+		ellipse[Nellipse++] = new TEllipse(x0, y0, r0, r0);
+	}
+	
+	// Draw all ellipses
+	for(int i=0; i<Nellipse; i++)ellipse[i]->Draw();
+	
+	// Loop over all cheat hits and draw them
+	DContainer *mccheathits = event_loop->Get("MCCheatHits");
+	MCCheatHit_t *mccheathit = (MCCheatHit_t*)mccheathits->first();
+	for(int i=0; i<mccheathits->nrows; i++, mccheathit++){
+		float x = mccheathit->r*cos(mccheathit->phi);
+		float y = mccheathit->r*sin(mccheathit->phi);
+		markers[Nmarkers] = new TMarker(x,y,20);
+		markers[Nmarkers]->SetMarkerColor(colors[mccheathit->track-1]);
+		markers[Nmarkers]->Draw();
+		if(++Nmarkers>=500)break;
+	}
+	
+	maincanvas->Update();
+
+	return NOERROR;
+}
+
 //------------------------------------------------------------------
 // fini   -Close output file here
 //------------------------------------------------------------------
 derror_t MyProcessor::fini(void)
 {
+	delete axes;
+	delete axes_phiz;
+	delete axes_hits;
 
 	return NOERROR;
 }

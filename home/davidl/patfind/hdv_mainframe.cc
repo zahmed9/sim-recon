@@ -47,6 +47,7 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 	slope		= new TGTextButton(this,"&Slope", 		5);
 	offset	= new TGTextButton(this,"&Offset",		6);
 	gifs		= new TGTextButton(this,"&GIFs",			8);
+	hits		= new TGTextButton(this,"&Hits",			9);
 	quit		= new TGTextButton(this,"&Quit",			1);
 	quit->SetCommand(".q");
 	
@@ -56,6 +57,7 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 	buttonframe->AddFrame(phi_vs_z, fLayout);
 	buttonframe->AddFrame(slope, fLayout);
 	buttonframe->AddFrame(offset, fLayout);
+	buttonframe->AddFrame(hits, fLayout);
 	buttonframe->AddFrame(gifs, fLayout);
 	buttonframe->AddFrame(quit, fLayout);
 	
@@ -103,6 +105,9 @@ Bool_t hdv_mainframe::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
 						case 8: //GIFs
 							MakeGIFs();
 							break;
+						case 9: //Hits
+							myproc->DrawHits();
+							break;
 						default:
 							cout<<"parm1="<<parm1<<endl;
 					}
@@ -140,7 +145,11 @@ void hdv_mainframe::MakeGIFs(void)
 	sprintf(fname,"patfind_phi_vs_z_%02d.gif",event);
 	myproc->PlotPhiVsZ();
 	maincanvas->SaveAs(fname);
-	
+
+	sprintf(fname,"patfind_hits_%02d.gif",event);
+	myproc->DrawHits();
+	maincanvas->SaveAs(fname);
+
 	event++;
 }
 

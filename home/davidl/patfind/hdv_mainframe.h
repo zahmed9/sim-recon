@@ -20,7 +20,7 @@ class hdv_mainframe:public TGMainFrame {
 
 	private:
 		TGTextButton *quit, *next, *density, *lines, *slope, *offset;
-		TGTextButton *phi_vs_z, *gifs;
+		TGTextButton *phi_vs_z, *gifs, *hits;
 		TGLayoutHints *fLayout;
 		TRootEmbeddedCanvas *emcanvas;
 

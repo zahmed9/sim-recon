@@ -16,6 +16,7 @@
 #include <TLine.h>
 #include <TEllipse.h>
 #include <TCanvas.h>
+#include <TMarker.h>
 
 class DMagneticFieldMap;
 class DFactory_MCTrackCandidates;
@@ -33,14 +34,18 @@ class MyProcessor:public DEventProcessor
 		derror_t PlotSlope(void);
 		derror_t PlotOffset(void);
 		derror_t PlotPhiVsZ(void);
+		derror_t DrawHits(void);
 
-		TFile *ROOTfile;
-		TTree *pat;
-		TH2F *axes, *axes_phiz;
+		TH2F *axes, *axes_phiz, *axes_hits;
 		DFactory_MCTrackCandidates *factory;
 		
 		TLine *lines[500];
 		int Nlines;
+		
+		TMarker *markers[500];
+		int Nmarkers;
+		TEllipse *ellipse[20];
+		int Nellipse;
 };
 
 
