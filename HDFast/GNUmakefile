@@ -4,17 +4,20 @@
 #
 #
 # Created  1998/12/16  eugenio
-# Last Modified 29-Mar-2000  eugenio
+# Last Modified 1-June-2004  eugenio
 #
-# This makefile is currently working 
-# for OSF1 and Linux only. Contact Paul Eugenio (CMU)
+# This makefile is currently verified for 
+# Linux only. Contact Paul Eugenio (FSU)
 # to implement other platforms or see
-# the osf implementation which links
+# the Linux implementation which links
 # to the root libs
 #
-# Before making anything; source setup4.4 and
-# the standard .halldrc file.  ALSO, you need
-# to make libTMCfast.a in the mcroot development
+# Prior to compiling, source "setup5_2.Linux" and
+# the standard .halldrc file. 
+#
+# Note: This package depends on libTMCfast.a from
+# the mcroot package therefor build mcroot before
+# trying to build HDFast
 #################################################
 
 #
@@ -40,22 +43,7 @@ ROOTGLIBS     = $(shell  root-config --glibs)
 
 TMCFAST_INC = -I$(HALLD_HOME)/src/mcroot
 
-#HDFASTLIBS = -L$(HALLD_HOME)/lib/$(UNAME)  -lTMCFast
 HDFASTLIBS = $(HALLD_HOME)/lib//Linux/libTMCFast.a
-
-#HDFASTLIBS =    TMCFastHepEvt.o  TMCFastHepEvtDict.o TMCFastTOF.o TMCFastTOFDict.o \
-#		TMCFastOfflineTrack.o  TMCFastOfflineTrackDict.o \
-#		TMCFastHepParticle.o  TMCFastHepParticleDict.o \
-#		TMCFastCalorimeter.o TMCFastCalorimeterDict.o \
-#		TMCFastCalorHits.o TMCFastCalorHitsDict.o \
-#		TCalHitTracks.o TCalHitTracksDict.o 
-
-#
-
-
-
-
-
 
 
 # Machine dependent stuff.
@@ -191,7 +179,7 @@ BLDDIR := $(PWD)
 # User .o files are listed here
 USER_OBJ = usr_main.o main_args.o usr_analysis.o usr_init.o usr_fill_event.o \
         usr_summary.o usr_hbsummary.o  usr_dump.o \
-        usr_mcfast2root.o usr_lgd.o usr_hits.o usr_dumpCalor.o \
+        usr_mcfast2root.o usr_lgd.o  usr_dumpCalor.o \
         usr_calor.o  prgeom.o usr_mcfio_out.o
 
 TEST_OBJ = usr_main.o main_args.o usr_test.o
@@ -237,7 +225,7 @@ MCFIO = $(MCFAST_DIR)/lib.$(UNAME)/libFmcfio.a
 #-----------------
 :all
 
-all:  HDFast HDFast_lite db 
+all:  HDFast  db 
 
 HDFast_lite: $(USR_LITE_OBJ)
 	make  HDFast_Lite "HDFAST_LITE=on"
