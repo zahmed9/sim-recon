@@ -16,7 +16,7 @@ select((select(STDOUT),$|=1)[$[]);
 $GeoFile= $ENV{"HALLD_HOME"}."/src/HDFast/HDFast.db";
 
 if(! -e $GeoFile){
-    print "GEO FILE:".$dbFile." DOES NOT EXITS!\n\n";
+    print "GEO FILE:".$GeoFile." DOES NOT EXITS!\n\n";
     
     exit;
 }
