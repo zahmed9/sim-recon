@@ -21,12 +21,32 @@
 #       Consequently, we have to source the copy in the
 #       /group/halld/Software/scripts directory rather than the
 #       one we check out.
+#
 source /group/halld/Software/scripts/env_jlab.csh
 
 
-# checkout and build the Hall-D source code
+# Checkout and build the Hall-D source code
 cd /group/halld/Software/builds
 rm -f latest.out
 /group/halld/Software/scripts/make_release latest > latest.out
 
+# We want to keep three days worth of builds around so delete the
+# build from 3 days ago
+set old_build=`date -d "now-3day" +"build_%F"`
+set dayofweek=`date -d "now-3day" +"%a"`
+if ( $dayofweek != "Mon") then
+	echo Deleting $old_build
+	rm -rf $old_build
+else
+	echo "Not deleting Monday's build."
+endif
 
+
+# Update symbolic links
+set today=`date -d "now" +"build_%F"`
+set yesterday=`date -d "now-1day" +"build_%F"`
+set twodaysago=`date -d "now-2day" +"build_%F"`
+rm -f LATEST YESTERDAY TWODAYSAGO
+ln -s $today LATEST
+ln -s $yesterday YESTERDAY
+ln -s $twodaysago TWODAYSAGO
