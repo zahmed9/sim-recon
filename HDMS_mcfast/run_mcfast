@@ -12,6 +12,12 @@
 ##########################################
 select((select(STDOUT),$|=1)[$[]);
 
+if(! -e "HDMS.db"){
+    print "GEO FILE \"HDMS.db\" DOES NOT EXITS!\n\n";
+    print "Make a link from your geo file to HDMS.db\n\n";
+    exit;
+}
+
 &printusage($0) if($#ARGV == -1);
 
 $label= "none";
@@ -20,6 +26,8 @@ $stdhep_it="ascii2stdhep";
 $unstdhep_it="stdhep2ascii";
 $REMOVE=1;
 $dbFile=0;
+
+
 
 for (@ARGV) {
     if(/^-G(.+)/)  { $dbFile = $1;}
@@ -32,8 +40,8 @@ for (@ARGV) {
     if(/^-B(.+)/)  { $beamp = $1;}
 }
 
-print "the arg count is ".$#ARGV."\n";
-print "dbFile: ".$dbFile,"\n";
+
+#print "dbFile: ".$dbFile,"\n";
 
 if($#ARGV > 0){
     $dcmd="\$HDMS_MCFAST_DIR/HDMS.cmd";
