@@ -10,15 +10,15 @@ setenv CRNLIB /apps/cernlib/sun4_solaris2/97a/lib
 
 # The first 2 packages below can be obtained from the Halld CVS repository
 # now set these locations
-setenv HDMS_MCFAST_DIR /work/halld/mc/HDMS_mcfast
-setenv STDHEP_TRANS_DIR /work/halld/mc/stdhep_translators
+setenv HDMS_MCFAST_DIR /work/halld/src/HDMS_mcfast
+setenv STDHEP_TRANS_DIR /work/halld/src/stdhep_translators
 
 
 # below are fermi lab products (See above about fermi lab products)
 # and finally  set these locations
-setenv MCFAST_DIR /work/halld/mc/mcfast
-setenv STDHEP_DIR /work/halld/mc/stdhep
-setenv QQ_DIR /work/halld/mc/qq
+setenv MCFAST_DIR /work/halld/src/mcfast
+setenv STDHEP_DIR /work/halld/src/stdhep
+setenv QQ_DIR /work/halld/src/qq
 ##########################################
 #
 # Now edit HDMS.cmd and change the  HDMS_MCFAST_DIR location 
