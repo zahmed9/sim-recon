@@ -1,0 +1,110 @@
+	#     # ######  #     #  #####
+	#     # #     # ##   ## #     #
+	#     # #     # # # # # #
+	####### #     # #  #  #  #####
+	#     # #     # #     #       #
+	#     # #     # #     # #     #
+	#     # ######  #     #  #####
+
+
+Cebaf's Meson Spectrometer for HallD
+
+MCFast consists of a set of modularized Monte Carlo library routines.  The 
+package is designed to perform parameterized tracking by assembling a 
+covariance matrix that represents all of the materials and measurement planes 
+traversed by a generated particle.  A reconstructed track is produced by 
+smearing the generated track parameters according to the track's covariance 
+matrix.
+
+The HallD version of MCFast requires the following fermi lab products(these 
+are precompiled libraries. Future plans include placing the source files in 
+the halld CVS repository. Currently there is no support for a MCFast version 
+for Linux) A distributions of these products can be obtained via ftp from 
+ftp.fnal.gov (username:ftp).  The site is restricted  to registered users. A 
+registration form can be obtained in the top level directory at the  site.
+
+Caution! Some of these packages are currently in development, so using another
+ version of any product where a specific version is listed may break mcfast.
+
+        stdhep v3_04
+        qq v9_2
+	mcfast v2_6_2
+
+The above packages support only the following platforms: 
+	OSF1, HP-UX,IRIX, IRIX64, SunOS, Ultrix, Aix, Linux(except for mcfast)
+
+****************************************
+*	FIVE EASY STEPS TO USE MCFAST  *
+****************************************
+
+[1]	Get the Packages: stdhepv3_04, qqv9_2, mcfastv2_6_2
+	from fermi lab; and HDMS_mcfast & stdhep_translators
+	from the HallD CVS repository.
+
+
+	Update the env's for your local system by
+	modifying and adding these lines to your .cshrc file
+	and source it. 
+
+	# The first 2 packages can be obtained from the Halld CVS repository
+	setenv HDMS_MCFAST_DIR /dsk19/halld/source/HDMS_mcfast
+	setenv STDHEP_TRANS_DIR /dsk19/halld/source/stdhep_translators
+
+	# below are fermi lab products (See above about fermi lab products)
+	setenv MCFAST_DIR /dsk19/halld/source/mcfast
+	setenv STDHEP_DIR /dsk19/halld/source/stdhep
+	setenv QQ_DIR /dsk19/halld/source/qq
+	source $HDMS_MCFAST_DIR/setup
+	source $STDHEP_DIR/ups/setup.csh
+	source $QQ_DIR/ups/setup.csh
+
+[2]
+	Add a symbolic link.
+		ln -s  $MCFAST_DIR/mcfast/db  $HDMS_MCFAST_DIR/db
+		# This is NEEDED to run mcfast everytime!
+[3]
+	Make the StdHep translators.
+		cd  $STDHEP_TRANS_DIR
+		make all
+[4]
+	Make MCFast
+		cd $HDMS_MCFAST_DIR
+		make mcfast
+
+[5]	Running MCFast
+	
+	Generate some MC data using genr8( or any program that 
+	writes esr itape output --GROUP=802 or genr8 ascii format)
+	
+	Translate MC files to StdHep format using either itape2stdhep 
+	or ascii2stdhep ( itape2stdhep -i<input.itape> -o<output.evt> 
+	-N<#events> -n<#of particles> )
+
+	Run mcfast.
+		mcfast [-f HDMS.cmd] [-l lpt_file] [-hb Hbook_file]
+
+	where  	HDMS.cmd is the ascii command file that drives mcfast 
+       		lpt_file     = name of ASCII output run time log file
+       		Hbook_file   = name of output Hbook file
+
+	o The StdHep output file can be converted back to itape or ascii
+	using either stdhep2itape or stdhep2ascii
+	
+	o The hbook file will contain 4 histograms which  represents
+	the differences of the four-momentum components between the 
+	generated and smeared tracks.
+
+	o In summary, 4 files are needed to run mcfast:
+		(1) "dd" a link to $MCFAST_DIR/mcfast/dd
+		(2) "HDMS_v_1.0.db" the detector geo file
+		(3)  "HDMS.cmd" the ascii command file
+		(4) the evt (stdhep) file named in HDMS.cmd
+	
+		HDMS_v_1.0.db and HDMS.db are located in 
+		the $HDMS_MCFAST_DIR
+
+
+
+
+
+

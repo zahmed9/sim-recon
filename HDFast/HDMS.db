@@ -1,0 +1,275 @@
+database mcfast 0000
+!
+! hdms_v_1.0.db   Hall D Meson Spectrometer
+!
+! Halld geometry for stage 1
+! This is a test version and it
+! may not correspond to any agreed
+! upon  detector geo.
+! 	Created by Paul M Eugenio
+!		   Carngie Mellon University
+!		   28-Sept-98
+!       Modified By Curtis A. Meyer
+!                  Carnegie Mellon University
+!                  30 Sept 1998
+!
+include db/detector.db
+!
+make detector "HDMS STAGE 1.0" "CENTRAL"
+!
+! ************ Materials ***************
+!
+include db/materials.db
+!
+make MATERIAL "CF4"  88.  42.  3.9286E-3 64000. 5.0E+04 1.0E+16 6.75E-06
+!make MATERIAL "HeWi" 12.   6.  1.0E-3    50.  
+!make MATERIAL "GaWi" 21.  10.  0.65E-3   33.6
+!make MATERIAL "Roha" 7.2   3.6 0.031     42.
+!make MATERIAL "Mylr" 9.0   4.5 1.39      39.95
+!
+! ************ Mixtures ***************
+!
+include db/mixtures.db
+make MIXTURE  "AR-ETH-CF4" 3 "ARGON"  "C2H6"  "CF4"  "-"  "-" 0.5 0.35 0.15
+make MIXTURE  "PBSC" 2 "LEAD"  "SCIN"  "-"  "-"  "-" 0.5 0.5 
+make MIXTURE  "IRSC" 2 "IRON"  "SCIN"  "-"  "-"  "-" 0.72 0.28 
+!
+! Place some Aluminum around the cylindrical chambers:
+! Place some Carbon Fiber inside the chambers
+!
+include db/absorber.db
+!
+make Absorber "SHL1"  "TUBE"  1  60.0  61.0  220.0  10.0  "ALUM"
+make Absorber "SHL2"  "TUBE"  1  60.0  61.0  280.0  10.0  "ALUM"
+make Absorber "SHL3"  "TUBE"  1  60.0  61.0  340.0  10.0  "ALUM"
+!
+make Absorber "SHL4"  "TUBE"  1   9.8   9.9  220.0  10.0  "CFIB"
+make Absorber "SHL5"  "TUBE"  1   9.8   9.9  280.0  10.0  "CFIB"
+make Absorber "SHL6"  "TUBE"  1   9.8   9.9  340.0  10.0  "CFIB"
+!
+make Absorber "SHL9"  "TUBE"  1  14.8  14.9   20.0  240.0 "CFIB"
+!
+!
+! ************** Beam pipe ***************
+! .05 cm thick Be pipe at a radius of 2.50cm.
+!
+include db/beampipe.db
+!
+make BPipe "beam" 0.00 2.50 132.5 465.0 "VACU" 0.00 0.05 0.00 0.00 /
+"VACU" "BE"  "VACU" "VACU"
+!
+! *********************** Solenoids *************************
+!  The LASS solenoid is a 2.24 T field that is 465cm long and 
+!               has an inner radius of 95cm.
+!
+include db/solenoid.db
+!
+make Solenoid  "LASS" 2.24000 0.0000   95.0000    132.5  465.0000 "AIR" /
+0.0000    2.0000    0.0000    0.0000  "----"  "MXSO"  "----"  "----"
+!
+! ****************** Central Drift Chamber *******************
+!
+include db/drift.db
+!
+make Drift 1 "VRTX"  5  0   3.0  14.0   15.0   90.000  "AR-ETH-CF4" /
+0.0500    0.0500    0.3000    0.3000    "CFIB" "CFIB" "CFIB" "CFIB"
+!
+make Drift 1 "STRW" 16  2  15.0  60.0   55.0  240.000  "AR-ETH-CF4" /
+0.1000    0.1000    0.6000    0.6000    "CFIB" "CFIB" "ALUM" "ALUM"
+!
+!
+include db/drift_layer.db
+!
+! *********      drift#  anode#  rad  zlen   c_sz #wr  IDr IDc phi0 /
+!                     stereo_tau stereo_offset eff_hit eff_dedx siga sib sigc 
+!
+make LayerDRFAno 1  1   4.0   90.0 1.0  25  -1  1 0. 0.    0. .96 0.96 0.008 0.0 0.0
+make LayerDRFAno 1  2   6.0   90.0 1.0  38  -1  1 0. 0.    0. .96 0.96 0.008 0.0 0.0
+make LayerDRFAno 1  3   8.0   90.0 1.0  50  -1  1 0. 0.    0. .96 0.96 0.008 0.0 0.0
+make LayerDRFAno 1  4  10.0   90.0 1.0  62  -1  1 0. 0.    0. .96 0.96 0.008 0.0 0.0
+make LayerDRFAno 1  5  12.0   90.0 1.0  74  -1  1 0. 0.    0. .96 0.96 0.008 0.0 0.0
+!
+make LayerDRFAno 2  1  15.0  240.0 1.0  94  -1  1 0. 0.    0. .96 0.96 0.020 0.0 0.0
+make LayerDRFAno 2  2  18.0  240.0 1.0 113  -1  0 0. 0.    0. .96 0.96 0.020 0.0 0.0
+make LayerDRFAno 2  3  21.0  240.0 1.0 132  -1  0 0. 0.    0. .96 0.96 0.020 0.0 0.0
+make LayerDRFAno 2  4  24.0  240.0 1.0 151  -1  0 0. 0.    0. .96 0.96 0.020 0.0 0.0
+make LayerDRFAno 2  5  27.0  240.0 1.0 170  -1  0 0. 0.104 0. .96 0.96 0.020 0.0 0.0
+make LayerDRFAno 2  6  30.0  240.0 1.0 189  -1  0 0. 0.104 0. .96 0.96 0.020 0.0 0.0
+make LayerDRFAno 2  7  33.0  240.0 1.0 208  -1  0 0. -.104 0. .96 0.96 0.020 0.0 0.0
+make LayerDRFAno 2  8  36.0  240.0 1.0 227  -1  0 0. -.104 0. .96 0.96 0.020 0.0 0.0
+make LayerDRFAno 2  9  39.0  240.0 1.0 246  -1  0 0. 0.104 0. .96 0.96 0.020 0.0 0.0
+make LayerDRFAno 2 10  42.0  240.0 1.0 265  -1  0 0. 0.104 0. .96 0.96 0.020 0.0 0.0
+make LayerDRFAno 2 11  45.0  240.0 1.0 284  -1  0 0. 0.    0. .96 0.96 0.020 0.0 0.0
+make LayerDRFAno 2 12  48.0  240.0 1.0 303  -1  0 0. 0.    0. .96 0.96 0.020 0.0 0.0
+make LayerDRFAno 2 13  51.0  240.0 1.0 322  -1  0 0. 0.    0. .96 0.96 0.020 0.0 0.0
+make LayerDRFAno 2 14  54.0  240.0 1.0 341  -1  0 0. 0.    0. .96 0.96 0.020 0.0 0.0
+make LayerDRFAno 2 15  57.0  240.0 1.0 360  -1  0 0. 0.    0. .96 0.96 0.020 0.0 0.0
+make LayerDRFAno 2 16  60.0  240.0 1.0 389  -1  2 0. 0.    0. .96 0.96 0.020 0.0 0.0
+!
+!
+include db/drift_offset.db
+!
+!
+make OffsetDRFAno  1   1  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
+make OffsetDRFAno  1   2  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
+make OffsetDRFAno  1   3  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
+make OffsetDRFAno  1   4  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
+make OffsetDRFAno  1   5  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
+!
+make OffsetDRFAno  2   1  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
+make OffsetDRFAno  2   2  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
+make OffsetDRFAno  2   3  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
+make OffsetDRFAno  2   4  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
+make OffsetDRFAno  2   5  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
+make OffsetDRFAno  2   6  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
+make OffsetDRFAno  2   7  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
+make OffsetDRFAno  2   8  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
+make OffsetDRFAno  2   9  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
+make OffsetDRFAno  2  10  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
+make OffsetDRFAno  2  11  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
+make OffsetDRFAno  2  12  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
+make OffsetDRFAno  2  13  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
+make OffsetDRFAno  2  14  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
+make OffsetDRFAno  2  15  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
+make OffsetDRFAno  2  16  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  
+!
+include db/drift_cathode.db
+!
+make LayerDRFCatho 2 1 0.1 240. 240 6   1  0. 0.96 0.050 0. 0.
+make LayerDRFCatho 2 2 0.1 240. 240 12 16  0. 0.96 0.050 0. 0.
+!
+! FORWARD Silicon Disk Chambers for Small Angles
+!
+include db/sidisk.db
+!
+make SiDisk  1 "SiDk" 3 100.0
+make SiDisk  2 "SiDk" 3 150.0
+make SiDisk  3 "SiDk" 3 200.0
+make SiDisk  4 "SiDk" 3 250.0
+make SiDisk  5 "SiDk" 3 300.0
+make SiDisk  6 "SiDk" 3 350.0
+!
+!  FORWARD DISK Chambers (not really Silicon).
+!
+make SiDisk  7 "DISK" 6 220.0
+make SiDisk  8 "DISK" 6 280.0
+make SiDisk  9 "DISK" 6 340.0
+!
+include db/sidisk_layer.db
+!
+make LayerSiDi 1 1 "SILI" 6 -1.00 0.090 2.50 13.00 0. 6.28 1.046 1 
+make LayerSiDi 1 2 "SILI" 6  0.00 0.090 2.50 13.00 0. 6.28 1.046 2 
+make LayerSiDi 1 3 "SILI" 6  1.00 0.090 2.50 13.00 0. 6.28 1.046 3 
+!
+make LayerSiDi 2 1 "SILI" 6 -1.00 0.090 2.50 13.00 0. 6.28 1.046 1 
+make LayerSiDi 2 2 "SILI" 6  0.00 0.090 2.50 13.00 0. 6.28 1.046 2 
+make LayerSiDi 2 3 "SILI" 6  1.00 0.090 2.50 13.00 0. 6.28 1.046 3 
+!
+make LayerSiDi 3 1 "SILI" 6 -1.00 0.090 2.50 13.00 0. 6.28 1.046 1 
+make LayerSiDi 3 2 "SILI" 6  0.00 0.090 2.50 13.00 0. 6.28 1.046 2 
+make LayerSiDi 3 3 "SILI" 6  1.00 0.090 2.50 13.00 0. 6.28 1.046 3 
+!
+make LayerSiDi 4 1 "SILI" 6 -1.00 0.090 2.50 13.00 0. 6.28 1.046 1 
+make LayerSiDi 4 2 "SILI" 6  0.00 0.090 2.50 13.00 0. 6.28 1.046 2 
+make LayerSiDi 4 3 "SILI" 6  1.00 0.090 2.50 13.00 0. 6.28 1.046 3 
+!
+make LayerSiDi 5 1 "SILI" 6 -1.00 0.090 2.50 13.00 0. 6.28 1.046 1 
+make LayerSiDi 5 2 "SILI" 6  0.00 0.090 2.50 13.00 0. 6.28 1.046 2 
+make LayerSiDi 5 3 "SILI" 6  1.00 0.090 2.50 13.00 0. 6.28 1.046 3 
+!
+make LayerSiDi 6 1 "SILI" 6 -1.00 0.090 2.50 13.00 0. 6.28 1.046 1 
+make LayerSiDi 6 2 "SILI" 6  0.00 0.090 2.50 13.00 0. 6.28 1.046 2 
+make LayerSiDi 6 3 "SILI" 6  1.00 0.090 2.50 13.00 0. 6.28 1.046 3 
+!
+! --- Layers for the disk drift chambers.
+!
+make LayerSiDi  7 1 "AIR" 1  -5.0  2.00  10.00 60.00 0. 6.28 1.046 2 
+make LayerSiDi  7 2 "AIR" 1  -3.0  2.00  10.00 60.00 0. 6.28 1.046 3 
+make LayerSiDi  7 3 "AIR" 1  -1.0  2.00  10.00 60.00 0. 6.28 1.046 2 
+make LayerSiDi  7 4 "AIR" 1   1.0  2.00  10.00 60.00 0. 6.28 1.046 3 
+make LayerSiDi  7 5 "AIR" 1   3.0  2.00  10.00 60.00 0. 6.28 1.046 2 
+make LayerSiDi  7 6 "AIR" 1   5.0  2.00  10.00 60.00 0. 6.28 1.046 3 
+!
+make LayerSiDi  8 1 "AIR" 1  -5.0  2.00  10.00 60.00 0. 6.28 1.046 2 
+make LayerSiDi  8 2 "AIR" 1  -3.0  2.00  10.00 60.00 0. 6.28 1.046 3 
+make LayerSiDi  8 3 "AIR" 1  -1.0  2.00  10.00 60.00 0. 6.28 1.046 2 
+make LayerSiDi  8 4 "AIR" 1   1.0  2.00  10.00 60.00 0. 6.28 1.046 3 
+make LayerSiDi  8 5 "AIR" 1   3.0  2.00  10.00 60.00 0. 6.28 1.046 2 
+make LayerSiDi  8 6 "AIR" 1   5.0  2.00  10.00 60.00 0. 6.28 1.046 3 
+!
+make LayerSiDi  9 1 "AIR" 1  -5.0  2.00  10.00 60.00 0. 6.28 1.046 2 
+make LayerSiDi  9 2 "AIR" 1  -3.0  2.00  10.00 60.00 0. 6.28 1.046 3 
+make LayerSiDi  9 3 "AIR" 1  -1.0  2.00  10.00 60.00 0. 6.28 1.046 2 
+make LayerSiDi  9 4 "AIR" 1   1.0  2.00  10.00 60.00 0. 6.28 1.046 3 
+make LayerSiDi  9 5 "AIR" 1   3.0  2.00  10.00 60.00 0. 6.28 1.046 2 
+make LayerSiDi  9 6 "AIR" 1   5.0  2.00  10.00 60.00 0. 6.28 1.046 3 
+!
+include db/sidisk_wedge.db
+!
+make Wedge "ALL" 1 1 0 200 0.100 0.00 0.0 0.0   0.99 0.0020 0. 0.
+make Wedge "ALL" 1 2 0 200 0.000 0.01 0.0 0.0   0.99 0.0020 0. 0.
+make Wedge "ALL" 1 3 0 200 0.100 0.00 0.0 0.104 0.99 0.0020 0. 0.
+!
+make Wedge "ALL" 2 1 0 200 0.100 0.00 0.0 0.0   0.99 0.0020 0. 0.
+make Wedge "ALL" 2 2 0 200 0.000 0.01 0.0 0.0   0.99 0.0020 0. 0.
+make Wedge "ALL" 2 3 0 200 0.100 0.00 0.0 0.104 0.99 0.0020 0. 0.
+!
+make Wedge "ALL" 3 1 0 200 0.100 0.00 0.0 0.0   0.99 0.0020 0. 0.
+make Wedge "ALL" 3 2 0 200 0.000 0.01 0.0 0.0   0.99 0.0020 0. 0.
+make Wedge "ALL" 3 3 0 200 0.100 0.00 0.0 0.104 0.99 0.0020 0. 0.
+!
+make Wedge "ALL" 4 1 0 200 0.100 0.00 0.0 0.0   0.99 0.0020 0. 0.
+make Wedge "ALL" 4 2 0 200 0.000 0.01 0.0 0.0   0.99 0.0020 0. 0.
+make Wedge "ALL" 4 3 0 200 0.100 0.00 0.0 0.104 0.99 0.0020 0. 0.
+!
+make Wedge "ALL" 5 1 0 200 0.100 0.00 0.0 0.0   0.99 0.0020 0. 0.
+make Wedge "ALL" 5 2 0 200 0.000 0.01 0.0 0.0   0.99 0.0020 0. 0.
+make Wedge "ALL" 5 3 0 200 0.100 0.00 0.0 0.104 0.99 0.0020 0. 0.
+!
+make Wedge "ALL" 6 1 0 200 0.100 0.00 0.0 0.0   0.99 0.0020 0. 0.
+make Wedge "ALL" 6 2 0 200 0.000 0.01 0.0 0.0   0.99 0.0020 0. 0.
+make Wedge "ALL" 6 3 0 200 0.100 0.00 0.0 0.104 0.99 0.0020 0. 0.
+!
+!Wedges for the disk drift chambers
+!
+make Wedge "ALL"  7 1 0 200 0.000 0.00 0.0 0.00 0.96 0.020 0. 0.
+make Wedge "ALL"  7 2 0 200 0.000 0.00 0.0 0.08 0.96 0.020 0. 0.
+make Wedge "ALL"  7 3 0 200 0.000 0.00 0.0 0.00 0.96 0.020 0. 0.
+make Wedge "ALL"  7 4 0 200 0.000 0.00 0.0 -.08 0.96 0.020 0. 0.
+make Wedge "ALL"  7 5 0 200 0.000 0.00 0.0 0.00 0.96 0.020 0. 0.
+make Wedge "ALL"  7 6 0 200 0.000 0.00 0.0 0.08 0.96 0.020 0. 0.
+!
+make Wedge "ALL"  8 1 0 200 0.000 0.00 0.0 0.00 0.96 0.020 0. 0.
+make Wedge "ALL"  8 2 0 200 0.000 0.00 0.0 0.08 0.96 0.020 0. 0.
+make Wedge "ALL"  8 3 0 200 0.000 0.00 0.0 0.00 0.96 0.020 0. 0.
+make Wedge "ALL"  8 4 0 200 0.000 0.00 0.0 -.08 0.96 0.020 0. 0.
+make Wedge "ALL"  8 5 0 200 0.000 0.00 0.0 0.00 0.96 0.020 0. 0.
+make Wedge "ALL"  8 6 0 200 0.000 0.00 0.0 0.08 0.96 0.020 0. 0.
+!
+make Wedge "ALL"  9 1 0 200 0.000 0.00 0.0 0.00 0.96 0.020 0. 0.
+make Wedge "ALL"  9 2 0 200 0.000 0.00 0.0 0.08 0.96 0.020 0. 0.
+make Wedge "ALL"  9 3 0 200 0.000 0.00 0.0 0.00 0.96 0.020 0. 0.
+make Wedge "ALL"  9 4 0 200 0.000 0.00 0.0 -.08 0.96 0.020 0. 0.
+make Wedge "ALL"  9 5 0 200 0.000 0.00 0.0 0.00 0.96 0.020 0. 0.
+make Wedge "ALL"  9 6 0 200 0.000 0.00 0.0 0.08 0.96 0.020 0. 0.
+!
+make Wedge "ALL" 10 1 0 200 0.000 0.00 0.0 0.00 0.96 0.020 0. 0.
+make Wedge "ALL" 10 2 0 200 0.000 0.00 0.0 0.08 0.96 0.020 0. 0.
+make Wedge "ALL" 10 3 0 200 0.000 0.00 0.0 0.00 0.96 0.020 0. 0.
+make Wedge "ALL" 10 4 0 200 0.000 0.00 0.0 -.08 0.96 0.020 0. 0.
+make Wedge "ALL" 10 5 0 200 0.000 0.00 0.0 0.00 0.96 0.020 0. 0.
+make Wedge "ALL" 10 6 0 200 0.000 0.00 0.0 0.08 0.96 0.020 0. 0.
+!
+include db/hitsontrack.db
+!
+make HitsOnTrack 4 0 0
+!
+! ****************** Beam vertex *******************
+
+include db/beamvrtx.db
+
+make BeamVrtx  0.  0.  0.  0.0030  0.0030  30.0
+! 
+end
+
+
