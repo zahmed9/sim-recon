@@ -12,17 +12,18 @@
 ##########################################
 select((select(STDOUT),$|=1)[$[]);
 
-#$GeoFile= $ENV{"HDFAST_DIR"}."/halld_strawman.db";
-$GeoFile= $ENV{"HDFAST_DIR"}."/HDFast.db";
+
+$GeoFile= $ENV{"HALLD_HOME"}."/src/HDFast/HDFast.db";
+
 if(! -e $GeoFile){
-    print "GEO FILE:".$GeoFile." DOES NOT EXITS!\n\n";
+    print "GEO FILE:".$dbFile." DOES NOT EXITS!\n\n";
     
     exit;
 }
 
 if(! -e "db/"){
     
-    $syscmd="ln -s ".$ENV{"HDFAST_DIR"}."/db .";
+    $syscmd="ln -s ".$ENV{"HALLD_HOME"}."/src/HDFast/db .";
     print  $syscmd."\n";
     system($syscmd);
 }
@@ -71,7 +72,6 @@ if($ManyMode==0){
 }
 
 
-print "dbFile: ".$dbFile."gamp flag".$gamp_flag.$gamp_kludge,"\n";
 
 if($#ARGV > 0){
     $dcmd="\$HDFAST_DIR/HALLD.cmd";
@@ -110,6 +110,7 @@ foreach $beamZ (@Beams){
 #
 # make the command file
 #
+    print "Making mcfast command file:\n";
     $syscomm = "sed \"s/input.evt/".$tag.".evt/g\" " ;
     $syscomm =  $syscomm." ".$dcmd." >".$tag.".cmd";
     print  $syscomm."\n";
@@ -122,21 +123,24 @@ foreach $beamZ (@Beams){
     print  "cp tmp tmp2\n";
     system("cp tmp tmp2");
     if($dbFile ){
-	$syscomm =  "sed \"s/\\/home\\/halld\\/src\\/HDFast\\/HDFast.db/";
-	$syscomm =  $syscomm.$dbFile."/g\" tmp > tmp2";
+	$syscomm =  "sed \"s/Geo.db/$dbFile/g\" tmp > tmp2"  ;
 	print  $syscomm."\n";
 	system($syscomm);
+    }else {
+	system("cp $GeoFile Geo.db");
+	system("cp tmp  tmp2");
     }
     $syscomm =  "sed \"s/25000/".$nevents."/g\" " ;
     $syscomm =  $syscomm." tmp2 >".$tag.".cmd";
     print  $syscomm."\n";
     system($syscomm);
     $syscomm = "rm tmp tmp2";
-    print  $syscomm."\n";
+    print  $syscomm."\n\n";
     system($syscomm);
 #
 # create HDFast command
 #
+    print "Running HDFast:\n";
     $RdtFile = $tag.".rdt ";
     
     $syscomm = "HDFast -f ".$tag.".cmd -o ".$RdtFile." -l ".$tag.".log -hb ".$tag.".hbook";
@@ -173,9 +177,10 @@ foreach $beamZ (@Beams){
     system($syscomm);
    }
 #
-#remove stdhep output file
+# clean up loose files 
 #
     if( $REMOVE==1){
+	 system("rm Geo.db");
         $syscomm = "rm ".$tag.".mcfasted.evt";
         print  $syscomm."\n";
         system($syscomm);
