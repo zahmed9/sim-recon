@@ -1,5 +1,5 @@
 
-include Rules.make
+include $(BUILDS)/cms/Rules.make
 
 DATA_CSRCS = data.c tapeIO.c tapeIoctl.c dataIO.c crc.c
 
