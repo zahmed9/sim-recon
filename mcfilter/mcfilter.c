@@ -16,7 +16,7 @@ typedef struct {
   float c_low; /* charged angle cut in theta*/
   float p_high; /* gamma angle cut in theta (high side)*/
   float p_low; /* gamma angle cut in theta (low side)*/
-  int resoloution; /* Distort 4-vectors by resoloution */
+  int resolution; /* Distort 4-vectors by resoloution */
 } cuts_t;
 
 void PrintUsage(char *processName);
@@ -25,8 +25,12 @@ int GetData(FILE *finput, itape_header_t *buffer);
 void print_particle(FILE *fp, esr_particle_t p);
 void distort_npart(esr_nparticle_t *esr);
 int angular_acceptance(esr_nparticle_t *esr, cuts_t cuts);
+void distort_npart(esr_nparticle_t *esr);
+vector4_t newgamma(vector4_t gamma);
+vector4_t newcharged(vector4_t charged);
+vector4_t newbeam(vector4_t beam);
 void v4_to_arr(vector4_t vec, float arr[4]);
-vector4_t arr2v4(float arr[4])l
+vector4_t arr2v4(float arr[4]);
 
 
 int debug = 0;
@@ -66,7 +70,7 @@ void main(int argc, char *argv[])
   
   cuts.p_low = cuts.c_low = 0.0;
   cuts.p_high = 180.0;
-  cuts.resoloution = 0;
+  cuts.resolution = 0;
 
   if(argc==1)PrintUsage(argv[0]);
 
@@ -100,7 +104,7 @@ void main(int argc, char *argv[])
 	}
 	break;
       case 'R':
-	cuts.reloution = 1;
+	cuts.resolution = 1;
 	break;
       case 'o':
 	outFile = ++argptr;
@@ -174,7 +178,7 @@ int ProcessEvent(itape_header_t *event, cuts_t cuts){
     vector4_t sum = {0,0,0,0};
     if (debug) fprintf(stderr, "next event\n");
     if (!(angular_acceptance(esr, cuts))) return 0;
-    if (cuts.resoution) distort_npart(esr);
+    if (cuts.resolution) distort_npart(esr);
     return 1;
   }
   return 0;
@@ -213,6 +217,7 @@ int angular_acceptance(esr_nparticle_t *esr, cuts_t cuts){
 }
 
 void distort_npart(esr_nparticle_t *esr){
+  int i;
   if (esr){
     esr->beam = newbeam(esr->beam);
     for (i=0; i < esr->nparticles; i++){
@@ -232,6 +237,12 @@ void distort_npart(esr_nparticle_t *esr){
   
 }
 
+vector4_t newgamma(vector4_t gamma){
+  float arr[4];
+  v4_to_arr(gamma, arr);
+  newgamma_(arr);
+  return (arr2v4(arr));
+}
 
 vector4_t newcharged(vector4_t charged){
   float arr[4];
@@ -248,9 +259,8 @@ vector4_t newbeam(vector4_t beam){
 }
 
 void v4_to_arr(vector4_t vec, float arr[4]){
-  float arr[4];
-  arr[0] = beam.space.x; arr[1] = beam.space.y; arr[2] = beam.space.z;
-  arr[3] = beam.t;
+  arr[0] = vec.space.x; arr[1] = vec.space.y; arr[2] = vec.space.z;
+  arr[3] = vec.t;
 }
 
 vector4_t arr2v4(float arr[4]){
