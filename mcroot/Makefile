@@ -215,11 +215,11 @@ TMCesrDict.cxx: TMCesr.h TMCesrLinkDef.h
 	@echo "Generating dictionary TMCesrDict..."
 	@$(ROOTSYS)/bin/rootcint -f TMCesrDict.cxx -c TMCesr.h 
 
-TMCFastTracePointDict.cxx: TMCFastTracePoint.h TMCFastTracePointLinkDef.h
+TMCFastTracePointDict.cxx: TMCFastTracePoint.h #TMCFastTracePointLinkDef.h
 	@echo "Generating dictionary TMCFastTracePointDict..."
-	@$(ROOTSYS)/bin/rootcint -f TMCFastTracePointDict.cxx -c TMCFastTracePoint.h  TMCFastTracePointLinkDef.h
+	@$(ROOTSYS)/bin/rootcint -f TMCFastTracePointDict.cxx -c TMCFastTracePoint.h  #  TMCFastTracePointLinkDef.h
 
-#TMCFastCerenTraceDict.cxx: TMCFastCerenTrace.h TMCFastCerenTraceLinkDef.h
+#TMCFastCerenTraceDict.cxx: TMCFastCerenTrace.h
 #	@echo "Generating dictionary TMCFastCerenTraceDict..."
 #	@$(ROOTSYS)/bin/rootcint -f TMCFastCerenTraceDict.cxx -c TMCFastCerenTrace.h 
 
