@@ -90,7 +90,7 @@ with an idealized track fitting procedure.
 [HDFast Run Time Environment]
 
 	Note!! HDFast, during run time, needs certain environmental variables defined.  Therefor,
-	       it is suggested that one adds the following lines to cshrc (or equivalent)
+	       it is suggested that one adds the following lines to their cshrc (or equivalent)
 	       for automatic sourcing.
 
 
@@ -98,7 +98,65 @@ with an idealized track fitting procedure.
 		# Needed for HDFast building and running
 		setenv HALLD_HOME  /your/home/gluex
 		source $HALLD_HOME/src/HDFast/setup5_2.Linux_gcc3x  # or _gcc2x
+		set path=($path  $HALLD_HOME/bin/`uname`   $HALLD_HOME/bin )
+		rehash
+
+
+
+[Using HDFast &  Test Run]
+
+
+Below is an example showing how to generate MC events and process the 
+events through the HDFast simulation.
+	
+
+		% mkdir $HALLD_HOME/test
+		% cp ../genr8/n_pi-pi+pi+.input ./
+		% genr8 -M1000 -An_3pi.ascii < n_pi-pi+pi+.input
+		% run_hdfast -N 1000 -t n_3pi -n 3
 
 
 
 
+
+[Viewing and Using HDFast Simulation Output]
+
+	Viewing HDFast output(An ascii dump of the data)
+		// list the data groups(data branches). See "dumpRdt -h" for usage.
+		% dumpRdt -L  n_3pi.rdt
+			Opening n_3pi.rdt for input
+			set dump branches
+			List Branches
+			Branch list:
+			        hepevt
+			        offtrk
+			        bcal
+			        lgdSmears
+			        traces
+			Virtual Branch list:
+			        esr     Requires(hepevt,offtrk,bcal,lgdSmears)
+
+			The Tree contains 981 events
+
+		// Dump all groups for just one event
+		% dumpRdt -Bhepevt,offtrk,bcal,lgdSmears,traces -Vesr -n1 n_3pi.rdt
+					...
+					...
+		
+	Create a ROOT ntuple which can be opened by the ROOT ntuple viewer for a
+	quick click graphical plots for mass projections and other distributions.
+	See the text file "n_3pi.ntuple_labels" for the definitions of the automatically
+	generated ntuple label names.  The ROOT ntuple is contained in the
+	n_3pi n_3pi.root file. 
+		// See "ntp_maker -h" for usage
+		% ntp_maker -on_3pi n_3pi.rdt > n_3pi.ntuple_labels				...
+
+
+
+	Example of ROOT macro access to the HDFast simulated data.
+
+		// get sample macro
+		% wget  http://www.jlab.org/Hall-D/software/getInfo.C ./
+
+		// execute the root macro
+		% root .x getInfo.C
