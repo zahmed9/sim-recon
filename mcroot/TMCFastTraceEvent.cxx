@@ -3,9 +3,14 @@
 ////////////////////////////////////////////////////////////////////////
 // TMCFastTraceEvent
 //
-// 
+//  This class contains all of the trace point information provided by 
+//  the core mcfast processing.  This information is contained in an array
+//  of TMCFastTracePoint objects with the individual particle trace boundary
+//  information stored in an array of TMCFastTraceParticle objects.
 //
 ////////////////////////////////////////////////////////////////////////
+
+
 
 
 #include "TMCFastTraceEvent.h"
