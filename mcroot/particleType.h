@@ -2,10 +2,33 @@
  * particleType.h
 */
 
+#define SC_ENERGY 1
+#define SC_MASS 2
+#define E_OVER_P 3
+
 #ifndef particleTypeH_INCLUDED
 #define particleTypeH_INCLUDED
 
-static const char sccsid_particleTypeH[] = "@(#)particleType.h\t5.3\tCreated 8/20/97 17:13:12, \tcompiled "__DATE__;
+#define ELECTRON_MASS     0.00051100
+#define MUON_MASS         0.10566
+#define PI_CHARGED_MASS   0.13957
+#define PI_ZERO_MASS      0.13498
+#define KAON_CHARGED_MASS 0.49368
+#define KAON_ZERO_MASS    0.49767
+#define ETA_MASS          0.54745
+#define PROTON_MASS       0.93827
+#define NEUTRON_MASS      0.93957 
+#define OMEGA_MASS        0.78194
+#define RHO_MASS          0.770
+#define ETA_PRIME_MASS    0.95778
+#define PHI_MASS          1.019413
+#define DEUTERON_MASS     1.877
+#define TRITON_MASS       2.1573
+
+#define LAMBDA_MASS       1.115683
+#define SIGMA_ZERO_MASS   1.192642
+
+#define NUM_PARTICLES 63  /* should match the number of particles enumerated in Particle_t */
 
 typedef enum {
 
@@ -49,9 +72,8 @@ typedef enum {
   AntiXiPlus     = 31,
   AntiOmegaPlus  = 32,
 
-  /* the constants defined by GEANT end here */
-
-  /* These are E852-defined constants */
+  Deuteron       = 45,
+  Triton         = 49,
 
   Rho0           = 57,
   RhoPlus        = 58,
@@ -62,137 +84,44 @@ typedef enum {
 
 } Particle_t;
 
-float ParticleMass(Particle_t);
-int   ParticleCharge(Particle_t);
 
-char *ParticleType(Particle_t p)
-{
-  static char ret[20];
-  switch (p) {
-  case Unknown:
-    strcpy(ret,"unknown");
-    break;
-  case Gamma:
-    strcpy(ret,"gamma");
-    break;
-  case Positron:
-    strcpy(ret,"positron");
-    break;
-  case Electron:
-    strcpy(ret,"electron");
-    break;
-  case Neutrino:
-    strcpy(ret,"neutrino");
-    break;
-  case MuonPlus:
-    strcpy(ret,"mu+");
-    break;
-  case MuonMinus:
-    strcpy(ret,"mu-");
-    break;
-  case Pi0:
-    strcpy(ret,"pi0");
-    break;
-  case PiPlus:
-    strcpy(ret,"pi+");
-    break;
-  case PiMinus:
-    strcpy(ret,"pi-");
-    break;
-  case KLong:
-    strcpy(ret,"KL");
-    break;
-  case KPlus:
-    strcpy(ret,"K+");
-    break;
-  case KMinus:
-    strcpy(ret,"K-");
-    break;
-  case Neutron:
-    strcpy(ret,"neutron");
-    break;
-  case Proton:
-    strcpy(ret,"proton");
-    break;
-  case AntiProton:
-    strcpy(ret,"pbar");
-    break;
-  case KShort:
-    strcpy(ret,"Ks");
-    break;
-  case Eta:
-    strcpy(ret,"eta");
-    break;
-  case Lambda:
-    strcpy(ret,"lambda");
-    break;
-  case SigmaPlus:
-    strcpy(ret,"sigma+");
-    break;
-  case Sigma0:
-    strcpy(ret,"sigma0");
-    break;
-  case SigmaMinus:
-    strcpy(ret,"sigma-");
-    break;
-  case Xi0:
-    strcpy(ret,"Xi0");
-    break;
-  case XiMinus:
-    strcpy(ret,"Xi-");
-    break;
-  case OmegaMinus:
-    strcpy(ret,"omega-");
-    break;
-  case AntiNeutron:
-    strcpy(ret,"nbar");
-    break;
 
-  case AntiLambda:
-    strcpy(ret,"lambdabar");
-    break;
-  case AntiSigmaMinus:
-    strcpy(ret,"sigmabar-");
-    break;
-  case AntiSigma0:
-    strcpy(ret,"sigmabar0");
-    break;
-  case AntiSigmaPlus:
-    strcpy(ret,"sigmabar+");
-    break;
-  case AntiXi0:
-    strcpy(ret,"Xibar0");
-    break;
-  case AntiXiPlus:
-    strcpy(ret,"Xibar+");
-    break;
-  case AntiOmegaPlus:
-    strcpy(ret,"omegabar+");
-    break;
-  case Rho0:
-    strcpy(ret,"rho0");
-    break;  
-  case RhoPlus:
-    strcpy(ret,"rho+");
-    break;
-  case RhoMinus:
-    strcpy(ret,"rho;");
-    break;
-  case omega:
-    strcpy(ret,"omega");
-    break;
-  case EtaPrime:
-    strcpy(ret,"etaprime");
-    break;
-  case phiMeson:
-    strcpy(ret,"phi");
-    break;
-  default:
-    sprintf(ret,"type(%d)",(int)p);
-    break;
-  }
-  return(ret);
-}
+
+#ifndef BIT
+#define BIT(n) (1<<(n))
+#endif
+/*
+BIT     HEX
+0       0x1 
+1       0x2 
+2       0x4            
+3       0x8 
+4       0x10 
+5       0x20 
+6       0x40 
+7       0x80 
+8       0x100 
+9       0x200 
+10      0x400 
+11      0x800 
+12      0x1000 
+13      0x2000 
+14      0x4000 
+15      0x8000 
+16      0x10000 
+17      0x20000 
+18      0x40000 
+19      0x80000 
+20      0x100000 
+*/
+
+
+
+#define PART_BEAM      BIT(0)
+#define PART_FINAL      BIT(1)  
+
+
+
 
 
 
