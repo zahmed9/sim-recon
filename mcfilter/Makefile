@@ -26,7 +26,7 @@ TCLLIB= -L/usr/local/lib -ltcl
 
 LIBS= $(TESTLIBS) $(STDLIBS)  $(MISCLIB)
 
-PROGRAM= mcfilter.c
+PROGRAM= mcfilter
 
 exe: mcfilter
 

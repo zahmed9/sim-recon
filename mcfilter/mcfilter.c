@@ -56,17 +56,17 @@ void main(int argc, char *argv[])
       switch(*(++argptr)){
       case 'M':
 	maxevents= atoi(++argptr);
-	fprintf(stderr,"\n will gut out at most %d\n",maxevents);
+	fprintf(stderr,"Process %d events\n",maxevents);
 	break;
       case 'd':
-	debug = atoi(++argptr);
+	debug = 1;
 	break;
       case 't':
 	theta_cut = atof(++argptr);
 	break;
       case 'o':
 	outFile = ++argptr;
-	fprintf(stderr, "writing to output file:%s\n", outFile);
+	fprintf(stderr, "writing to output file: %s\n", outFile);
 	if(!(fpOUT=fopen(outFile,"w"))){
 	  fprintf(stderr,"\nfail to open %s for writing...exiting\n",outFile);
 	  exit(0);
@@ -103,9 +103,8 @@ void main(int argc, char *argv[])
 	exit(0);
       }
       else{
-	printf("reading data from %s\n",inFile);
+	printf("reading data from: %s\n",inFile);
 	/* do stuff */
-	done=0;
 	while( (maxevents ? maxevents>nevents:1) && (GetData(fpIN, event) )){
 	  if(ProcessEvent(event, theta_cut)){
 	    data_write(fileno(fpOUT), event); /*NO ERROR CHECKING AT THE MOMENT...*/
@@ -135,7 +134,7 @@ int ProcessEvent(itape_header_t *event, float theta_cut){
       float theta, phi;
       
       v3dir(esr->p[i].p.space, &theta, &phi);
-      fprintf(stderr, "theta: %f, theta_deg: %f, theta_cut: %f\n", theta, theta*RAD2DEG, theta_cut);
+      if(debug) fprintf(stderr, "theta: %f, theta_deg: %f, theta_cut: %f\n", theta, theta*RAD2DEG, theta_cut);
       if (fabs(theta) < theta_cut) return 0;
     }
     return 1;
@@ -163,9 +162,10 @@ int GetData(FILE *finput, itape_header_t *buffer)
       if (ret == 1) return(1);
     }
   }
+  if (ret == 2) return 0;
   if (ret>0){
     return 1;
   }
-  return ret;
+  return 0;
 }
 
