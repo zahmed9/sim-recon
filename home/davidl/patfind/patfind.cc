@@ -42,6 +42,10 @@ int main(int narg, char *argv[])
 	// Close out event loop
 	eventloop->Fini();
 	
+	// clean up
+	delete myproc;
+	delete hdvmf;
+	
 	return 0;
 }
 
@@ -53,7 +57,7 @@ derror_t hdv_getevent(void)
 	// Read in next event. 
 	derror_t err;
 	err = eventloop->OneEvent();
-	myproc->FindTracks();
+	// myproc->FindTracks();
 	
 	if(err!=NOERROR)return err;
 		

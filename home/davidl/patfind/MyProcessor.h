@@ -19,6 +19,7 @@
 #include <TCanvas.h>
 
 class DMagneticFieldMap;
+class DFactory_MCTrackCandidates;
 
 class MyProcessor:public DEventProcessor
 {
@@ -29,26 +30,27 @@ class MyProcessor:public DEventProcessor
 		derror_t erun(void){};				///< Called everytime run number changes, provided brun has been called.
 		derror_t fini(void);					///< Called after last event of last event source has been processed.
 
-		derror_t FindTracks(void);
+		//derror_t FindTracks(void);
 		derror_t densityPlot(void);
-		derror_t FillDensityHistogram(TH2F *hist);
+		//derror_t FillDensityHistogram(TH2F *hist);
 
-		DTrkHit *trkhit[300];
-		int Ntrkhits;
-		DMagneticFieldMap *Bfield;
+		//DTrkHit *trkhit[300];
+		//int Ntrkhits;
+		//DMagneticFieldMap *Bfield;
 
 		TFile *ROOTfile;
 		TTree *pat;
 		TH2F *axes;
+		DFactory_MCTrackCandidates *factory;
 		
-		float cmax;
-		float x,y,z,r,phi;
+		//float cmax;
+		//float x,y,z,r,phi;
 		
-		TH2F *density, *density_work;
+		//TH2F *density, *density_work;
 		TLine *lines[500];
 		int Nlines;
-		TEllipse *ellipse[100];
-		int Nellipse;
+		//TEllipse *ellipse[100];
+		//int Nellipse;
 };
 
 
