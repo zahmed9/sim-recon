@@ -1,0 +1,184 @@
+<!DOCTYPE HTML PUBLIC "-// IETF/DTD HTML 2.0// EN">
+<html>
+<!--                                             -->
+<!-- Author: ROOT team (rootdev@hpsalo.cern.ch)  -->
+<!--                                             -->
+<!--   Date: Thu Jan 14 16:43:52 1999            -->
+<!--                                             -->
+<head>
+<title>TMCFastOfflineTrack - source file</title>
+<link rev=made href="mailto:rootdev@root.cern.ch">
+<meta name="rating" content="General">
+<meta name="objecttype" content="Manual">
+<meta name="keywords" content="software development, oo, object oriented, unix, x11, motif, windows nt, c++, html, rene brun, fons rademakers">
+<meta name="description" content="ROOT - An Object Oriented Framework For Large Scale Data Analysis.">
+</head>
+<body BGCOLOR="#ffffff" LINK="#0000ff" VLINK="#551a8b" ALINK="#ff0000" TEXT="#000000">
+<a name="TopOfPage"></a>
+<pre>
+<b>//*-- Author :    Paul Eugenio 2-Nov-98</b>
+
+<b>//////////////////////////////////////////////////////////////////////////</b>
+<b>//                                                                      //</b>
+<b>// <a href=".././TMCFastOfflineTrack.html">TMCFastOfflineTrack</a>   MCFast Offline Track (Smeared ) Class          //</b>
+<b>//                                                                      //</b>
+<b>// This is port of MCFast Trace Common Block to ROOT                    //</b>
+<b>//</b>
+<b>// More information see Tracking in MCFast doc at:</b>
+<b>//</b>
+/*
+<a href= "http://www-pat.fnal.gov/mcfast.html" >
+http://www-pat.fnal.gov/mcfast.html </a>
+*/
+<b>//</b>
+<b>//                                                                      </b>
+<b>//////////////////////////////////////////////////////////////////////////</b>
+
+#include "<a href="../TMCFastOfflineTrack.h">TMCFastOfflineTrack.h</a>"
+
+ClassImp(TMCFastOfflineTrack)
+
+
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastOfflineTrack:GetHepEvtP"> </a><a href="../ListOfTypes.html#Double_t">Double_t</a> <a href=".././TMCFastOfflineTrack.html#TMCFastOfflineTrack:GetHepEvtP">TMCFastOfflineTrack::GetHepEvtP</a>(<a href="../ListOfTypes.html#Int_t">Int_t</a> hep){
+<b>  // Return the smeared momentum of the particle with</b>
+<b>  // the HepEvt index "hep"</b>
+
+  <a href="../ListOfTypes.html#Double_t">Double_t</a> p=-1000.0; // -1 TeV should indicate a problem...
+  
+  for(<a href="../ListOfTypes.html#Int_t">Int_t</a> i=0; i&lt; <a href="#TMCFastOfflineTrack:GetNtracks">GetNtracks</a>();i++){
+    if(<a href="#TMCFastOfflineTrack:GetHep">GetHep</a>(i) == hep)
+      p = <a href="#TMCFastOfflineTrack:GetP">GetP</a>(i);
+
+   
+  }
+  if( p==-1000.0 ){
+    cerr&lt;&lt;"ERROR! <a href=".././TMCFastOfflineTrack.html#TMCFastOfflineTrack:GetHepEvtP">TMCFastOfflineTrack::GetHepEvtP</a>(<a href="../ListOfTypes.html#Int_t">Int_t</a> hep)n";
+    cerr&lt;&lt;"is returning -1 TeV which means that the offline trackn";
+    cerr&lt;&lt;"for HepEvt["&lt;&lt;hep&lt;&lt;"] particle is missing!n";
+    cerr&lt;&lt;"n\n Abortingn\n";
+    exit(-1);
+  }
+  return p;
+}
+
+
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastOfflineTrack:TMCFastOfflineTrack"> </a><a href=".././TMCFastOfflineTrack.html#TMCFastOfflineTrack:TMCFastOfflineTrack">TMCFastOfflineTrack::TMCFastOfflineTrack</a>(struct ntrkoff_t *trk_off){
+<b>  // Call <a href="#TMCFastOfflineTrack:Fill">Fill</a>()</b>
+<b>  //</b>
+  <a href="#TMCFastOfflineTrack:Fill">Fill</a>(trk_off);
+}
+
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastOfflineTrack:Fill"> </a><a href="../ListOfTypes.html#void">void</a> <a href=".././TMCFastOfflineTrack.html#TMCFastOfflineTrack:Fill">TMCFastOfflineTrack::Fill</a>(struct ntrkoff_t *trk_off){
+<b>  // Fill the <a href=".././TMCFastOfflineTrack.html">TMCFastOfflineTrack</a> object </b>
+<b>  // using mcfast common block information</b>
+<b>  //</b>
+  <a href="#TMCFastOfflineTrack:SetNtracks">SetNtracks</a>(trk_off-&gt;ntracks);
+  
+  for(<a href="../ListOfTypes.html#Int_t">Int_t</a> i=0;i&lt; this-&gt;<a href="#TMCFastOfflineTrack:GetNtracks">GetNtracks</a>();i++){
+    <a href="#TMCFastOfflineTrack:SetPx">SetPx</a>(i,trk_off-&gt;trk_off[i].w.px);
+    <a href="#TMCFastOfflineTrack:SetPy">SetPy</a>(i,trk_off-&gt;trk_off[i].w.py);
+    <a href="#TMCFastOfflineTrack:SetPz">SetPz</a>(i,trk_off-&gt;trk_off[i].w.pz);
+    <a href="#TMCFastOfflineTrack:SetE">SetE</a>(i,trk_off-&gt;trk_off[i].w.E) ;
+    <a href="#TMCFastOfflineTrack:SetX">SetX</a>(i,trk_off-&gt;trk_off[i].w.x) ;
+    <a href="#TMCFastOfflineTrack:SetY">SetY</a>(i,trk_off-&gt;trk_off[i].w.y) ;
+    <a href="#TMCFastOfflineTrack:SetZ">SetZ</a>(i,trk_off-&gt;trk_off[i].w.z) ;
+    <a href="#TMCFastOfflineTrack:SetPt">SetPt</a>(i,trk_off-&gt;trk_off[i].w.pt);
+    <a href="#TMCFastOfflineTrack:SetP">SetP</a>(i,trk_off-&gt;trk_off[i].w.p) ;
+    <a href="#TMCFastOfflineTrack:SetQ">SetQ</a>(i,trk_off-&gt;trk_off[i].w.q) ;
+    <a href="#TMCFastOfflineTrack:SetMass">SetMass</a>(i,trk_off-&gt;trk_off[i].mass) ;    
+    for(<a href="../ListOfTypes.html#Int_t">Int_t</a> j=0;j&lt;7;j++)
+      for(<a href="../ListOfTypes.html#Int_t">Int_t</a> k=0;k&lt;7;k++)
+	<a href="#TMCFastOfflineTrack:SetCov">SetCov</a>(i,j,k,trk_off-&gt;trk_off[i].cov[j][k]) ;  
+    <a href="#TMCFastOfflineTrack:SetChisq">SetChisq</a>(i,trk_off-&gt;trk_off[i].chisq) ;        
+    <a href="#TMCFastOfflineTrack:SetNhits">SetNhits</a>(i,trk_off-&gt;trk_off[i].nhit) ; 
+    <a href="#TMCFastOfflineTrack:SetNhitsSilicon">SetNhitsSilicon</a>(i,trk_off-&gt;trk_off[i].nhit_sil) ; 
+    <a href="#TMCFastOfflineTrack:SetNhitsStereo">SetNhitsStereo</a>(i,trk_off-&gt;trk_off[i].nhit_stereo) ;
+    <a href="#TMCFastOfflineTrack:SetIcov">SetIcov</a>(i, trk_off-&gt;trk_off[i].icov)  ; 
+    <a href="#TMCFastOfflineTrack:SetHep">SetHep</a>(i, trk_off-&gt;trk_off[i].hep)  ; 
+  }
+  
+}
+
+
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastOfflineTrack:~TMCFastOfflineTrack"> </a><a href=".././TMCFastOfflineTrack.html">TMCFastOfflineTrack</a>::~<a href=".././TMCFastOfflineTrack.html">TMCFastOfflineTrack</a>()
+{
+<b>  //Clear()</b>
+<b>  //</b>
+   Clear();
+}
+
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastOfflineTrack:Print"> </a><a href="../ListOfTypes.html#void">void</a> <a href=".././TMCFastOfflineTrack.html#TMCFastOfflineTrack:Print">TMCFastOfflineTrack::Print</a>(ostream *os){
+<b>  // Prints  <a href=".././TMCFastOfflineTrack.html">TMCFastOfflineTrack</a> object</b>
+<b>  //</b>
+<b>  // This function is also used</b>
+<b>  // to  overload  &amp;operator&lt;&lt; </b>
+<b>  // </b>
+<b>  // For example;</b>
+<b>  // cout &lt;&lt; trkoff;</b>
+<b>  // </b>
+<b>  // where trkoff is an instance of <a href=".././TMCFastOfflineTrack.html">TMCFastOfflineTrack</a></b>
+
+
+
+  *os&lt;&lt;" Ntracks: "&lt;&lt; <a href="#TMCFastOfflineTrack:GetNtracks">GetNtracks</a>()&lt;&lt;endl;
+ 
+  for(<a href="../ListOfTypes.html#Int_t">Int_t</a> j=0;j&lt; <a href="#TMCFastOfflineTrack:GetNtracks">GetNtracks</a>();j++){
+    *os&lt;&lt;"Track["&lt;&lt;j&lt;&lt;"]"&lt;&lt;endl;
+<b>    // line </b>
+    *os&lt;&lt;"t P(x,y,z,t): ("&lt;&lt; 
+      <a href="#TMCFastOfflineTrack:GetPx">GetPx</a>(j)&lt;&lt;","&lt;&lt;
+      <a href="#TMCFastOfflineTrack:GetPy">GetPy</a>(j)&lt;&lt;","&lt;&lt;
+      <a href="#TMCFastOfflineTrack:GetPz">GetPz</a>(j)&lt;&lt;","&lt;&lt;
+      <a href="#TMCFastOfflineTrack:GetE">GetE</a>(j) &lt;&lt;","&lt;&lt; ")"&lt;&lt;endl;
+<b>    // line</b>
+    *os&lt;&lt;"t (x,y,z): ("&lt;&lt; 
+      <a href="#TMCFastOfflineTrack:GetX">GetX</a>(j)&lt;&lt;","&lt;&lt;
+      <a href="#TMCFastOfflineTrack:GetY">GetY</a>(j)&lt;&lt;","&lt;&lt;
+      <a href="#TMCFastOfflineTrack:GetZ">GetZ</a>(j)&lt;&lt;","&lt;&lt; ")"&lt;&lt; endl;
+<b>    // line </b>
+    *os&lt;&lt;"t Pt "&lt;&lt;<a href="#TMCFastOfflineTrack:GetPt">GetPt</a>(j)&lt;&lt;" p "&lt;&lt;<a href="#TMCFastOfflineTrack:GetP">GetP</a>(j)&lt;&lt;" q "&lt;&lt; 
+      <a href="#TMCFastOfflineTrack:GetQ">GetQ</a>(j)&lt;&lt; " mass "&lt;&lt;<a href="#TMCFastOfflineTrack:GetMass">GetMass</a>(j)&lt;&lt;endl;
+<b>    // line </b>
+    *os&lt;&lt;"t cov[7][7]";
+    for(<a href="../ListOfTypes.html#Int_t">Int_t</a> k=0;k&lt;7;k++){
+      *os&lt;&lt;"n\tt";
+      for(<a href="../ListOfTypes.html#Int_t">Int_t</a> l=0;l&lt;7;l++)
+      *os&lt;&lt; <a href="#TMCFastOfflineTrack:GetCov">GetCov</a>(j,k,l)&lt;&lt;" ";
+    }
+    *os&lt;&lt;endl;
+<b>    // line </b>
+    *os&lt;&lt;"t Chisq: "&lt;&lt;<a href="#TMCFastOfflineTrack:GetChisq">GetChisq</a>(j)&lt;&lt;" icov: "&lt;&lt;<a href="#TMCFastOfflineTrack:GetIcov">GetIcov</a>(j)
+      &lt;&lt;" hepIndex: "&lt;&lt;<a href="#TMCFastOfflineTrack:GetHep">GetHep</a>(j)&lt;&lt;endl;
+<b>    // line</b>
+    *os&lt;&lt;"t Nhits: "&lt;&lt;<a href="#TMCFastOfflineTrack:GetNhits">GetNhits</a>(j)
+      &lt;&lt;" NhitsSilicon: "&lt;&lt;<a href="#TMCFastOfflineTrack:GetNhitsSilicon">GetNhitsSilicon</a>(j)
+	&lt;&lt;" NhitsStereo: "&lt;&lt;<a href="#TMCFastOfflineTrack:GetNhitsStereo">GetNhitsStereo</a>(j)&lt;&lt;endl;
+
+
+  }
+}
+
+
+ostream &amp;operator&lt;&lt;(ostream &amp;os, <a href=".././TMCFastOfflineTrack.html">TMCFastOfflineTrack</a> &amp;offtrack){
+<b>  // overload the standard print operator</b>
+  offtrack.<a href="#TMCFastOfflineTrack:Print">Print</a>(&amp;os);
+  return os;
+}
+</pre>
+
+<!--SIGNATURE-->
+<br>
+<address>
+<hr>
+<center>
+<a href="http://root.cern.ch/root/Welcome.html">ROOT page</a> - <a href="../ClassIndex.html">Class index</a> - <a href="#TopOfPage">Top of the page</a><br>
+</center>
+<hr>This page has been automatically generated. If you have any comments or suggestions about the page layout send a mail to <a href="mailto:rootdev@root.cern.ch">ROOT support</a>, or contact <a href="mailto:rootdev@root.cern.ch">the developers</a> with any questions or problems regarding ROOT.
+</address>
+</body>
+</html>

@@ -1,0 +1,17 @@
+################  ROOT ##########################
+# 
+#
+# These items are need to run root. Include them
+# in you .cshrc file.
+#
+#
+setenv ROOTSYS /work/halld/root   
+set path=($path $ROOTSYS/bin)
+
+setenv LD_LIBRARY_PATH  LD_LIBRARY_PATH:$ROOTSYS/lib
+
+# You must have root installed on you system.
+# For more information an root (such as where to get it),
+# see http://root.cern.ch
+#
+####################### HALL D #####################

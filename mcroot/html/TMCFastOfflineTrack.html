@@ -1,0 +1,209 @@
+<!DOCTYPE HTML PUBLIC "-// IETF/DTD HTML 2.0// EN">
+<html>
+<!--                                             -->
+<!-- Author: ROOT team (rootdev@hpsalo.cern.ch)  -->
+<!--                                             -->
+<!--   Date: Thu Jan 14 16:43:52 1999            -->
+<!--                                             -->
+<head>
+<title>TMCFastOfflineTrack</title>
+<link rev=made href="mailto:rootdev@root.cern.ch">
+<meta name="rating" content="General">
+<meta name="objecttype" content="Manual">
+<meta name="keywords" content="software development, oo, object oriented, unix, x11, motif, windows nt, c++, html, rene brun, fons rademakers">
+<meta name="description" content="ROOT - An Object Oriented Framework For Large Scale Data Analysis.">
+</head>
+<body BGCOLOR="#ffffff" LINK="#0000ff" VLINK="#551a8b" ALINK="#ff0000" TEXT="#000000">
+<a name="TopOfPage"></a>
+<!--BEGIN-->
+<center>
+<h1>TMCFastOfflineTrack</h1>
+<hr width=300>
+<!--SDL--><em><a href=#TMCFastOfflineTrack:description>class description</a> - <a href="src/TMCFastOfflineTrack.cxx.html">source file</a> - <a href="TMCFastOfflineTrack_Tree.ps">inheritance tree</a></em>
+<hr width=300>
+</center>
+<h2>class <a name="TMCFastOfflineTrack" href="TMCFastOfflineTrack.h">TMCFastOfflineTrack</a> : public <a href="http://root.cern.ch/root/html/TObject.html">TObject</a></h2>
+<pre>
+
+<!--TAB4-->    <b>public:</b><br>
+<!--TAB6-->      <a href="./TMCFastOfflineTrack.html">TMCFastOfflineTrack</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:TMCFastOfflineTrack">TMCFastOfflineTrack</a><!--PLAIN-->()
+<!--TAB6-->      <a href="./TMCFastOfflineTrack.html">TMCFastOfflineTrack</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:TMCFastOfflineTrack">TMCFastOfflineTrack</a><!--PLAIN-->(ntrkoff_t* trk_off)
+<!--TAB6-->      <a href="./TMCFastOfflineTrack.html">TMCFastOfflineTrack</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:TMCFastOfflineTrack">TMCFastOfflineTrack</a><!--PLAIN-->(<a href="./TMCFastOfflineTrack.html">TMCFastOfflineTrack</a>&amp;)
+<!--TAB6-->             virtual <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:~TMCFastOfflineTrack">~TMCFastOfflineTrack</a><!--PLAIN-->()
+<!--TAB6-->                  <a href="http://root.cern.ch/root/html/TClass.html">TClass</a>* <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:Class">Class</a><!--PLAIN-->()
+<!--TAB6-->                     <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:Fill">Fill</a><!--PLAIN-->(ntrkoff_t* trk_off)
+<!--TAB6-->                 <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:GetChisq">GetChisq</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--TAB6-->                 <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:GetCov">GetCov</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Int_t">Int_t</a> j, <a href="ListOfTypes.html#Int_t">Int_t</a> k)
+<!--TAB6-->                 <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:GetE">GetE</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--TAB6-->                    <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:GetHep">GetHep</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--TAB6-->                 <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:GetHepEvtP">GetHepEvtP</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> hep)
+<!--TAB6-->                    <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:GetIcov">GetIcov</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--TAB6-->                 <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:GetMass">GetMass</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--TAB6-->                    <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:GetNhits">GetNhits</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--TAB6-->                    <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:GetNhitsSilicon">GetNhitsSilicon</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--TAB6-->                    <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:GetNhitsStereo">GetNhitsStereo</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--TAB6-->                    <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:GetNtracks">GetNtracks</a><!--PLAIN-->()
+<!--TAB6-->                 <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:GetP">GetP</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--TAB6-->                 <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:GetPt">GetPt</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--TAB6-->                 <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:GetPx">GetPx</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--TAB6-->                 <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:GetPy">GetPy</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--TAB6-->                 <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:GetPz">GetPz</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--TAB6-->                 <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:GetQ">GetQ</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--TAB6-->                 <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:GetX">GetX</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--TAB6-->                 <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:GetY">GetY</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--TAB6-->                 <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:GetZ">GetZ</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--TAB6-->          virtual <a href="http://root.cern.ch/root/html/TClass.html">TClass</a>* <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:IsA">IsA</a><!--PLAIN-->()
+<!--TAB6-->                     <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:Print">Print</a><!--PLAIN-->(ostream* os)
+<!--TAB6-->                     <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:SetChisq">SetChisq</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--TAB6-->                     <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:SetCov">SetCov</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Int_t">Int_t</a> j, <a href="ListOfTypes.html#Int_t">Int_t</a> k, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--TAB6-->                     <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:SetE">SetE</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--TAB6-->                     <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:SetHep">SetHep</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Int_t">Int_t</a> n)
+<!--TAB6-->                     <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:SetIcov">SetIcov</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Int_t">Int_t</a> n)
+<!--TAB6-->                     <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:SetMass">SetMass</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--TAB6-->                     <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:SetNhits">SetNhits</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Int_t">Int_t</a> n)
+<!--TAB6-->                     <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:SetNhitsSilicon">SetNhitsSilicon</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Int_t">Int_t</a> n)
+<!--TAB6-->                     <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:SetNhitsStereo">SetNhitsStereo</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Int_t">Int_t</a> n)
+<!--TAB6-->                     <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:SetNtracks">SetNtracks</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> n)
+<!--TAB6-->                     <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:SetP">SetP</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--TAB6-->                     <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:SetPt">SetPt</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--TAB6-->                     <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:SetPx">SetPx</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--TAB6-->                     <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:SetPy">SetPy</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--TAB6-->                     <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:SetPz">SetPz</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--TAB6-->                     <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:SetQ">SetQ</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--TAB6-->                     <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:SetX">SetX</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--TAB6-->                     <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:SetY">SetY</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--TAB6-->                     <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:SetZ">SetZ</a><!--PLAIN-->(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--TAB6-->             virtual <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:ShowMembers">ShowMembers</a><!--PLAIN-->(<a href="http://root.cern.ch/root/html/TMemberInspector.html">TMemberInspector</a>&amp; insp, <a href="ListOfTypes.html#char">char</a>* parent)
+<!--TAB6-->             virtual <a href="ListOfTypes.html#void">void</a> <!--TAB--><!--BOLD--><a href="#TMCFastOfflineTrack:Streamer">Streamer</a><!--PLAIN-->(<a href="http://root.cern.ch/root/html/TBuffer.html">TBuffer</a>&amp; b)
+
+<h3><!--TAB2-->  <a name="TMCFastOfflineTrack:Data Members">Data Members</a></h3>
+<!--TAB4-->    <b>private:</b><br>
+<!--TAB6-->         <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a name="TMCFastOfflineTrack:fntracks">fntracks</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fntracks">number of tracks</a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastOfflineTrack:fpx">fpx[20]</a><!--PLAIN-->   <!--TAB--><i><a name="Title:fpx">Track parameters at interaction </a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastOfflineTrack:fpy">fpy[20]</a><!--PLAIN-->   <!--TAB--><i><a name="Title:fpy"></a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastOfflineTrack:fpz">fpz[20]</a><!--PLAIN-->   <!--TAB--><i><a name="Title:fpz"></a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastOfflineTrack:fE">fE[20]</a><!--PLAIN-->    <!--TAB--><i><a name="Title:fE"></a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastOfflineTrack:fx">fx[20]</a><!--PLAIN-->    <!--TAB--><i><a name="Title:fx"></a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastOfflineTrack:fy">fy[20]</a><!--PLAIN-->    <!--TAB--><i><a name="Title:fy"></a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastOfflineTrack:fz">fz[20]</a><!--PLAIN-->    <!--TAB--><i><a name="Title:fz"></a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastOfflineTrack:fpt">fpt[20]</a><!--PLAIN-->   <!--TAB--><i><a name="Title:fpt">pt = sqrt(px*px+py*py) </a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastOfflineTrack:fp">fp[20]</a><!--PLAIN-->    <!--TAB--><i><a name="Title:fp">momentum </a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastOfflineTrack:fq">fq[20]</a><!--PLAIN-->    <!--TAB--><i><a name="Title:fq">charge </a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastOfflineTrack:fmass">fmass[20]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fmass">mass </a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastOfflineTrack:fcov">fcov[20][7][7]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fcov">covariance matrix		</a></i>
+<!--TAB6-->      <a href="ListOfTypes.html#Double_t">Double_t</a> <!--TAB--><!--BOLD--><a name="TMCFastOfflineTrack:fchisq">fchisq[20]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fchisq">fit chisq 	     </a></i>
+<!--TAB6-->         <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a name="TMCFastOfflineTrack:fnhits">fnhits[20]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fnhits">nhits in fit</a></i>
+<!--TAB6-->         <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a name="TMCFastOfflineTrack:fnhitsSilicon">fnhitsSilicon[20]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fnhitsSilicon"># of silicon hits</a></i>
+<!--TAB6-->         <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a name="TMCFastOfflineTrack:fnhitsStereo">fnhitsStereo[20]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fnhitsStereo"># of  hits with stereo info</a></i>
+<!--TAB6-->         <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a name="TMCFastOfflineTrack:ficov">ficov[20]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:ficov">icov = 0 if covariance matrix not defined</a></i>
+<!--TAB6-->         <a href="ListOfTypes.html#Int_t">Int_t</a> <!--TAB--><!--BOLD--><a name="TMCFastOfflineTrack:fhep">fhep[20]</a><!--PLAIN-->  <!--TAB--><i><a name="Title:fhep">position of corresp. track in HEPEVT list</a></i>
+</pre>
+<!--END-->
+<hr>
+<!--DESCRIPTION--><h2><a name="TMCFastOfflineTrack:description">Class Description</a></h2>
+<pre>                                                                      
+ <a href="./TMCFastOfflineTrack.html">TMCFastOfflineTrack</a>   MCFast Offline Track (Smeared ) Class          
+                                                                      
+ This is port of MCFast Trace Common Block to ROOT                    
+
+ More information see Tracking in MCFast doc at:
+
+/*
+<a href= "http://www-pat.fnal.gov/mcfast.html" >
+http://www-pat.fnal.gov/mcfast.html </a>
+*/
+
+
+
+</pre><hr>
+<!--FUNCTION--><a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastOfflineTrack:GetHepEvtP" href="src/TMCFastOfflineTrack.cxx.html#TMCFastOfflineTrack:GetHepEvtP">GetHepEvtP</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> hep)<br>
+<pre> Return the smeared momentum of the particle with
+ the HepEvt index "hep"
+</pre><hr>
+<!--FUNCTION--> <a name="TMCFastOfflineTrack:TMCFastOfflineTrack" href="src/TMCFastOfflineTrack.cxx.html#TMCFastOfflineTrack:TMCFastOfflineTrack">TMCFastOfflineTrack</a>(struct ntrkoff_t *trk_off)<br>
+<pre> Call <a href="#TMCFastOfflineTrack:Fill">Fill</a>()
+
+</pre><hr>
+<!--FUNCTION--><a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:Fill" href="src/TMCFastOfflineTrack.cxx.html#TMCFastOfflineTrack:Fill">Fill</a>(struct ntrkoff_t *trk_off)<br>
+<pre> Fill the <a href="./TMCFastOfflineTrack.html">TMCFastOfflineTrack</a> object
+ using mcfast common block information
+
+</pre><hr>
+<!--FUNCTION--> <a name="TMCFastOfflineTrack:~TMCFastOfflineTrack" href="src/TMCFastOfflineTrack.cxx.html#TMCFastOfflineTrack:~TMCFastOfflineTrack">~TMCFastOfflineTrack</a>()
+<br>
+<pre>Clear()
+
+</pre><hr>
+<!--FUNCTION--><a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:Print" href="src/TMCFastOfflineTrack.cxx.html#TMCFastOfflineTrack:Print">Print</a>(ostream *os)<br>
+<pre> Prints  <a href="./TMCFastOfflineTrack.html">TMCFastOfflineTrack</a> object
+
+ This function is also used
+ to  overload  &amp;operator&lt;&lt;
+
+ For example;
+ cout &lt;&lt; trkoff;
+
+ where trkoff is an instance of <a href="./TMCFastOfflineTrack.html">TMCFastOfflineTrack</a>
+</pre><br><br><br>
+<h3>Inline Functions</h3>
+<hr>
+<pre>
+<!--INLINE FUNCTION--><!--TAB6-->        <a href="./TMCFastOfflineTrack.html">TMCFastOfflineTrack</a> <a name="TMCFastOfflineTrack:TMCFastOfflineTrack" href="TMCFastOfflineTrack.h">TMCFastOfflineTrack</a>(ntrkoff_t* trk_off)
+<!--INLINE FUNCTION--><!--TAB6-->                      <a href="ListOfTypes.html#Int_t">Int_t</a> <a name="TMCFastOfflineTrack:GetNtracks" href="TMCFastOfflineTrack.h">GetNtracks</a>()
+<!--INLINE FUNCTION--><!--TAB6-->                   <a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastOfflineTrack:GetPx" href="TMCFastOfflineTrack.h">GetPx</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--INLINE FUNCTION--><!--TAB6-->                   <a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastOfflineTrack:GetPy" href="TMCFastOfflineTrack.h">GetPy</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--INLINE FUNCTION--><!--TAB6-->                   <a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastOfflineTrack:GetPz" href="TMCFastOfflineTrack.h">GetPz</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--INLINE FUNCTION--><!--TAB6-->                   <a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastOfflineTrack:GetE" href="TMCFastOfflineTrack.h">GetE</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--INLINE FUNCTION--><!--TAB6-->                   <a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastOfflineTrack:GetX" href="TMCFastOfflineTrack.h">GetX</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--INLINE FUNCTION--><!--TAB6-->                   <a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastOfflineTrack:GetY" href="TMCFastOfflineTrack.h">GetY</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--INLINE FUNCTION--><!--TAB6-->                   <a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastOfflineTrack:GetZ" href="TMCFastOfflineTrack.h">GetZ</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--INLINE FUNCTION--><!--TAB6-->                   <a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastOfflineTrack:GetPt" href="TMCFastOfflineTrack.h">GetPt</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--INLINE FUNCTION--><!--TAB6-->                   <a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastOfflineTrack:GetP" href="TMCFastOfflineTrack.h">GetP</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--INLINE FUNCTION--><!--TAB6-->                   <a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastOfflineTrack:GetQ" href="TMCFastOfflineTrack.h">GetQ</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--INLINE FUNCTION--><!--TAB6-->                   <a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastOfflineTrack:GetMass" href="TMCFastOfflineTrack.h">GetMass</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--INLINE FUNCTION--><!--TAB6-->                   <a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastOfflineTrack:GetCov" href="TMCFastOfflineTrack.h">GetCov</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Int_t">Int_t</a> j, <a href="ListOfTypes.html#Int_t">Int_t</a> k)
+<!--INLINE FUNCTION--><!--TAB6-->                   <a href="ListOfTypes.html#Double_t">Double_t</a> <a name="TMCFastOfflineTrack:GetChisq" href="TMCFastOfflineTrack.h">GetChisq</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--INLINE FUNCTION--><!--TAB6-->                      <a href="ListOfTypes.html#Int_t">Int_t</a> <a name="TMCFastOfflineTrack:GetNhits" href="TMCFastOfflineTrack.h">GetNhits</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--INLINE FUNCTION--><!--TAB6-->                      <a href="ListOfTypes.html#Int_t">Int_t</a> <a name="TMCFastOfflineTrack:GetNhitsSilicon" href="TMCFastOfflineTrack.h">GetNhitsSilicon</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--INLINE FUNCTION--><!--TAB6-->                      <a href="ListOfTypes.html#Int_t">Int_t</a> <a name="TMCFastOfflineTrack:GetNhitsStereo" href="TMCFastOfflineTrack.h">GetNhitsStereo</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--INLINE FUNCTION--><!--TAB6-->                      <a href="ListOfTypes.html#Int_t">Int_t</a> <a name="TMCFastOfflineTrack:GetIcov" href="TMCFastOfflineTrack.h">GetIcov</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--INLINE FUNCTION--><!--TAB6-->                      <a href="ListOfTypes.html#Int_t">Int_t</a> <a name="TMCFastOfflineTrack:GetHep" href="TMCFastOfflineTrack.h">GetHep</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i)
+<!--INLINE FUNCTION--><!--TAB6-->                       <a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:SetNtracks" href="TMCFastOfflineTrack.h">SetNtracks</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> n)
+<!--INLINE FUNCTION--><!--TAB6-->                       <a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:SetPx" href="TMCFastOfflineTrack.h">SetPx</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--INLINE FUNCTION--><!--TAB6-->                       <a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:SetPy" href="TMCFastOfflineTrack.h">SetPy</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--INLINE FUNCTION--><!--TAB6-->                       <a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:SetPz" href="TMCFastOfflineTrack.h">SetPz</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--INLINE FUNCTION--><!--TAB6-->                       <a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:SetE" href="TMCFastOfflineTrack.h">SetE</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--INLINE FUNCTION--><!--TAB6-->                       <a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:SetX" href="TMCFastOfflineTrack.h">SetX</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--INLINE FUNCTION--><!--TAB6-->                       <a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:SetY" href="TMCFastOfflineTrack.h">SetY</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--INLINE FUNCTION--><!--TAB6-->                       <a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:SetZ" href="TMCFastOfflineTrack.h">SetZ</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--INLINE FUNCTION--><!--TAB6-->                       <a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:SetPt" href="TMCFastOfflineTrack.h">SetPt</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--INLINE FUNCTION--><!--TAB6-->                       <a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:SetP" href="TMCFastOfflineTrack.h">SetP</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--INLINE FUNCTION--><!--TAB6-->                       <a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:SetQ" href="TMCFastOfflineTrack.h">SetQ</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--INLINE FUNCTION--><!--TAB6-->                       <a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:SetMass" href="TMCFastOfflineTrack.h">SetMass</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--INLINE FUNCTION--><!--TAB6-->                       <a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:SetCov" href="TMCFastOfflineTrack.h">SetCov</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Int_t">Int_t</a> j, <a href="ListOfTypes.html#Int_t">Int_t</a> k, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--INLINE FUNCTION--><!--TAB6-->                       <a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:SetChisq" href="TMCFastOfflineTrack.h">SetChisq</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Double_t">Double_t</a> x)
+<!--INLINE FUNCTION--><!--TAB6-->                       <a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:SetNhits" href="TMCFastOfflineTrack.h">SetNhits</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Int_t">Int_t</a> n)
+<!--INLINE FUNCTION--><!--TAB6-->                       <a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:SetNhitsSilicon" href="TMCFastOfflineTrack.h">SetNhitsSilicon</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Int_t">Int_t</a> n)
+<!--INLINE FUNCTION--><!--TAB6-->                       <a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:SetNhitsStereo" href="TMCFastOfflineTrack.h">SetNhitsStereo</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Int_t">Int_t</a> n)
+<!--INLINE FUNCTION--><!--TAB6-->                       <a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:SetIcov" href="TMCFastOfflineTrack.h">SetIcov</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Int_t">Int_t</a> n)
+<!--INLINE FUNCTION--><!--TAB6-->                       <a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:SetHep" href="TMCFastOfflineTrack.h">SetHep</a>(<a href="ListOfTypes.html#Int_t">Int_t</a> i, <a href="ListOfTypes.html#Int_t">Int_t</a> n)
+<!--INLINE FUNCTION--><!--TAB6-->                    <a href="http://root.cern.ch/root/html/TClass.html">TClass</a>* <a name="TMCFastOfflineTrack:Class" href="TMCFastOfflineTrack.h">Class</a>()
+<!--INLINE FUNCTION--><!--TAB6-->                    <a href="http://root.cern.ch/root/html/TClass.html">TClass</a>* <a name="TMCFastOfflineTrack:IsA" href="TMCFastOfflineTrack.h">IsA</a>()
+<!--INLINE FUNCTION--><!--TAB6-->                       <a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:ShowMembers" href="TMCFastOfflineTrack.h">ShowMembers</a>(<a href="http://root.cern.ch/root/html/TMemberInspector.html">TMemberInspector</a>&amp; insp, <a href="ListOfTypes.html#char">char</a>* parent)
+<!--INLINE FUNCTION--><!--TAB6-->                       <a href="ListOfTypes.html#void">void</a> <a name="TMCFastOfflineTrack:Streamer" href="TMCFastOfflineTrack.h">Streamer</a>(<a href="http://root.cern.ch/root/html/TBuffer.html">TBuffer</a>&amp; b)
+<!--INLINE FUNCTION--><!--TAB6-->        <a href="./TMCFastOfflineTrack.html">TMCFastOfflineTrack</a> <a name="TMCFastOfflineTrack:TMCFastOfflineTrack" href="TMCFastOfflineTrack.h">TMCFastOfflineTrack</a>(<a href="./TMCFastOfflineTrack.html">TMCFastOfflineTrack</a>&amp;)
+</pre>
+
+<hr><br>
+<!--SIGNATURE-->
+<em>Author: <a href=http://xwho.cern.ch/WHO/people?Paul+Eugenio>    Paul Eugenio </a>2-Nov-98</em><br>
+<br>
+<address>
+<hr>
+<center>
+<a href="http://root.cern.ch/root/Welcome.html">ROOT page</a> - <a href="ClassIndex.html">Class index</a> - <a href="#TopOfPage">Top of the page</a><br>
+</center>
+<hr>This page has been automatically generated. If you have any comments or suggestions about the page layout send a mail to <a href="mailto:rootdev@root.cern.ch">ROOT support</a>, or contact <a href="mailto:rootdev@root.cern.ch">the developers</a> with any questions or problems regarding ROOT.
+</address>
+</body>
+</html>

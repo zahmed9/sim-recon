@@ -1,0 +1,182 @@
+#
+#  WARNING This makefile is currently only setup for Alpha/OSF with g++
+#
+
+
+ObjSuf        = o
+SrcSuf        = cxx
+ExeSuf        =
+DllSuf        = so
+MCFASTLIB      = $(TMCFastO)
+OutPutOpt     = -o
+
+ROOTLIBS      = -L$(ROOTSYS)/lib -lNew -lBase -lCint -lClib -lCont -lFunc \
+                -lGraf -lGraf3d -lHist -lHtml -lMatrix -lMeta -lMinuit -lNet \
+                -lPostscript -lProof -lTree -lUnix -lZip
+ROOTGLIBS     = -lGpad -lGui -lGX11 -lX3d
+
+#
+# Machine dependent stuff.
+#
+ifeq "$(UNAME)" "OSF1"
+# Alpha/OSF with egcs -fwritable-strings
+CXX           = g++
+CXXFLAGS      = -O -g -I$(ROOTSYS)/include -fPIC -fno-rtti -fno-exceptions \
+                -fwritable-strings -mcpu=ev5 -D__osf__ -D__alpha
+LD            = g++
+LDFLAGS       = -g -fwritable-strings
+SOFLAGS       = -Wl,-expect_unresolved,* -shared
+LIBS          = $(ROOTLIBS) -lg++ -lm
+GLIBS         = $(ROOTLIBS) $(ROOTGLIBS) -lXpm -lX11 \
+	        -lg++ -lm -lPW
+endif 
+
+ifeq "$(UNAME)" "Linux"
+# Linux with egcs
+CXX           = g++
+CXXFLAGS      = -O -g -Wall -fno-rtti -fno-exceptions -fPIC -I$(ROOTSYS)/include
+LD            = g++
+LDFLAGS       = -g
+SOFLAGS       = -shared
+LIBS          = $(ROOTLIBS) -lm -ldl -rdynamic
+GLIBS         = $(ROOTLIBS) $(ROOTGLIBS) -L/usr/X11R6/lib \
+                -lXpm -lX11 -lm -ldl -rdynamic
+endif
+
+
+
+#------------------------------------------------------------------------------
+
+TMCFastO        = TMCFastHepEvt.o TMCFastTOF.o \
+		   TMCFastOfflineTrack.o TMCFastHepParticle.o \
+                TMCFastHepEvtDict.o TMCFastTOFDict.o \
+		TMCFastOfflineTrackDict.o TMCFastHepParticleDict.o\
+		TMCFastCalorimeter.o TMCFastCalorimeterDict.o \
+		TMCFastCalorHits.o TMCFastCalorHitsDict.o \
+		TCalHitTracks.o  TCalHitTracksDict.o \
+		TLGDsmears.o TLGDsmearsDict.o \
+		TLGDparticle.o TLGDparticleDict.o \
+		TMCesr.o TMCesrDict.o TMCParticle.o TMCParticleDict.o
+
+
+TMCFastS        = TMCFastHepEvt.cxx TMCFastTOF.cxx \
+		TMCFastOfflineTrack.cxx TMCFastHepParticle.cxx\
+                TMCFastHepEvtDict.cxx TMCFastTOFDict.cxx \
+		TMCFastOfflineTrackDict.cxx TMCFastHepParticleDict.cxx \
+		TMCFastCalorimeter.cxx TMCFastCalorimeterDict.cxx \
+		TMCFastCalorHits.cxx TMCFastCalorHitsDict.cxx \
+		TCalHitTracks.cxx  TCalHitTracksDict.cxx \
+		TLGDsmears.cxx TLGDsmearsDict.cxx \
+		TLGDparticle.cxx TLGDparticleDict.cxx \
+		TMCesr.cxx TMCesrDict.cxx TMCParticle.cxx TMCParticleDict.cxx	
+
+TMCFast_LIB       = libTMCFast.a
+
+
+MAIN1O    = mcfast2root.o
+MAIN1S    = mcfast2root.cxx
+
+MAIN2O        = dumpRdt.o
+MAIN2S        = dumpRdt.cxx
+
+
+
+TMCFast         = mcfast2root
+TMCFast2         = dumpRdt
+TMCFastSO       = libTMCFast.so
+
+
+OBJS          = $(TMCFastO) $(MAIN1O) 
+
+PROGRAMS      = $(TMCFast)  $(TMCFast2) 
+
+all:            $(PROGRAMS)
+
+lib:	$(TMCFast_LIB)
+
+$(TMCFast_LIB): $(TMCFastO)
+	ar -r  $(HALLD_HOME)/lib/$(UNAME)/$(TMCFast_LIB) $(TMCFastO) 
+
+$(TMCFast):       $(TMCFastO) $(MAIN1O)
+		$(LD) $(SOFLAGS) $(LDFLAGS) $(TMCFastO) $(OutPutOpt) $(TMCFastSO)
+		$(LD) $(LDFLAGS) $(MAIN1O) $(MCFASTLIB) $(LIBS) $(OutPutOpt) $(TMCFast)
+		@echo "$(TMCFast) done"
+
+$(TMCFast2):       $(TMCFastO) $(MAIN2O)
+		$(LD) $(SOFLAGS) $(LDFLAGS) $(TMCFastO) $(OutPutOpt) $(TMCFastSO)
+		$(LD) $(LDFLAGS) $(MAIN2O) $(MCFASTLIB) $(LIBS) $(OutPutOpt) $(TMCFast2)
+		@echo "$(TMCFast2) done"
+
+
+
+
+
+clean:
+		@rm -f $(OBJS) *Dict.* core
+
+.SUFFIXES: .cxx
+
+###
+
+TMCFastHepEvt.o: TMCFastHepEvt.h
+TMCFastTOF.o: TMCFastTOF.h
+TMCFastOfflineTrack.o: TMCFastOfflineTrack.h
+TMCFastHepParticle.o: TMCFastHepParticle.h
+mcfast2root.o: TMCFastHepEvt.h TMCFastHepParticle.h  TMCFastTOF.h TMCFastOfflineTrack.h TMCFastHepParticle.h
+dumpRdt.o: TMCFastHepEvt.h TMCFastHepParticle.h  TMCFastTOF.h TMCFastOfflineTrack.h
+TMCFastCalorimeter.o: TMCFastCalorimeter.h
+TMCFastCalorHits.o: TMCFastCalorHits.h
+TLGDsmears.o:TLGDsmears.h
+TLGDparticle.o:TLGDparticle.h
+TMCesr.o:TMCesr.h
+TMCParticle.o:TMCParticle.h
+
+#
+# Tell make how to parse the C++ code using rootcint
+#
+TMCFastHepEvtDict.cxx: TMCFastHepEvt.h TMCFastHepEvtLinkDef.h
+	@echo "Generating dictionary TMCFastHepEvtDict..."
+	@$(ROOTSYS)/bin/rootcint -f TMCFastHepEvtDict.cxx -c TMCFastHepEvt.h TMCFastHepEvtLinkDef.h
+
+TMCFastTOFDict.cxx: TMCFastTOF.h TMCFastTOFLinkDef.h
+	@echo "Generating dictionary TMCFastTOFDict..."
+	@$(ROOTSYS)/bin/rootcint -f TMCFastTOFDict.cxx -c TMCFastTOF.h TMCFastTOFLinkDef.h
+
+TMCFastOfflineTrackDict.cxx: TMCFastOfflineTrack.h TMCFastOfflineTrackLinkDef.h
+	@echo "Generating dictionary TMCFastOfflineTrackDict..."
+	@$(ROOTSYS)/bin/rootcint -f TMCFastOfflineTrackDict.cxx -c TMCFastOfflineTrack.h TMCFastOfflineTrackLinkDef.h
+
+TMCFastHepParticleDict.cxx: TMCFastHepParticle.h TMCFastHepParticleLinkDef.h
+	@echo "Generating dictionary TMCFastHepParticleDict..."
+	@$(ROOTSYS)/bin/rootcint -f TMCFastHepParticleDict.cxx -c TMCFastHepParticle.h TMCFastHepParticleLinkDef.h
+
+TMCFastCalorimeterDict.cxx: TMCFastCalorimeter.h TMCFastCalorimeterLinkDef.h
+	@echo "Generating dictionary TMCFastCalorimeterDict..."
+	@$(ROOTSYS)/bin/rootcint -f TMCFastCalorimeterDict.cxx -c TMCFastCalorimeter.h TMCFastCalorimeterLinkDef.h
+
+TMCFastCalorHitsDict.cxx: TMCFastCalorHits.h TMCFastCalorHitsLinkDef.h
+	@echo "Generating dictionary TMCFastCalorHitsDict..."
+	@$(ROOTSYS)/bin/rootcint -f TMCFastCalorHitsDict.cxx -c TMCFastCalorHits.h TMCFastCalorHitsLinkDef.h
+
+TCalHitTracksDict.cxx: TCalHitTracks.h TCalHitTracksLinkDef.h
+	@echo "Generating dictionary TCalHitTracksDict..."
+	@$(ROOTSYS)/bin/rootcint -f TCalHitTracksDict.cxx -c TCalHitTracks.h TCalHitTracksLinkDef.h
+
+TLGDsmearsDict.cxx: TLGDsmears.h TLGDsmearsLinkDef.h
+	@echo "Generating dictionary TLGDsmearsDict..."
+	@$(ROOTSYS)/bin/rootcint -f TLGDsmearsDict.cxx -c TLGDsmears.h TLGDsmearsLinkDef.h
+
+TLGDparticleDict.cxx: TLGDparticle.h TLGDparticleLinkDef.h
+	@echo "Generating dictionary TLGDparticleDict..."
+	@$(ROOTSYS)/bin/rootcint -f TLGDparticleDict.cxx -c TLGDparticle.h TLGDparticleLinkDef.h
+
+TMCParticleDict.cxx: TMCParticle.h TMCParticleLinkDef.h
+	@echo "Generating dictionary TMCParticleDict..."
+	@$(ROOTSYS)/bin/rootcint -f TMCParticleDict.cxx -c TMCParticle.h TMCParticleLinkDef.h
+
+TMCesrDict.cxx: TMCesr.h TMCesrLinkDef.h
+	@echo "Generating dictionary TMCesrDict..."
+	@$(ROOTSYS)/bin/rootcint -f TMCesrDict.cxx -c TMCesr.h TMCesrLinkDef.h
+
+.cxx.o:
+	$(CXX) $(CXXFLAGS) -c $<

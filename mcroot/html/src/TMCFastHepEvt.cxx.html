@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-// IETF/DTD HTML 2.0// EN">
+<html>
+<!--                                             -->
+<!-- Author: ROOT team (rootdev@hpsalo.cern.ch)  -->
+<!--                                             -->
+<!--   Date: Thu Jan  7 15:35:15 1999            -->
+<!--                                             -->
+<head>
+<title>TMCFastHepEvt - source file</title>
+<link rev=made href="mailto:rootdev@root.cern.ch">
+<meta name="rating" content="General">
+<meta name="objecttype" content="Manual">
+<meta name="keywords" content="software development, oo, object oriented, unix, x11, motif, windows nt, c++, html, rene brun, fons rademakers">
+<meta name="description" content="ROOT - An Object Oriented Framework For Large Scale Data Analysis.">
+</head>
+<body BGCOLOR="#ffffff" LINK="#0000ff" VLINK="#551a8b" ALINK="#ff0000" TEXT="#000000">
+<a name="TopOfPage"></a>
+<pre>
+<b>//*-- Author :    Paul Eugenio 2-Nov-98</b>
+
+<b>////////////////////////////////////////////////////////////////////////</b>
+<b>// <a href=".././TMCFastHepEvt.html">TMCFastHepEvt</a></b>
+<b>//</b>
+<b>// This class is an object oriented version of StdHep FORTRAN common block.</b>
+<b>// The StdHep common block is filled by MCFast routines. An instance of</b>
+<b>// <a href=".././TMCFastHepEvt.html">TMCFastHepEvt</a> is created using this information and is save to Root</b>
+<b>// Tree for I/O.</b>
+<b>//</b>
+<b>//  <a href=".././TMCFastHepEvt.html">TMCFastHepEvt</a> contains a <a href="http://root.cern.ch/root/html/TClonesArray.html">TClonesArray</a> of  <a href=".././TMCFastHepParticle.html">TMCFastHepParticle</a></b>
+<b>//</b>
+<b>// More information about StdHep can be found at:</b>
+<b>//</b>
+/*
+<a href= "http://www-pat.fnal.gov/stdhep.html" >
+http://www-pat.fnal.gov/stdhep.html </a>
+*/
+<b>//</b>
+<b>//</b>
+<b>////////////////////////////////////////////////////////////////////////</b>
+
+
+#include "<a href="../TMCFastHepEvt.h">TMCFastHepEvt.h</a>"
+
+
+ClassImp(TMCFastHepEvt)
+
+
+TClonesArray *TMCFastHepEvt::fgParticles = 0;
+
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastHepEvt:TMCFastHepEvt"> </a><a href=".././TMCFastHepEvt.html#TMCFastHepEvt:TMCFastHepEvt">TMCFastHepEvt::TMCFastHepEvt</a>(struct hepevt_t *evt){
+<b>  // Create the object </b>
+<b>  // and fill it using  FIll(struct hepevt_t *evt) </b>
+<b>  //</b>
+  if(!<a href=".././TMCFastHepEvt.html#TMCFastHepEvt:fgParticles">fgParticles</a>) <a href=".././TMCFastHepEvt.html#TMCFastHepEvt:fgParticles">fgParticles</a> = new <a href="http://root.cern.ch/root/html/TClonesArray.html">TClonesArray</a>("<a href=".././TMCFastHepParticle.html">TMCFastHepParticle</a>",10);
+  <a href=".././TMCFastHepEvt.html#TMCFastHepEvt:fHepParticle">fHepParticle</a> = <a href=".././TMCFastHepEvt.html#TMCFastHepEvt:fgParticles">fgParticles</a>;
+  <a href="#TMCFastHepEvt:Fill">Fill</a>(evt);
+}
+
+<a name="TMCFastHepEvt:TMCFastHepEvt"> </a><a href=".././TMCFastHepEvt.html#TMCFastHepEvt:TMCFastHepEvt">TMCFastHepEvt::TMCFastHepEvt</a>(){
+  <a href=".././TMCFastHepEvt.html#TMCFastHepEvt:fnhep">fnhep</a>=0;
+  if(!<a href=".././TMCFastHepEvt.html#TMCFastHepEvt:fgParticles">fgParticles</a>) <a href=".././TMCFastHepEvt.html#TMCFastHepEvt:fgParticles">fgParticles</a> = new <a href="http://root.cern.ch/root/html/TClonesArray.html">TClonesArray</a>("<a href=".././TMCFastHepParticle.html">TMCFastHepParticle</a>",10);
+  <a href=".././TMCFastHepEvt.html#TMCFastHepEvt:fHepParticle">fHepParticle</a> = <a href=".././TMCFastHepEvt.html#TMCFastHepEvt:fgParticles">fgParticles</a>;
+}
+
+
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastHepEvt:AddHepParticle"> </a><a href="../ListOfTypes.html#void">void</a> <a href=".././TMCFastHepEvt.html#TMCFastHepEvt:AddHepParticle">TMCFastHepEvt::AddHepParticle</a>(struct heppart_t *part){
+<b>  // Create a <a href=".././TMCFastHepParticle.html">TMCFastHepParticle</a> instance</b>
+<b>  // from the c struct heppart_t and add the instance to </b>
+<b>  // the  <a href="http://root.cern.ch/root/html/TClonesArray.html">TClonesArray</a> <a href=".././TMCFastHepEvt.html#TMCFastHepEvt:fHepParticle">fHepParticle</a></b>
+<b>  //</b>
+  <a href="http://root.cern.ch/root/html/TClonesArray.html">TClonesArray</a> &amp;partilces = *<a href=".././TMCFastHepEvt.html#TMCFastHepEvt:fHepParticle">fHepParticle</a>;
+  new(partilces[<a href=".././TMCFastHepEvt.html#TMCFastHepEvt:fnhep">fnhep</a>++]) <a href=".././TMCFastHepParticle.html">TMCFastHepParticle</a>(part);
+}
+
+
+
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastHepEvt:Fill"> </a><a href="../ListOfTypes.html#void">void</a>  <a href=".././TMCFastHepEvt.html#TMCFastHepEvt:Fill">TMCFastHepEvt::Fill</a>(struct hepevt_t *evt){
+<b>  // Fill the object using a c </b>
+<b>  // struct map of the hepevt FORTRAN common block</b>
+<b>  // </b>
+  <a href="#TMCFastHepEvt:SetNevhep">SetNevhep</a>(evt-&gt;nevhep);
+  <a href=".././TMCFastHepEvt.html#TMCFastHepEvt:fnhep">fnhep</a>=0;
+  for(<a href="../ListOfTypes.html#Int_t">Int_t</a> i =0; i&lt; evt-&gt;nhep;i++)
+    <a href="#TMCFastHepEvt:AddHepParticle">AddHepParticle</a>(&amp;(evt-&gt;heppart[i]));
+  if(evt-&gt;nhep != <a href="#TMCFastHepEvt:GetNhep">GetNhep</a>()){
+    cerr&lt;&lt; "ERROR!! <a href="http://root.cern.ch/root/html/TClonesArray.html">TClonesArray</a> <a href=".././TMCFastHepParticle.html">TMCFastHepParticle</a> != evt-&gt;nhep elementsn";
+  }
+ 
+}
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastHepEvt:Clear"> </a><a href="../ListOfTypes.html#void">void</a> <a href=".././TMCFastHepEvt.html#TMCFastHepEvt:Clear">TMCFastHepEvt::Clear</a>()
+{
+<b>  // Clear the <a href="http://root.cern.ch/root/html/TClonesArray.html">TClonesArray</a> <a href=".././TMCFastHepEvt.html#TMCFastHepEvt:fHepParticle">fHepParticle</a></b>
+<b>  //</b>
+   <a href=".././TMCFastHepEvt.html#TMCFastHepEvt:fHepParticle">fHepParticle</a>-&gt;<a href="http://root.cern.ch/root/html/TClonesArray.html#TClonesArray:Clear">Clear</a>();
+}
+
+
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastHepEvt:~TMCFastHepEvt"> </a><a href=".././TMCFastHepEvt.html">TMCFastHepEvt</a>::~<a href=".././TMCFastHepEvt.html">TMCFastHepEvt</a>()
+{
+   <a href="#TMCFastHepEvt:Clear">Clear</a>();
+}
+
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastHepEvt:Print"> </a><a href="../ListOfTypes.html#void">void</a> <a href=".././TMCFastHepEvt.html#TMCFastHepEvt:Print">TMCFastHepEvt::Print</a>(ostream *os){
+<b>  // Prints <a href=".././TMCFastHepEvt.html">TMCFastHepEvt</a> object</b>
+<b>  //</b>
+<b>  // This function is also used</b>
+<b>  // to  overload  &amp;operator&lt;&lt; </b>
+<b>  // </b>
+<b>  // For example;</b>
+<b>  // cout &lt;&lt; hepevt;</b>
+<b>  // </b>
+<b>  // where hepevt is an instance of <a href=".././TMCFastHepEvt.html">TMCFastHepEvt</a></b>
+
+  *os&lt;&lt;" Nevhep: "&lt;&lt; this-&gt;<a href="#TMCFastHepEvt:GetNevhep">GetNevhep</a>()&lt;&lt;endl;
+  *os&lt;&lt;"t Nhep: "&lt;&lt; this-&gt;<a href="#TMCFastHepEvt:GetNhep">GetNhep</a>()&lt;&lt;endl;
+
+<b>  // Now Print the Particles</b>
+
+  <a href="http://root.cern.ch/root/html/TIter.html">TIter</a> next(this-&gt;<a href="#TMCFastHepEvt:GetHepParticles">GetHepParticles</a>());
+  
+  while( <a href=".././TMCFastHepParticle.html">TMCFastHepParticle</a> *particle = (<a href=".././TMCFastHepParticle.html">TMCFastHepParticle</a> *)next()){
+    particle-&gt;<a href="#TMCFastHepEvt:Print">Print</a>(os);
+  }
+}
+
+
+ostream &amp;operator&lt;&lt;(ostream &amp;os, <a href=".././TMCFastHepEvt.html">TMCFastHepEvt</a> &amp;hepevt){
+<b>// overload the standard print operator</b>
+  hepevt.<a href="#TMCFastHepEvt:Print">Print</a>(&amp;os);
+  return os;
+}
+</pre>
+
+<!--SIGNATURE-->
+<br>
+<address>
+<hr>
+<center>
+<a href="http://root.cern.ch/root/Welcome.html">ROOT page</a> - <a href="../ClassIndex.html">Class index</a> - <a href="#TopOfPage">Top of the page</a><br>
+</center>
+<hr>This page has been automatically generated. If you have any comments or suggestions about the page layout send a mail to <a href="mailto:rootdev@root.cern.ch">ROOT support</a>, or contact <a href="mailto:rootdev@root.cern.ch">the developers</a> with any questions or problems regarding ROOT.
+</address>
+</body>
+</html>

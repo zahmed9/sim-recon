@@ -1,0 +1,369 @@
+<!DOCTYPE HTML PUBLIC "-// IETF/DTD HTML 2.0// EN">
+<html>
+<!--                                             -->
+<!-- Author: ROOT team (rootdev@hpsalo.cern.ch)  -->
+<!--                                             -->
+<!--   Date: Thu Jan 14 16:43:53 1999            -->
+<!--                                             -->
+<head>
+<title>TMCFastTOF - source file</title>
+<link rev=made href="mailto:rootdev@root.cern.ch">
+<meta name="rating" content="General">
+<meta name="objecttype" content="Manual">
+<meta name="keywords" content="software development, oo, object oriented, unix, x11, motif, windows nt, c++, html, rene brun, fons rademakers">
+<meta name="description" content="ROOT - An Object Oriented Framework For Large Scale Data Analysis.">
+</head>
+<body BGCOLOR="#ffffff" LINK="#0000ff" VLINK="#551a8b" ALINK="#ff0000" TEXT="#000000">
+<a name="TopOfPage"></a>
+<pre>
+<b>//*-- Author :    Paul Eugenio 2-Nov-98</b>
+<b>//*-- CMZ : PME 7-Jan-99</b>
+
+<b>////////////////////////////////////////////////////////////////////////</b>
+<b>// <a href=".././TMCFastTOF.html">TMCFastTOF</a></b>
+<b>//</b>
+<b>// Time-of-flight information obtained </b>
+<b>// from the mcfast track tracing</b>
+<b>//</b>
+<b>// This class is an object oriented version </b>
+<b>// of mcfast trace common block.</b>
+<b>//</b>
+<b>// More information see Tracking in MCFast doc at:</b>
+<b>//</b>
+/*
+<a href= "http://www-pat.fnal.gov/mcfast.html" >
+http://www-pat.fnal.gov/mcfast.html </a>
+*/
+<b>//</b>
+<b>//</b>
+<b>////////////////////////////////////////////////////////////////////////</b>
+
+
+
+#include "<a href="../TMCFastTOF.h">TMCFastTOF.h</a>"
+
+
+
+ClassImp(TMCFastTOF)
+
+
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastTOF:TMCFastTOF"> </a><a href=".././TMCFastTOF.html#TMCFastTOF:TMCFastTOF">TMCFastTOF::TMCFastTOF</a>(struct ntraces_t *trace){
+<b>  // Call FIll()</b>
+<b>  //</b>
+  <a href="#TMCFastTOF:Fill">Fill</a>(trace);
+}
+
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastTOF:Fill"> </a><a href="../ListOfTypes.html#void">void</a>  <a href=".././TMCFastTOF.html#TMCFastTOF:Fill">TMCFastTOF::Fill</a>(struct ntraces_t *trace){
+<b>  // Fill the object info using </b>
+<b>  //common block information</b>
+<b>  //</b>
+  <a href="#TMCFastTOF:SetNtraces">SetNtraces</a>(trace-&gt;ntraces);
+  for(<a href="../ListOfTypes.html#Int_t">Int_t</a> i=0;i&lt; this-&gt;<a href="#TMCFastTOF:GetNtraces">GetNtraces</a>();i++){
+    <a href="#TMCFastTOF:SetHep">SetHep</a>(i, trace-&gt;trace_par[i].hep)  ;
+    <a href="#TMCFastTOF:SetType">SetType</a>(i,trace-&gt;trace_par[i].type) ;
+    <a href="#TMCFastTOF:SetPlane">SetPlane</a>(i,trace-&gt;trace_par[i].plane);
+    <a href="#TMCFastTOF:SetHits">SetHits</a>(i,trace-&gt;trace_par[i].hit) ;
+    <a href="#TMCFastTOF:SetPx">SetPx</a>(i,trace-&gt;trace_par[i].w.px);
+    <a href="#TMCFastTOF:SetPy">SetPy</a>(i,trace-&gt;trace_par[i].w.py);
+    <a href="#TMCFastTOF:SetPz">SetPz</a>(i,trace-&gt;trace_par[i].w.pz);
+    <a href="#TMCFastTOF:SetE">SetE</a>(i,trace-&gt;trace_par[i].w.E) ;
+    <a href="#TMCFastTOF:SetX">SetX</a>(i,trace-&gt;trace_par[i].w.x) ;
+    <a href="#TMCFastTOF:SetY">SetY</a>(i,trace-&gt;trace_par[i].w.y) ;
+    <a href="#TMCFastTOF:SetZ">SetZ</a>(i,trace-&gt;trace_par[i].w.z) ;
+    <a href="#TMCFastTOF:SetPt">SetPt</a>(i,trace-&gt;trace_par[i].w.pt);
+    <a href="#TMCFastTOF:SetP">SetP</a>(i,trace-&gt;trace_par[i].w.p) ;
+    <a href="#TMCFastTOF:SetQ">SetQ</a>(i,trace-&gt;trace_par[i].w.q) ;
+    for(<a href="../ListOfTypes.html#Int_t">Int_t</a> j=0;j&lt;3;j++)
+      <a href="#TMCFastTOF:SetEta">SetEta</a>(i,j,trace-&gt;trace_par[i].eta[j]);
+    <a href="#TMCFastTOF:SetPath">SetPath</a>(i,trace-&gt;trace_par[i].path); 
+    <a href="#TMCFastTOF:SetTime">SetTime</a>(i,trace-&gt;trace_par[i].time); 
+    <a href="#TMCFastTOF:SetTau">SetTau</a>(i,trace-&gt;trace_par[i].tau) ; 
+    <a href="#TMCFastTOF:SetMaterial">SetMaterial</a>(i,trace-&gt;trace_par[i].material); 
+    <a href="#TMCFastTOF:SetRadl">SetRadl</a>(i,trace-&gt;trace_par[i].radl);  
+    <a href="#TMCFastTOF:SetDedx">SetDedx</a>(i,trace-&gt;trace_par[i].dedx) ; 
+  } 
+}
+
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastTOF:GetCTOF"> </a><a href="../ListOfTypes.html#Double_t">Double_t</a> <a href=".././TMCFastTOF.html#TMCFastTOF:GetCTOF">TMCFastTOF::GetCTOF</a>(<a href="../ListOfTypes.html#Int_t">Int_t</a> hep){
+<b>  // Get time-of-flight for the central region</b>
+<b>  //</b>
+<b>  // The routine first finds the central trace</b>
+<b>  // for the hep particle and then calculates</b>
+<b>  // the tof of that trace.</b>
+<b>  //</b>
+<b>  // See <a href="#TMCFastTOF:GetType">GetType</a>() for information about trace types</b>
+<b>  //</b>
+<b>  //  tof = gamma * (<a href="#TMCFastTOF:GetTau">GetTau</a>(i) - <a href="#TMCFastTOF:GetTau">GetTau</a>(0))</b>
+<b>  // tof = (<a href="#TMCFastTOF:GetTau">GetTau</a>(i) - <a href="#TMCFastTOF:GetTau">GetTau</a>(0))*<a href="#TMCFastTOF:GetTime">GetTime</a>(i)/<a href="#TMCFastTOF:GetTau">GetTau</a>(i);</b>
+<b>  //</b>
+<b>  // The use of tau is need do to a bug in mcfast that forgets</b>
+<b>  // to fill t0 but does fill tau0.</b>
+<b>  //</b>
+<b>  // WARNING!! TOF is buggy for mcfast version 4.1 DO NOT USE!</b>
+
+
+  <a href="../ListOfTypes.html#Double_t">Double_t</a> tof=-1; // default for no info
+  <a href="../ListOfTypes.html#Int_t">Int_t</a> ntraces=<a href="#TMCFastTOF:GetNtraces">GetNtraces</a>();
+  for(<a href="../ListOfTypes.html#Int_t">Int_t</a> i=0;i&lt;ntraces;i++){
+    if(<a href="#TMCFastTOF:GetHep">GetHep</a>(i)==hep &amp;&amp; <a href="#TMCFastTOF:GetType">GetType</a>(i)==CENTRAL){ 
+      tof =  (<a href="#TMCFastTOF:GetTau">GetTau</a>(i) - <a href="#TMCFastTOF:GetTau">GetTau</a>(0))*<a href="#TMCFastTOF:GetTime">GetTime</a>(i)/<a href="#TMCFastTOF:GetTau">GetTau</a>(i);
+
+<b>      //cout&lt;&lt;  <a href="#TMCFastTOF:GetTime">GetTime</a>(i) &lt;&lt;" - "&lt;&lt; <a href="#TMCFastTOF:GetTime">GetTime</a>(0)&lt;&lt; " = "&lt;&lt;tof&lt;&lt;endl;</b>
+    }
+  }
+  return tof;
+}
+
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastTOF:Beta"> </a><a href="../ListOfTypes.html#Double_t">Double_t</a> <a href=".././TMCFastTOF.html#TMCFastTOF:Beta">TMCFastTOF::Beta</a>(<a href="../ListOfTypes.html#Int_t">Int_t</a> hep){
+<b>  // Calculate beta for central</b>
+<b>  // region particles.</b>
+<b>  // beta = <a href="#TMCFastTOF:GetPath">GetPath</a>(hep) /( <a href="#TMCFastTOF:GetCTOF">GetCTOF</a>(hep)*kSpeedOfLight)</b>
+<b>  //</b>
+  <a href="../ListOfTypes.html#Double_t">Double_t</a> tof=<a href="#TMCFastTOF:GetCTOF">GetCTOF</a>(hep);
+  <a href="../ListOfTypes.html#Double_t">Double_t</a> path=<a href="#TMCFastTOF:GetPath">GetPath</a>(hep);
+  <a href="../ListOfTypes.html#Double_t">Double_t</a> beta= path/tof*(1/kSpeedOfLight);
+
+  return beta;
+}
+
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastTOF:CTOFmass"> </a><a href="../ListOfTypes.html#Double_t">Double_t</a> <a href=".././TMCFastTOF.html#TMCFastTOF:CTOFmass">TMCFastTOF::CTOFmass</a>(<a href="../ListOfTypes.html#Int_t">Int_t</a> hep){
+<b>  // Calculate time-of-flight mass</b>
+<b>  // Currently there is no smearing!!!!! (but soon should be implemented)</b>
+<b>  //</b>
+<b>  //  m = p/(beta*gamma)</b>
+<b>  //  mass = <a href="#TMCFastTOF:GetP">GetP</a>(i)*<a href="http://root.cern.ch/root/html/TMath.html#TMath:Sqrt">TMath::Sqrt</a>(1/beta*beta - 1.0);</b>
+<b>  //</b>
+
+  <a href="../ListOfTypes.html#Double_t">Double_t</a> mass=-1; // default for no info
+ 
+  <a href="../ListOfTypes.html#Int_t">Int_t</a> ntraces=<a href="#TMCFastTOF:GetNtraces">GetNtraces</a>();
+  for(<a href="../ListOfTypes.html#Int_t">Int_t</a> i=0;i&lt;ntraces;i++){
+   
+    if(<a href="#TMCFastTOF:GetHep">GetHep</a>(i)==hep &amp;&amp; <a href="#TMCFastTOF:GetType">GetType</a>(i)==CENTRAL){
+       <a href="../ListOfTypes.html#Double_t">Double_t</a> gamma = <a href="#TMCFastTOF:GetTime">GetTime</a>(i)/<a href="#TMCFastTOF:GetTau">GetTau</a>(i);
+      /****** This beta is broken --bad time information
+	<a href="../ListOfTypes.html#Double_t">Double_t</a> tof = (<a href="#TMCFastTOF:GetTau">GetTau</a>(i) - <a href="#TMCFastTOF:GetTau">GetTau</a>(0))/gamma;
+	<a href="../ListOfTypes.html#Double_t">Double_t</a> beta1 = (<a href="#TMCFastTOF:GetPath">GetPath</a>(i)/tof)*(1/kSpeedOfLight);
+	cerr&lt;&lt;"n beta1: "&lt;&lt;beta;
+	*******************/
+      <a href="../ListOfTypes.html#Double_t">Double_t</a> beta = <a href="http://root.cern.ch/root/html/TMath.html#TMath:Sqrt">TMath::Sqrt</a>(1.0 - 1/(gamma*gamma));
+      mass =  <a href="#TMCFastTOF:GetP">GetP</a>(i)/(beta*gamma);
+      
+      /****************** OLD CODE
+	<a href="../ListOfTypes.html#Double_t">Double_t</a> beta= <a href="#TMCFastTOF:GetPath">GetPath</a>(i)/(<a href="#TMCFastTOF:GetTime">GetTime</a>(i) - <a href="#TMCFastTOF:GetTime">GetTime</a>(0))*(1/kSpeedOfLight); 
+	mass = <a href="#TMCFastTOF:GetP">GetP</a>(i)*<a href="http://root.cern.ch/root/html/TMath.html#TMath:Sqrt">TMath::Sqrt</a>(1.0/(beta*beta) - 1.0);
+	******************/
+    }
+  }
+  return  mass;
+}
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastTOF:CTOFmass"> </a><a href="../ListOfTypes.html#Double_t">Double_t</a> <a href=".././TMCFastTOF.html#TMCFastTOF:CTOFmass">TMCFastTOF::CTOFmass</a>(<a href="../ListOfTypes.html#Int_t">Int_t</a> hep, <a href=".././TMCFastOfflineTrack.html">TMCFastOfflineTrack</a> &amp;offtrk){
+<b>  // Calculate time-of-flight mass</b>
+<b>  // Currently there is no time smearing!!!!! </b>
+<b>  // (but soon it should be implemented)</b>
+<b>  //</b>
+<b>  //  m = p/(beta*gamma)</b>
+<b>  //  mass = <a href="#TMCFastTOF:GetP">GetP</a>(i)*<a href="http://root.cern.ch/root/html/TMath.html#TMath:Sqrt">TMath::Sqrt</a>(1/beta*beta - 1.0);</b>
+<b>  //</b>
+
+
+  
+  <a href="../ListOfTypes.html#Double_t">Double_t</a> mass=-1; // default for no info
+  <a href="../ListOfTypes.html#Int_t">Int_t</a> ntraces=<a href="#TMCFastTOF:GetNtraces">GetNtraces</a>();
+  for(<a href="../ListOfTypes.html#Int_t">Int_t</a> i=0;i&lt;ntraces;i++){
+    if(<a href="#TMCFastTOF:GetHep">GetHep</a>(i)==hep &amp;&amp; <a href="#TMCFastTOF:GetType">GetType</a>(i)== CENTRAL){
+      <a href="../ListOfTypes.html#Double_t">Double_t</a> gamma = <a href="#TMCFastTOF:GetTime">GetTime</a>(i)/<a href="#TMCFastTOF:GetTau">GetTau</a>(i);
+      /****** This beta is broken --bad time information
+	<a href="../ListOfTypes.html#Double_t">Double_t</a> tof = (<a href="#TMCFastTOF:GetTau">GetTau</a>(i) - <a href="#TMCFastTOF:GetTau">GetTau</a>(0))/gamma;
+	<a href="../ListOfTypes.html#Double_t">Double_t</a> beta1 = (<a href="#TMCFastTOF:GetPath">GetPath</a>(i)/tof)*(1/kSpeedOfLight);
+	cerr&lt;&lt;"n beta1: "&lt;&lt;beta;
+	*******************/
+      <a href="../ListOfTypes.html#Double_t">Double_t</a> beta = <a href="http://root.cern.ch/root/html/TMath.html#TMath:Sqrt">TMath::Sqrt</a>(1.0 - 1/(gamma*gamma));
+      mass =  offtrk.GetHepEvtP(hep)/(beta*gamma);
+      
+      /****************** OLD CODE
+	<a href="../ListOfTypes.html#Double_t">Double_t</a> beta= <a href="#TMCFastTOF:GetPath">GetPath</a>(i)/(<a href="#TMCFastTOF:GetTime">GetTime</a>(i) - <a href="#TMCFastTOF:GetTime">GetTime</a>(0))*(1/kSpeedOfLight); 
+	mass = <a href="#TMCFastTOF:GetP">GetP</a>(i)*<a href="http://root.cern.ch/root/html/TMath.html#TMath:Sqrt">TMath::Sqrt</a>(1.0/(beta*beta) - 1.0);
+	******************/
+    }
+  }
+  return mass;
+}
+
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastTOF:GetFTOF"> </a><a href="../ListOfTypes.html#Double_t">Double_t</a> <a href=".././TMCFastTOF.html#TMCFastTOF:GetFTOF">TMCFastTOF::GetFTOF</a>(<a href="../ListOfTypes.html#Int_t">Int_t</a> hep){
+<b>  // Get time-of-flight for the forward region</b>
+<b>  //</b>
+<b>  // The routine first finds the forward trace</b>
+<b>  // for the hep particle and then calculates</b>
+<b>  // the tof of that trace.</b>
+<b>  //</b>
+<b>  // See <a href="#TMCFastTOF:GetType">GetType</a>() for information about trace types</b>
+<b>  //</b>
+<b>  //  tof = gamma * (<a href="#TMCFastTOF:GetTau">GetTau</a>(i) - <a href="#TMCFastTOF:GetTau">GetTau</a>(0))</b>
+<b>  // tof = (<a href="#TMCFastTOF:GetTau">GetTau</a>(i) - <a href="#TMCFastTOF:GetTau">GetTau</a>(0))*<a href="#TMCFastTOF:GetTau">GetTau</a>(i)/<a href="#TMCFastTOF:GetTime">GetTime</a>(i);</b>
+<b>  //</b>
+<b>  // The use of tau is need do to a bug in mcfast that forgets</b>
+<b>  // to fill t0 but does fill tau0. </b>
+<b>  // WARNING!! TOF is buggy for mcfast version 4.1 DO NOT USE!</b>
+
+  <a href="../ListOfTypes.html#Double_t">Double_t</a> tof=-1; // default for no info
+  <a href="../ListOfTypes.html#Int_t">Int_t</a> ntraces=<a href="#TMCFastTOF:GetNtraces">GetNtraces</a>();
+  for(<a href="../ListOfTypes.html#Int_t">Int_t</a> i=0;i&lt;ntraces;i++){
+    if(<a href="#TMCFastTOF:GetHep">GetHep</a>(i)==hep &amp;&amp; <a href="#TMCFastTOF:GetType">GetType</a>(i)==FORWARD){
+      <a href="../ListOfTypes.html#Double_t">Double_t</a> gamma = <a href="#TMCFastTOF:GetTime">GetTime</a>(i)/<a href="#TMCFastTOF:GetTau">GetTau</a>(i);
+      tof =  (<a href="#TMCFastTOF:GetTau">GetTau</a>(i) - <a href="#TMCFastTOF:GetTau">GetTau</a>(0))/gamma;
+    }
+    
+    
+  }
+   return tof;
+}
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastTOF:FTOFmass"> </a><a href="../ListOfTypes.html#Double_t">Double_t</a> <a href=".././TMCFastTOF.html#TMCFastTOF:FTOFmass">TMCFastTOF::FTOFmass</a>(<a href="../ListOfTypes.html#Int_t">Int_t</a> hep, <a href=".././TMCFastOfflineTrack.html">TMCFastOfflineTrack</a> &amp;offtrk){
+<b>  // Calculate time-of-flight mass</b>
+<b>  // Currently there is no smearing of time!!! (but soon should be implemented)</b>
+<b>  //  m = p/(beta*gamma)</b>
+<b>  //  mass = <a href="#TMCFastTOF:GetP">GetP</a>(i)*<a href="http://root.cern.ch/root/html/TMath.html#TMath:Sqrt">TMath::Sqrt</a>(1/beta*beta - 1.0);</b>
+<b>  //</b>
+
+  <a href="../ListOfTypes.html#Double_t">Double_t</a> mass=-1; // default for no info
+  <a href="../ListOfTypes.html#Int_t">Int_t</a> ntraces=<a href="#TMCFastTOF:GetNtraces">GetNtraces</a>();
+  for(<a href="../ListOfTypes.html#Int_t">Int_t</a> i=0;i&lt;ntraces;i++){
+    if(<a href="#TMCFastTOF:GetHep">GetHep</a>(i)==hep &amp;&amp; <a href="#TMCFastTOF:GetType">GetType</a>(i)==FORWARD){
+<b>      // del_t = del_tau * gamma</b>
+      <a href="../ListOfTypes.html#Double_t">Double_t</a> gamma = <a href="#TMCFastTOF:GetTime">GetTime</a>(i)/<a href="#TMCFastTOF:GetTau">GetTau</a>(i);
+
+      /****** This beta is broken --bad time information
+      <a href="../ListOfTypes.html#Double_t">Double_t</a> tof = (<a href="#TMCFastTOF:GetTau">GetTau</a>(i) - <a href="#TMCFastTOF:GetTau">GetTau</a>(0))/gamma;
+      <a href="../ListOfTypes.html#Double_t">Double_t</a> beta1 = (<a href="#TMCFastTOF:GetPath">GetPath</a>(i)/tof)*(1/kSpeedOfLight);
+      *******************/
+
+      <a href="../ListOfTypes.html#Double_t">Double_t</a> beta = <a href="http://root.cern.ch/root/html/TMath.html#TMath:Sqrt">TMath::Sqrt</a>(1.0 - 1/(gamma*gamma));
+<b>      //cerr&lt;&lt;"n beta1: "&lt;&lt;beta1&lt;&lt;" beta: "&lt;&lt;beta&lt;&lt;endl;</b>
+      mass =  offtrk.GetHepEvtP(hep)/(beta*gamma);
+     
+    }
+  }
+  return mass;
+}
+
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastTOF:FTOFmass"> </a><a href="../ListOfTypes.html#Double_t">Double_t</a> <a href=".././TMCFastTOF.html#TMCFastTOF:FTOFmass">TMCFastTOF::FTOFmass</a>(<a href="../ListOfTypes.html#Int_t">Int_t</a> hep){
+<b>  // Calculate time-of-flight mass</b>
+<b>  // Currently there is no smearing of time!!! (but soon should be implemented)</b>
+<b>  //  m = p/(beta*gamma)</b>
+<b>  //  mass = <a href="#TMCFastTOF:GetP">GetP</a>(i)*<a href="http://root.cern.ch/root/html/TMath.html#TMath:Sqrt">TMath::Sqrt</a>(1/beta*beta - 1.0);</b>
+<b>  //</b>
+
+  <a href="../ListOfTypes.html#Double_t">Double_t</a> mass=-1; // default for no info
+  <a href="../ListOfTypes.html#Int_t">Int_t</a> ntraces=<a href="#TMCFastTOF:GetNtraces">GetNtraces</a>();
+  for(<a href="../ListOfTypes.html#Int_t">Int_t</a> i=0;i&lt;ntraces;i++){
+    if(<a href="#TMCFastTOF:GetHep">GetHep</a>(i)==hep &amp;&amp; <a href="#TMCFastTOF:GetType">GetType</a>(i)==FORWARD){
+<b>      // del_t = del_tau * gamma</b>
+      <a href="../ListOfTypes.html#Double_t">Double_t</a> gamma = <a href="#TMCFastTOF:GetTime">GetTime</a>(i)/<a href="#TMCFastTOF:GetTau">GetTau</a>(i);
+      /****** This beta is broken --bad time information
+      <a href="../ListOfTypes.html#Double_t">Double_t</a> tof = (<a href="#TMCFastTOF:GetTau">GetTau</a>(i) - <a href="#TMCFastTOF:GetTau">GetTau</a>(0))/gamma;
+      <a href="../ListOfTypes.html#Double_t">Double_t</a> beta1 = (<a href="#TMCFastTOF:GetPath">GetPath</a>(i)/tof)*(1/kSpeedOfLight);
+       cerr&lt;&lt;"n beta1: "&lt;&lt;beta;
+       *******************/
+      <a href="../ListOfTypes.html#Double_t">Double_t</a> beta = <a href="http://root.cern.ch/root/html/TMath.html#TMath:Sqrt">TMath::Sqrt</a>(1.0 - 1/(gamma*gamma));
+      mass =  <a href="#TMCFastTOF:GetP">GetP</a>(i)/(beta*gamma);
+     
+    }
+  }
+  return mass;
+}
+
+
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastTOF:GetR"> </a><a href="../ListOfTypes.html#Double_t">Double_t</a> <a href=".././TMCFastTOF.html#TMCFastTOF:GetR">TMCFastTOF::GetR</a>(<a href="../ListOfTypes.html#Int_t">Int_t</a> i){
+<b>  // return <a href="http://root.cern.ch/root/html/TMath.html#TMath:Sqrt">TMath::Sqrt</a>(<a href="#TMCFastTOF:GetX">GetX</a>(i)*<a href="#TMCFastTOF:GetX">GetX</a>(i) + <a href="#TMCFastTOF:GetY">GetY</a>(i)*<a href="#TMCFastTOF:GetY">GetY</a>(i));</b>
+<b>  //</b>
+  <a href="../ListOfTypes.html#Double_t">Double_t</a> r;
+ 
+  r= <a href="http://root.cern.ch/root/html/TMath.html#TMath:Sqrt">TMath::Sqrt</a>(<a href="#TMCFastTOF:GetX">GetX</a>(i)*<a href="#TMCFastTOF:GetX">GetX</a>(i) + <a href="#TMCFastTOF:GetY">GetY</a>(i)*<a href="#TMCFastTOF:GetY">GetY</a>(i));
+  return r;
+  
+}
+
+
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastTOF:~TMCFastTOF"> </a><a href=".././TMCFastTOF.html">TMCFastTOF</a>::~<a href=".././TMCFastTOF.html">TMCFastTOF</a>()
+{
+<b>  // Clear()</b>
+<b>  //</b>
+   Clear();
+}
+
+<b>//____________________________________________________________________________</b>
+<a name="TMCFastTOF:Print"> </a><a href="../ListOfTypes.html#void">void</a> <a href=".././TMCFastTOF.html#TMCFastTOF:Print">TMCFastTOF::Print</a>(ostream *os){
+<b>  // Prints <a href=".././TMCFastTOF.html">TMCFastTOF</a> object</b>
+<b>  //</b>
+<b>  // This function is also used</b>
+<b>  // to  overload  &amp;operator&lt;&lt; </b>
+<b>  // </b>
+<b>  // For example;</b>
+<b>  // cout &lt;&lt; tof_trace;</b>
+<b>  // </b>
+<b>  // where tof_trace is an instance of <a href=".././TMCFastTOF.html">TMCFastTOF</a></b>
+
+
+  *os&lt;&lt;" TraceNum: "&lt;&lt; <a href="#TMCFastTOF:GetNtraces">GetNtraces</a>()&lt;&lt;endl;
+ 
+  for(<a href="../ListOfTypes.html#Int_t">Int_t</a> j=0;j&lt; <a href="#TMCFastTOF:GetNtraces">GetNtraces</a>();j++){
+    *os&lt;&lt;"Trace["&lt;&lt;j&lt;&lt;"]"&lt;&lt;endl;
+<b>    // line </b>
+    *os&lt;&lt;"t HepIndex: "&lt;&lt; this-&gt;<a href="#TMCFastTOF:GetHep">GetHep</a>(j)&lt;&lt;" Type: "&lt;&lt; this-&gt;<a href="#TMCFastTOF:GetType">GetType</a>(j);
+    *os&lt;&lt;" Plane: "&lt;&lt; <a href="#TMCFastTOF:GetPlane">GetPlane</a>(j)&lt;&lt;" Nhits: "&lt;&lt; <a href="#TMCFastTOF:GetHits">GetHits</a>(j)&lt;&lt;endl;
+<b>    // line </b>
+    *os&lt;&lt;"t\t P(x,y,z,t): ("&lt;&lt; 
+      <a href="#TMCFastTOF:GetPx">GetPx</a>(j)&lt;&lt;","&lt;&lt;
+      <a href="#TMCFastTOF:GetPy">GetPy</a>(j)&lt;&lt;","&lt;&lt;
+      <a href="#TMCFastTOF:GetPz">GetPz</a>(j)&lt;&lt;","&lt;&lt;
+      <a href="#TMCFastTOF:GetE">GetE</a>(j) &lt;&lt;","&lt;&lt; ")"&lt;&lt;endl;
+<b>    // line</b>
+    *os&lt;&lt;"t\t (x,y,z): ("&lt;&lt; 
+      <a href="#TMCFastTOF:GetX">GetX</a>(j)&lt;&lt;","&lt;&lt;
+      <a href="#TMCFastTOF:GetY">GetY</a>(j)&lt;&lt;","&lt;&lt;
+      <a href="#TMCFastTOF:GetZ">GetZ</a>(j)&lt;&lt;","&lt;&lt; ")";
+    *os&lt;&lt;" Pt "&lt;&lt;<a href="#TMCFastTOF:GetPt">GetPt</a>(j)&lt;&lt;" p "&lt;&lt;<a href="#TMCFastTOF:GetP">GetP</a>(j)&lt;&lt;" q "&lt;&lt; <a href="#TMCFastTOF:GetQ">GetQ</a>(j)&lt;&lt; endl;
+<b>    // line </b>
+    for(<a href="../ListOfTypes.html#Int_t">Int_t</a> k=0;k&lt;3;k++)
+      *os&lt;&lt;"t\t eta["&lt;&lt;k&lt;&lt;"]: "&lt;&lt; <a href="#TMCFastTOF:GetEta">GetEta</a>(j,k);
+    *os&lt;&lt;endl;
+<b>    // line </b>
+    *os&lt;&lt;"t\t Path: "&lt;&lt;<a href="#TMCFastTOF:GetPath">GetPath</a>(j)&lt;&lt;" Time: "&lt;&lt;<a href="#TMCFastTOF:GetTime">GetTime</a>(j)
+      &lt;&lt;" Tau: "&lt;&lt;<a href="#TMCFastTOF:GetTau">GetTau</a>(j)&lt;&lt;endl;
+<b>    // line </b>
+    *os&lt;&lt;"t\tMaterial: "&lt;&lt;<a href="#TMCFastTOF:GetMaterial">GetMaterial</a>(j)&lt;&lt;" Radl: "&lt;&lt;<a href="#TMCFastTOF:GetRadl">GetRadl</a>(j)
+      &lt;&lt;" Dedx: "&lt;&lt;<a href="#TMCFastTOF:GetDedx">GetDedx</a>(j)&lt;&lt; endl;
+
+  }
+}
+
+
+ostream &amp;operator&lt;&lt;(ostream &amp;os, <a href=".././TMCFastTOF.html">TMCFastTOF</a> &amp;tof){
+<b>  // overload the standard print operator</b>
+  tof.<a href="#TMCFastTOF:Print">Print</a>(&amp;os);
+  return os;
+}
+</pre>
+
+<!--SIGNATURE-->
+<br>
+<address>
+<hr>
+<center>
+<a href="http://root.cern.ch/root/Welcome.html">ROOT page</a> - <a href="../ClassIndex.html">Class index</a> - <a href="#TopOfPage">Top of the page</a><br>
+</center>
+<hr>This page has been automatically generated. If you have any comments or suggestions about the page layout send a mail to <a href="mailto:rootdev@root.cern.ch">ROOT support</a>, or contact <a href="mailto:rootdev@root.cern.ch">the developers</a> with any questions or problems regarding ROOT.
+</address>
+</body>
+</html>
