@@ -15,7 +15,7 @@ http://www-pat.fnal.gov/mcfast.html </a>
 //End_Html
 //
 ////////////////////////////////////////////////////////////////////////
-
+#include <stdlib.h>
 #include "TMCFastCerenTrace.h"
 
 ClassImp(TMCFastCerenTrace)

@@ -20,7 +20,7 @@ http://www-pat.fnal.gov/stdhep.html </a>
 //
 ////////////////////////////////////////////////////////////////////////
 
-
+#include <stdlib.h>
 #include "TMCFastHepEvt.h"
 
 

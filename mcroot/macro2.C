@@ -12,7 +12,7 @@ Here is the output </a>
 
 gSystem.Load("libTMCFast.so");
 
-TFile f("test.rdt");
+TFile f("K1K.rdt");
 TTree *tree = (TTree*)f.Get("T");
 
 TBranch *b1 = tree->GetBranch("hepevt");

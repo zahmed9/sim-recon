@@ -3,6 +3,7 @@
 //*-- Author :    Paul Eugenio 22-Feb-1999
 //*-- CMZ : PME 22-Feb-1999
 
+#include <stdlib.h>
 #include <iostream.h>
 #include <string.h>
 #include <Rtypes.h>

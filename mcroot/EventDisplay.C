@@ -33,7 +33,7 @@
 //  gROOT.Reset();
   gSystem->Load("libTMCFast.so");
 
-  #include <iostream.h>
+//  #include <iostream.h>
   #include <string.h>
 
   //////////////////////////////////////////
@@ -117,7 +117,7 @@
 
  dbFile >>word;
  while(strcmp(word,"end") != 0 ){ // not EOF
-   if(strcmp(word,"make")==0|| strcmp(word,"!%")==0||){
+   if(strcmp(word,"make")==0 /*|| strcmp(word,"!%")==0|| */){
      if(strcmp(word,"!%")==0)
        dbFile >>word;
      dbFile >>word;
@@ -401,8 +401,8 @@
  solenoid->Draw();
  solenoidR->Draw();
  target->Draw();
- cerenkov->Draw();
- cerenkovR->Draw();
+// cerenkov->Draw();
+// cerenkovR->Draw();
  for(int j=0;j< driftNum;j++){
    drift[j]->Draw();
    driftR[j]->Draw();
@@ -451,8 +451,8 @@
  solenoid->Draw();
  solenoidR->Draw();
  target->Draw();
- cerenkov->Draw();
- cerenkovR->Draw();
+// cerenkov->Draw();
+// cerenkovR->Draw();
  for(int j=0;j< driftNum;j++){
    drift[j]->Draw();
    driftR[j]->Draw();
@@ -592,5 +592,10 @@ evtButton->Draw();
 // xslidertxt->SetTextSize(0.03);
 //xslidertxt->Draw();
 //xslider->SetMethod(".x EventTrace.C");
-  c1->SetEditable(kIsNotEditable);
+
+
+
+//  c1->SetEditable(kIsNotEditable);
+
+
 }
