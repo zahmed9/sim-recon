@@ -10,6 +10,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include <stdlib.h>
+#include <math.h>
 #include <iostream>
 #include <string.h>
 
@@ -361,6 +362,14 @@ int main(int argc, char **argv)
 	values[n_vectors++] = (pz - hepParticle.GetPz())/hepParticle.GetPz();
 	values[n_vectors++] = (E - hepParticle.GetE())/hepParticle.GetE();
 
+	float p_total = sqrt(pow(hepParticle.GetPx(),2.0)+pow(hepParticle.GetPy(),2.0)+pow(hepParticle.GetPz(),2.0));
+	values[n_vectors++] = p_total;
+	values[n_vectors++] = (particle->GetP()-p_total)/p_total;
+	float theta_thrown = atan2(sqrt(pow(hepParticle.GetPx(),2.0) + pow(hepParticle.GetPy(),2.0)), hepParticle.GetPz());
+	float theta_measured = atan2(sqrt(pow(px,2.0) + pow(py,2.0)), pz);
+	values[n_vectors++] = theta_thrown;
+	values[n_vectors++] = (theta_measured-theta_thrown)/theta_thrown;
+
 	if(firstEvent){
 	  //vertex
 	    sprintf(label,"SigmaX_%d",nparts);
@@ -385,6 +394,19 @@ int main(int argc, char **argv)
 	    sprintf(label,"SigmaE_%d",nparts);
 	    vnames->Add(label);
 	    cout<<"SigmaE_{int}:\t\t (E - hepParticle.GetE())/hepParticle.GetE() for each particle\n";
+
+	    sprintf(label,"P_%d",nparts);
+	    vnames->Add(label);
+	    cout<<"P_{int}:\t\t Thrown momentum (total) for each particle\n";
+	    sprintf(label,"SigmaP_%d",nparts);
+	    vnames->Add(label);
+	    cout<<"SigmaP_{int}:\t\t (Psmeared - Pthrown)/Pthrown for each particle\n";
+	    sprintf(label,"theta_%d",nparts);
+	    vnames->Add(label);
+	    cout<<"theta_{int}:\t\t Thrown theta angle in radians for each particle\n";
+	    sprintf(label,"Sigmatheta_%d",nparts);
+	    vnames->Add(label);
+	    cout<<"Sigmatheta_{int}:\t\t (theta_rec - theta_thrown)/theta_thrown for each particle\n";
 	  }
 
   
