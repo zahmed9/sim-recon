@@ -61,7 +61,7 @@
 /*
  * Cerenkov Parameters (added 9 Apr 1999 PME)
  */
-#define CERENKOV_Z 415.5 
+#define CERENKOV_Z 420.0
 
 
 

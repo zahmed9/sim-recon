@@ -38,7 +38,7 @@
 #define LGD_X_LIMIT 86.0
 #define LGD_Y_LIMIT 86.0
 #define LGD_BEAMHOLE 8.0
-#define LGD_Z_LOCATION  560.0 /* was at 487.5, 587.5 */
+#define LGD_Z_LOCATION  575.0 // zcenter - zlength/2 from the HDFast.db file
 
 
 struct hepGamma_t{
