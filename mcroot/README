@@ -1,5 +1,5 @@
-################Environment##########################
-# 
+################ JLAB Environment ##########################
+#      
 #
 # These items are need to run root. Include them
 # in you .cshrc file.
@@ -10,7 +10,14 @@ setenv ROOTSYS /work/halld/root.$UNAME
 # 
 # Using  egcs1.1.1
 setenv EGCS   /work/halld/local.$UNAME
-set path=( $EGCS/bin $path $ROOTSYS/bin)
+
+#
+# set paths
+# try to keep the over so that you don't
+# end up using the wrong root or g++ executables
+set path=( $EGCS/bin  $ROOTSYS/bin $path)
+
+
 
 # set path for shared libs
 setenv LD_LIBRARY_PATH $ROOTSYS/lib:$EGCS/lib
