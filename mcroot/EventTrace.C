@@ -18,7 +18,7 @@ cout<<"Opening "<<rdtFile<<" for data input\n";
 
  // get all branches
  TBranch *b1 = tree->GetBranch("hepevt");
-//TBranch *b2 = tree->GetBranch("traces");
+ TBranch *b2 = tree->GetBranch("traces");
  TBranch *b3 = tree->GetBranch("offtrk");
  TBranch *b4 = tree->GetBranch("bcal");
  TBranch *b5 = tree->GetBranch("lgdSmears");
@@ -26,10 +26,10 @@ cout<<"Opening "<<rdtFile<<" for data input\n";
 
  // define object pointers
  TMCFastHepEvt *hepevt;
-// TMCFastTOF *trace; 
+ TMCFastTraceEvent *trace; 
  TMCFastOfflineTrack *offtrk;  
  hepevt = new TMCFastHepEvt();
-//trace = new TMCFastTOF();
+ trace = new TMCFastTraceEvent();
  offtrk = new TMCFastOfflineTrack();
  bcal = new TMCFastCalorimeter();
  lgdSmears = new TLGDsmears();
@@ -37,7 +37,7 @@ cout<<"Opening "<<rdtFile<<" for data input\n";
  
  // tell the branch were to put the event objects 
  b1->SetAddress(&hepevt);
-//b2->SetAddress(&trace);
+ b2->SetAddress(&trace);
  b3->SetAddress(&offtrk);
  b4->SetAddress(&bcal);
  b5->SetAddress(&lgdSmears); 

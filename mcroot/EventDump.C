@@ -3,8 +3,8 @@
   if(hepevt_on)
     hepevt->Print(&cout);
 if(trace_on){
-  cout<<"Sorry, trace points are yet implimented\n";
-//    traces->Print(&cout);
+  //  cout<<"Sorry, trace points are yet implimented\n";
+    trace->Print(&cout);
     // dump both forward & central TOF for each particle
 //    for(Int_t i=0; i< hepevt->GetNhep();i++){
 //      cout << "CTOF["<<i+1<<"] mass: "<<trace->CTOFmass(i+1)
