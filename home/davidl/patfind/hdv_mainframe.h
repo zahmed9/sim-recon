@@ -18,7 +18,7 @@ class hdv_mainframe:public TGMainFrame {
 		Bool_t ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2);
 
 	private:
-		TGTextButton *quit, *next, *density, *lines;
+		TGTextButton *quit, *next, *density, *lines, *slope, *offset;
 		TGLayoutHints *fLayout;
 		TRootEmbeddedCanvas *emcanvas;
 

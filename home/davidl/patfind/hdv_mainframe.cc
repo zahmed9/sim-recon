@@ -41,14 +41,18 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 	AddFrame(buttonframe, fLayout);
 
 	next	= new TGTextButton(this,	"&Next", 2);
-	density	= new TGTextButton(this,	"&Density", 3);
+	density	= new TGTextButton(this,"&Density", 3);
 	lines	= new TGTextButton(this,	"&Lines", 4);
+	slope	= new TGTextButton(this,	"&Slope", 5);
+	offset	= new TGTextButton(this,"&Offset", 6);
 	quit	= new TGTextButton(this,	"&Quit", 1);
 	quit->SetCommand(".q");
 	
 	buttonframe->AddFrame(next, fLayout);
 	buttonframe->AddFrame(density, fLayout);
 	buttonframe->AddFrame(lines, fLayout);
+	buttonframe->AddFrame(slope, fLayout);
+	buttonframe->AddFrame(offset, fLayout);
 	buttonframe->AddFrame(quit, fLayout);
 	
 	MapSubwindows();
@@ -82,6 +86,12 @@ Bool_t hdv_mainframe::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
 							break;
 						case 4: //Lines
 							myproc->evnt(0);
+							break;
+						case 5: //Slope
+							myproc->PlotSlope();
+							break;
+						case 6: //Offset
+							myproc->PlotOffset();
 							break;
 						default:
 							cout<<"parm1="<<parm1<<endl;

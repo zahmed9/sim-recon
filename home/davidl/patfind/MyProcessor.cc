@@ -126,10 +126,6 @@ derror_t MyProcessor::densityPlot(void)
 	// are filled with the current event's data
 	event_loop->Get("MCTrackCandidates");
 
-	// Get a pointer to the MCTrackCandidates factory object so we can 
-	// access things not included in the normal _data container
-	DFactory_MCTrackCandidates *factory = (DFactory_MCTrackCandidates*)event_loop->GetFactory("MCTrackCandidates");
-
 	// Draw contour map
 	TH2F *density = factory->GetDensityHistogram(0);
 	density->Draw("cont");
@@ -146,6 +142,31 @@ derror_t MyProcessor::densityPlot(void)
 	maincanvas->Update();
 	cout<<endl<<"Done"<<endl;
 	
+	return NOERROR;
+}
+
+//------------------------------------------------------------------
+// PlotSlope
+//------------------------------------------------------------------
+derror_t MyProcessor::PlotSlope(void)
+{
+	cout<<__FILE__<<":"<<__LINE__<<endl;
+	factory->slope_density->Draw();
+	maincanvas->Update();
+
+	return NOERROR;
+}
+
+
+//------------------------------------------------------------------
+// PlotOffset
+//------------------------------------------------------------------
+derror_t MyProcessor::PlotOffset(void)
+{
+	cout<<__FILE__<<":"<<__LINE__<<endl;
+	factory->offset_density->Draw();
+	maincanvas->Update();
+
 	return NOERROR;
 }
 
