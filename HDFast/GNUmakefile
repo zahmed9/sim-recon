@@ -126,7 +126,7 @@ MEM_CHECK = -lchecker
 # More ROOT defines with g++
 CXX           = g++
 #CXXFLAGS      = -O -I$(ROOTSYS)/include
-CXXFLAGS      = -O -g -Wall -fno-rtti -fno-exceptions  -fPIC -I$(ROOTSYS)/include \
+CXXFLAGS      = -O -g -Wall  -fno-exceptions  -fPIC -I$(ROOTSYS)/include \
 		 -I/home/halld/include 
 LD            = g++
 LDFLAGS       = -g  

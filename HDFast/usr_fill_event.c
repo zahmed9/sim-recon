@@ -80,6 +80,8 @@ int fill_parts(int nparts, mc_part_t *part){
      * dump common block
      */
     if(Debug==1){
+      /*
+
       fprintf(stderr,"i= %d 
 trk_off_c_.trk_off[i].hep =%d
 hepevt_.idhep[trk_off_c_.trk_off[i].hep -1] = %d
@@ -95,10 +97,8 @@ trk_off_c_.trk_off[i].w.e = %f\n",i,trk_off_c_.trk_off[i].hep  ,
 	      trk_off_c_.trk_off[i].w.px,
 	      trk_off_c_.trk_off[i].w.py,
 	      trk_off_c_.trk_off[i].w.pz,
-	      trk_off_c_.trk_off[i].w.e
-
-);
-      
+	      trk_off_c_.trk_off[i].w.e);
+      */
     }
 
     /*

@@ -16,11 +16,12 @@
 #include <iostream.h>
 #include <fstream.h>
 #include <stdlib.h>
+#include <vector>
 #include <CalorInfo.hh>
 #include <CalorInfoTrack.hh>
 #include <CalorSignalMC.hh>
 #include <calor_hits.h>
-
+using namespace std;
 
 extern "C" void usr_calor(struct cal_hits_t *Calor)
 {

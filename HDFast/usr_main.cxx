@@ -32,6 +32,11 @@
 #include "TMCFastTOF.h"
 #include "TMCFastOfflineTrack.h"
 
+// undefined reference errors occur because errno is not defined
+// on RHEL3 GCC3.2. Define it here to avoid this.
+#undef errno
+  extern "C" int errno=0;
+
 void PrintUsage(char *processName);
 #ifndef HDFAST_LITE
 TROOT HDFast("HDFast","The Hall D Fast MC Package");

@@ -15,9 +15,11 @@
 #include <iostream.h>
 #include <fstream.h>
 #include <stdlib.h>
+#include <vector>
 #include <CalorInfo.hh>
 #include <CalorInfoTrack.hh>
 #include <CalorSignalMC.hh>
+using namespace std;
 
 #define TRUE 1
 #define FALSE 0
