@@ -2,10 +2,6 @@
 #  Makefile: General library and executable maker 
 #      ---> uses default user routines 
 ###################################################
-ROOTLIBS      = -L$(ROOTSYS)/lib -lNew -lBase -lCint -lClib -lCont -lFunc \
-                -lGraf -lGraf3d -lHist -lHtml -lMatrix -lMeta -lMinuit -lNet \
-                -lPostscript -lProof -lTree -lUnix -lZip
-ROOTGLIBS     = -lGpad -lGui -lGX11 -lX3d
 
 # Alpha/OSF with g++
 CXX           = g++
@@ -27,7 +23,8 @@ F77 = f77
 CC=gcc
 CCxx=g++
 CFLAG =
-CRNLIB= /usr/local/lib
+# set CRNLIB externally
+#CRNLIB= /usr/local/lib
 # some options are untested
 ifeq "$(UNAME)" "AIX"
   FFLAGS = -g
@@ -165,6 +162,9 @@ clean:
 #$Id$
 #
 #$Log$
+#Revision 1.6  1998/11/19 14:47:06  eugenio
+#removed CRNLIB def
+#
 #Revision 1.5  1998/11/19 01:17:45  eugenio
 #fix hard link
 #
