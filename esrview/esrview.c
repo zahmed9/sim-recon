@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <math.h>
+#include <clas_cern.h>
 #include <kinematics.h>
 #include <itypes.h>
 #include <string.h>
@@ -28,6 +29,7 @@ int ProcessEvent(itape_header_t *event);
 int GetData(FILE *finput, itape_header_t *buffer);
 void hini(char *out);
 void book_histos();
+int clean_up();
 
 int debug = 0;
 
@@ -120,9 +122,8 @@ void main(int argc, char *argv[])
     }
   }
   
-  fprintf(stderr, "Number of events read: %d, written: %d, %f accepted\n", nevents, nwrite, nwrite/(float)nevents);
-  data_flush(fileno(fpOUT));
-  fclose(fpOUT);
+  clean_up();
+
 }
 
 
@@ -130,18 +131,42 @@ int ProcessEvent(itape_header_t *event){
   esr_nparticle_t *esr = data_getGroup(event, GROUP_ESR_NPARTICLE_MC);
   vector4_t vzero = {0,0,0,0};
   int i;
+  esr_particle_t  *piplus[10], *piminus[10];
+  int npiplus = 0, npiminus = 0, npart = 0;
+  vector4_t target = {.938, 0, 0, 0};
 
   if (!esr) esr = data_getGroup(event, GROUP_ESR_NPARTICLE); 
   
   if (esr){
     if (debug) fprintf(stderr, "next event\n");
+    hf1(1, esr->nparticles, 1);
     for(i=0; i < esr->nparticles; i++){
-      
-
+      switch(esr->p[i].particleType){
+      case PiPlus:
+	piplus[npiplus++] = &(esr->p[i]);
+	npart++;
+	break;
+      case PiMinus:
+	piminus[npiminus++] = &(esr->p[i]);
+	npart++;
+	break;
+      }
     }
-    return 1;
+    if (debug) fprintf(stderr, "npiplus = %d, npiminus = %d\n", npiplus, npiminus);
+    if ((npiminus == 2) && (npiplus==1)){
+      vector4_t f0 = v4add(piminus[0]->p, piminus[1]->p);
+      vector4_t rho1 = v4add(piminus[1]->p, piplus[0]->p);
+      vector4_t rho2 = v4add(piminus[0]->p, piplus[0]->p);
+      vector4_t a2 = v4add(v4add(piminus[0]->p, piminus[1]->p), piplus[0]->p);
+      hf1(100, v4mass(a2), 1);
+      hf2(101, v4dot(f0, f0), v4dot(rho2, rho2), 1);
+      hf1(110, costheta_gj(a2, esr->beam, piplus[0]->p , target, esr->miss), 1);
+      hf1(111, costheta_gj(a2, esr->beam, rho1 , target, esr->miss), 1);
+      hf1(112, costheta_gj(a2, esr->beam, rho2 , target, esr->miss), 1);
+      
+    }
   }
-  return 0;
+  return 1;
 }
 
 int GetData(FILE *finput, itape_header_t *buffer)
@@ -181,14 +206,20 @@ void hini(char *out)
   quest_[9] = 65000;
   hlimit_(&memh);
   hropen_(&lun, "esr", out , "N", &lrec, &istat, 3L, strlen(out), 1L);
-
+  book_histos();
 
   return;
 }
 
 void book_histos(){
-  hbook1(1, "nesr", 10, -1.5, 8.5, 0);
+  hbook1(1, "n esr", 10, -1.5, 8.5, 0);
 
+  /* 3pi events*/
+  hbook1(100, "3 [p] mass", 100, 0, 3.0, 0);
+  hbook2(101, "dalitz", 50, 0, 2.0, 50, 0, 2.0, 0);
+  hbook1(110, "cosj [p]^+! analyzer", 100, -1.0, 1.0, 0);
+  hbook1(111, "cosj [r]^0! 1 analyzer", 100, -1.0, 1.0, 0);
+  hbook1(112, "cosj [r]^0! 2 analyzer", 100, -1.0, 1.0, 0);
 }
 
 int clean_up(){
