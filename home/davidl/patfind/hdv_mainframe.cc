@@ -16,6 +16,7 @@ using namespace std;
 #include <TGeoVolume.h>
 #include <TGeoManager.h>
 
+extern DEventLoop *eventloop;
 extern TCanvas *maincanvas;
 
 TGeoVolume *MOTHER = NULL;
@@ -72,6 +73,10 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 	maincanvas->Range(-300.0,-300.0,300.0, 300.0);
 	maincanvas->SetTickx();
 	maincanvas->SetTicky();
+
+	event_text = new TText(210.0,-290.0,"Event:");
+	event_text->SetTextSize(0.025);
+	event_text->Draw();
 }
 
 //-------------------
@@ -117,6 +122,10 @@ Bool_t hdv_mainframe::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
 			}
 			break;
 	}
+	
+	SetEvent(eventloop->eventnumber);
+	maincanvas->Update();
+	cout<<__FILE__<<":"<<__LINE__<<endl;
 }
 
 //-------------------
@@ -156,4 +165,21 @@ void hdv_mainframe::MakeGIFs(void)
 	event++;
 }
 
+//-------------------
+// SetEvent
+//-------------------
+void hdv_mainframe::SetEvent(int id)
+{
+	char str[256];
+	sprintf(str,"Event: %5d", id);
+	float x1 =maincanvas->GetX1();
+	float x2 =maincanvas->GetX2();
+	float y1 =maincanvas->GetY1();
+	float y2 =maincanvas->GetY2();
+	float x = x1 + 0.85*(x2-x1);
+	float y = y1 + 0.02*(y2-y1);
+	
+	event_text->SetText(x,y,str);
+	event_text->Draw();
+}
 

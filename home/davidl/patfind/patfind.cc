@@ -57,7 +57,6 @@ derror_t hdv_getevent(void)
 	// Read in next event. 
 	derror_t err;
 	err = eventloop->OneEvent();
-	// myproc->FindTracks();
 	
 	if(err!=NOERROR)return err;
 		

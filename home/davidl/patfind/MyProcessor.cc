@@ -84,7 +84,7 @@ derror_t MyProcessor::evnt(int eventnumber)
 
 	// Invoke the MCTrackCandidates factory so it's internal structures
 	// are filled with the current event's data
-	event_loop->Get("MCTrackCandidates");
+	DContainer *mctrackcandidates = event_loop->Get("MCTrackCandidates");
 
 	// Loop over the archits to find the two points defining each line
 	int Narchits = factory->GetNarchits();
@@ -123,7 +123,7 @@ derror_t MyProcessor::evnt(int eventnumber)
 	}
 
 	maincanvas->Update();
-	cout<<endl<<"Done ("<<factory->GetNcircles()<<" tracks)"<<endl;
+	cout<<endl<<"Done ("<<mctrackcandidates->nrows<<" tracks)"<<endl;
 	
 	return NOERROR;
 }
