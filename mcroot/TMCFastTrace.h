@@ -29,6 +29,7 @@ struct trace_t {
   double time;        /* Time at which track made hit */
   double tau;         /* Proper flight time to intersection */
   int material;       /* Position in material list */
+  int dummy;          /* needed for pad alignment */
   double radl;        /* # of radiation lengths in material */
   double dedx;        /* dE/dx of material */
 } ;
