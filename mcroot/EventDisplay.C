@@ -28,7 +28,7 @@
 
    char *rdtFile="draw.rdt";
  
- char *geoFile="/home/halld/src/HDFast/HDFast.db";
+ char *geoFile="../HDFast/HDFast.db";
   
 //  gROOT.Reset();
   gSystem->Load("libTMCFast.so");
@@ -97,11 +97,11 @@
   TBox *cerenkov,*cerenkovR;
 
   // SiDisks Geometry
-  TLine *SiLine[100],*SiLineR[100],;
+  TLine *SiLine[100],*SiLineR[100];
   struct SiDisk_t{
     int index;
     double zpos;
-  }SiDisk[40];
+  }SiDisk[80];
   int NsiLayer=0;
   int NSiDisks=0;
   
@@ -408,6 +408,8 @@
    driftR[j]->Draw();
  }
  for(int j=0;j< NsiLayer ;j++){
+   //SiLine[j]->SetLineColor(1);
+   // SiLine[j]->SetLineWidth(10);
    SiLine[j]->Draw(); 
    SiLineR[j]->Draw(); 
  }
@@ -551,14 +553,11 @@
  c1->cd();
 
 
- TText *txt = new TText(0.70,0.95,"Hall D ");
+ TText *txt = new TText(0.70,0.95,"GlueX");
  txt->Draw();
  TText *txt = new TText(0.55,0.90,"Meson Spectrometer");
  txt->Draw();
  
- TText *txt = new TText(0.7,0.85,"Stage 1");
- txt->SetTextSize(0.03);
- txt->Draw();
 
 //TButton *next = new TButton("next event",".q",0.6,0.1,0.8,0.15);
 //next->Draw();

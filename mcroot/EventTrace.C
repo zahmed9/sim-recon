@@ -18,7 +18,7 @@ cout<<"Opening "<<rdtFile<<" for data input\n";
 
  // get all branches
  TBranch *b1 = tree->GetBranch("hepevt");
- TBranch *b2 = tree->GetBranch("tof_trace");
+//TBranch *b2 = tree->GetBranch("traces");
  TBranch *b3 = tree->GetBranch("offtrk");
  TBranch *b4 = tree->GetBranch("bcal");
  TBranch *b5 = tree->GetBranch("lgdSmears");
@@ -26,10 +26,10 @@ cout<<"Opening "<<rdtFile<<" for data input\n";
 
  // define object pointers
  TMCFastHepEvt *hepevt;
- TMCFastTOF *trace; 
+// TMCFastTOF *trace; 
  TMCFastOfflineTrack *offtrk;  
  hepevt = new TMCFastHepEvt();
- trace = new TMCFastTOF();
+//trace = new TMCFastTOF();
  offtrk = new TMCFastOfflineTrack();
  bcal = new TMCFastCalorimeter();
  lgdSmears = new TLGDsmears();
@@ -37,7 +37,7 @@ cout<<"Opening "<<rdtFile<<" for data input\n";
  
  // tell the branch were to put the event objects 
  b1->SetAddress(&hepevt);
- b2->SetAddress(&trace);
+//b2->SetAddress(&trace);
  b3->SetAddress(&offtrk);
  b4->SetAddress(&bcal);
  b5->SetAddress(&lgdSmears); 
@@ -59,8 +59,8 @@ cout<<"tracing event number: "<<ev<<endl;
 
  Float_t tx[2],ty[2],tz[2];
         
- Int_t nPoints=6000;
- Float_t ctrk_z[6000],ctrk_x[6000],ctrk_y[6000];
+ Int_t nPoints=80000;
+ Float_t ctrk_z[80000],ctrk_x[80000],ctrk_y[80000];
  
  
  for(Int_t i=0;i<n_particles;i++){
@@ -163,13 +163,14 @@ cout<<"tracing event number: "<<ev<<endl;
      parms[0]=zVel;
      parms[1]=zPos0;
      ztrace->SetParameters(parms);
-     
+     int ctrk_nPoints=0;
      for(Int_t j=0;j<nPoints ;j++){
-       ctrk_z[j] = ztrace->Eval(((Double_t)(j)) /1e9);
-       ctrk_x[j] = Xc + xtrace->Eval(((Double_t)(j))/1e9);
-       ctrk_y[j] = Yc + ytrace->Eval(((Double_t)(j))/1e9);
+       ctrk_z[j] = ztrace->Eval(((Double_t)(j)) /1e10);
+       ctrk_x[j] = Xc + xtrace->Eval(((Double_t)(j))/1e10);
+       ctrk_y[j] = Yc + ytrace->Eval(((Double_t)(j))/1e10);
+       ctrk_nPoints++;
        if( ctrk_z[j]> 600)
-	 nPoints=j;
+	 j=nPoints;
        /*
 	 cout<<"j: "<<j<<" t: "<<((Double_t)(j))/1e9<<endl;
 	 cout<<"(x,y,z) ("<<ctrk_x[j]<<","<<ctrk_y[j]<<","<<ctrk_z[j]<<")\n";
@@ -191,9 +192,9 @@ cout<<"tracing event number: "<<ev<<endl;
      
      
      
-     xztrack[nCharged] = new TPolyLine(nPoints,ctrk_z,ctrk_x);
-     yztrack[nCharged] = new TPolyLine(nPoints,ctrk_z,ctrk_y);
-     xytrack[nCharged] = new TPolyLine(nPoints,ctrk_x,ctrk_y);
+     xztrack[nCharged] = new TPolyLine(ctrk_nPoints,ctrk_z,ctrk_x);
+     yztrack[nCharged] = new TPolyLine(ctrk_nPoints,ctrk_z,ctrk_y);
+     xytrack[nCharged] = new TPolyLine(ctrk_nPoints,ctrk_x,ctrk_y);
 
      xztrack[nCharged]->SetLineColor(colNum);
      yztrack[nCharged]->SetLineColor(colNum);
@@ -257,11 +258,15 @@ evttxt.Draw();
 TPad *dump_pad = new TPad("dump_pad","dumps",0.50,0.02,0.75,0.3,22);
 dump_pad->Draw();
 dump_pad->cd();
-TButton *dumpButton = new TButton("Dump Event",".x EventDump.C",0.1,0.80,0.9,0.95);
+TButton *dumpButton = new TButton("Print Event Info",".x EventDump.C",0.05,0.80,0.95,0.95);
 dumpButton->Draw();
-TText itxt(0.3,0.7,"include");
-itxt.SetTextSize(0.09);
+TText itxt(0.1,0.75,"click on data groups to exclude");
+itxt.SetTextSize(0.06);
 itxt.Draw();
+TText iitxt(0.1,0.05,"black box = on;  white box = off");
+iitxt.SetTextSize(0.06);
+iitxt.Draw();
+
 
 Int_t sw_esr=0,esr_on=1;
 Int_t sw_hepevt=0,hepevt_on=1;
@@ -270,30 +275,30 @@ Int_t sw_offtrk=0,offtrk_on=1;
 Int_t sw_bcal=0,bcal_on=1;
 Int_t sw_lgdSmears=0,lgdSmears_on=1;
 
-TButton *esrCB = new TButton("esr","{esrCB->SetFillColor(esr_on=sw_esr++%2 );esrCB->SetTextColor(esr_on+4); }",0.1,0.6,0.25,0.7);
+TButton *esrCB = new TButton("esr","{esrCB->SetFillColor(esr_on=sw_esr++%2 );esrCB->SetTextColor(esr_on+4); }",0.1,0.6,0.35,0.7);
 esrCB->SetFillColor(esr_on);
 esrCB->SetTextColor(5);
-esrCB->SetTextSize(0.05);
-TButton *hepevtCB = new TButton("hepevt","{hepevtCB->SetFillColor(hepevt_on=sw_hepevt++%2 );hepevtCB->SetTextColor(hepevt_on+4); }",0.55,0.6,0.7,0.7);
+esrCB->SetTextSize(0.5);
+TButton *hepevtCB = new TButton("hepevt","{hepevtCB->SetFillColor(hepevt_on=sw_hepevt++%2 );hepevtCB->SetTextColor(hepevt_on+4); }",0.55,0.6,0.8,0.7);
 hepevtCB->SetFillColor(hepevt_on);
 hepevtCB->SetTextColor(5);
-hepevtCB->SetTextSize(0.05);
-TButton *traceCB = new TButton("tof","{traceCB->SetFillColor(trace_on=sw_trace++%2 );traceCB->SetTextColor(trace_on+4); }",0.1,0.4,0.25,0.5);
+hepevtCB->SetTextSize(0.5);
+TButton *traceCB = new TButton("traces","{traceCB->SetFillColor(trace_on=sw_trace++%2 );traceCB->SetTextColor(trace_on+4); }",0.1,0.4,0.35,0.5);
 traceCB->SetFillColor(trace_on);
 traceCB->SetTextColor(5);
-traceCB->SetTextSize(0.05);
-TButton *offtrkCB = new TButton("trks","{offtrkCB->SetFillColor(offtrk_on=sw_offtrk++%2 );offtrkCB->SetTextColor(offtrk_on+4); }",0.55,0.4,0.7,0.5);
+traceCB->SetTextSize(0.5);
+TButton *offtrkCB = new TButton("trks","{offtrkCB->SetFillColor(offtrk_on=sw_offtrk++%2 );offtrkCB->SetTextColor(offtrk_on+4); }",0.55,0.4,0.8,0.5);
 offtrkCB->SetFillColor(offtrk_on);
 offtrkCB->SetTextColor(5);
-offtrkCB->SetTextSize(0.05);
-TButton *bcalCB = new TButton("bcal","{bcalCB->SetFillColor(bcal_on=sw_bcal++%2 );bcalCB->SetTextColor(bcal_on+4); }", 0.1,0.2,0.25,0.3);
+offtrkCB->SetTextSize(0.5);
+TButton *bcalCB = new TButton("bcal","{bcalCB->SetFillColor(bcal_on=sw_bcal++%2 );bcalCB->SetTextColor(bcal_on+4); }", 0.1,0.2,0.35,0.3);
 bcalCB->SetFillColor(bcal_on);
 bcalCB->SetTextColor(5);
-bcalCB->SetTextSize(0.05);
-TButton *lgdSmearsCB = new TButton("lgd","{lgdSmearsCB->SetFillColor(lgdSmears_on=sw_lgdSmears++%2 );lgdSmearsCB->SetTextColor(lgdSmears_on +4); }",0.55,0.2,0.7,0.3);
+bcalCB->SetTextSize(0.5);
+TButton *lgdSmearsCB = new TButton("lgd","{lgdSmearsCB->SetFillColor(lgdSmears_on=sw_lgdSmears++%2 );lgdSmearsCB->SetTextColor(lgdSmears_on +4); }",0.55,0.2,0.8,0.3);
 lgdSmearsCB->SetFillColor(lgdSmears_on);
 lgdSmearsCB->SetTextColor(5);
-lgdSmearsCB->SetTextSize(0.05);
+lgdSmearsCB->SetTextSize(0.5);
 
 esrCB->Draw();
 hepevtCB->Draw();
