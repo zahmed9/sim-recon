@@ -125,7 +125,7 @@ tof2:     $(TMCFastO) $(TOF2O)
 		@echo "tof2 done"
 
 ntp_maker:     $(TMCFastO) $(NTP_MAKERO) $(TMCFastO)
-		$(LD) $(LDFLAGS) $(NTP_MAKERO) $(TMCFastO) $(LIBPP) $(LIBS) $(OutPutOpt) ntp_maker
+		$(LD) $(LDFLAGS) $(NTP_MAKERO) $(TMCFastO)  $(LIBS) $(OutPutOpt) ntp_maker
 		@echo "ntp_maker done"
 
 
