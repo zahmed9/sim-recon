@@ -16,10 +16,11 @@ class hdv_mainframe:public TGMainFrame {
 		~hdv_mainframe(){};
 		
 		Bool_t ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2);
+		void MakeGIFs(void);
 
 	private:
 		TGTextButton *quit, *next, *density, *lines, *slope, *offset;
-		TGTextButton *phi_vs_z;
+		TGTextButton *phi_vs_z, *gifs;
 		TGLayoutHints *fLayout;
 		TRootEmbeddedCanvas *emcanvas;
 

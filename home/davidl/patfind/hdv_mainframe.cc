@@ -46,6 +46,7 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 	phi_vs_z	= new TGTextButton(this,"&Phi vs. Z",	7);
 	slope		= new TGTextButton(this,"&Slope", 		5);
 	offset	= new TGTextButton(this,"&Offset",		6);
+	gifs		= new TGTextButton(this,"&GIFs",			8);
 	quit		= new TGTextButton(this,"&Quit",			1);
 	quit->SetCommand(".q");
 	
@@ -55,12 +56,13 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 	buttonframe->AddFrame(phi_vs_z, fLayout);
 	buttonframe->AddFrame(slope, fLayout);
 	buttonframe->AddFrame(offset, fLayout);
+	buttonframe->AddFrame(gifs, fLayout);
 	buttonframe->AddFrame(quit, fLayout);
 	
 	MapSubwindows();
 	Layout();
-	SetWindowName("Hall-D Event Viewer");
-	SetIconName("HDView");
+	SetWindowName("Hall-D Track Pattern Finder");
+	SetIconName("PatFind");
 	MapWindow();
 
 	maincanvas = emcanvas->GetCanvas();
@@ -98,6 +100,9 @@ Bool_t hdv_mainframe::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
 						case 7: //Phi vs. Z
 							myproc->PlotPhiVsZ();
 							break;
+						case 8: //GIFs
+							MakeGIFs();
+							break;
 						default:
 							cout<<"parm1="<<parm1<<endl;
 					}
@@ -105,6 +110,38 @@ Bool_t hdv_mainframe::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
 			}
 			break;
 	}
+}
+
+//-------------------
+// MakeGIFs
+//-------------------
+void hdv_mainframe::MakeGIFs(void)
+{
+	static int event=1;
+	
+	char fname[256];
+	
+	sprintf(fname,"patfind_lines_%02d.gif",event);
+	myproc->evnt(0);
+	maincanvas->SaveAs(fname);
+
+	sprintf(fname,"patfind_density_%02d.gif",event);
+	myproc->densityPlot();
+	maincanvas->SaveAs(fname);
+
+	sprintf(fname,"patfind_slope_%02d.gif",event);
+	myproc->PlotSlope();
+	maincanvas->SaveAs(fname);
+
+	sprintf(fname,"patfind_offset_%02d.gif",event);
+	myproc->PlotOffset();
+	maincanvas->SaveAs(fname);
+
+	sprintf(fname,"patfind_phi_vs_z_%02d.gif",event);
+	myproc->PlotPhiVsZ();
+	maincanvas->SaveAs(fname);
+	
+	event++;
 }
 
 
