@@ -50,13 +50,15 @@ derror_t MyProcessor::init(void)
 	// set limits for plot. This represents the space where the center 
 	// of the circle can be. It can be (and often is) outside of the
 	// bounds of the solenoid.
-	float cmax = 120.0; // in cm.
+	float cmax = 150.0; // in cm.
 
 	axes = new TH2F("axes","",10,-cmax,cmax,10,-cmax,cmax);
 	axes->SetStats(0);
 
 	axes_phiz = new TH2F("axes_phiz","",10,0.0,650.0, 10, -2.0*M_PI, 2.0*M_PI);
 	axes_phiz->SetStats(0);
+	axes_phiz->SetXTitle("z-coordinate (cm)");
+	axes_phiz->SetYTitle("\\phi angle (radians)");
 
 	axes_hits = new TH2F("axes_hits","",10,-100.0,100.0, 10, -100.0,100.0);
 	axes_hits->SetStats(0);
@@ -166,7 +168,7 @@ derror_t MyProcessor::PlotSlope(void)
 		if(hist){
 			hist->SetLineColor(colors[i%5]);
 			float maxloc = hist->GetBinCenter(hist->GetMaximumBin());
-			hist->Fit("gaus","0", "", maxloc-0.002, maxloc+0.002);
+			//hist->Fit("gaus","0", "", maxloc-0.002, maxloc+0.002);
 			//hist->GetFunction("gaus")->ResetBit(1<<9); // make function draw with histo (deep in TH1 document)
 			hist->Draw("same");
 		}
@@ -203,7 +205,12 @@ derror_t MyProcessor::PlotPhiVsZ(void)
 {
 	axes_phiz->Draw();
 	factory->DrawPhiZPoints();
+	
+	maincanvas->SetGridx(1);
+	maincanvas->SetGridy(1);
 	maincanvas->Update();
+	maincanvas->SetGridx(0);
+	maincanvas->SetGridy(0);
 
 	return NOERROR;
 }
@@ -241,7 +248,7 @@ derror_t MyProcessor::DrawHits(void)
 	MCTrackCandidate_t *tc = (MCTrackCandidate_t*)mctc->first();
 	for(int i=0;i<mctc->nrows;i++, tc++){
 		float x0 = tc->x0;
-		float y0 = -tc->y0;
+		float y0 = tc->y0;
 		float r0 = sqrt(x0*x0 + y0*y0);
 		ellipse[Nellipse++] = new TEllipse(x0, y0, r0, r0);
 	}
@@ -254,9 +261,12 @@ derror_t MyProcessor::DrawHits(void)
 	MCCheatHit_t *mccheathit = (MCCheatHit_t*)mccheathits->first();
 	for(int i=0; i<mccheathits->nrows; i++, mccheathit++){
 		float x = mccheathit->r*cos(mccheathit->phi);
-		float y = mccheathit->r*sin(mccheathit->phi);
-		markers[Nmarkers] = new TMarker(x,y,20);
-		markers[Nmarkers]->SetMarkerColor(colors[mccheathit->track-1]);
+		float y = -mccheathit->r*sin(mccheathit->phi);
+		int color = colors[mccheathit->track-1];
+		int markerstyle = 20;
+		if(mccheathit->system>2){markerstyle = 22; color+=100;}
+		markers[Nmarkers] = new TMarker(x,y,markerstyle);
+		markers[Nmarkers]->SetMarkerColor(color);
 		markers[Nmarkers]->Draw();
 		if(++Nmarkers>=500)break;
 	}
