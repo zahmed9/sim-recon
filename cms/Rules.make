@@ -16,7 +16,7 @@
 
 # Set up the environment
 
-VDIR= $(CLAS_PACK)/scripts/vdir
+VDIR= $(BUILDS)/scripts/vdir
 
 ifndef OS_NAME
   export OS_NAME = $(shell $(CLAS_CMS)/uname_clas)
