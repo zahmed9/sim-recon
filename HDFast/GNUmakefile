@@ -109,8 +109,8 @@ ifeq "$(UNAME)" "Linux"
   FP_EXCEPTION = -L/usr/lib
   LOPTION= -O0 -W1,-taso
 
-#  ABSOFT:= -absoft # Tells f77mcf to use absoft
-  LIBS := -L. -lU77 -lV77 -lf77math -lfio   #ABSOFT run time 
+ ABLIBS = $(HALLDLIBS)
+  LIBS := -L$(ABLIBS) -lU77 -lV77 -lf77math -lfio   #ABSOFT run time 
 #  LIBS += -L/usr/local/packages/egcs/lib/gcc-lib/i586-pc-linux-gnu/egcs-2.91.57
   LIBS += -lg2c                                          #g77 runtime
   LIBS += -lm    
@@ -221,9 +221,6 @@ MCFIO = $(MCFAST_DIR)/lib.$(UNAME)/libFmcfio.a
 
 .$(SrcSuf).o:
 	$(CXX) $(TMCFAST_INC) -I. $(FINC)  $(CXXFLAGS) -c $<
-
-usr_mcfio_out.o:usr_mcfio_out.F
-	f77 -O -w -g -fno-second-underscore -c $(FINC) -I. usr_mcfio_out.F
 
 
 
@@ -356,10 +353,10 @@ db:
 	@ln -s $(MCFAST_DIR)/db db
 
 clean:
-	rm -f mcfast
+	rm -f HDFast HDFast_lite mctest
 	rm -f mcfast.map
 	rm -f $(patsubst %.F,%.f,$(wildcard *.F))
-	rm -f $(USER_OBJ)
+	rm -f $(USER_OBJ) $(USR_LITE_OBJ) $(TEST_OBJ)
 	rm -f *.d $(DEPFILE)
 
 depend: $(DEPFILE)
@@ -374,7 +371,7 @@ test:
 ### rules
 
 .F.o:
-	$(F77bb) $(ABSOFT) -f77 "$(FFLAG)" -cpp "$(FINC)" $<
+	f77  $(FFLAG) -fno-second-underscore  -c -g $(FINC) -I. $<
 
 .c.o:
 	gcc -c -I.  $(FINC) $(CFLAG) $<

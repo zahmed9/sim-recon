@@ -10,7 +10,7 @@ c 10/10/98 Paul Eugenio (CMU) removed all blocks but STDHEP
 #include "mcfio.inc"
 #include "mcp_mcfio.inc"
 #include "stdhep.inc"
-#include "mcfdat_dst.inc"
+c #include "mcfdat_dst.inc"
 
 #define MCFIO_GEOMETRY 880
 #define MCFIO_DST 881

@@ -79,7 +79,7 @@ void usr_analysis_(void){
    * usr_lgd() allocates memory for LgdParts
    * and it must be free'd after calling usr_dump
    */
-  foundAllGammas=usr_lgd(); /* remember to free memory */
+  foundAllGammas= usr_lgd(); /* remember to free memory */
 
   if((count++ -1)%50==0){
     fprintf(stderr,"Read in %d events. %d smeared events were accepted.\n",
@@ -106,7 +106,7 @@ void usr_analysis_(void){
 	      LgdParts->part[i].vz);
   }
   /* 
-    * Only save events where all particles are found
+    * Only save events where all particles are foundtrk_off1_.
    */
   if(Debug==1)
     fprintf(stderr,"trk_off_num: %d  trk_gen_num: %d\n",
@@ -132,7 +132,7 @@ void usr_analysis_(void){
       usr_fill_event(trk_off1_.trk_off_num);/* for chrg. part. only */
       usr_mcfio_out_();
     }else
-      usr_dump();
+      ;/* usr_dump(); */
     free(LgdParts);
   }else{
     /* 
