@@ -61,8 +61,8 @@ int main(int argc, char **argv)
   Char_t *argptr,*token,rootfile[500]="Event.rdt",leaf[100][25],Vleaf[100][25];
   Int_t nevents=0,listBranches=0,nleaves2save=0,nVirtualLeaves2save=0;
   Int_t dump_hepevt=0,dump_offtrk=0,dump_all=0,
-    dump_bcal=0,dump_lgdSmears=0,dump_esr=0,dump_vtx_hits=0,
-    dump_cdc_hits=0,dump_trace=0,dump_gamp=0;
+    dump_bcal=0,dump_lgdSmears=0,dump_esr=0,
+    dump_trace=0,dump_gamp=0;
   Int_t skipEvents=0;
   Double_t kludge_beamE=0;
   // MCFast objects
