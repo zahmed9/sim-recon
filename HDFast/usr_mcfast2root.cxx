@@ -92,7 +92,7 @@ extern "C" int usr_mcfast2root(event_t *event)
     
    
     //tree->SetAutoSave(1000000000);  // autosave when 1 Gbyte written
-    tree->SetAutoSave(100000000);  // autosave when 100 Mbyte written
+    tree->SetAutoSave(10000000);  // autosave when 100 Mbyte written
     Int_t bufsize = 256000;
     Int_t split  = 0;  // by default, split Event in sub branches
     if (split)  bufsize /= 4;

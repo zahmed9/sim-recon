@@ -23,6 +23,7 @@
 #include <dev_hit.h>
 #include <hit_track.h>
 
+
 struct offline_track_struct *trk_off;
 struct trace_s *trace,tmp_trace[50],tmp2_trace[20];
 struct heppart_t *heppart;
@@ -114,7 +115,8 @@ void usr_dump(void){
   trace_num=0;
   trace_num2=0;
   for(i=0;i<trace_par_c_.trace_num;i++){
-    int haveIt=0;
+    int haveIt=0, IsAHadShower;
+ 
     /*
      * Kludge fix the hits (they are missing the the trace index)
      */
@@ -125,6 +127,22 @@ void usr_dump(void){
      *
      **/
     
+
+    //
+    // Look for hadron conversion in the trace list and skipp all traces after it
+    //
+    switch(trace_par_c_.trace_par[i].type){
+    case  HADRON_SHOWER:
+      IsAHadShower=1;
+      break;
+    case PRODUCTION:
+      IsAHadShower=0;
+      break;
+    default:
+    }
+
+  
+
     /* find the TOF traces */
    
     if(Debug==2){
@@ -134,7 +152,7 @@ void usr_dump(void){
 		trace_par_c_.trace_par[i].w.y * 
 		trace_par_c_.trace_par[i].w.y);
       fprintf(stderr,
-	"typ: %d plane: %d hit: %d hep: %d path: %lf time: %lf tau: %lf loc(r,z): %lf %lf \n",
+	"typ: %d plane: %d hit: %d hep: %d path: %lf time: %lf tau: %lf loc(r,z): %lf %lf  m: %lf\n",
 	      trace_par_c_.trace_par[i].type,
 	      trace_par_c_.trace_par[i].plane,
 	      trace_par_c_.trace_par[i].hit,
@@ -142,9 +160,18 @@ void usr_dump(void){
 	      trace_par_c_.trace_par[i].path,
 	      trace_par_c_.trace_par[i].time,
 	      trace_par_c_.trace_par[i].tau,
-	      rloc,zloc);
-    }/* end of debug */
+	      rloc,zloc, sqrt( 
+			      trace_par_c_.trace_par[i].w.e * trace_par_c_.trace_par[i].w.e 
+			      -(trace_par_c_.trace_par[i].w.px * trace_par_c_.trace_par[i].w.px +
+				trace_par_c_.trace_par[i].w.py * trace_par_c_.trace_par[i].w.py +
+				trace_par_c_.trace_par[i].w.pz * trace_par_c_.trace_par[i].w.pz ))
 
+);
+
+
+
+    }/* end of debug */
+    if( ! IsAHadShower)
     if(((trace_par_c_.trace_par[i].type ==PRODUCTION && 
        trace_par_c_.trace_par[i].plane == PRODUCTION_PLANE) ||
        (trace_par_c_.trace_par[i].type ==CENTRAL &&
@@ -159,6 +186,8 @@ void usr_dump(void){
       /* 
        * we have a TOF trace 
        */
+      if(Debug==2)
+	fprintf(stderr, "\t^^^^ Found a tof trace point ^^^^^\n");
       haveIt=1;
       tmp_trace[trace_num] = trace_par_c_.trace_par[i];
       trace_num++;
@@ -166,11 +195,14 @@ void usr_dump(void){
     /*
      * Get the Cerenkov trace points
      */
+    if( ! IsAHadShower)
     if(trace_par_c_.trace_par[i].type ==FORWARD && 
        (int)(trace_par_c_.trace_par[i].w.z +.5) == (int)(CERENKOV_Z)){
       /* 
        * we have a CERENKOV trace point 
        */
+      if(Debug==2)
+	fprintf(stderr, "\t^^^^ Found a ceren trace point ^^^^^\n");
       haveIt=1;
       tmp2_trace[trace_num2] = trace_par_c_.trace_par[i];
       trace_num2++;

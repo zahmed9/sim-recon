@@ -26,6 +26,9 @@
  * Trace types
  */
 #define PRODUCTION 4
+#define HADRON_SHOWER 9
+
+
 /* Old tracing code defines 
 #define CENTRAL 1
 #define FORWARD 2
