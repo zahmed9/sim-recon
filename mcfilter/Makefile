@@ -25,20 +25,20 @@ XLIB= -L/lib
 RPCLIB= -L/usr/lib -lrpcsvc
 TCLLIB= -L/usr/local/lib -ltcl
 
-LIBS= $(TESTLIBS) $(STDLIBS)  $(MISCLIB)
+LIBS= $(TESTLIBS) $(STDLIBS)  $(MISCLIB) -L$(CERNLIBDIR) $(CERNLIB)
 
 PROGRAM= mcfilter
 
 exe: mcfilter
 
 SRCS= mcfilter.c
-FSRC= 
+FSRC= newbeam.f newcharged.f newgamma.f gausran.f
 
-FOBJ =${FSRC:.F=.o}
+FOBJ =${FSRC:.f=.o}
 OBJS= $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
 
-$(PROGRAM): $(OBJS)
-	$(CC) -v -o $@ $(CDBG) $(FINCLUDE) $^ $(FOBJ) $(LIBS)
+$(PROGRAM): $(OBJS) $(FOBJ)
+	$(CC) -v -o $@ $(CDBG) $(FINCLUDE) $^ $(LIBS)
 
 install: mcfilter
 	mv -f mcfilter $(TOP_DIR)/bin/$(OS_NAME)
