@@ -1,17 +1,38 @@
-################  ROOT ##########################
+################Environment##########################
 # 
 #
 # These items are need to run root. Include them
 # in you .cshrc file.
 #
-#
-setenv ROOTSYS /work/halld/root   
-set path=($path $ROOTSYS/bin)
+# if you don't have $UNAME defined then define it
+setenv $UNAME `uname`
+setenv ROOTSYS /work/halld/root.$UNAME 
+# 
+# Using  egcs1.1.1
+setenv EGCS   /work/halld/local.$UNAME
+set path=( $EGCS/bin $path $ROOTSYS/bin)
 
-setenv LD_LIBRARY_PATH  LD_LIBRARY_PATH:$ROOTSYS/lib
-
-# You must have root installed on you system.
-# For more information an root (such as where to get it),
-# see http://root.cern.ch
+# set path for shared libs
+setenv LD_LIBRARY_PATH $ROOTSYS/lib:$EGCS/lib
 #
+# 
 ####################### HALL D #####################
+
+In /work/halld/stage1_physics there exist data files (*.rdt) which have
+been processed through HDFast --the simulation program based upon the Fermilab MCFast framework.  HDFast creates and writes data utilizing ROOT I/O. The data format is a ROOT tree which is a data container similar to but with much less limitations than itape or BOS. Each event occupies a super-branch in the tree which in turns contains sub-branches(a sub-branch is like a itape group or BOS bank). Each sub-branch contains the data structure defined by a C++ object. Adding new branches reduces to creating C++ classes. Currently HDFast save 5 branches, and 1 virtual branch. 
+
+  o hepevt    --contains generated mc information
+  o offtrk    --contains the offline(smeared) charged track information
+  o tof_trace --contains time-of-flight information 
+  o bcal      --contains barrel calorimetry hit in formation
+  o ldgSmear  --contains smeared (energy only) lgd gamma information 
+  
+  + esr       --a virtual event summary constructed from the about branches
+
+
+
+See http://www.phys.cmu.edu/halld/MCS.html for more information on the Monte Carlo Framework.
+
+In addition to the data files,  /work/halld/stage1_physics contains example macros (*.C) and executables. See tof.C for example of opening a data file and generating histograms.  Also, EventDisplay.C is, you've guess it, an event display (still a bit crude and slow).  To run the event display type "root .x  EventDisplay.C"  The executable dumpRdt (see /work/halld/src/mcroot/ subsystem on building it) is an example of a program that opens a data file and ascii dumps the branch information. "dumpRdt -h" will provide command line help, and "dumpRdt -n1 file.rdt" will dump one event from file.rdt. 
+
+
