@@ -1,73 +1,63 @@
-	#     # ######  #     #  #####
-	#     # #     # ##   ## #     #
-	#     # #     # # # # # #
-	####### #     # #  #  #  #####
-	#     # #     # #     #       #
-	#     # #     # #     # #     #
-	#     # ######  #     #  #####
+#     # ######  #######
+#     # #     # #          ##     ####    #####
+#     # #     # #         #  #   #          #
+####### #     # #####    #    #   ####      #
+#     # #     # #        ######       #     #
+#     # #     # #        #    #  #    #     #
+#     # ######  #        #    #   ####      #
 
 
-Cebaf's Meson Spectrometer for HallD
+The GlueX Spectrometer for Hall D
 
 HDFast is a fast and flexible simulation program based upon the MCFast framework developed by the simulation group at Fermilab. MCFast consists of a set of modularized Monte Carlo library routines; it is designed to perform parameterized tracking by assembling a covariance matrix for each track that takes into account materials, efficiencies, and resolutions for all measurements planes, and use this matrix to smear the track parameters randomly. In principle, the distribution of smeared tracks produced by this method would be similar to the distribution of real tracks that were measured by a real detector(with the same parameters) and analyzed with an idealized track fitting procedure. 
 
-Running HDFast
-
-First one must generate the MC events. Monte Carlo events can be generated using the program genr8 or cwrap . Both programs generate peripheral phase space Monte Carlo events where events can be produced which describe a complex decay chain of intermediary states. Both meson and baryon decay chains are allowed, but with a limiting assumption of a t-channel production process. Given in this directory is an example genr8 input file: "example.input". To run genr8 execute:
-
-	genr8 -M100 -Aexample.ascii < example.input
-
-This will generate 100 MC events in ascii format which are then read in by
-HDFast using the perl script "run_hdfast". But first source halldrc from your .cshrc file.
-
-       run_hdfast -N100 -texample -n6
-
-In addition to the default debug files: example.hbook and example.log; there
-is an example.rdt file which is a ROOT tree file that contains all data groups (branches) for the event. The file can then be analyzed using root macros or programs developed in the mcroot subsystem.
 
 Building HDFast:
 
-HDFast requires the following fermi lab products(these 
-are precompiled libraries. Future plans include placing the source files in 
-the halld CVS repository. Currently there is no support for a MCFast version 
-for Linux) A distributions of these products can be obtained via ftp from 
-ftp.fnal.gov (username:ftp).  The site is restricted  to registered users. A 
-registration form can be obtained in the top level directory at the  site.
+The Following Environmental variables must be defined: $CRNLIB (points to your cern libs) 
+and $HALLD_HOME (points to a directory where $HALLD_HOME/src/HDFast is the HDFast cvs directory)
 
-Caution! Some of these packages are currently in development, so using another
- version of any product where a specific version is listed may break mcfast.
-
-        stdhep v4_04
-        qq v9_2b
-	mcfast v4_1
-
-The above packages support only the following platforms: 
-	OSF1, HP-UX,IRIX, IRIX64, SunOS, Ultrix, Aix, Linux(except for mcfast)
-
-****************************************
-*	FIVE EASY STEPS TO USE MCFAST  *
-****************************************
-
-[1]	Get the Packages: stdhep, qq, mcfast
-	from fermi lab; and HDFast & stdhep_translators
-	from the HallD CVS repository.
-
-	Remeber to have halldrc sourced from your .cshrc file
-		
+Example are:
+			% echo $CRNLIB 
+				/usr/local/cern/2000/lib	
+			% echo $HALLD_HOME
+				/home/gluex
 
 
-[2]
-	Add a symbolic link.
-		ln -s  $MCFAST_DIR/db  $HDFAST_DIR/db
-		# This is NEEDED to run mcfast everytime!
-[3]
-	Make the StdHep translators.
-		cd  $STDHEP_TRANS_DIR
-		make all
-[4]
-	Make HDFast
-		cd $HDFAST_DIR
-		make HDFast
 
-[5]	Call or email eugenio@ernest.phys.cmu.edu if you run
-        into any problems.
+The library libTMCFast.a from the mcroot cvs repository must be built prior to building HDFast.
+
+			% cd $HALLD_HOME/src/mcroot 
+			% make all
+			% cd $HALLD_HOME/src/HDFast
+
+
+Now source 
+	$HALLD_HOME/src/HDFast/setup5_2.Linux_gcc3x 
+					or
+	$HALLD_HOME/src/HDFast/setup5_2.Linux_gcc2x 
+
+			depending on your version of gcc  (see gcc --version)
+
+Ready to make HDFast
+
+	
+			% make HDFast
+
+
+
+The HDFast run time environment:
+
+	Note!! HDFast, during run time, needs certain environmental variables defined.  Therefor,
+	       it is suggested that one adds adds the following lines to cshrc (or equivalent)
+	       for automatic sourcing.
+
+
+		#
+		# Needed for HDFast building and running
+		setenv HALLD_HOME  /your/home/gluex
+		source $HALLD_HOME/src/HDFast/setup5_2.Linux_gcc3x  # or _gcc2x
+
+
+
+
