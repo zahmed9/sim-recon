@@ -37,7 +37,7 @@ setenv EVGEN_DIR $MCFAST_DIR/evgen
 setenv MCFIO_DIR $MCFAST_DIR/mcfio
 setenv UTIL_DIR $MCFAST_DIR/util
 setenv GLIB $MCFAST_DIR/lib.$UNAME
-setenv MCFREL v4_0
+setenv MCFREL v4_4
 set path=($path $MCFAST_DIR/bin)
 #
 # now source stdhep and qq setup
