@@ -42,3 +42,4 @@ else
 endif
 
 setenv CERN_ROOT ${CERN}/${CERN_LEVEL}
+setenv PATH ${CERN_ROOT}/bin:$PATH
