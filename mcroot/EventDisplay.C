@@ -26,7 +26,7 @@
  * One last point, the "next event" button does not work.
  *******************************************************/
 
-   char *rdtFile="test2.rdt";
+   char *rdtFile="draw.rdt";
  
  char *geoFile="/home/halld/src/HDFast/HDFast.db";
   
