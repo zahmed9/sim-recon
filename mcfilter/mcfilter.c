@@ -16,13 +16,18 @@ typedef struct {
   float c_low; /* charged angle cut in theta*/
   float p_high; /* gamma angle cut in theta (high side)*/
   float p_low; /* gamma angle cut in theta (low side)*/
+  int resoloution; /* Distort 4-vectors by resoloution */
 } cuts_t;
 
 void PrintUsage(char *processName);
 int ProcessEvent(itape_header_t *event, cuts_t cuts);
 int GetData(FILE *finput, itape_header_t *buffer);
 void print_particle(FILE *fp, esr_particle_t p);
+void distort_npart(esr_nparticle_t *esr);
 int angular_acceptance(esr_nparticle_t *esr, cuts_t cuts);
+void v4_to_arr(vector4_t vec, float arr[4]);
+vector4_t arr2v4(float arr[4])l
+
 
 int debug = 0;
 
@@ -36,6 +41,7 @@ void PrintUsage(char *processName)
   fprintf(stderr,"\t-p[l,h]\t\tneutral theta cut in degrees\n");
   fprintf(stderr,"\t   l[#]\t\t- low angle gamma cut\n");
   fprintf(stderr,"\t   h[#]\t\t- high angle gamma cut\n");
+  fprintf(stderr,"\t-R\t\tDistort 4-vectors by Resoloution\n");
   fprintf(stderr,"\t-d\t\tdebug mode\n");
   fprintf(stderr,"\t-h\t\tPrint this message.\n\n");
   exit(0);
@@ -60,6 +66,7 @@ void main(int argc, char *argv[])
   
   cuts.p_low = cuts.c_low = 0.0;
   cuts.p_high = 180.0;
+  cuts.resoloution = 0;
 
   if(argc==1)PrintUsage(argv[0]);
 
@@ -91,6 +98,9 @@ void main(int argc, char *argv[])
 	  PrintUsage(argv[0]);
 	  break;
 	}
+	break;
+      case 'R':
+	cuts.reloution = 1;
 	break;
       case 'o':
 	outFile = ++argptr;
@@ -164,10 +174,12 @@ int ProcessEvent(itape_header_t *event, cuts_t cuts){
     vector4_t sum = {0,0,0,0};
     if (debug) fprintf(stderr, "next event\n");
     if (!(angular_acceptance(esr, cuts))) return 0;
+    if (cuts.resoution) distort_npart(esr);
     return 1;
   }
   return 0;
 }
+
 
 /* returns 1 if all particles pass angle cuts 0 if any one fails*/
 int angular_acceptance(esr_nparticle_t *esr, cuts_t cuts){
@@ -198,6 +210,54 @@ int angular_acceptance(esr_nparticle_t *esr, cuts_t cuts){
     
   }
   return 1;
+}
+
+void distort_npart(esr_nparticle_t *esr){
+  if (esr){
+    esr->beam = newbeam(esr->beam);
+    for (i=0; i < esr->nparticles; i++){
+      switch(abs(esr->p[i].particleType)){
+      case Gamma:
+	esr->p[i].p = newgamma(esr->p[i].p);
+	break;
+      case PiPlus:
+      case PiMinus:
+      case KPlus:
+      case KMinus:	
+	esr->p[i].p = newcharged(esr->p[i].p);
+	break;
+      }
+    }
+  }
+  
+}
+
+
+vector4_t newcharged(vector4_t charged){
+  float arr[4];
+  v4_to_arr(charged, arr);
+  newcharged_(arr);
+  return (arr2v4(arr));
+}
+
+vector4_t newbeam(vector4_t beam){
+  float arr[4];
+  v4_to_arr(beam, arr);
+  newbeam_(arr);
+  return (arr2v4(arr));
+}
+
+void v4_to_arr(vector4_t vec, float arr[4]){
+  float arr[4];
+  arr[0] = beam.space.x; arr[1] = beam.space.y; arr[2] = beam.space.z;
+  arr[3] = beam.t;
+}
+
+vector4_t arr2v4(float arr[4]){
+  vector4_t vec;
+  vec.t = arr[3];
+  vec.space.x = arr[0]; vec.space.y = arr[1]; vec.space.z = arr[2];
+  return vec;
 }
 
 void print_particle(FILE *fp, esr_particle_t p){

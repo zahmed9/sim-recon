@@ -17,6 +17,7 @@ MISCLIB_AIX :=  -L/usr/lib -lxlf90 -lm -lc
 MISCLIB_Linux :=  -L/usr/lib  -lm -lc /usr/lib/libf2c.a
 MISCLIB_OSF1 :=  -L/usr/lib -lm -lc -lfor -lUfor
 MISCLIB_IRIX64 := -L/usr/lib64 -lm
+MISCLIB_IRIX := -L/usr/lib -lm
 
 MISCLIB := $(MISCLIB_$(OS_NAME))
 
