@@ -35,7 +35,7 @@ ROOTGLIBS     = -lGpad -lGui -lGX11 -lX3d
 TMCFAST_INC = -I$(HALLD_HOME)/src/mcroot
 
 #HDFASTLIBS = -L$(HALLD_HOME)/lib/$(UNAME)  -lTMCFast
-HDFASTLIBS = /home/halld/lib/Linux/libTMCFast.a
+HDFASTLIBS = $(HALLDLIBS)/libTMCFast.a
 
 #HDFASTLIBS =    TMCFastHepEvt.o  TMCFastHepEvtDict.o TMCFastTOF.o TMCFastTOFDict.o \
 #		TMCFastOfflineTrack.o  TMCFastOfflineTrackDict.o \
