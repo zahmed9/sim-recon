@@ -1,0 +1,48 @@
+##################################################
+#
+# Source this file after modifying below
+#
+#################################################
+
+# Set YOUR cern lib location
+# below is the location on jlabs2 
+#setenv CRNLIB /apps/cernlib/sun4_solaris2/97a/lib
+setenv CRNLIB /usr/local/lib
+
+# The first 2 packages below can be obtained from the Halld CVS repository
+# now set these locations
+setenv HDFAST_DIR $HALLD_HOME/src/HDFast
+setenv STDHEP_TRANS_DIR $HALLD_HOME/src/stdhep_translators
+
+
+# below are fermi lab products (See above about fermi lab products)
+# and finally  set these locations
+setenv MCFAST_DIR $HALLD_HOME/src/mcfast_v4_2_OSF1+V4
+setenv STDHEP_DIR $HALLD_HOME/src/stdhep_v4_04_OSF1
+setenv QQ_DIR $HALLD_HOME/src/qq_v9_2b
+##########################################
+#
+# Now edit HDMS.cmd and change the  HDMS_MCFAST_DIR location 
+#
+#############################################
+# Modify the above and do not change anything below
+#
+# pulled out of $MCFAST_DIR/setup.csh and modified for our use
+setenv UNAME `uname`
+setenv MCFLIB $MCFAST_DIR/lib.$UNAME
+setenv MCFBIN $MCFAST_DIR/bin.$UNAME
+setenv MCFINC $MCFAST_DIR/inc
+#setenv MCFSRC $MCFAST_DIR/mcfast/src
+setenv EVGEN_DIR $MCFAST_DIR/evgen
+setenv MCFIO_DIR $MCFAST_DIR/mcfio
+setenv UTIL_DIR $MCFAST_DIR/util
+setenv GLIB $MCFAST_DIR/lib.$UNAME
+setenv MCFREL v4_0
+set path=($path $MCFAST_DIR/bin)
+#
+# now source stdhep and qq setup
+source $STDHEP_DIR/ups/setup.csh
+source $QQ_DIR/ups/setup.csh
+#
+# 
+
