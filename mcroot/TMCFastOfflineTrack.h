@@ -64,20 +64,20 @@ class TMCFastOfflineTrack: public TObject {
 private:
 
   Int_t    fntracks;                    // number of tracks
-  Double_t fpx[TTRK_OFF_MAX];           // Track parameters at interaction 
-  Double_t fpy[TTRK_OFF_MAX];
-  Double_t fpz[TTRK_OFF_MAX];
-  Double_t fE[TTRK_OFF_MAX];
-  Double_t fx[TTRK_OFF_MAX];
-  Double_t fy[TTRK_OFF_MAX];
-  Double_t fz[TTRK_OFF_MAX];
-  Double_t fpt[TTRK_OFF_MAX];          // pt = sqrt(px*px+py*py) 
-  Double_t fp[TTRK_OFF_MAX];           // momentum 
-  Double_t fq[TTRK_OFF_MAX];           // charge 
+  Float_t fpx[TTRK_OFF_MAX];           // Track parameters at interaction 
+  Float_t fpy[TTRK_OFF_MAX];
+  Float_t fpz[TTRK_OFF_MAX];
+  Float_t fE[TTRK_OFF_MAX];
+  Float_t fx[TTRK_OFF_MAX];
+  Float_t fy[TTRK_OFF_MAX];
+  Float_t fz[TTRK_OFF_MAX];
+  Float_t fpt[TTRK_OFF_MAX];          // pt = sqrt(px*px+py*py) 
+  Float_t fp[TTRK_OFF_MAX];           // momentum 
+  Float_t fq[TTRK_OFF_MAX];           // charge 
 
-  Double_t fmass[TTRK_OFF_MAX];        // mass 
-  Double_t fcov[TTRK_OFF_MAX][7][7];   //  covariance matrix		
-  Double_t fchisq[TTRK_OFF_MAX];       // fit chisq 	     
+  Float_t fmass[TTRK_OFF_MAX];        // mass 
+  Float_t fcov[TTRK_OFF_MAX][7][7];   //  covariance matrix		
+  Float_t fchisq[TTRK_OFF_MAX];       // fit chisq 	     
   Int_t    fnhits[TTRK_OFF_MAX];        // nhits in fit
   Int_t    fnhitsSilicon[TTRK_OFF_MAX] ;   // # of silicon hits
   Int_t    fnhitsStereo[TTRK_OFF_MAX];    // # of  hits with stereo info

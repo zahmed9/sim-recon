@@ -39,8 +39,8 @@ private:
   Int_t findex;      // The HEPEVT index
   Int_t fjmohep[2];    // The position of the mother particles 
   Int_t fjdahep[2];    // Position of the first daughter... 
-  Double_t  fphep[5];    // 4-Momentum (Px,Py,Pz,E), mass
-  Double_t fvhep[4];    // Vertex information(x,y,z), time 
+  Float_t  fphep[5];    // 4-Momentum (Px,Py,Pz,E), mass
+  Float_t fvhep[4];    // Vertex information(x,y,z), time 
 
 public:
   TMCFastHepParticle() { }
