@@ -48,9 +48,12 @@ TMCParticle::TMCParticle(TMCFastHepParticle &heppart,TMCFastOfflineTrack &offtrk
   SetPy(offtrk.GetPy(track)) ;
   SetPz(offtrk.GetPz(track)); 
   SetE(offtrk.GetE(track)) ; 
-  SetX(heppart.GetVx()) ; 
-  SetY(heppart.GetVy()) ;
-  SetZ(heppart.GetVz()) ;
+  SetX(offtrk.GetX(track)) ; 
+  SetY(offtrk.GetY(track)) ; 
+  SetZ(offtrk.GetZ(track)) ; 
+  //  SetX(heppart.GetVx()) ; 
+  //  SetY(heppart.GetVy()) ;
+  //  SetZ(heppart.GetVz()) ;
   SetCharge((int)offtrk.GetQ(track));
   SetIdHep(heppart.GetIdhep()) ;
   SetHepIndex(offtrk.GetHep(track));
