@@ -57,6 +57,8 @@ chdir "$halld_home/src/programs/Analysis/hd_dump";
 system("make");
 chdir "$halld_home/src/programs/Simulation/genr8";
 system("make install");
+chdir "$halld_home/src/programs/Simulation/genr8_2_hddm";
+system("make");
 chdir "$halld_home/src/programs/Simulation/hdds";
 system("make");
 chdir "$halld_home/src/programs/Simulation/stdhep_translators";
