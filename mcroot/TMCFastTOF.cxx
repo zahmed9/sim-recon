@@ -78,21 +78,17 @@ Double_t TMCFastTOF::GetCTOF(Int_t hep){
   //
   // See GetType() for information about trace types
   //
-  //  tof = gamma * (GetTau(i) - GetTau(0))
-  // tof = (GetTau(i) - GetTau(0))*GetTime(i)/GetTau(i);
+  //  
+  // tof = (GetTime(i) - GetTime(0));
   //
-  // The use of tau is need do to a bug in mcfast that forgets
-  // to fill t0 but does fill tau0.
-  //
-  // WARNING!! TOF is buggy for mcfast version 4.1 DO NOT USE!
 
 
   Double_t tof=-1; // default for no info
   Int_t ntraces=GetNtraces();
   for(Int_t i=0;i<ntraces;i++){
     if(GetHep(i)==hep && GetType(i)==CENTRAL){ 
-      tof =  (GetTau(i) - GetTau(0))*GetTime(i)/GetTau(i);
-
+      //tof =  (GetTau(i) - GetTau(0))*GetTime(i)/GetTau(i);
+      tof =  (GetTime(i) - GetTime(0));
       //cout<<  GetTime(i) <<" - "<< GetTime(0)<< " = "<<tof<<endl;
     }
   }
@@ -111,6 +107,26 @@ Double_t TMCFastTOF::Beta(Int_t hep){
 
   return beta;
 }
+//____________________________________________________________________________
+Double_t TMCFastTOF::GetMass(Int_t hep){
+  // Calculate the mass from the local four-vector
+  // This is not the smeared mass.
+  //  
+  //  mass = TMath::Sqrt((GetE(i)*GetE(i)) - (GetP(i)*GetP(i)));
+  // where GetHep(i)==hep
+
+  Double_t mass=-1; // default for no info
+ 
+  Int_t ntraces=GetNtraces();
+  for(Int_t i=0;i<ntraces;i++){
+    if(GetHep(i)==hep){
+      mass =   TMath::Sqrt((GetE(i)*GetE(i)) - (GetP(i)*GetP(i)));
+      break;
+    }
+  }
+  return  mass;
+}
+
 
 //____________________________________________________________________________
 Double_t TMCFastTOF::CTOFmass(Int_t hep){
@@ -118,7 +134,9 @@ Double_t TMCFastTOF::CTOFmass(Int_t hep){
   // Currently there is no smearing!!!!! (but soon should be implemented)
   //
   //  m = p/(beta*gamma)
-  //  mass = GetP(i)*TMath::Sqrt(1/beta*beta - 1.0);
+  // 
+  //  beta = (GetPath(i)/tof)*(1/kSpeedOfLight);
+  //  tof = (GetTime(i) - GetTime(0));
   //
 
   Double_t mass=-1; // default for no info
@@ -127,19 +145,14 @@ Double_t TMCFastTOF::CTOFmass(Int_t hep){
   for(Int_t i=0;i<ntraces;i++){
    
     if(GetHep(i)==hep && GetType(i)==CENTRAL){
-       Double_t gamma = GetTime(i)/GetTau(i);
-      /****** This beta is broken --bad time information
-	Double_t tof = (GetTau(i) - GetTau(0))/gamma;
-	Double_t beta1 = (GetPath(i)/tof)*(1/kSpeedOfLight);
-	cerr<<"\n beta1: "<<beta;
-	*******************/
-      Double_t beta = TMath::Sqrt(1.0 - 1/(gamma*gamma));
-      mass =  GetP(i)/(beta*gamma);
+      Double_t tof = (GetTime(i) - GetTime(0));
+      Double_t beta = (GetPath(i)/tof)*(1/kSpeedOfLight);
+      Double_t gamma = 1/(TMath::Sqrt( 1 - beta*beta));
       
-      /****************** OLD CODE
-	Double_t beta= GetPath(i)/(GetTime(i) - GetTime(0))*(1/kSpeedOfLight); 
-	mass = GetP(i)*TMath::Sqrt(1.0/(beta*beta) - 1.0);
-	******************/
+       if(gamma!=gamma) // look for NaN this means beta=1
+	mass =0;
+      else
+	mass =  GetP(i)/(beta*gamma);
     }
   }
   return  mass;
@@ -151,28 +164,24 @@ Double_t TMCFastTOF::CTOFmass(Int_t hep, TMCFastOfflineTrack &offtrk){
   // (but soon it should be implemented)
   //
   //  m = p/(beta*gamma)
-  //  mass = GetP(i)*TMath::Sqrt(1/beta*beta - 1.0);
+  //  
+  // beta = (GetPath(i)/tof)*(1/kSpeedOfLight);
+  // tof = (GetTime(i) - GetTime(0));
   //
-
-
   
   Double_t mass=-1; // default for no info
   Int_t ntraces=GetNtraces();
   for(Int_t i=0;i<ntraces;i++){
     if(GetHep(i)==hep && GetType(i)== CENTRAL){
-      Double_t gamma = GetTime(i)/GetTau(i);
-      /****** This beta is broken --bad time information
-	Double_t tof = (GetTau(i) - GetTau(0))/gamma;
-	Double_t beta1 = (GetPath(i)/tof)*(1/kSpeedOfLight);
-	cerr<<"\n beta1: "<<beta;
-	*******************/
-      Double_t beta = TMath::Sqrt(1.0 - 1/(gamma*gamma));
-      mass =  offtrk.GetHepEvtP(hep)/(beta*gamma);
+      Double_t tof = (GetTime(i) - GetTime(0));
+      Double_t beta = (GetPath(i)/tof)*(1/kSpeedOfLight);
+      Double_t gamma = 1/(TMath::Sqrt( 1 - beta*beta));
       
-      /****************** OLD CODE
-	Double_t beta= GetPath(i)/(GetTime(i) - GetTime(0))*(1/kSpeedOfLight); 
-	mass = GetP(i)*TMath::Sqrt(1.0/(beta*beta) - 1.0);
-	******************/
+       if(gamma!=gamma) // look for NaN this means beta=1
+	mass =0;
+      else
+	mass =  offtrk.GetHepEvtP(hep)/(beta*gamma);
+      
     }
   }
   return mass;
@@ -188,22 +197,18 @@ Double_t TMCFastTOF::GetFTOF(Int_t hep){
   //
   // See GetType() for information about trace types
   //
-  //  tof = gamma * (GetTau(i) - GetTau(0))
-  // tof = (GetTau(i) - GetTau(0))*GetTau(i)/GetTime(i);
-  //
-  // The use of tau is need do to a bug in mcfast that forgets
-  // to fill t0 but does fill tau0. 
-  // WARNING!! TOF is buggy for mcfast version 4.1 DO NOT USE!
-
+  //  
+  // tof = (GetTime(i) - GetTime(0));
+  
   Double_t tof=-1; // default for no info
   Int_t ntraces=GetNtraces();
   for(Int_t i=0;i<ntraces;i++){
     if(GetHep(i)==hep && GetType(i)==FORWARD){
-      Double_t gamma = GetTime(i)/GetTau(i);
-      tof =  (GetTau(i) - GetTau(0))/gamma;
+      //Double_t gamma = GetTime(i)/GetTau(i);
+      tof =  (GetTime(i) - GetTime(0));
     }
     
-    
+    // WARNING!! TOF is buggy for mcfast version 4.1 DO NOT USE!   
   }
    return tof;
 }
@@ -212,25 +217,29 @@ Double_t TMCFastTOF::FTOFmass(Int_t hep, TMCFastOfflineTrack &offtrk){
   // Calculate time-of-flight mass
   // Currently there is no smearing of time!!! (but soon should be implemented)
   //  m = p/(beta*gamma)
-  //  mass = GetP(i)*TMath::Sqrt(1/beta*beta - 1.0);
+  //  mass = offtrk.GetHepEvtP(i)*TMath::Sqrt(1/beta*beta - 1.0);
   //
-
+  // beta = (GetPath(i)/tof)*(1/kSpeedOfLight);
+  // tof = (GetTime(i) - GetTime(0));
+  //
   Double_t mass=-1; // default for no info
   Int_t ntraces=GetNtraces();
   for(Int_t i=0;i<ntraces;i++){
     if(GetHep(i)==hep && GetType(i)==FORWARD){
       // del_t = del_tau * gamma
-      Double_t gamma = GetTime(i)/GetTau(i);
+      //mcfast v4.1:: Double_t gamma = GetTime(i)/GetTau(i);
 
-      /****** This beta is broken --bad time information
-      Double_t tof = (GetTau(i) - GetTau(0))/gamma;
-      Double_t beta1 = (GetPath(i)/tof)*(1/kSpeedOfLight);
-      *******************/
+      Double_t tof = (GetTime(i) - GetTime(0));
+      Double_t beta = (GetPath(i)/tof)*(1/kSpeedOfLight);
+      Double_t gamma = 1/(TMath::Sqrt( 1 - beta*beta));
 
-      Double_t beta = TMath::Sqrt(1.0 - 1/(gamma*gamma));
-      //cerr<<"\n beta1: "<<beta1<<" beta: "<<beta<<endl;
-      mass =  offtrk.GetHepEvtP(hep)/(beta*gamma);
-     
+      // mcfast v4.1:: Double_t beta = TMath::Sqrt(1.0 - 1/(gamma*gamma));
+      //cerr<<"\n beta: "<<beta<<" gamma: "<<gamma<<endl;
+      if(gamma!=gamma) // look for NaN this means beta=1
+	mass =0;
+      else
+	mass =  offtrk.GetHepEvtP(hep)/(beta*gamma);
+      
     }
   }
   return mass;
@@ -248,16 +257,17 @@ Double_t TMCFastTOF::FTOFmass(Int_t hep){
   Int_t ntraces=GetNtraces();
   for(Int_t i=0;i<ntraces;i++){
     if(GetHep(i)==hep && GetType(i)==FORWARD){
-      // del_t = del_tau * gamma
-      Double_t gamma = GetTime(i)/GetTau(i);
-      /****** This beta is broken --bad time information
-      Double_t tof = (GetTau(i) - GetTau(0))/gamma;
-      Double_t beta1 = (GetPath(i)/tof)*(1/kSpeedOfLight);
-       cerr<<"\n beta1: "<<beta;
-       *******************/
-      Double_t beta = TMath::Sqrt(1.0 - 1/(gamma*gamma));
-      mass =  GetP(i)/(beta*gamma);
-     
+      Double_t tof = (GetTime(i) - GetTime(0));
+      Double_t beta = (GetPath(i)/tof)*(1/kSpeedOfLight);
+      Double_t gamma = 1/(TMath::Sqrt( 1 - beta*beta));
+      //cout<<"beta: "<<beta<<" gamma: "<<gamma<<endl;
+      if(gamma != gamma){ // look for NaN this means beta=1
+	mass =0.0;
+	//cout<<" beta is one\n";
+      }
+      else
+	mass =  GetP(i)/(beta*gamma);
+      
     }
   }
   return mass;

@@ -34,7 +34,7 @@ endif
 ifeq "$(UNAME)" "Linux"
 # Linux with egcs
 CXX           = g++
-CXXFLAGS      = -O -g -Wall -fno-rtti -fno-exceptions -fPIC -I$(ROOTSYS)/include
+CXXFLAGS      = -O2 -g -Wall -fno-rtti -fno-exceptions -fPIC -I$(ROOTSYS)/include
 LD            = g++
 LDFLAGS       = -g
 SOFLAGS       = -shared
@@ -176,7 +176,7 @@ TMCParticleDict.cxx: TMCParticle.h TMCParticleLinkDef.h
 
 TMCesrDict.cxx: TMCesr.h TMCesrLinkDef.h
 	@echo "Generating dictionary TMCesrDict..."
-	@$(ROOTSYS)/bin/rootcint -f TMCesrDict.cxx -c TMCesr.h TMCesrLinkDef.h
+	@$(ROOTSYS)/bin/rootcint -f TMCesrDict.cxx -c TMCesr.h 
 
 .cxx.o:
 	$(CXX) $(CXXFLAGS) -c $<

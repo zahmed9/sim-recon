@@ -88,6 +88,7 @@ public:
 
   Double_t GetCTOF(Int_t hep);
   Double_t GetFTOF(Int_t hep);
+  Double_t GetMass(Int_t hep);
   Double_t GetR(Int_t i);
   Double_t Beta(Int_t hep);
   Double_t CTOFmass(Int_t hep);
