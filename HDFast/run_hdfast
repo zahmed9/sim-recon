@@ -138,7 +138,7 @@ if($#ARGV > 0){
     $syscomm = "stdhep2ascii -i".$tag.".mcfasted.evt -o".$tag.".mcfasted.ascii -n".$nparts." -N".$nevents ;
     print  $syscomm."\n";
     system($syscomm);
-
+   }
 #
 #remove stdhep output file
 #
@@ -148,7 +148,7 @@ if($#ARGV > 0){
         system($syscomm);
 	
     }
-  }
+  
 
 }
 
