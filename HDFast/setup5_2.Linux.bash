@@ -17,9 +17,9 @@ export STDHEP_TRANS_DIR=$HALLD_HOME/src/stdhep_translators
 
 # below are fermi lab products (See above about fermi lab products)
 # and finally  set these locations
-export MCFAST_DIR=$HALLD_HOME/src/mcfast_v5_2_Linux+2.4
-export STDHEP_DIR=$HALLD_HOME/src/stdhep_v4_08_Linux+2.2
-export QQ_DIR=$HALLD_HOME/src/qq_v9_2b_Linux+2.2
+export MCFAST_DIR=$HALLD_HOME/src/mcfast_v5_2_Linux+2.4+GCC3_2_1
+export STDHEP_DIR=$HALLD_HOME/src/stdhep_v5_01_Linux+2.4
+export QQ_DIR=$HALLD_HOME/src/qq_v9_2b_Linux+2.4
 ##########################################
 #
 # Now edit HDMS.cmd and change the  HDMS_MCFAST_DIR location 
