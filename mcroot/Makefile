@@ -15,6 +15,9 @@ ROOTLIBS      = -L$(ROOTSYS)/lib -lNew -lBase -lCint -lClib -lCont -lFunc \
                 -lPostscript -lProof -lTree -lUnix -lZip
 ROOTGLIBS     = -lGpad -lGui -lGX11 -lX3d
 
+ROOTLIBS      = $(shell root-config --libs)
+ROOTGLIBS     = $(shell  root-config --glibs)   
+
 LIBPP = -L/home/halld/lib/$(UNAME) -lpp 
 
 #
