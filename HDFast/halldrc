@@ -1,16 +1,64 @@
-setenv CVSROOT  :pserver:${USER}@jlabs2.cebaf.gov:/group/halld/cvsroot
+###################################################################
+#	Hall D  HDFast  resources
+#
+#   Typically this file is sourced from one's .cshrc file
+###################################################################
+
+####### MODIFY THE ENV'S BELOW #######
+                    
+setenv HALLD_HOME /home/halldpwa/hdfast
+
+setenv CRNLIB /cern/2000/lib 
+
+#
+# Note: cernlib 2000 requires linking against -lnsl 
+#
+
+
+
+
+
+
+
+
+
+################# DO NOT MODIFY BELOW #########################
+#
+#
+#
+setenv CVSROOT  :pserver:${USER}@jlabs1.jlab.org:/group/halld/cvsroot
+
+# legacy of the current Hall D make scheme
+# (with  kludges due to old CLAS hooks)
+#
 setenv OS_NAME `uname`
-setenv TOP_DIR /home/halld
+setenv UNAME `uname`   
+setenv TOP_DIR $HALLD_HOME
 setenv BUILDS $TOP_DIR/source
 setenv CLAS_CMS $TOP_DIR/source/cms
 setenv HALLDLIBS $TOP_DIR/lib/$OS_NAME
 setenv HALLDLIB $HALLDLIBS
-setenv HALLD_HOME $TOP_DIR
 
-set path=($path  $HALLD_HOME/bin.$OS_NAME   $HALLD_HOME/bin )
+set path=($path  $HALLD_HOME/bin/$OS_NAME   $HALLD_HOME/bin )
 
 #
 # MCFast environments
 #
+source $HALLD_HOME/src/HDFast/setup5_1.$OS_NAME 
+#
+# ROOT env's are setup in .cshrc
+setenv ROOTSYS $HALLD_HOME/src/root
+if( $?LD_LIBRARY_PATH) then
+ setenv LD_LIBRARY_PATH  ${LD_LIBRARY_PATH}:${ROOTSYS}/lib   
+else
+  setenv LD_LIBRARY_PATH  ${ROOTSYS}/lib   
+endif
+set path=($path $ROOTSYS/bin)
 
-source $HALLD_HOME/src/HDFast/setup4.1
+# PWA2000 (This is just a snapshot from the RPI server)
+#
+setenv PWA2000_ROOT $HALLD_HOME/src/pwa2000
+set path=($path  $PWA2000_ROOT/bin )
+
+
+#
