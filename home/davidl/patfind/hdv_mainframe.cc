@@ -40,17 +40,19 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 	TGHorizontalFrame *buttonframe = new TGHorizontalFrame(this, w, 50);
 	AddFrame(buttonframe, fLayout);
 
-	next	= new TGTextButton(this,	"&Next", 2);
-	density	= new TGTextButton(this,"&Density", 3);
-	lines	= new TGTextButton(this,	"&Lines", 4);
-	slope	= new TGTextButton(this,	"&Slope", 5);
-	offset	= new TGTextButton(this,"&Offset", 6);
-	quit	= new TGTextButton(this,	"&Quit", 1);
+	next		= new TGTextButton(this,"&Next",			2);
+	density	= new TGTextButton(this,"&Density",		3);
+	lines		= new TGTextButton(this,"&Lines",		4);
+	phi_vs_z	= new TGTextButton(this,"&Phi vs. Z",	7);
+	slope		= new TGTextButton(this,"&Slope", 		5);
+	offset	= new TGTextButton(this,"&Offset",		6);
+	quit		= new TGTextButton(this,"&Quit",			1);
 	quit->SetCommand(".q");
 	
 	buttonframe->AddFrame(next, fLayout);
 	buttonframe->AddFrame(density, fLayout);
 	buttonframe->AddFrame(lines, fLayout);
+	buttonframe->AddFrame(phi_vs_z, fLayout);
 	buttonframe->AddFrame(slope, fLayout);
 	buttonframe->AddFrame(offset, fLayout);
 	buttonframe->AddFrame(quit, fLayout);
@@ -92,6 +94,9 @@ Bool_t hdv_mainframe::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
 							break;
 						case 6: //Offset
 							myproc->PlotOffset();
+							break;
+						case 7: //Phi vs. Z
+							myproc->PlotPhiVsZ();
 							break;
 						default:
 							cout<<"parm1="<<parm1<<endl;
