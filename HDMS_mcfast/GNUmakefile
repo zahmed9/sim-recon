@@ -79,7 +79,8 @@ FINC = -I$(INC1) -I$(INC2) -I$(INC3) -I$(INC4) -I$(INC5) \
 LIB = $(MCFAST_DIR)/lib.$(UNAME)
 
 #User .o files are listed here
-USER_OBJ = usr_analysis.o usr_init.o usr_fill_event.o usr_summary.o
+USER_OBJ = usr_analysis.o usr_init.o usr_fill_event.o \
+	usr_summary.o usr_mcfio_out.o
 
 
 #next line is needed for histoscope... Add before PACKLIB
@@ -137,8 +138,11 @@ clean:
 #$Id$
 #
 #$Log$
-#Revision 1.1  1998/10/08 05:19:53  eugenio
-#Initial revision
+#Revision 1.2  1998/10/10 18:06:46  eugenio
+#Added usr_mcfio_out.F
+#
+#Revision 1.1.1.1  1998/10/08 05:19:53  eugenio
+#MCFast for HallD
 #
 #Revision 1.1.1.1  1998/10/04 21:20:47  eugenio
 #Hall D source for MCFast
