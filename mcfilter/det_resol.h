@@ -49,21 +49,24 @@
 *
       real       delta_R
 *
-      parameter (delta_R = 0.0002)
+      parameter ( delta_R = 200.0E-6 )
 *
 *        rmax_bore: The maximum radius at which we are sensitive to hits.
 *        rmax_inst: Maximum instrumented radius in the solenoid.
+*        rlyr1:     Radius at which we get our first hit on the track.
 *        tgtpos:    Distance from the upstream end of the magnet to the 
 *                   target (meters).
 *        ltot:      Total length of the solenoid (meters).
 *
       real rmax_bore
       real rmax_inst
+      real rlyr1
       real tgtpos
       real ltot
 *
       parameter ( rmax_bore   = 0.925 )
       parameter ( rmax_inst   = 0.650 )
+      parameter ( rlyr1       = 0.050 )
       parameter ( tgtpos      = 0.500 )
       parameter ( ltot        = 4.650 )
 *
