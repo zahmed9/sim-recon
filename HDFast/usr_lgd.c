@@ -18,6 +18,12 @@
  * Paul Eugenio
  * Carnegie Mellon University
  * 27 JAN 1999
+ *
+ * Joachim Kuhn/Curtis Meyer
+ * June 2004
+ * The size and position of the LGD were completely wrong!
+ * Annoningly, they are hardcoded into this routine!
+ *
  **********************************************/
 
 #include<stdio.h>
@@ -35,11 +41,22 @@
 
 /* PDG numbering scheme see PDG Review of Particle Physics */
 #define PDG_GAMMA 22
-#define LGD_X_LIMIT 86.0
-#define LGD_Y_LIMIT 86.0
+
+// ======== Change June 2004 =======
+//
+// OLD (PAUL EUGENIO'S) LGD PARAMETERS
+//#define LGD_X_LIMIT 86.0
+//#define LGD_Y_LIMIT 86.0
+//#define LGD_BEAMHOLE 8.0 /* SQUARE HOLE OF LENGTH 2*VALUE */
+// NEW RADII (AUG 2004, JK))
+#define LGD_X_LIMIT 120.0
+#define LGD_Y_LIMIT 120.0
+// NEW BEAM HOLE DEFINITION (2x2 BLOCKS + 1 GUARD LAYER)
 #define LGD_BEAMHOLE 8.0
+// ========
 #define LGD_Z_LOCATION  575.0 // zcenter - zlength/2 from the HDFast.db file
 
+// ======== End of changes
 
 struct hepGamma_t{
   int index;
@@ -98,7 +115,8 @@ int usr_lgd(void){
 	else{/* All neutrals use target center for production vertex */
 	  vx=0.0;
 	  vy=0.0;
-	  vz=50.0;/* target center */
+	  /*vz=50.0; OLD (PAUL EUGENIO'S) target center */
+	  vz=65.0;/* target center (CHANGED AUG 2004, JK) */
 	}
 	/*
 	 * Get the triangular lengths.
