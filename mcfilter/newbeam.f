@@ -11,20 +11,22 @@
 *
       real p(*)
 *
+      include "det_resol.h"
+*
       real sigma,pnew,dummy
-      real resolution /0.001/ ! sigma_p/p
+*
       real gausran
       external gausran
       integer i
 *
 *     ******************************************
 *
-      sigma=resolution*p(4)
+      sigma = Beam_resol * p(4)
 *
-      pnew=p(4) + sigma * gausran(dummy)
+      pnew = p(4) + sigma * gausran(dummy)
 *
       do 100 i = 1,4
-         p(i)=p(i) * pnew / p(4)
+         p(i) = p(i) * pnew / p(4)
  100  Continue
 *
       return
