@@ -18,28 +18,17 @@ ROOTGLIBS     = -lGpad -lGui -lGX11 -lX3d
 ROOTLIBS      = $(shell root-config --libs)
 ROOTGLIBS     = $(shell  root-config --glibs)   
 
-LIBPP = -L/home/halld/lib/$(UNAME) -lpp 
+LIBPP = -L$(PWA2000_ROOT)/lib -lpp 
 
 #
 # Machine dependent stuff.
 #
-ifeq "$(UNAME)" "OSF1"
-# Alpha/OSF with egcs -fwritable-strings
-CXX           = g++
-CXXFLAGS      = -O -g -I$(ROOTSYS)/include -fPIC -fno-rtti -fno-exceptions \
-                -fwritable-strings -mcpu=ev5 -D__osf__ -D__alpha
-LD            = g++
-LDFLAGS       = -g -fwritable-strings
-SOFLAGS       = -Wl,-expect_unresolved,* -shared
-LIBS          = $(ROOTLIBS) -lg++ -lm
-GLIBS         = $(ROOTLIBS) $(ROOTGLIBS) -lXpm -lX11 \
-	        -lg++ -lm -lPW
-endif 
+
 
 ifeq "$(UNAME)" "Linux"
 # Linux with egcs
 CXX           = g++
-CXXFLAGS      = -O2 -g -Wall -fno-rtti -fno-exceptions -fPIC -I$(ROOTSYS)/include -I/home/halld/include 
+CXXFLAGS      = -O2 -g -Wall -fno-rtti -fno-exceptions -fPIC -I$(ROOTSYS)/include -I/home/halld/include  -I$(PWA2000_ROOT)/include
 LD            = g++
 LDFLAGS       = -g
 SOFLAGS       = -shared
@@ -104,14 +93,19 @@ TMCFastSO       = libTMCFast.so
 
 OBJS          = $(TMCFastO) $(MAIN2O) $(TOF2O) $(NTP_MAKERO) 
 
-PROGRAMS      = dumpRdt tof2 ntp_maker
-
-all:            $(PROGRAMS)
-
+PROGRAMS      = dumpRdt  ntp_maker
 lib:	$(TMCFast_LIB)
 
-lib_install: $(TMCFast_LIB)
+all:            $(PROGRAMS) lib
+
+
+
+install: $(TMCFast_LIB) $(PROGRAMS) 
 	mv $(TMCFast_LIB)  $(HALLD_HOME)/lib/$(UNAME)/$(TMCFast_LIB)
+	mv dumpRdt $(HALLD_HOME)/bin/$(UNAME)/.
+
+install-ntp_maker: ntp_maker
+	mv ntp_maker $(HALLD_HOME)/bin/$(UNAME)/.    
 
 
 $(TMCFast_LIB): $(TMCFastO)
@@ -143,7 +137,7 @@ clean:
 .SUFFIXES: .cxx .C
 
 ###
-ntp_maker.o: TNtupleUtil.h
+ntp_maker.o: TNtupleUtil.h 
 TNtupleUtil.o: TNtupleUtil.h
 TMCFastHepEvt.o: TMCFastHepEvt.h
 TMCFastTOF.o: TMCFastTOF.h
