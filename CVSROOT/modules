@@ -26,4 +26,4 @@
 # spread out over the entire source repository.
 
 CVSstats -a HDFast HDGeant HDMS_mcfast c_cern esrview genr8 hddm hdds include kine_c macros mcfilter mcroot scripts sim src stdhep_translators wavegen
-release -a HDFast HDGeant genr8 hddm hdds include mcroot stdhep_translators -d ../ src
+release -a HDFast HDGeant genr8 hddm hdds include mcroot stdhep_translators
