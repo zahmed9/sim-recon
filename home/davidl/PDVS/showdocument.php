@@ -100,7 +100,7 @@ function ShowDocument($id, $version)
 	<TR>
 		<TD><A href="updatedocument.php?id=<?=$id?>">Update This Document</A></TD>
 		<TD width="50"></TD>
-		<TD><A href="addfiles.php?id=<?=$id?>&version=<?=$version?>">Add files to this document</A></TD>
+		<TD><A href="addfiles.php?id=<?=$id?>&version=<?=$version?>">Add files to this version</A></TD>
 	</TR>
 	</table>
 	</center>
