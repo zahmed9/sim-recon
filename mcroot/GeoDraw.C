@@ -202,6 +202,7 @@ int GeoDraw(char *geoFile="tmp.db"){
        z2= SiDisk[ptr-1].zpos +  zCenter + rthick;
        r1= rmin;
        r2= rmax; 
+       
 
        SiLine[NsiLayer] = new TLine(z1,r1,z1,r2);
        SiLineR[NsiLayer] = new TLine(z1,-r1,z1,-r2);

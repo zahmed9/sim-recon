@@ -264,3 +264,135 @@ ostream &operator<<(ostream &os, TMCesr &esr){
   esr.Print(&os);
   return os;
 }
+
+/********************
+ * gampID(int pdgID)
+ * The convention is that
+ * followed in StdHep 4.02
+ *******************/
+#include"particleType.h"
+int  gampID(int id){
+  Particle_t p=Unknown;
+  switch (id) {
+  case 0:
+    p=Unknown;
+    break;
+  case 22:
+    p=Gamma;
+    break;
+  case -11:
+    p=Positron;
+    break;
+  case 11:
+    p=Electron;
+    break;
+  case 12:
+    p=Neutrino;
+    break;
+  case -13:
+    p=MuonPlus;
+    break;
+  case 13:
+    p=MuonMinus;
+    break;
+  case 111:
+    p=Pi0;
+    break;
+  case 211:
+    p=PiPlus;
+    break;
+  case -211:
+    p=PiMinus;
+    break;
+  case 130:
+    p=KLong;
+    break;
+  case 321:
+    p=KPlus;
+    break;
+  case -321:
+    p=KMinus;
+    break;
+  case 2112:
+    p=Neutron;
+    break;
+  case 2212:
+    p=Proton;
+    break;
+  case -2212:
+    p=AntiProton;
+    break;
+  case 310:
+    p=KShort;
+    break;
+  case 221:
+    p=Eta;
+    break;
+  case 3122:
+    p=Lambda;
+    break;
+  case 3222:
+    p=SigmaPlus;
+    break;
+  case 3212:
+    p=Sigma0;
+    break;
+  case 3112:
+    p=SigmaMinus;
+    break;
+  case 3322:
+    p=Xi0;
+  case 3312:
+    p=XiMinus;
+    break;
+  case 3334:
+    p=OmegaMinus;
+    break;
+  case -2112:
+    p=AntiNeutron;
+    break;
+  case -3122:
+    p=AntiLambda;
+    break;
+  case -3112:
+    p=AntiSigmaMinus;
+    break;
+  case -3212:
+    p=AntiSigma0;
+    break;
+  case -3222:
+    p=AntiSigmaPlus;
+    break;
+  case -3322:
+    p=AntiXi0;
+    break;
+  case -3312:
+    p=AntiXiPlus;
+    break;
+  case -3334:
+    p=AntiOmegaPlus;
+    break;
+  case 113:
+    p=Rho0;
+    break;  
+  case 213:
+    p=RhoPlus;
+    break;
+  case -213:
+    p=RhoMinus;
+    break;
+  case 223:
+    p=omega;
+    break;
+  case 331:
+    p=EtaPrime;
+    break;
+  case 333:
+    p=phiMeson;
+    break;
+  default:
+    p=Unknown;
+    break;
+  }
+  return((int)p);
+}
