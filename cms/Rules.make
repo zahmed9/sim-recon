@@ -19,7 +19,7 @@
 VDIR= $(BUILDS)/scripts/vdir
 
 ifndef OS_NAME
-  export OS_NAME = $(shell $(CLAS_CMS)/uname_clas)
+  export OS_NAME = $(shell $(BUILDS)/uname_clas)
 endif
 
 ifndef TOP_DIR
