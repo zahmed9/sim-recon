@@ -48,8 +48,9 @@ void PrintUsage(char *processName)
   cerr << "\t-e          Make esr from TMCFastHepEvt only\n";
   cerr << "\t-n<nevents> The number of event to read (default all).\n";
   cerr << "\t-s<nevents> The number of events to skip before reading(default=0).\n";
-  cerr<< "\t-B<energy>  Add kludged beam (default is 8 GeV)\n";
-  cerr << "\t-b<bcal_zres> Add z position smearing to the BCAL(default none).\n";
+  cerr << "\t-B<energy>  Add kludged beam (default is 8 GeV)\n";
+  cerr << "\t-b<bcal_zres> Add z position (cm) smearing to the BCAL(default none).\n";
+  cerr << "\t-p<phi_res> Add phi angle (mrad) smearing to the BCAL(default none). \n";
   cerr<<"\t-D Print DEBUG information\n";
   cerr<<"\t-h Print this help message\n\n";
   cerr<<"\tNote: The Ntuple label definitions are sent to the stdout for \n\t"
@@ -69,6 +70,7 @@ int main(int argc, char **argv)
   sprintf(outputfile,"halld.root");
   sprintf(ntpTitle,"Hall  Ntuple");
   Double_t bcal_zresolution=-1; // -1 = no z-position smearing
+  Double_t phi_resolution =-1; // -1 = no phi-angle smearing
   Double_t beamE = 8.0;
 
   /*
@@ -90,7 +92,7 @@ int main(int argc, char **argv)
 	  break;
 	case 'o':
 	  sprintf(outputfile,"%s.root",++argptr);
-	  cerr<<"Saveing output in file: "<<outputfile<<endl;
+	  cerr<<"Saving output in file: "<<outputfile<<endl;
 	  break;
 	case 'e':
 	  cerr<<"Making esr from hepevt objects only!\n";
@@ -114,6 +116,10 @@ int main(int argc, char **argv)
 	case 'b':
 	  bcal_zresolution = atof(++argptr);
 	  cerr<<"Smearing BCAL z by "<< bcal_zresolution<<" cm\n";
+	  break;
+	case 'p':
+	  phi_resolution = atof(++argptr);
+	  cerr<<"Smearing BCAL phi by "<< phi_resolution <<" rads\n";
 	  break;
 	case 'h':
 	  PrintUsage(argv[0]);    
@@ -236,7 +242,7 @@ int main(int argc, char **argv)
     if(MakeHepEvtEsr)
       esr = new TMCesr(*hepevt);
     else
-      esr = new TMCesr(*hepevt,*offtrk,*lgdSmears,*bcal,bcal_zresolution);
+      esr = new TMCesr(*hepevt,*offtrk,*lgdSmears,*bcal,bcal_zresolution,phi_resolution);
     
     // some indexology
     Int_t nparts=0,n,i,j,k,l;
@@ -999,4 +1005,5 @@ int main(int argc, char **argv)
   cerr<<endl;
   return 0;
 }
+
 
