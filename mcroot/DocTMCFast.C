@@ -9,7 +9,6 @@
  gHtml->MakeClass("TMCFastHepEvt");
  gHtml->MakeClass("TMCFastHepParticle");
  gHtml->MakeClass("TMCFastOfflineTrack");
- gHtml->MakeClass("TMCFastTOF");
  gHtml->MakeClass("TMCFastCalorHits");
  gHtml->MakeClass("TMCFastCalorimeter");
  gHtml->MakeClass("TCalHitTracks");
@@ -17,8 +16,8 @@
  gHtml->MakeClass("TMCesr");
  gHtml->MakeClass("TLGDsmears"); 
  gHtml->MakeClass("TLGDparticle");
- gHtml->MakeClass("TMCFastTrace");
- gHtml->MakeClass("TMCFastHits");
- gHtml->MakeClass("TMCFastHit");
- gHtml->MakeClass("TMCFastCerenkov");
+ gHtml->MakeClass("TMCFastTraceEvent");
+ gHtml->MakeClass("TMCFastTraceParticle");
+ gHtml->MakeClass("TMCFastTracePoint");
+
 }
