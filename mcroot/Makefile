@@ -93,7 +93,7 @@ TMCFastSO       = libTMCFast.so
 
 OBJS          = $(TMCFastO) $(MAIN2O) $(TOF2O) $(NTP_MAKERO) 
 
-PROGRAMS      = dumpRdt  ntp_maker
+PROGRAMS      = dumpRdt  
 lib:	$(TMCFast_LIB)
 
 all:            $(PROGRAMS) lib
