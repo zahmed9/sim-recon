@@ -18,7 +18,7 @@ cvs co CVSstats
 # remove files we want to ignore such as Postscript files or generated files
 rm -f `find . -name "*.ps"`
 rm -f `find . -name "*.pdf"`
-rm -f HDGeant/hddsGeant3.f
+rm -f HDGeant/hddsGeant3.F
 rm -f HDGeant/dsolenoid.table
 rm -f HDGeant/hddm_s.c
 rm -f HDGeant/hddm_s.h
