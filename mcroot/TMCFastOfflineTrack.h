@@ -44,6 +44,7 @@ struct offline_track_t {
                             = 1 if covariance matrix defined
                             = 2 defined, but no momentum information */
   int hep;          /* position of corresp. track in HEPEVT list */
+  int pad;          /* pad for alignment */
 } ;
 
 #define TRK_OFF_MAX 20
