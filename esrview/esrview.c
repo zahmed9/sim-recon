@@ -131,8 +131,8 @@ int ProcessEvent(itape_header_t *event){
   esr_nparticle_t *esr = data_getGroup(event, GROUP_ESR_NPARTICLE_MC);
   vector4_t vzero = {0,0,0,0};
   int i;
-  esr_particle_t  *piplus[10], *piminus[10];
-  int npiplus = 0, npiminus = 0, npart = 0;
+  esr_particle_t  *piplus[10], *piminus[10], *gamma[10];
+  int ngamma = 0, npiplus = 0, npiminus = 0, npart = 0;
   vector4_t target = {.938, 0, 0, 0};
 
   if (!esr) esr = data_getGroup(event, GROUP_ESR_NPARTICLE); 
@@ -150,6 +150,10 @@ int ProcessEvent(itape_header_t *event){
 	piminus[npiminus++] = &(esr->p[i]);
 	npart++;
 	break;
+      case Gamma:
+	gamma[ngamma++] = &(esr->p[i]);
+	npart++;
+	break;
       }
     }
     if (debug) fprintf(stderr, "npiplus = %d, npiminus = %d\n", npiplus, npiminus);
@@ -158,12 +162,13 @@ int ProcessEvent(itape_header_t *event){
       vector4_t rho1 = v4add(piminus[1]->p, piplus[0]->p);
       vector4_t rho2 = v4add(piminus[0]->p, piplus[0]->p);
       vector4_t a2 = v4add(v4add(piminus[0]->p, piminus[1]->p), piplus[0]->p);
+      vector4_t t = v4sub(esr->beam, a2);
       hf1(100, v4mass(a2), 1);
       hf2(101, v4dot(f0, f0), v4dot(rho2, rho2), 1);
       hf1(110, costheta_gj(a2, esr->beam, piplus[0]->p , target, esr->miss), 1);
       hf1(111, costheta_gj(a2, esr->beam, rho1 , target, esr->miss), 1);
       hf1(112, costheta_gj(a2, esr->beam, rho2 , target, esr->miss), 1);
-      
+      hf1(113,  - v4dot(t, t), 1);
     }
   }
   return 1;
@@ -217,9 +222,10 @@ void book_histos(){
   /* 3pi events*/
   hbook1(100, "3 [p] mass", 100, 0, 3.0, 0);
   hbook2(101, "dalitz", 50, 0, 2.0, 50, 0, 2.0, 0);
-  hbook1(110, "cosj [p]^+! analyzer", 100, -1.0, 1.0, 0);
+  hbook1(110, "cos[q]?GJ! [p]^+! analyzer", 100, -1.0, 1.0, 0);
   hbook1(111, "cosj [r]^0! 1 analyzer", 100, -1.0, 1.0, 0);
   hbook1(112, "cosj [r]^0! 2 analyzer", 100, -1.0, 1.0, 0);
+  hbook1(113, "-t", 100, 0, 1.0, 0);
 }
 
 int clean_up(){
@@ -230,3 +236,5 @@ int clean_up(){
   hrend_("esr", 3L);
 
 }
+
+
