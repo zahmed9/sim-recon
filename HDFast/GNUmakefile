@@ -187,17 +187,16 @@ PWD   := $(shell /bin/pwd)
 SRCDIR := $(PWD)
 BLDDIR := $(PWD)
 
-# User .o files are listed here removed usr_mcfio_out.o
+# User .o files are listed here
 USER_OBJ = usr_main.o main_args.o usr_analysis.o usr_init.o usr_fill_event.o \
         usr_summary.o usr_hbsummary.o  usr_dump.o \
         usr_mcfast2root.o usr_lgd.o usr_hits.o usr_dumpCalor.o \
-        usr_calor.o  prgeom.o
+        usr_calor.o  prgeom.o usr_mcfio_out.o
 
 TEST_OBJ = usr_main.o main_args.o usr_test.o
 
 USR_LITE_OBJ = usr_main.o main_args.o usr_analysis_lite.o usr_fill_event.o \
-	usr_init.o usr_summary.o prgeom.o 
-#usr_mcfio_out.o
+	usr_init.o usr_summary.o prgeom.o usr_mcfio_out.o
 
 # List of files for which to build the depend information: all .c, .cc
 # and .F files in this directory.
