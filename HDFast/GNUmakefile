@@ -43,8 +43,8 @@ ROOTGLIBS     = $(shell  root-config --glibs)
 
 TMCFAST_INC = -I$(HALLD_HOME)/src/mcroot
 
-HDFASTLIBS = $(HALLD_HOME)/lib//Linux/libTMCFast.a
-
+#HDFASTLIBS = $(HALLD_HOME)/lib//Linux/libTMCFast.a
+HDFASTLIBS = $(HALLD_HOME)/src/mcroot/libTMCFast.a
 
 # Machine dependent stuff.
 hostname = $(shell hostname)
