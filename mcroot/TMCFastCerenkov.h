@@ -23,7 +23,7 @@ class TMCFastCerenkov: public TObject {
   
 private:
 
-  TClonesArray *ftrace_points;  // array of TMCFastCerenTrace
+  TClonesArray *ftrace_points;  // array of TMCFastTrace points
   static TClonesArray *fgtrace_points; // dummy needed to init TClonesArray 
 
 
