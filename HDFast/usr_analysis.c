@@ -132,7 +132,7 @@ void usr_analysis_(void){
       usr_fill_event(trk_off1_.trk_off_num);/* for chrg. part. only */
       usr_mcfio_out_();
     }else
-      ;/* usr_dump(); */
+       usr_dump(); 
     free(LgdParts);
   }else{
     /* 

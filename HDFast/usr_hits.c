@@ -125,7 +125,7 @@ void copy_trace(struct trace_s *source,struct trace_s *dest){
   dest->w.px = source->w.px ;
   dest->w.py = source->w.py ;
   dest->w.pz = source->w.pz ;
-  dest->w.E = source->w.E ;
+  dest->w.e = source->w.e ;
   dest->w.x = source->w.x ;
   dest->w.y = source->w.y ;
   dest->w.z = source->w.z ;

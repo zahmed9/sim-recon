@@ -15,7 +15,8 @@ struct trace_s {
   int type;           /* Trace type (see trace_type.inc) */
   int plane;          /* Radial or z plane number */
   int hit;            /* hit index  (NOTE MCFast comments called this nhits)*/
-  struct wtrack_struct w;  /* Track parameters at interaction */
+  /*struct wtrack_struct w;   Track parameters at interaction */
+  wtrack_s   w;          /*    Track parameters        */
   double eta[3];      /* Direction cosines of normal to plane */
   double path;        /* Total track length up to this hit */
   double time;        /* Time at which track made hit */

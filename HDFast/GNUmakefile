@@ -184,7 +184,7 @@ BLDDIR := $(PWD)
 USER_OBJ = usr_main.o main_args.o usr_analysis.o usr_init.o usr_fill_event.o \
         usr_summary.o usr_hbsummary.o usr_mcfio_out.o usr_dump.o \
         usr_mcfast2root.o usr_lgd.o usr_hits.o usr_dumpCalor.o \
-        usr_calor.o DetCalorimeter.o prgeom.o
+        usr_calor.o  prgeom.o
 
 TEST_OBJ = usr_main.o main_args.o usr_test.o
 

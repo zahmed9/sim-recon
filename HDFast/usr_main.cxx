@@ -33,7 +33,9 @@
 #include "TMCFastOfflineTrack.h"
 
 void PrintUsage(char *processName);
+#ifndef HDFAST_LITE
 TROOT HDFast("HDFast","The Hall D Fast MC Package");
+#endif
 extern "C" void mcfast_main(int argc, char **argv);
 Int_t counter=0,Nevents=0,Debug=0,SaveBrokenEvents =0,SaveOldFormat =0;
 
@@ -104,8 +106,10 @@ int main(int argc, char **argv)
      *  Open the data file.
      */
     Int_t comp   = 5;    // 0=no 1=min(but fast) , ... 9=max(but slow) compression 
-    TFile *rdtfile=0;
-#ifndef HDFAST_LITE     
+
+#ifndef HDFAST_LITE  
+    TFile *rdtfile=0; 
+    cerr<<"new TFile("<<outputfile<<")\n";
     rdtfile = new TFile(outputfile,"RECREATE","TTree Hall D ROOT file");
     rdtfile->SetCompressionLevel(comp);
 #endif
