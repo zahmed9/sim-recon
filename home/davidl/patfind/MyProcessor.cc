@@ -7,6 +7,8 @@
 #include <iostream>
 using namespace std;
 
+#include <TF1.h>
+
 #include "MyProcessor.h"
 #include "hddm_s.h"
 
@@ -17,6 +19,8 @@ using namespace std;
 
 #define rad2deg 57.3
 #define PI_MASS 0.139568
+
+static int colors[] = {kRed,kBlue,kMagenta,kGreen,kBlack};
 
 extern TCanvas *maincanvas;
 
@@ -48,6 +52,8 @@ derror_t MyProcessor::init(void)
 
 	axes = new TH2F("axes","",10,-cmax,cmax,10,-cmax,cmax);
 
+	axes_phiz = new TH2F("axes_phiz","",10,0.0,650.0, 10, -2.0*M_PI, 2.0*M_PI);
+
 	return NOERROR;
 }
 
@@ -74,9 +80,7 @@ derror_t MyProcessor::evnt(int eventnumber)
 	// Loop over the archits to find the two points defining each line
 	int Narchits = factory->GetNarchits();
 	DArcHit *a = factory->Getarchits();
-	DContainer *mccheathits = event_loop->Get("MCCheatHits");
-	MCCheatHit_t *mccheathit = (MCCheatHit_t*)mccheathits->first();
-	for(int i=0; i<Narchits; i++, a++, mccheathit++){
+	for(int i=0; i<Narchits; i++, a++){
 		float m = a->m;
 		float b = a->b;
 		float x1,y1,x2,y2;
@@ -95,8 +99,7 @@ derror_t MyProcessor::evnt(int eventnumber)
 		// is the opposite of what the positive y-axis for a downstream
 		// looking view. Hence, we flip the y-coordinate here.
 		lines[Nlines] = new TLine(x1,y1,x2,y2);
-		int colors[] = {kBlack,kRed,kBlue,kMagenta};
-		lines[Nlines]->SetLineColor(colors[mccheathit->track]);
+		lines[Nlines]->SetLineColor(colors[a->track-1]);
 		lines[Nlines++]->Draw();
 		if(Nlines>=500)break;
 	}
@@ -150,21 +153,48 @@ derror_t MyProcessor::densityPlot(void)
 //------------------------------------------------------------------
 derror_t MyProcessor::PlotSlope(void)
 {
-	cout<<__FILE__<<":"<<__LINE__<<endl;
 	factory->slope_density->Draw();
+	for(int i=0; i<factory->GetNumDensityHistograms(); i++){
+		TH1F *hist = factory->GetSlopeDensityHistogram(i);
+		if(hist){
+			hist->SetLineColor(colors[i%5]);
+			hist->Fit("gaus","0");
+			hist->GetFunction("gaus")->ResetBit(1<<9); // make function draw with histo (deep in TH1 document)
+			hist->Draw("same");
+		}
+	}
+	
 	maincanvas->Update();
 
 	return NOERROR;
 }
-
 
 //------------------------------------------------------------------
 // PlotOffset
 //------------------------------------------------------------------
 derror_t MyProcessor::PlotOffset(void)
 {
-	cout<<__FILE__<<":"<<__LINE__<<endl;
 	factory->offset_density->Draw();
+	for(int i=0; i<factory->GetNumDensityHistograms(); i++){
+		TH1F *hist = factory->GetOffsetDensityHistogram(i);
+		if(hist){
+			hist->SetLineColor(colors[i%5]);
+			hist->Draw("same");
+		}
+	}
+
+	maincanvas->Update();
+
+	return NOERROR;
+}
+
+//------------------------------------------------------------------
+// PlotPhiVsZ
+//------------------------------------------------------------------
+derror_t MyProcessor::PlotPhiVsZ(void)
+{
+	axes_phiz->Draw();
+	factory->DrawPhiZPoints();
 	maincanvas->Update();
 
 	return NOERROR;
