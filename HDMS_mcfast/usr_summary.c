@@ -13,7 +13,12 @@
 void usr_summary_(void)
 {
   extern int Nread,Nsmeared;
-  fprintf(stderr,"\nNumber of mc events read: %d  Number accepted smeared events out: %d (%3.1f%%)\n\n",Nread,Nsmeared,100.0*((double)(Nsmeared)/((double)(Nread))));
+
+  /*
+   * Print the acceptance.
+   */
+  fprintf(stderr,"\nNumber of mc events read: %d  Number accepted smeared events out: %d (%3.1f%%)\n\n",
+	  Nread,Nsmeared,100.0*((double)(Nsmeared)/((double)(Nread))));
 	  
 
 }

@@ -18,10 +18,13 @@
  */
 int Nread=0,Nsmeared=0;
 
+void usr_dump(void);
+
 void usr_analysis_(void){
 
   int i;
   static int nread=0,nsmeared=0;
+  static int traced=3;
   int list_trk[TRK_GEN_MAX];
 
   Nread++;
@@ -30,20 +33,36 @@ void usr_analysis_(void){
    */
   for(i=0;i<trk_gen_c_.trk_gen_num;i++)
     list_trk[i]= trk_gen_c_.trk_gen[i].hep;
+  
   /*
    * Now track them
    */
   trk_offline_(&(trk_gen_c_.trk_gen_num), list_trk);
 
   /* 
-   * Only save events where all particles are found
+    * Only save events where all particles are found
    */
   /*  fprintf(stderr,"trk_off_num: %d  trk_gen_num: %d\n",
 	  trk_off1_.trk_off_num,trk_gen_c_.trk_gen_num);
    */
   if(trk_off1_.trk_off_num ==  trk_gen_c_.trk_gen_num ){
     Nsmeared++;
+
+    /*
+     *  Save HEPEVT, Trace information in bin file
+     */
+
+      usr_dump();
+   
+    
+
+    /* 
+     * Fill the FORTRAN common blocks 
+     */
     usr_fill_event(trk_off1_.trk_off_num);
-    usr_mcfio_out_();
+    /* 
+     * Save the event 
+     */
+    usr_mcfio_out_(); 
   }
 }
