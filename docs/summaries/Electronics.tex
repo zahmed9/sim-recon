@@ -1,0 +1,79 @@
+\subsubsection*{Purpose, Description}
+
+The electronics will amplify, discriminate, and digitize raw detector signals
+storing them for later readout at level 1 trigger rates of 200 kHz
+without incurring deadtime.  The detector includes
+approximately 18,600 ADC channels and 6,300 TDC channels.
+
+A pipelined approach is required due to the high trigger rate.  The
+digitized information must be stored for several $ \mu s $ while the
+level 1 trigger is formed.  Multiple events must be buffered within
+the digitizer modules and read or transmitted while the front ends continue to
+acquire new events.  The raw data rate from the detector is about 1
+Gbyte/second. A sophisticated timing system is required to synchronize the
+pipelines in the front-end modules.  The plan is to clock all digitizers in synchronization
+with the accelerator timing.
+
+Energy sums from the calorimeters as well as track counts from the barrel and TOF systems
+compromise the level 1 trigger.
+
+
+
+\subsubsection*{Current Status, R\&D issues}
+
+
+Since no currently available commercial solutions exist the 
+preamps, discriminators, digitizer modules, and timing system
+will be designed by GlueX.
+
+JLab has designed a multi-channel TDC module based on the ACAM TDC-F1
+chip, and 100 units are currently in use in existing JLab experiments.  A high density
+FADC with auxiliary user-definable processing is currently being developed at
+Jefferson Lab.
+
+A single-channel prototype 8-bit 250~MHz FADC, suitable for the barrel
+and lead glass calorimeters, has been constructed at Indiana
+University.  A multi-channel version which includes the energy sum is
+currently being designed.
+
+ A prototype constant-fraction discriminator has been built at the University of Alberta.
+
+Preliminary work has been done on the preamps and
+the timing system, and on a slower FADC for the tracking chambers.
+
+
+
+
+\subsubsection*{Review}
+
+The GlueX electronics system was reviewed in July of 2003.  The
+reviewers concluded the basic design is sound and appropriate assuming
+adequate human and fiscal resources.
+
+The reviewers recommended that the work on the TDC and FADC should
+continue.  A multi-channel FADC needs to be prototyped and evaluated.
+As part of the level-1 trigger, the digitized calorimeter signals are
+summed in a pipelined adder tree; the prototype FADC needs to
+demonstrate this capability.
+
+Analog front-end requirements need to be settled.  Prototype work
+needs to begin, especially on the tracking chamber electronics to be
+located inside the magnet.  The pipelined level-1 trigger, timing,
+synchronization, and calibration systems all need further development.
+
+
+
+\subsubsection*{Manpower, Management, and Schedule}
+
+The reviewers concluded that current manpower resources are
+inadequate.  The University of Alberta has recently joined the
+collaboration, but additional institutions possessing electronics
+expertise are needed.  Discussions are under way with the Indiana University
+Cyclotron Facility.
+
+The reviewers concluded that a rudimentary management plan exists, but
+that it needs further development.  
+
+The reviewers estimated that the GlueX electronics effort could
+require 6 years to complete after CD-3; the collaboration hopes to
+reduce this time.  One possibility is a commercial partner/collaborator.
