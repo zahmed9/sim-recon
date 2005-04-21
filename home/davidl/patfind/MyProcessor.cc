@@ -10,19 +10,21 @@ using namespace std;
 #include <TF1.h>
 
 #include "MyProcessor.h"
-#include "hddm_s.h"
+#include "MyMainFrame.h"
 
+#include "DEventLoop.h"
 #include "DMagneticFieldMap.h"
 #include "DQuickFit.h"
-#include "DFactory_MCCheatHits.h"
-#include "DFactory_MCTrackCandidates.h"
+#include "DFactory_DMCCheatHit.h"
+#include "DFactory_DMCTrackCandidate.h"
 
 #define rad2deg 57.3
 #define PI_MASS 0.139568
 
 static int colors[] = {kRed,kBlue,kCyan,kGreen,kBlack};
 
-extern TCanvas *maincanvas;
+extern DEventLoop *eventloop;
+extern MyMainFrame *mmf;
 
 //------------------------------------------------------------------
 // init   -Open output file here (e.g. a ROOT file)
@@ -30,22 +32,17 @@ extern TCanvas *maincanvas;
 derror_t MyProcessor::init(void)
 {
 	// Print list of factories
-	event_loop->PrintFactories();
+	eventloop->PrintFactories();
 	
 	// Get a pointer to the MCTrackCandidates factory object so we can 
 	// access things not included in the normal _data container
-	factory = (DFactory_MCTrackCandidates*)event_loop->GetFactory("MCTrackCandidates");
+	factory = (DFactory_DMCTrackCandidate*)eventloop->GetFactory("DMCTrackCandidate");
 	
 	// Set factory to handle flipping of x-axis for proper viewing
 	factory->flip_x_axis = 1;
 	
 	// Tell factory to keep around a few density histos
-	factory->SetNumDensityHistograms(4);
-
-	// Initialize Nlines Nmarkers Nellipse;
-	Nlines = 0;
-	Nmarkers = 0;
-	Nellipse = 0;
+	factory->SetMaxDensityHistograms(4);
 	
 	// set limits for plot. This represents the space where the center 
 	// of the circle can be. It can be (and often is) outside of the
@@ -67,9 +64,34 @@ derror_t MyProcessor::init(void)
 }
 
 //------------------------------------------------------------------
-// evnt   -Fill histograms here
+// evnt
 //------------------------------------------------------------------
 derror_t MyProcessor::evnt(int eventnumber)
+{
+	// Invoke the MCTrackCandidates factory so it's internal structures
+	// are filled with the current event's data
+	vector<DMCTrackCandidate*> mctrackcandidates;
+	eventloop->Get(mctrackcandidates);
+
+	// Call the appropriate plotting routine depending upon what's selected
+	switch(mmf->GetDisplayType()){
+		case MyMainFrame::dtLines:					PlotLines();		break;
+		case MyMainFrame::dtHoughDensity:		PlotDensity();		break;
+		case MyMainFrame::dtSlopeDensity:		PlotSlope();		break;
+		case MyMainFrame::dtInterceptDensity:	PlotIntercept();	break;
+		case MyMainFrame::dtPhiVsZ:				PlotPhiVsZ();		break;
+		case MyMainFrame::dtHits:					PlotHits();			break;
+		default:
+			cout<<__FILE__<<":"<<__LINE__<<" Unknown display type ("<<mmf->GetDisplayType()<<")"<<endl;
+	}
+
+	return NOERROR;
+}
+
+//------------------------------------------------------------------
+// PlotLines
+//------------------------------------------------------------------
+derror_t MyProcessor::PlotLines(void)
 {
 	axes->Draw();
 
@@ -78,18 +100,14 @@ derror_t MyProcessor::evnt(int eventnumber)
 	// bounds of the solenoid.
 	float cmax = 300.0; // in cm.
 	
-	// Delete lines from previous event
-	for(int i=0;i<Nlines;i++)delete lines[i];
-	Nlines = 0;
-
-	// Invoke the MCTrackCandidates factory so it's internal structures
-	// are filled with the current event's data
-	DContainer *mctrackcandidates = event_loop->Get("MCTrackCandidates");
+	// Delete lines from previous call
+	for(int i=0;i<lines.size();i++)delete lines[i];
+	lines.clear();
 
 	// Loop over the archits to find the two points defining each line
-	int Narchits = factory->GetNarchits();
-	DArcHit *a = factory->Getarchits();
-	for(int i=0; i<Narchits; i++, a++){
+	vector<DArcHit*> archits = factory->GetDArcHits();
+	for(int i=0; i<archits.size(); i++){
+		DArcHit *a = archits[i];
 		float m = a->m;
 		float b = a->b;
 		float x1,y1,x2,y2;
@@ -104,55 +122,51 @@ derror_t MyProcessor::evnt(int eventnumber)
 			x1 = m*y1 + b;
 			x2 = m*y2 + b;
 		}
-		// The drawing canvas has the y-axis pointing up. This
-		// is the opposite of what the positive y-axis for a downstream
-		// looking view. Hence, we flip the y-coordinate here.
-		lines[Nlines] = new TLine(x1,y1,x2,y2);
-		lines[Nlines]->SetLineColor(colors[a->track-1]);
-		lines[Nlines++]->Draw();
-		if(Nlines>=500)break;
+		
+		// Create a line using the color from the cheat code
+		TLine *line = new TLine(x1,y1,x2,y2);
+		line->SetLineColor(colors[(a->track-1)%5]);
+		line->Draw();
+		lines.push_back(line);
+		if(lines.size()>=500)break;
 	}
 	
 	// Draw circles at focus points
-	int Ncircles = factory->GetNcircles();
-	TEllipse *circle = factory->GetCircles();
-	for(int i = 0;i<Ncircles;i++, circle++){
+	vector<TEllipse*> circles = factory->GetCircles();
+	for(int i = 0; i<circles.size(); i++){
+		TEllipse *circle = circles[i];
 		circle->SetLineColor(kRed);
 		circle->SetFillStyle(0);
 		circle->Draw();
 	}
 
-	maincanvas->Update();
-	cout<<endl<<"Done ("<<mctrackcandidates->nrows<<" tracks)"<<endl;
+	// Update the canvas so the new plot is drawn
+	mmf->Update();
 	
 	return NOERROR;
 }
 
 //------------------------------------------------------------------
-// densityPlot
+// PlotDensity
 //------------------------------------------------------------------
-derror_t MyProcessor::densityPlot(void)
+derror_t MyProcessor::PlotDensity(void)
 {
 
-	// Invoke the MCTrackCandidates factory so it's internal structures
-	// are filled with the current event's data
-	event_loop->Get("MCTrackCandidates");
-
-	// Draw contour map
+	// Get and draw density histogram
 	TH2F *density = factory->GetDensityHistogram(0);
 	density->Draw("cont");
 
 	// Draw circles at focus points
-	int Ncircles = factory->GetNcircles();
-	TEllipse *circle = factory->GetCircles();
-	for(int i = 0;i<Ncircles;i++, circle++){
+	vector<TEllipse*> circles = factory->GetCircles();
+	for(int i = 0; i<circles.size(); i++){
+		TEllipse *circle = circles[i];
 		circle->SetLineColor(kRed);
+		circle->SetFillStyle(0);
 		circle->Draw();
 	}
 
-	// Update canvas
-	maincanvas->Update();
-	cout<<endl<<"Done"<<endl;
+	// Update the canvas so the new plot is drawn
+	mmf->Update();
 	
 	return NOERROR;
 }
@@ -162,38 +176,43 @@ derror_t MyProcessor::densityPlot(void)
 //------------------------------------------------------------------
 derror_t MyProcessor::PlotSlope(void)
 {
-	factory->slope_density->Draw();
-	for(int i=0; i<factory->GetNumDensityHistograms(); i++){
+	// Draw first histo in list to replace pad contents
+	factory->GetSlopeDensityHistogram(0)->Draw();
+	
+	// Overlay the rest of the histos
+	for(int i=1; i<factory->GetNumDensityHistograms(); i++){
 		TH1F *hist = factory->GetSlopeDensityHistogram(i);
-		if(hist){
-			hist->SetLineColor(colors[i%5]);
-			float maxloc = hist->GetBinCenter(hist->GetMaximumBin());
-			//hist->Fit("gaus","0", "", maxloc-0.002, maxloc+0.002);
-			//hist->GetFunction("gaus")->ResetBit(1<<9); // make function draw with histo (deep in TH1 document)
-			hist->Draw("same");
-		}
+		if(!hist)continue;
+		
+		hist->SetLineColor(colors[i%5]);
+		hist->Draw("same");
 	}
 	
-	maincanvas->Update();
+	// Update the canvas so the new plot is drawn
+	mmf->Update();
 
 	return NOERROR;
 }
 
 //------------------------------------------------------------------
-// PlotOffset
+// PlotIntercept
 //------------------------------------------------------------------
-derror_t MyProcessor::PlotOffset(void)
+derror_t MyProcessor::PlotIntercept(void)
 {
-	factory->offset_density->Draw();
-	for(int i=0; i<factory->GetNumDensityHistograms(); i++){
+	// Draw first histo in list to replace pad contents
+	factory->GetOffsetDensityHistogram(0)->Draw();
+	
+	// Overlay the rest of the histos
+	for(int i=1; i<factory->GetNumDensityHistograms(); i++){
 		TH1F *hist = factory->GetOffsetDensityHistogram(i);
-		if(hist){
-			hist->SetLineColor(colors[i%5]);
-			hist->Draw("same");
-		}
+		if(!hist)continue;
+		
+		hist->SetLineColor(colors[i%5]);
+		hist->Draw("same");
 	}
-
-	maincanvas->Update();
+	
+	// Update the canvas so the new plot is drawn
+	mmf->Update();
 
 	return NOERROR;
 }
@@ -206,74 +225,79 @@ derror_t MyProcessor::PlotPhiVsZ(void)
 	axes_phiz->Draw();
 	factory->DrawPhiZPoints();
 	
-	maincanvas->SetGridx(1);
-	maincanvas->SetGridy(1);
-	maincanvas->Update();
-	maincanvas->SetGridx(0);
-	maincanvas->SetGridy(0);
+	mmf->SetGrid(1);
+	mmf->Update();
+	mmf->SetGrid(0);
 
 	return NOERROR;
 }
 
 
 //------------------------------------------------------------------
-// DrawHits
+// PlotHits
 //------------------------------------------------------------------
-derror_t MyProcessor::DrawHits(void)
+derror_t MyProcessor::PlotHits(void)
 {
 	// Draw the empty screen
 	axes_hits->Draw("AXIS");
 	
 	// Delete old Markers
-	for(int i=0; i<Nmarkers; i++)delete markers[i];
-	Nmarkers = 0;
+	for(int i=0; i<markers.size(); i++)delete markers[i];
+	markers.clear();
 
 	// Delete old Ellipses
-	for(int i=0; i<Nellipse; i++)delete ellipse[i];
-	Nellipse = 0;
+	for(int i=0; i<circles.size(); i++)delete circles[i];
+	circles.clear();
 
 	// Draw BCAL for reference
 	float R1=65.0;
 	float R2=90.0;
-	ellipse[Nellipse] = new TEllipse(0.0,0.0,R1,R1);
-	ellipse[Nellipse++]->SetLineColor(14);
-	ellipse[Nellipse] = new TEllipse(0.0,0.0,R2,R2);
-	ellipse[Nellipse++]->SetLineColor(14);
-	ellipse[Nellipse] = new TEllipse(0.0,0.0,(R1+R2)/2.0,(R1+R2)/2.0);
-	ellipse[Nellipse]->SetLineWidth(56);
-	ellipse[Nellipse++]->SetLineColor(16); // 16= light grey
+	TEllipse *circle = new TEllipse(0.0,0.0,R1,R1);
+	circle->SetLineColor(14);
+	circles.push_back(circle);
+	circle = new TEllipse(0.0,0.0,R2,R2);
+	circle->SetLineColor(14);
+	circles.push_back(circle);
+	circle = new TEllipse(0.0,0.0,(R1+R2)/2.0,(R1+R2)/2.0);
+	circle->SetLineWidth(56);
+	circle->SetLineColor(16); // 16= light grey
+	circles.push_back(circle);
 	
 	// Draw circles based on MCTrackCandidates
-	DContainer *mctc = event_loop->Get("MCTrackCandidates");
-	MCTrackCandidate_t *tc = (MCTrackCandidate_t*)mctc->first();
-	for(int i=0;i<mctc->nrows;i++, tc++){
+	vector<DMCTrackCandidate*> mctc;
+	eventloop->Get(mctc);
+	for(int i=0;i<mctc.size();i++){
+		DMCTrackCandidate *tc = mctc[i];
 		float x0 = tc->x0;
 		float y0 = tc->y0;
 		float r0 = sqrt(x0*x0 + y0*y0);
-		ellipse[Nellipse++] = new TEllipse(x0, y0, r0, r0);
+		TEllipse *circle = new TEllipse(x0, y0, r0, r0);
+		circles.push_back(circle);
 	}
 	
 	// Draw all ellipses
-	for(int i=0; i<Nellipse; i++)ellipse[i]->Draw();
+	for(int i=0; i<circles.size(); i++)circles[i]->Draw();
 	
 	// Loop over all cheat hits and draw them
-	DContainer *mccheathits = event_loop->Get("MCCheatHits");
-	MCCheatHit_t *mccheathit = (MCCheatHit_t*)mccheathits->first();
-	for(int i=0; i<mccheathits->nrows; i++, mccheathit++){
+	vector<DMCCheatHit*> mccheathits;
+	eventloop->Get(mccheathits);
+	for(int i=0; i<mccheathits.size(); i++){
+		DMCCheatHit *mccheathit = mccheathits[i];
 		float x = mccheathit->r*cos(mccheathit->phi);
 		float y = -mccheathit->r*sin(mccheathit->phi);
 		int color = colors[mccheathit->track-1];
 		int markerstyle = 20+mccheathit->track-1;
 		if(mccheathit->system>2)continue;
 		if(mccheathit->system>2){markerstyle = 22; color+=100;}
-		markers[Nmarkers] = new TMarker(x,y,markerstyle);
-		markers[Nmarkers]->SetMarkerColor(color);
-		markers[Nmarkers]->SetMarkerSize(0.75);
-		markers[Nmarkers]->Draw();
-		if(++Nmarkers>=500)break;
+		TMarker *marker = new TMarker(x,y,markerstyle);
+		marker->SetMarkerColor(color);
+		marker->SetMarkerSize(0.75);
+		marker->Draw();
+		markers.push_back(marker);
+		if(markers.size()>=500)break;
 	}
 	
-	maincanvas->Update();
+	mmf->Update();
 
 	return NOERROR;
 }

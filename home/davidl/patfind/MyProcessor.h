@@ -6,6 +6,7 @@
 /// Example program for a Hall-D analyzer which uses DANA
 ///
 
+
 #include "DEventProcessor.h"
 #include "DEventLoop.h"
 
@@ -19,33 +20,28 @@
 #include <TMarker.h>
 
 class DMagneticFieldMap;
-class DFactory_MCTrackCandidates;
+class DFactory_DMCTrackCandidate;
 
 class MyProcessor:public DEventProcessor
 {
 	public:
 		derror_t init(void);					///< Called once at program start.
-		derror_t brun(int runnumber){};	///< Called everytime a new run number is detected.
 		derror_t evnt(int eventnumber);	///< Called every event.
-		derror_t erun(void){};				///< Called everytime run number changes, provided brun has been called.
 		derror_t fini(void);					///< Called after last event of last event source has been processed.
 
-		derror_t densityPlot(void);
+		derror_t PlotLines(void);
+		derror_t PlotDensity(void);
 		derror_t PlotSlope(void);
-		derror_t PlotOffset(void);
+		derror_t PlotIntercept(void);
 		derror_t PlotPhiVsZ(void);
-		derror_t DrawHits(void);
+		derror_t PlotHits(void);
 
 		TH2F *axes, *axes_phiz, *axes_hits;
-		DFactory_MCTrackCandidates *factory;
+		DFactory_DMCTrackCandidate *factory;
 		
-		TLine *lines[500];
-		int Nlines;
-		
-		TMarker *markers[500];
-		int Nmarkers;
-		TEllipse *ellipse[20];
-		int Nellipse;
+		vector<TLine*> lines;
+		vector<TMarker*> markers;
+		vector<TEllipse*> circles;
 };
 
 

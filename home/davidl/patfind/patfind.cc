@@ -6,15 +6,14 @@
 
 #include <TApplication.h>
 
+#include "MyMainFrame.h"
 #include "MyProcessor.h"
 #include "DEventLoop.h"
 
-#include "hdv_mainframe.h"
 
-TCanvas *maincanvas=NULL;
-DEventLoop *eventloop=NULL;
+DEventLoop *eventloop = NULL;
 MyProcessor *myproc = NULL;
-hdv_mainframe *hdvmf=NULL;
+MyMainFrame *mmf = NULL;
 
 //-----------
 // main
@@ -27,11 +26,9 @@ int main(int narg, char *argv[])
 
 	// Open Window
 	TApplication app("HDView", &narg, argv);
-	hdvmf = new hdv_mainframe(gClient->GetRoot(), 600, 600);
+	mmf = new MyMainFrame(gClient->GetRoot(), 800, 800);
 	
-	// This is done AFTER creating the TApplication object so when the
-	// init routine is called, the window will be mapped and it can
-	// draw the detectors.
+	// Create a MyProcessor
 	myproc = new MyProcessor();
 	eventloop->AddProcessor(myproc);
 	eventloop->Init();
@@ -44,22 +41,8 @@ int main(int narg, char *argv[])
 	
 	// clean up
 	delete myproc;
-	delete hdvmf;
+	delete mmf;
 	
 	return 0;
 }
 
-//-------------------
-// hdv_getevent
-//-------------------
-derror_t hdv_getevent(void)
-{
-	// Read in next event. 
-	derror_t err;
-	err = eventloop->OneEvent();
-	
-	if(err!=NOERROR)return err;
-		
-
-	return NOERROR;
-}
