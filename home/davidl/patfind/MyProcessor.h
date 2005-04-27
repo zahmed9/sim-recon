@@ -35,6 +35,7 @@ class MyProcessor:public DEventProcessor
 		derror_t PlotIntercept(void);
 		derror_t PlotPhiVsZ(void);
 		derror_t PlotHits(void);
+		derror_t PlotStats(void);
 
 		TH2F *axes, *axes_phiz, *axes_hits;
 		DFactory_DMCTrackCandidate *factory;

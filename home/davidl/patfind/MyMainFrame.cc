@@ -11,6 +11,8 @@ using namespace std;
 #include "MyProcessor.h"
 #include "MyMainFrame.h"
 #include "DEventLoop.h"
+#include "DMCReconstructed.h"
+#include "DMCThrown.h"
 
 extern MyProcessor *myproc;
 extern DEventLoop *eventloop;
@@ -52,6 +54,7 @@ MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(p,w,
 			display->AddEntry("z-intercept Density", dtInterceptDensity);
 			display->AddEntry("Phi vs. z", dtPhiVsZ);
 			display->AddEntry("Detector Hits", dtHits);
+			display->AddEntry("Detector Hits", dtStats);
 	
 	//------------------ Middle Frame ------------------
 	int canvas_size = 400;
@@ -66,15 +69,49 @@ MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(p,w,
 			statsframe->AddFrame(statleft, noHints);
 			statsframe->AddFrame(statright, noHints);
 			
+			TGLabel *spacerL = new TGLabel(statleft, " ");
+			TGLabel *spacerR = new TGLabel(statright, " ");
+
 			TGLabel *filelab = new TGLabel(statleft, "File:");
 						filename = new TGLabel(statright, "----- <none> -----");
 			TGLabel *eventlab = new TGLabel(statleft, "Event:");
 			         eventno = new TGLabel(statright, "--------");
+
+			TGLabel *foundlab = new TGLabel(statleft, "Found Tracks:");
+			         foundtrks = new TGLabel(statright, "--------");
+			TGLabel *thrownlab = new TGLabel(statleft, "Thrown Tracks:");
+			         throwntrks = new TGLabel(statright, "--------");
+			TGLabel *correctlab = new TGLabel(statleft, "Fraction ID'ed:");
+			         correcttrks = new TGLabel(statright, "--------");
+
+			TGLabel *tot_foundlab = new TGLabel(statleft, "Tot. Found Tracks:");
+			         tot_foundtrks = new TGLabel(statright, "--------");
+			TGLabel *tot_thrownlab = new TGLabel(statleft, "Tot. Thrown Tracks:");
+			         tot_throwntrks = new TGLabel(statright, "--------");
+			TGLabel *tot_correctlab = new TGLabel(statleft, "Tot. Fraction ID'ed:");
+			         tot_correcttrks = new TGLabel(statright, "--------");
 	
 			statleft->AddFrame(filelab, defHintsRight);
-			statright->AddFrame(filename, defHintsLeft);
 			statleft->AddFrame(eventlab, defHintsRight);
+			statleft->AddFrame(spacerL, defHintsRight);
+			statleft->AddFrame(foundlab, defHintsRight);
+			statleft->AddFrame(thrownlab, defHintsRight);
+			statleft->AddFrame(correctlab, defHintsRight);
+			statleft->AddFrame(spacerL, defHintsRight);
+			statleft->AddFrame(tot_foundlab, defHintsRight);
+			statleft->AddFrame(tot_thrownlab, defHintsRight);
+			statleft->AddFrame(tot_correctlab, defHintsRight);
+
+			statright->AddFrame(filename, defHintsLeft);
 			statright->AddFrame(eventno, defHintsLeft);
+			statright->AddFrame(spacerR, defHintsLeft);
+			statright->AddFrame(foundtrks, defHintsLeft);
+			statright->AddFrame(throwntrks, defHintsLeft);
+			statright->AddFrame(correcttrks, defHintsLeft);
+			statright->AddFrame(spacerR, defHintsLeft);
+			statright->AddFrame(tot_foundtrks, defHintsLeft);
+			statright->AddFrame(tot_throwntrks, defHintsLeft);
+			statright->AddFrame(tot_correcttrks, defHintsLeft);
 
 		// Main Canvas
 		TRootEmbeddedCanvas *emcanvas = new TRootEmbeddedCanvas("Main Canvas",middleframe,canvas_size, canvas_size, kSunkenFrame, GetWhitePixel());
@@ -83,8 +120,9 @@ MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(p,w,
 		maincanvas = emcanvas->GetCanvas();
 
 		// Options frame
-		TGGroupFrame *optionsframe = new TGGroupFrame(middleframe, "Options", kVerticalFrame);
+		optionsframe = new TGButtonGroup(middleframe, "Pass", kVerticalFrame);
 		middleframe->AddFrame(optionsframe, defHints);
+
 
 	//------------------ Bottom Frame ------------------
 	TGHorizontalFrame *bottomframe = new TGHorizontalFrame(this, w, 50);
@@ -107,6 +145,7 @@ MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(p,w,
 	display->Connect("Selected(Int_t)", "MyMainFrame", this, "DoSetDisplay(Int_t)");
 	prev->Connect("Clicked()", "MyMainFrame", this, "DoPrev()");
 	next->Connect("Clicked()", "MyMainFrame", this, "DoNext()");
+	optionsframe->Connect("Clicked(Int_t)", "MyMainFrame", this, "DoSetOption(Int_t)");
 
 	// Set up timer to call the DoTimer() method repeatedly
 	// so events can be automatically advanced.
@@ -121,6 +160,10 @@ MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(p,w,
 	MapWindow();
 	
 	sourcename = NULL;
+	radiooption = 1000;
+	Ntot_foundtrks = 0;
+	Ntot_throwntrks = 0;
+	Ntot_correcttrks = 0;
 	if(GetDisplayType()<0)display->Select(dtLines);
 }
 
@@ -145,6 +188,69 @@ void MyMainFrame::Update(void)
 		sourcename = sname;
 		filename->SetText(sourcename);
 	}
+	
+	// Update numbers of tracks etc.
+	vector<const DMCReconstructed*> mcreconstructed;
+	eventloop->Get(mcreconstructed);
+	sprintf(str, "%d", mcreconstructed.size());
+	foundtrks->SetText(str);
+	Ntot_foundtrks += mcreconstructed.size();
+	sprintf(str, "%d", Ntot_foundtrks);
+	tot_foundtrks->SetText(str);
+
+	vector<const DMCThrown*> mcthrown;
+	eventloop->Get(mcthrown);
+	sprintf(str, "%d", mcthrown.size());
+	throwntrks->SetText(str);
+	Ntot_throwntrks += mcthrown.size();
+	sprintf(str, "%d", Ntot_throwntrks);
+	tot_throwntrks->SetText(str);
+	
+	int Ncorrecttrks = 0;
+	for(int i=0; i<mcreconstructed.size(); i++){
+		const DMCReconstructed *mcr = mcreconstructed[i];
+		if(mcr->thrown_delta_p/mcr->p < 0.2)Ncorrecttrks++;
+	}
+	//sprintf(str,"%3.0f%%", (float)Ncorrecttrks/(float)
+}
+
+//-------------------
+// EnableRadioButtons
+//-------------------
+void MyMainFrame::EnableRadioButtons(int N)
+{
+	if(N<0)N=0;
+
+	// Remove any extra radio buttons
+	for(int i=N; i<radiobuttons.size(); i++){
+		radiobuttons[i]->UnmapWindow();
+		optionsframe->RemoveFrame(radiobuttons[i]);
+		delete radiobuttons[i];
+	}
+	if(radiobuttons.size()>N)
+		radiobuttons.erase(radiobuttons.begin()+N, radiobuttons.end());
+
+	// Add radio buttons if needed
+	for(int i=radiobuttons.size();i<N;i++){
+		char str[16];
+		sprintf(str,"%d", i+1);
+		TGRadioButton *button = new TGRadioButton(optionsframe, str);
+		radiobuttons.push_back(button);
+	}
+	
+	if(radiobuttons.size()>0){
+		if(radiooption > radiobuttons.size()){
+			radiooption = radiobuttons.size();
+			radiobuttons[radiooption-1]->SetState(kButtonDown);
+		}
+		if(radiooption < 1){
+			radiooption = 1;
+			radiobuttons[radiooption-1]->SetState(kButtonDown);
+		}
+	}
+	
+	optionsframe->Show();
+	optionsframe->Connect("Clicked(Int_t)", "MyMainFrame", this, "DoSetOption(Int_t)");
 }
 
 //-------------------
@@ -187,5 +293,17 @@ void MyMainFrame::DoSetDisplay(Int_t id)
 void MyMainFrame::DoTimer(void)
 {
 
+}
+
+
+//-------------------
+// DoSetOption
+//-------------------
+void MyMainFrame::DoSetOption(Int_t id)
+{
+	if(radiooption != id){
+		radiooption = id;
+		myproc->evnt(eventloop->eventnumber());
+	}
 }
 

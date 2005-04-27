@@ -42,7 +42,7 @@ derror_t MyProcessor::init(void)
 	factory->flip_x_axis = 1;
 	
 	// Tell factory to keep around a few density histos
-	factory->SetMaxDensityHistograms(4);
+	factory->SetMaxDensityHistograms(10);
 	
 	// set limits for plot. This represents the space where the center 
 	// of the circle can be. It can be (and often is) outside of the
@@ -70,7 +70,7 @@ derror_t MyProcessor::evnt(int eventnumber)
 {
 	// Invoke the MCTrackCandidates factory so it's internal structures
 	// are filled with the current event's data
-	vector<DMCTrackCandidate*> mctrackcandidates;
+	vector<const DMCTrackCandidate*> mctrackcandidates;
 	eventloop->Get(mctrackcandidates);
 
 	// Call the appropriate plotting routine depending upon what's selected
@@ -81,6 +81,7 @@ derror_t MyProcessor::evnt(int eventnumber)
 		case MyMainFrame::dtInterceptDensity:	PlotIntercept();	break;
 		case MyMainFrame::dtPhiVsZ:				PlotPhiVsZ();		break;
 		case MyMainFrame::dtHits:					PlotHits();			break;
+		case MyMainFrame::dtStats:					PlotStats();		break;
 		default:
 			cout<<__FILE__<<":"<<__LINE__<<" Unknown display type ("<<mmf->GetDisplayType()<<")"<<endl;
 	}
@@ -93,6 +94,7 @@ derror_t MyProcessor::evnt(int eventnumber)
 //------------------------------------------------------------------
 derror_t MyProcessor::PlotLines(void)
 {
+	mmf->EnableRadioButtons(0);
 	axes->Draw();
 
 	// set limits for plot. This represents the space where the center 
@@ -151,20 +153,28 @@ derror_t MyProcessor::PlotLines(void)
 //------------------------------------------------------------------
 derror_t MyProcessor::PlotDensity(void)
 {
+	vector<TEllipse*> circles = factory->GetCircles();
+	mmf->EnableRadioButtons(circles.size());
+
+	Int_t option = mmf->GetRadioOption();
+	if(option<1 || option>factory->GetNumDensityHistograms()){
+		cout<<__FILE__<<":"<<__LINE__<<" out of range ("<<option<<")";
+		cout<<"Ndensity_histos="<<factory->GetNumDensityHistograms()<<endl;
+		return NOERROR;
+	}
 
 	// Get and draw density histogram
-	TH2F *density = factory->GetDensityHistogram(0);
+	TH2F *density = factory->GetDensityHistogram(option);
 	density->Draw("cont");
 
 	// Draw circles at focus points
-	vector<TEllipse*> circles = factory->GetCircles();
 	for(int i = 0; i<circles.size(); i++){
 		TEllipse *circle = circles[i];
 		circle->SetLineColor(kRed);
 		circle->SetFillStyle(0);
 		circle->Draw();
 	}
-
+	
 	// Update the canvas so the new plot is drawn
 	mmf->Update();
 	
@@ -176,17 +186,18 @@ derror_t MyProcessor::PlotDensity(void)
 //------------------------------------------------------------------
 derror_t MyProcessor::PlotSlope(void)
 {
-	// Draw first histo in list to replace pad contents
-	factory->GetSlopeDensityHistogram(0)->Draw();
-	
-	// Overlay the rest of the histos
-	for(int i=1; i<factory->GetNumDensityHistograms(); i++){
-		TH1F *hist = factory->GetSlopeDensityHistogram(i);
-		if(!hist)continue;
-		
-		hist->SetLineColor(colors[i%5]);
-		hist->Draw("same");
+	mmf->EnableRadioButtons(factory->GetNumDensityHistograms()-1);
+	Int_t option = mmf->GetRadioOption();
+	if(option<1 || option>factory->GetNumDensityHistograms()){
+		cout<<__FILE__<<":"<<__LINE__<<" out of range ("<<option<<")";
+		cout<<"Ndensity_histos="<<factory->GetNumDensityHistograms()<<endl;
+		return NOERROR;
 	}
+
+	// Draw the histo
+	TH1F *hist = factory->GetSlopeDensityHistogram(option);
+	hist->SetLineColor(colors[(option-1)%5]);
+	hist->Draw();
 	
 	// Update the canvas so the new plot is drawn
 	mmf->Update();
@@ -199,17 +210,18 @@ derror_t MyProcessor::PlotSlope(void)
 //------------------------------------------------------------------
 derror_t MyProcessor::PlotIntercept(void)
 {
-	// Draw first histo in list to replace pad contents
-	factory->GetOffsetDensityHistogram(0)->Draw();
-	
-	// Overlay the rest of the histos
-	for(int i=1; i<factory->GetNumDensityHistograms(); i++){
-		TH1F *hist = factory->GetOffsetDensityHistogram(i);
-		if(!hist)continue;
-		
-		hist->SetLineColor(colors[i%5]);
-		hist->Draw("same");
+	mmf->EnableRadioButtons(factory->GetNumDensityHistograms()-1);
+	Int_t option = mmf->GetRadioOption();
+	if(option<1 || option>factory->GetNumDensityHistograms()){
+		cout<<__FILE__<<":"<<__LINE__<<" out of range ("<<option<<")";
+		cout<<"Ndensity_histos="<<factory->GetNumDensityHistograms()<<endl;
+		return NOERROR;
 	}
+
+	// Draw first histo in list to replace pad contents
+	TH1F *hist = factory->GetOffsetDensityHistogram(option);
+	hist->SetLineColor(colors[(option-1)%5]);
+	hist->Draw();
 	
 	// Update the canvas so the new plot is drawn
 	mmf->Update();
@@ -222,6 +234,11 @@ derror_t MyProcessor::PlotIntercept(void)
 //------------------------------------------------------------------
 derror_t MyProcessor::PlotPhiVsZ(void)
 {
+	// Enable options for all tracks
+	vector<const DMCTrackCandidate*> mctc;
+	eventloop->Get(mctc);
+	mmf->EnableRadioButtons(mctc.size());
+
 	axes_phiz->Draw();
 	factory->DrawPhiZPoints();
 	
@@ -232,12 +249,16 @@ derror_t MyProcessor::PlotPhiVsZ(void)
 	return NOERROR;
 }
 
-
 //------------------------------------------------------------------
 // PlotHits
 //------------------------------------------------------------------
 derror_t MyProcessor::PlotHits(void)
 {
+	// Enable options for all tracks
+	vector<const DMCTrackCandidate*> mctc;
+	eventloop->Get(mctc);
+	mmf->EnableRadioButtons(mctc.size());
+
 	// Draw the empty screen
 	axes_hits->Draw("AXIS");
 	
@@ -264,10 +285,8 @@ derror_t MyProcessor::PlotHits(void)
 	circles.push_back(circle);
 	
 	// Draw circles based on MCTrackCandidates
-	vector<DMCTrackCandidate*> mctc;
-	eventloop->Get(mctc);
 	for(int i=0;i<mctc.size();i++){
-		DMCTrackCandidate *tc = mctc[i];
+		const DMCTrackCandidate *tc = mctc[i];
 		float x0 = tc->x0;
 		float y0 = tc->y0;
 		float r0 = sqrt(x0*x0 + y0*y0);
@@ -279,10 +298,10 @@ derror_t MyProcessor::PlotHits(void)
 	for(int i=0; i<circles.size(); i++)circles[i]->Draw();
 	
 	// Loop over all cheat hits and draw them
-	vector<DMCCheatHit*> mccheathits;
+	vector<const DMCCheatHit*> mccheathits;
 	eventloop->Get(mccheathits);
 	for(int i=0; i<mccheathits.size(); i++){
-		DMCCheatHit *mccheathit = mccheathits[i];
+		const DMCCheatHit *mccheathit = mccheathits[i];
 		float x = mccheathit->r*cos(mccheathit->phi);
 		float y = -mccheathit->r*sin(mccheathit->phi);
 		int color = colors[mccheathit->track-1];
@@ -298,6 +317,15 @@ derror_t MyProcessor::PlotHits(void)
 	}
 	
 	mmf->Update();
+
+	return NOERROR;
+}
+
+//------------------------------------------------------------------
+// PlotStats
+//------------------------------------------------------------------
+derror_t MyProcessor::PlotStats(void)
+{
 
 	return NOERROR;
 }
