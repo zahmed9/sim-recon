@@ -9,7 +9,7 @@ FIG  = ch6_gluex_detector.eps
 
 summary: Summary_cover
 
-all: CDC_summary LGD_summary FDC_summary BCAL_summary DAQ_summary TOF_summary \
+all: CDC_summary LGD_summary FDC_summary CD_summary BCAL_summary DAQ_summary TOF_summary \
 	Computing_summary Software_summary Start_summary Tagger_summary \
 	Electronics_summary Online_summary Solenoid_summary UPV_summary \
 	Summary_cover
@@ -35,6 +35,10 @@ LGD_summary:
 	pdflatex $(@).tex	
 
 FDC_summary:
+	pdflatex $(@).tex	
+	pdflatex $(@).tex	
+
+CD_summary:
 	pdflatex $(@).tex	
 	pdflatex $(@).tex	
 

@@ -3,66 +3,60 @@
 The Cerenkov detector is to serve as part of the particle identification system
 together with the time-of-flight system for forward-going charged particles.
 The goal is to distinguish between pions, kaons and protons with
-momenta above the reach of the time-of-flight system. Here we describe the DIRC,
-one of options considered for this task.
+momenta above the reach of the time-of-flight system. Two options exist for this
+detector: a threshold gas option using C$_4$F$_{10}$, and a quartz-based DIRC
+option. Here we describe the gas Cerenkov option.
 
-The DIRC uses thin, long rectangular bars made of synthetic fused silica
-(quartz) both as Cerenkov radiators and light guides  with
-an index of refraction of $n \approx 1.47$. The design is based on the
-successful novel technique for particle identification developed for
-BABAR \footnote{I. Adam \em{et al.} Nucl. Instr. \& Meth. \textbf{A538} 281 (2005).}.
-A fraction of the Cerenkov photons produced by relativistic charged particles 
-in the quartz bar remain inside the bar due to total internal reflection.
-These photons are collected at the end of the bars and imaged onto 
-an array of photomultiplier tubes preserving sufficient angular precision to
-determine the angle of the produced Cerenkov light. The DIRC can provide 
-identification of pions, kaons and protons with an efficiency of better 
-than 90\% and a mis-identification rate below 10\% for momenta up to 4.5 GeV/c. 
-The current design for GlueX requires 60 quartz bars and 2000 photomultiplier 
-tubes.
+The gas Cerenkov counter operates as a threshold detector, tagging relativistic
+pions above the threshold for emission of Cerenkov light. Several radiator materials have
+been considered for the design. A pressurized gas radiator has the flexibility of
+matching the index of refraction to the desired momentum range, but requires
+thick gas containers in the downstream detector region. Two atmospheric-pressure
+radiators were found to produce high acceptance rates: aerogel (n=1.008) and C$_4$F$_{10}$
+(n=1.0015). The C$_4$F$_{10}$ radiator was selected because it has a momentum
+threshold for pions of 2.5 GeV/c.
+
+The proposed optics collects light from two sets of mirrors, which focus
+the light onto 40 photomultiplier tubes. All forward particles detected by the
+time-of-flight system and lead glass detectors will traverse one set of 
+mirrors. Therefore, there is a hight premium for producing these mirrors with
+minimal thickness.
+
 
 \subsubsection*{Raw Signals, Stages of Amplification, Final readout}
 
-An electron will create about 30 detected photoelectrons in the struck bar.
-The photomultipliers need to be sensitive to single photoelectrons
-with sufficient time resolution to minimize out-of-time photons converting
-in the quartz. The rate per tube is expected to be approximately 100kHz.
-The photomultiplier tubes will be placed at a distance of
-about 3 m on one side of the GlueX detector where the fringe fields of 
-the solenoid are below 100 G. Efficient shielding of the field can be achieved
-with standard techniques.
-
+The performance of the system is expressed in terms of the average number
+of photoelectrons detected per track. The radiator thickness is a minimum
+of 80 cm of gas. A reasonably good design will produce
+approximately 22 photoelectrons in the relativistic limit. For 95\%
+detection efficiency, this sets the effective threshold of pions at 3 GeV/c.
+The photomultiplier tubes will be placed about one meter away from the
+opening of the solenoid, so special care will be required to
+shield the photomultiplier tubes from the the fringe fields of the magnet.
 
 \subsubsection*{R\&D Issues, Simulations, Monitoring and Other Considerations}
 
-While the principle and hardware of the BaBar DIRC with modifications of 
-the geometry are applicable to the GlueX detector we explore possible 
-improvements of the imaging. 
-The exact exit position of a Cherenkov photon from a bar is unknown.
-At BaBar this uncertainty is reduced by placing the phototubes at some
-distance to measure the photon direction from the bar. This pinhole focusing
-requires a large water tank. On the other hand, focusing of the photons
-with mirrors onto multi-channel photon detectors increases the spatial
-resolution and allows a compact assembly. Such devices also provide higher
-precision in the measurement of the photon arrival time which allows to
-correct for the significant smearing of the Cherenkov angle due to the 
-unknown photon wavelength. As for the readout we investigate leading-edge 
-versus constant-fraction discrimination together with the TDC solution of 
-GlueX. A prototype of a focusing DIRC with cylindrical mirrors is currently
-being tested at SLAC
-\footnote{C. Field \em{et al.} Nucl. Instr. \& Meth. \textbf{A518} 565 (2004).}.
-Simulation studies are performed to optimize the mirror imaging and 
-the final design.
+Gas-filled Cerenkov detectors have been used in many particle physics 
+experiments. Still, it is a challenge to collect
+sufficient light for efficient detection of relativistic
+particles. Many requirements must be balanced to achieve high efficiency.
+The optics must to be designed to collect light to locations
+where photomultiplier tubes can be placed and operated in the fringe
+fields of the magnet. At the same time, the mirrors must have high reflectivity for the UV Cerenkov
+photons as well as be thin to have minimal impact on particle trajectories.
+The choice of radiator is also another variable. For example, the 
+original LASS spectrometer used a freon radiator in a 
+similar design to GlueX, but there is a limited selection of heavy
+environmentally friendly gases. 
 
 \subsubsection*{Manpower, R\&D and Production Schedules}
 
 The Cerenkov detector for GlueX is not as well developed as other detector components.
 This is due to the fact that the first group to express interest in this detector
-is no longer part of the collaboration. After the granting of CD0 to the JLab upgrade,
+is no longer part of the collaboration. However, after the granting of CD0 to the JLab upgrade,
 a pair of groups from Tennessee approached the collaboration and are eager to take
 on the responsibility for a major detector. Based on a fresh look at the challenges
 for particle identification and their own expertise, they have proposed the
 construction of a DIRC detector which is a very good match to particle identification
-in this momentum range. A final decision on the detector technology we will use clearly
-depends on many factors including physics, manpower, costs and timescales. The collaboration
-is currently evaluating all of these. 
+in this momentum range. Because this proposal is so new, the collaboration is still
+evaluating the relative merits of each option.
