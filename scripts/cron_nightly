@@ -24,11 +24,27 @@
 #
 source /group/halld/Software/scripts/env_jlab.csh
 
+# Dated labels
+set today=`date -d "now" +"build_%F"`
+set yesterday=`date -d "now-1day" +"build_%F"`
+set twodaysago=`date -d "now-2day" +"build_%F"`
+
 
 # Checkout and build the Hall-D source code
 cd /group/halld/Software/builds
 rm -f latest.out
-/group/halld/Software/scripts/make_release latest > latest.out
+/group/halld/Software/scripts/make_release latest >& latest.out
+
+# Save binaries and libraries and make DEBUG versions
+rm -rf tmp.bin tmp.lib
+mv $today/bin tmp.bin
+mv $today/lib tmp.lib
+setenv DEBUG yes
+/group/halld/Software/scripts/make_release latest >>& latest.out
+mv tmp.bin/* $today/bin
+mv tmp.lib/* $today/lib
+rm -rf tmp.bin tmp.lib
+
 
 # We want to keep three days worth of builds around so delete the
 # build from 3 days ago
@@ -43,10 +59,39 @@ endif
 
 
 # Update symbolic links
-set today=`date -d "now" +"build_%F"`
-set yesterday=`date -d "now-1day" +"build_%F"`
-set twodaysago=`date -d "now-2day" +"build_%F"`
 rm -f LATEST YESTERDAY TWODAYSAGO
 ln -s $today LATEST
 ln -s $yesterday YESTERDAY
 ln -s $twodaysago TWODAYSAGO
+
+#
+# Print output for nightly e-mail
+#
+echo "---------------- Errors ----------------"
+cat latest.out | \
+ grep -i error | \
+ grep -v "sys_errlist' is deprecated" |\
+ grep -v "^Generating " | \
+ grep -v "^U "
+ echo " "
+ echo " "
+
+echo "---------------- Warnings ----------------"
+cat latest.out | \
+ grep -i warning | \
+ grep -v mkstemp | \
+ grep -v "has modification time in the future" | \
+ grep -v "Clock skew detected" | \
+ grep -v "sys_errlist' is deprecated"
+ echo " "
+ echo " "
+
+echo "---------------- Executables ----------------"
+ ls $today/bin/*
+ echo " "
+ echo " "
+
+echo "---------------- Libraries ----------------"
+ ls $today/lib/*
+ echo " "
+ echo " "
