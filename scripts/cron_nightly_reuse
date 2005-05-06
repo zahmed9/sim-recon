@@ -1,0 +1,25 @@
+#!/bin/tcsh
+
+#
+# This script is run as a nightly cron job from davidl account.
+# The crontab file is kept in the scripts directory under
+# CVS control as is this one. See the file crontab.halld for
+# more details.
+#
+# NOTE: This script just sets the HALLD_MAKE_RELEASE_REUSE
+# environment variable before invoking the cron_nightly
+# script. Setting this variable causes the make_release
+# script to build in an existing source tree so that multiple
+# platforms (and DEBUG versions) can reside in the same
+# directory tree. As such, the cron job which runs this script
+# should be run later than the one which runs cron_nightly
+# directly so that it has a chance to checkout the source code.
+# As it is set up now, jlabl1 runs cron_nightly at 3:15am.
+#
+# Other Platforms:
+#  SunOS  3:45am
+#
+
+setenv HALLD_MAKE_RELEASE_REUSE YES
+/group/halld/Software/scripts/cron_nightly
+
