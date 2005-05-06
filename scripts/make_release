@@ -19,26 +19,36 @@ $halld_home = $ENV{"PWD"}."/$release";
 $ENV{"HALLD_HOME"} = $halld_home;
 print "\nMaking release \"$release\" ($halld_home)\n\n";
 
-# Move old "$release" out of the way (if it exists) and make new one
-if(-e $release){
-	print "\nMoving old \"$release\" directory to junk\n";
-	print `mkdir -p junk`;
-	print `rm -rf junk/$release`;
-	print `mv -f $release junk`;
+# If we're compiling multiple platforms or making DEBUG versions
+# then we don't want to re-checkout the code or delete the
+# existing binaries. Use the HALLD_MAKE_RELEASE_REUSE environment
+# variable to control this
+if( $ENV{"HALLD_MAKE_RELEASE_REUSE"} eq "YES"){
+
+	chdir $release;
+}else{
+
+	# Move old "$release" out of the way (if it exists) and make new one
+	if(-e $release){
+		print "\nMoving old \"$release\" directory to junk\n";
+		print `mkdir -p junk`;
+		print `rm -rf junk/$release`;
+		print `mv -f $release junk`;
+	}
+	mkdir $release;
+	chdir $release;
+
+	# Checkout release to new directory
+	print "\nChecking out source code ....\n\n";
+	system("cvs -d /group/halld/Repositories/cvsroot co $tags release");
+
+	# For now, just move these things by hand. They should be moved
+	# in the repository itself eventually
+	system("mkdir -p src/programs/Simulation");
+	system("mv HDFast HDGeant genr8 mcroot stdhep_translators hdds src/programs/Simulation");
+	system("mv hddm src/programs/Analysis");
+	system("mv include src");
 }
-mkdir $release;
-chdir $release;
-
-# Checkout release to new directory
-print "\nChecking out source code ....\n\n";
-system("cvs -d /group/halld/Repositories/cvsroot co $tags release");
-
-# For now, just move these things by hand. They should be moved
-# in the repository itself eventually
-system("mkdir -p src/programs/Simulation");
-system("mv HDFast HDGeant genr8 mcroot stdhep_translators hdds src/programs/Simulation");
-system("mv hddm src/programs/Analysis");
-system("mv include src");
 
 # Regenerate hddm files from schema
 print "\nBuilding HDDM tools ...\n\n";

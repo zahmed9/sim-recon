@@ -33,17 +33,12 @@ set twodaysago=`date -d "now-2day" +"build_%F"`
 # Checkout and build the Hall-D source code
 cd /group/halld/Software/builds
 rm -f latest.out
-/group/halld/Software/scripts/make_release latest >& latest.out
+/group/halld/Software/scripts/make_release latest >& latest_${OSNAME}.out
 
-# Save binaries and libraries and make DEBUG versions
-rm -rf tmp.bin tmp.lib
-mv $today/bin tmp.bin
-mv $today/lib tmp.lib
+# make DEBUG versions
 setenv DEBUG yes
-/group/halld/Software/scripts/make_release latest >>& latest.out
-mv tmp.bin/* $today/bin
-mv tmp.lib/* $today/lib
-rm -rf tmp.bin tmp.lib
+setenv HALLD_MAKE_RELEASE_REUSE YES
+/group/halld/Software/scripts/make_release latest >>& latest_${OSNAME}.out
 
 
 # We want to keep three days worth of builds around so delete the
@@ -68,16 +63,18 @@ ln -s $twodaysago TWODAYSAGO
 # Print output for nightly e-mail
 #
 echo "---------------- Errors ----------------"
-cat latest.out | \
+cat latest_${OSNAME}.out | \
  grep -i error | \
  grep -v "sys_errlist' is deprecated" |\
  grep -v "^Generating " | \
+ grep -v "^Preprocessing " | \
+ grep -v "^Parsing file " | \
  grep -v "^U "
  echo " "
  echo " "
 
 echo "---------------- Warnings ----------------"
-cat latest.out | \
+cat latest_${OSNAME}.out | \
  grep -i warning | \
  grep -v mkstemp | \
  grep -v "has modification time in the future" | \
