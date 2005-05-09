@@ -32,12 +32,13 @@ set twodaysago=`date -d "now-2day" +"build_%F"`
 
 # Checkout and build the Hall-D source code
 cd /group/halld/Software/builds
-rm -f latest.out
+rm -f latest_${OSNAME}.out
 /group/halld/Software/scripts/make_release latest >& latest_${OSNAME}.out
 
 # make DEBUG versions
 setenv DEBUG yes
 setenv HALLD_MAKE_RELEASE_REUSE YES
+echo "--------------------- DEBUG VERSION ------------------" >> latest_${OSNAME}.out
 /group/halld/Software/scripts/make_release latest >>& latest_${OSNAME}.out
 
 
