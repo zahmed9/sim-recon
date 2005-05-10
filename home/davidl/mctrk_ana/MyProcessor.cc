@@ -9,7 +9,7 @@ using namespace std;
 
 #include "MyProcessor.h"
 
-#include "DFactory_DMCFitstats.h"
+#include "DFactory_DMCFitStats.h"
 #include "DFactory_DMCCheatHit.h"
 
 TH1F *FDC_z, *FDC_r, *CDC_z, *CDC_r;
