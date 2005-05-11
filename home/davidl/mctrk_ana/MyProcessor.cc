@@ -9,8 +9,8 @@ using namespace std;
 
 #include "MyProcessor.h"
 
-#include "DFactory_DMCFitStats.h"
 #include "DFactory_DMCCheatHit.h"
+#include "DFactory_DMCTrackHists.h"
 
 TH1F *FDC_z, *FDC_r, *CDC_z, *CDC_r;
 
@@ -30,7 +30,7 @@ derror_t MyProcessor::init(void)
 	CDC_z = new TH1F("CDC_z","CDC z-hits", 6510, 0.0, 650.0);
 	FDC_r = new TH1F("FDC_r","FDC r-hits", 1100,0.0, 100.0);
 	CDC_r = new TH1F("CDC_r","CDC r-hits", 1100, 0.0, 100.0);
-
+	
 	return NOERROR;
 }
 
@@ -40,9 +40,9 @@ derror_t MyProcessor::init(void)
 derror_t MyProcessor::evnt(int eventnumber)
 {
 
-	// Histograms are created and filled in DMCFitStats factory
-	vector<const DMCFitStats*> fitstats;
-	eventLoop->Get(fitstats);
+	// Histograms are created and filled in DMCTrackHists factory
+	vector<const DMCTrackHists*> TrackHists;
+	eventLoop->Get(TrackHists);
 
 	// Histograms to determine angles from geometry
 	vector<const DMCCheatHit*> mccheathits;
