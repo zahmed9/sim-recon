@@ -1,0 +1,427 @@
+
+\documentclass[12pt]{article}
+\usepackage{epsfig}
+\usepackage{anysize}
+\usepackage{caption2}
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{codebkgd}{rgb}{0.95,0.95,1.0}
+\definecolor{cmdbkgd}{rgb}{0.95,1.0,0.95}
+
+% Set reasonable margins
+\marginsize{2cm}{2cm}{3cm}{2cm}
+\setcaptionwidth{5.0in}
+
+% These commands try to force figures to co-exist with text
+% better than the default which tends to throw figures onto
+% their own pages.
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
+
+\author{D. Lawrence \\ Jefferson Lab}
+\title{Getting Started with DANA}
+\begin{document}
+
+\maketitle
+
+%\vspace{-6cm}
+%\rightline{Hall-D-NOTE ??}
+%\vspace{6cm}
+
+%----------------------- Abstract -------------------------
+\abstract{The Hall-D {\bf D}ata {\bf ANA}lysis framework (DANA) provides the
+mechanism by which various pieces of the reconstruction software
+are brought together to fully reconstruct the data. This
+document is intended for user's new to the DANA system. This
+includes both end user's who simply want to get at the data for
+their own analysis, and person's writing reconstruction code
+for a particular subsystem. It is purposely kept short to minimize
+you TTR (Time To Results).}
+
+\newpage
+\tableofcontents
+\newpage
+
+%----------------------- Introduction -------------------------
+\section{Introduction}
+The DANA system is centered around the idea of data factories. In the
+DANA system, a factory is an object which takes one or more inputs
+and produces a single output. The inputs and outputs are lists of objects.
+So, for example, if I wanted to produce a list of showers in the forward
+lead glass calorimeter (FCAL), I would first need a list of hits in the
+FCAL. Similarly, in order to produce a list of tracks, I would first
+need a list of hits in the CDC, FDC, etc. In general, factories get their
+inputs from other factories. End point users (persons doing an analysis
+and not trying to produce a list for anyone else) get at the data in the
+same way, by accessing the factory.
+
+The factory objects themselves provide ``data on demand''
+\footnote{This concept is also called ``just in time''.}. What this
+means is that when an event is read in, nothing is analyzed until the
+data is actually requested from the factory. If the program being run
+is only interested in Barrel Calorimeter (BCAL) data, then there is
+no need to do full scale tracking or FCAL reconstruction or anything
+else other than BCAL related reconstruction on the event.
+Since factories get their input from other factories, a heirarchy
+of factories is naturally formed with each knowing what factories it
+needs to access for its inputs.
+
+
+
+%----------------------- Getting and Compiling the Source Code -------------------------
+\section{Getting and Compiling the Source Code}
+The Hall-D reconstruction code is kept in a CVS repository on the 
+Hall-D group disk (/group/halld) at Jefferson Lab. To access it,
+you need an account on the JLab CUE which belongs to the halld unix
+group\footnote{contact the JLab Computer Center if you need don't
+already have such an account}. Follow these steps to checkout and compile
+the code:
+
+\begin{itemize}
+	\item{\bf Create working directory} All of the source code and binaries
+	will reside in this directory. It can be named anything and placed 
+	anywhere. In my account, I use $/home/davidl/HallD$.
+	
+	\item{\bf Set HALLD\_HOME environment variable} The HALLD\_HOME
+	variable should
+	be set to the working directory you just made. The makefile system
+	\footnote{See GlueX-doc-473 on the BMS system}
+	uses this to find the source code and place the resulting binaries.
+	So, for my account this is set to $/home/davidl/HallD$.
+	
+		\begin{lstlisting}[frame=shadowbox,backgroundcolor=\color{cmdbkgd}]
+setenv HALLD_HOME /home/davidl/HallD
+		\end{lstlisting}
+
+	(I use tcsh in these instructions I'll leave it to $bash$ users to translate
+	where appropriate.)
+
+	\item{\bf Checkout the source} Go into
+	your working directory and checkout the code by doing the following:
+	
+		\begin{lstlisting}[frame=shadowbox,backgroundcolor=\color{cmdbkgd}]
+cd $HALLD_HOME
+setenv CVS_RSH `which ssh`
+setenv CVSROOT cvs.jlab.org:/group/halld/Repositories/cvsroot
+cvs co src include
+		\end{lstlisting}
+
+	Note that this assumes the account you're issuing the command from
+	has the same username as your JLab CUE account. If not, prefix
+	$CVSROOT$ with your JLab account name followed by an `@'
+	\footnote{e.g. joe@cvs.jlab.org:/group/halld/Repositories/cvsroot}.
+
+	\item{\bf Move the $include$ directory} Hopefully this step will be
+	removed in the near future. But for now, you'll need to move the
+	include directory you just checked out into the src directory
+	(that you also just checked out).
+
+		\begin{lstlisting}[frame=shadowbox,backgroundcolor=\color{cmdbkgd}]
+mv include src
+		\end{lstlisting}
+	
+	\item{\bf Compile the libraries} Go into the $src/libraries$ directory
+	and run gmake:
+
+		\begin{lstlisting}[frame=shadowbox,backgroundcolor=\color{cmdbkgd}]
+cd src/libraries
+gmake
+		\end{lstlisting}
+
+	This should build all of the libraries and place them in
+	{\it \$HALLD\_HOME/lib/\$OSNAME} where $\$OSNAME$ is the uname of
+	the system you're working on (e.g $Linux$).
+
+	\item{\bf Compile the executables} Go into the {\it src/programs/Analysis}
+	and run $gmake$ in the $hd\_dump$, $hd\_ana$, and $hdview$ directories:
+
+		\begin{lstlisting}[frame=shadowbox,backgroundcolor=\color{cmdbkgd}]
+cd $HALLD_HOME/src/programs/Analysis
+gmake -C hd_dump
+gmake -C hd_ana
+gmake -C hdview
+		\end{lstlisting}
+		
+	The executables will be placed in the {\it \$HALLD\_HOME/bin/\$OSNAME}
+	directory. These programs do the following:
+	\begin{itemize}
+		\item{\it hd\_dump} Dump ASCII output to screen from all factories
+		\item{\it hd\_ana} Generates a couple of example $ROOT$ histograms
+		\item{\it hdview} Graphical drawing of data
+	\end{itemize}
+	
+\end{itemize}
+
+%----------------------- Running the software -------------------------
+\section{Running the software}
+All of these programs use the same command line parser routine
+that is part of DANA. This just means, is that any command
+line argument that does not begin with a ``-'' is assumed to be 
+a data file\footnote{At this point in time, the only format we have
+for data files is HDDM}. Each of the programs will loop over
+all events in all of the data files specified on the command line.
+See the sections below for examples.
+
+%----------------------- Generating a Data File -------------------------
+\subsection{Generating a Data File}
+If you already have an HDGeant produced data file then you can 
+probably skip this section. Note though that HDDM can be very
+picky about version numbers in files so if you have an old file,
+the executables may simply exit with an error.
+
+Here, I'll assume you have a working $hdgeant$ executable.
+For the sake of simplicity, I'll show how to use the 
+single particle generator built into $hdgeant$. The only thing
+you really need is a file called $control.in$ in the directory
+you run hdgeant from. Here's an example one that throws 1.5GeV
+$\mu^{+}$s from the center of the target (z=65cm) at randomly
+chosen angles. See the $GEANT$ documentation for descriptions
+of the uncommented ``cards''.
+
+\begin{lstlisting}[caption=control.in,frame=shadowbox,backgroundcolor=\color{codebkgd}]
+TIME 1. 1. 1000000
+TRIG 1000000
+RUNG 9999
+
+C The following card enables single-track generation (for testing)
+C Note: if you REALLY want the specified theta/phi for every event,
+C you must add 100 to the particle type. Otherwise, theta and phi
+C will be randomly chosen.
+C    particle  energy  theta  phi  vertex(x y z)
+KINE    5      1.5     10.  265.    0. 0. 65.
+
+RNDM 172
+
+CUTS 1e-4 1e-4
+
+SWIT 0 0 0 0 0 0 0 0 0 0
+
+C The following card enables the GelHad package (from BaBar)
+C   on/off  ecut   scale   mode   thresh
+GELH  1     0.2     1.0     4     0.160
+
+HADR 1
+CKOV 1
+LABS 1
+LOSS 1
+MULS 1
+MUNU 1
+PAIR 1
+PFIS 1
+PHOT 1
+RAYL 1
+STRA 1
+SYNC 1
+
+C The NOSECONDARIES card is specific to HDGeant. Setting it to a non-zero
+C value will skip calls to GSKING()
+NOSECONDARIES 1
+
+C The BFIELD card is specific to HDGeant. Setting it to some value
+C (in Tesla) will cause the tracking to use a completely homogeneous
+C magnetic field with this value in the Z (beam) direction. Otherwise,
+C the TOSCA generated field map(dsolenoid.table) will be used.
+BFIELD -2.0
+
+END
+\end{lstlisting}
+
+Run $hdgeant$ without any arguments. It will produce several files,
+but the only one you're interested in is called $hdgeant.hddm$.
+
+%----------------------- hd_dump -------------------------
+\subsection{{\it hd\_dump}}
+The $hd\_dump$ program is a very basic one that can be used to dump
+single events in ASCII format to the terminal. Run it with no arguments
+to see a usage statement. Basically, to see the output of any factory,
+just use the $-D$ option. For example, the following will dump the contents
+of both the $DBCALHit$ and $DFCALHit$ factories:
+
+\begin{lstlisting}[frame=shadowbox,backgroundcolor=\color{cmdbkgd}]
+hd_dump -DDBCALHit -DDFCALHit hdgeant.hddm
+\end{lstlisting}
+
+This program is useful just to see that you're able to read the
+data. It relies on the factory objects themselves to format the
+output since factories are not required to implement a
+``toString()'' method, not all of them will produce useful output
+from $hd\_dump$.
+
+%----------------------- hd_ana -------------------------
+\subsection{{\it hd\_ana}}
+The $hd\_ana$ program is intended to be the definitive example
+program for end user analysis. It opens a ROOT file, creates a
+few histograms, and then fills them using data obtained through
+$DANA$. If you're writing a new analysis program, you probably just
+want to copy the source from this directory and edit from there.
+It is worth compiling and running to test that things are working,
+but the output isn't terribly useful beyond that. Run it like this:
+
+\begin{lstlisting}[frame=shadowbox,backgroundcolor=\color{cmdbkgd}]
+hd_ana hdgeant.hddm
+\end{lstlisting}
+
+%----------------------- hdview -------------------------
+\subsection{{\it hdview}}
+The $hdview$ program provides a simple graphical representation
+of events. It was developed to help visualize things for tracking
+and so is of limited use for other systems. However, it may be
+of some diagnostic use. Run it just like all of the other programs:
+
+\begin{lstlisting}[frame=shadowbox,backgroundcolor=\color{cmdbkgd}]
+hdview hdgeant.hddm
+\end{lstlisting}
+
+
+%----------------------- Adding your own code -------------------------
+\section{Adding your own code}
+At this point, you should have a working copy of the Hall-D source 
+code and an $hdgeant$ produced data file ($hdgeant.hddm$) to work with.
+Modifying the source can be broken up into two groups:
+\begin{itemize}
+	\item{\bf End User} Projects in this group want to perform
+	data analysis for a special study. These projects do not result
+	in output data which can be used either by factories or other
+	end users. These are executable programs. See section \ref{enduser}.
+	
+	\item{\bf Factories} Projects in this group perform some piece
+	of reconstruction or analysis that is made available to other
+	factories or end user's. These are kept in libraries, usually with
+	other related factories. See section \ref{factory}.
+\end{itemize}
+
+%----------------------- I just want to make a histogram! -------------------------
+\subsection{``I just want to make a histogram!''}
+\label{enduser}
+Oh you do, do you? Good, you've come to the right place. The best
+tutorial for this is actually to look at the example program $hd\_ana$. The
+source for this program is kept in
+{\it \$HALLD\_HOME/src/programs/Analysis/hd\_ana}. For convienience, the
+source has been included in this note in appendix \ref{hd_ana_src}.
+The basic idea is
+this: You need to create a class which inherits from the $DeventProcessor$
+class. You can then overide any of the methods corresponding to the 5 phases
+of the data processing:
+
+\begin{itemize}
+	\item{\bf init(void)} Called once at initialization
+	\item{\bf brun(int runnumber)} Called anytime the run number changes.
+	 Guaranteed to be called once before the first call to $evnt()$.
+	\item{\bf evnt(int eventnumber)} Called every event.
+	\item{\bf erun(void)} Called when the run number changes (iff $brun()$
+	 was already called) or after all events have been processed.
+	\item{\bf fini(void)} Called once after all events have been processed.
+\end{itemize}
+
+You create a single instance of your derived class and pass a pointer
+to it to the framework. Control is then
+handed over to the framework which will call the above methods of your
+class at the appropriate times.
+
+Inside your $evnt()$ method, you will request data objects from the 
+framework. The framework will look through it's list of factories
+until it finds the one which produces the requested data type and returns
+a list of those objects to you.
+
+%----------------------- Writing a Factory -------------------------
+\subsection{Writing a Factory}
+\label{factory}
+If you are writing reconstruction code that produces output for others
+to use, then you should write a factory. A factory consists, at a
+minimum, of 3 files which define: 1. the produced object header.
+2. the factory object header, and  3. the factory object methods.
+These can be produced using the $mkfactory$ script which resides in
+the $scripts$ directory in CVS
+\footnote{cvs -d cvs.jlab.org:/group/halld/Repositories/cvsroot co scripts/mkfactory}.
+Invoke the script with the name of the data object you'd like to
+generate with the factory. For example:
+
+\begin{lstlisting}[frame=shadowbox,backgroundcolor=\color{cmdbkgd}]
+mkfactory DParticle
+\end{lstlisting}
+
+would produce 3 files named $DParticle.h$, $DFactory\_DParticle.h$,
+and $DFactory\_DParticle.cc$.
+
+
+
+%----------------------- Questions -------------------------
+\section{Questions}
+Please refer any questions to David Lawrence at $davidl@jlab.org$.
+
+%--------------- Appendicies ----------------
+\newpage
+\appendix
+\section{Source for $hd\_ana$ program}
+\label{hd_ana_src}
+
+%-------------- hd_ana.cc -------------
+Listing \ref{hd_ana.cc} shows the {\it main()} routine for the
+hd\_ana program. It only has three lines. It just creates a MyProcessor
+object and a DEventLoop object and then it tells the DEventLoop object
+to run over all events, calling the methods of the MyProcessor object
+when needed. Notice that the command line arguments are given to 
+the DEventLoop object when it is created. It will parse them for
+,among other things, the file names to read events from.
+
+\lstinputlisting[caption=hd\_ana.cc,label=hd_ana.cc,frame=shadowbox
+	,backgroundcolor=\color{codebkgd}]{hd_ana.cc}
+
+%-------------- MyProcessor.h -------------
+\newpage
+Listing \ref{MyProcessor.h} shows the header file which defines the
+$MyProcessor$ class. It defines 5 routines corresponding to the 5
+phases of event processing described in section \ref{enduser}. Here,
+the $brun()$ and $erun()$ routines are defined right in the header
+to do nothing and just return no error\footnote{$NOERROR$ is defined
+in $derror.h$ which is included from $DEventProcessor.h$.}. Pointers
+for the ROOT file and a few histograms are defined here as well.
+
+\lstinputlisting[caption=MyProcessor.h,label=MyProcessor.h,frame=shadowbox
+	,backgroundcolor=\color{codebkgd}]{MyProcessor.h}
+
+%-------------- MyProcessor.cc -------------
+\newpage
+Listing \ref{MyProcessor.cc} is the file that contains the real meat
+of the program. The $init()$, $evnt()$, and $fini()$ methods
+are defined. I'll describe each of them a little here:
+
+\begin{description}
+\item{\bf derror\_t MyProcessor::init(void)}
+This routine is where the ROOT file is opened and the histograms are
+defined. The first line: {\it eventLoop$->$PrintFactories();} just
+dumps a list of all of the registered factories to the screen. It isn't
+required. The rest of the lines are just ROOT. See the documentation
+for ROOT for more details.
+
+\item{\bf derror\_t MyProcessor::evnt(int eventnumber)}
+This routine gets called every event and is where the histograms
+are filled. In this example, two types of data are requested from
+the $DEventLoop$ object, $eventLoop$\footnote{The $eventLoop$ variable
+is part of the $DEventProcessor$ class and so is inherited by
+the $MyProcessor$ class. It is set by DANA before calling any of
+the $MyProcessor$ methods.}. First, the variables $cdchits$ and
+$fcalhits$ are declared\footnote{Note that since we are asking for
+the DCDCHit and DFCALHit objects, their respective header files are
+included at the top of the file.}. Next, the eventLoop is asked to
+get these data types from whatever factory produces them.
+
+In the next section, there are two $for()$ loops which loop over the elements returned by
+the $eventLoop->Get()$ calls, filling the histograms.
+
+The last line, $eventLoop->PrintRate();$, updates the event processing
+rate on the screen. It only prints to the screen about once per second
+and so is safe to call every event. It is not required though.
+
+\item{\bf derror\_t MyProcessor::fini(void)}
+This routine just flushes the histograms to the ROOT file and then closes it.
+\end{description}
+
+\lstinputlisting[caption=MyProcessor.cc,label=MyProcessor.cc,frame=shadowbox
+	,backgroundcolor=\color{codebkgd}]{MyProcessor.cc}
+
+\end{document}
+
+
