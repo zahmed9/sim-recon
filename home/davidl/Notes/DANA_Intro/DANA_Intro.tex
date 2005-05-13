@@ -3,9 +3,11 @@
 \usepackage{epsfig}
 \usepackage{anysize}
 \usepackage{caption2}
+\usepackage{fancyvrb}
 \usepackage{listings}
 \usepackage{color}
 
+\lstset{basicstyle=\footnotesize,fancyvrb=true}
 \definecolor{codebkgd}{rgb}{0.95,0.95,1.0}
 \definecolor{cmdbkgd}{rgb}{0.95,1.0,0.95}
 
@@ -343,9 +345,74 @@ mkfactory DParticle
 \end{lstlisting}
 
 would produce 3 files named $DParticle.h$, $DFactory\_DParticle.h$,
-and $DFactory\_DParticle.cc$.
+and $DFactory\_DParticle.cc$.\\
+
+The header files should be copied to the $\$HALLD\_HOME/src/libraries/include$
+directory. The source should be placed in the appropriate subsystem
+directory. For example, a factory dealing with BCAL should be placed
+in the $\$HALLD\_HOME/src/libraries/BCAL$ directory. In that same
+directory, there is a file named something like $BCAL\_init.cc$
+which looks like this:
+
+\lstinputlisting[caption=BCAL\_init.cc,label=BCAL_init.cc,frame=shadowbox
+	,backgroundcolor=\color{codebkgd}]{BCAL_init.cc}
+
+$BCAL\_init()$ (as well as all of the other subsystems' $*\_init$
+routines) gets called when the $DEventLoop$ object is instantiated in
+the $main()$ routine of all programs using DANA. This is how your
+factory gets added to the list of factories kept by the $DEventLoop$.\\
+
+The place where you actually want to place your code for the
+factories is in the $init()$, $brun()$, $evnt()$, $erun$, and $fini()$
+methods\footnote{see section \ref{enduser}} of your new DFactory class.
+The most common usage, however, will be to read calibration constants in
+$brun()$ and then do the actual reconstruction in $evnt()$.\\
+
+The factory will produce data in the form of objects. More specifically,
+the factory will fill an STL $vector$ of pointers to objects
+which the factory creates. The DANA framework will automatically delete
+these objects when the next event is read in. So, the first thing
+you need to do is finish the definition of the class by adding the
+data fields. Listing \ref{DMCReconstructed.h} shows an example of a class
+$DMCReconstructed$ produced by a factory. The $mkfactory$ script created
+everything in this file except the lines after $HDCLASSDEF(DMCReconstructed)$.
+The $HDCLASSDEF(DMCReconstructed)$
+is a DANA defined macro that places a couple of methods in the
+class which it needs. It must be placed in the public area of the class.\\
+
+Notice that each data element in listing \ref{DMCReconstructed.h} has a
+comment prefaced with ``$///<$''. This special comment delimiter
+is used by the Doxygen documentation system to present the class
+definition in the web-based documentation in the proper place.\\
+
+\lstinputlisting[caption=DMCReconstructed.h,label=DMCReconstructed.h,frame=shadowbox
+	,backgroundcolor=\color{codebkgd}]{DMCReconstructed.h}
 
 
+The next step is to create objects in your factory's $evnt()$ method
+and add them to the $\_data$ vector of your factory. The variable
+$\_data$ is a vector whose type is based on the class of the objects
+the factory creates. Listing \ref{DFactory_DMCReconstructed.cc} shows
+the $evnt()$ method for the factory that creates the $DMCReconstructed$
+objects. This factory accesses data from two other factories in
+order to produce it's output. The key thing to notice that near the bottom
+of the routine is a line $\_data.push_back(mcreconstructed)$. This
+is how the objects are stored so that DANA can access them. DANA
+will take care of casting the pointers as $const$ before delivering them
+to others. DANA will take care of deleting the objects later, when
+the next event is read in.\\
+
+\lstinputlisting[caption=DFactory\_DMCReconstructed.cc,label=DFactory_DMCReconstructed.cc,frame=shadowbox
+	,backgroundcolor=\color{codebkgd}]{DFactory_DMCReconstructed.cc}
+
+
+The bottom half of listing \ref{DFactory_DMCReconstructed.cc} is
+the factory's $toString()$ method. This is used by $hd\_dump$
+to print the factory contents to the screen. A few routines are
+provided to the factory by the $DFactory_base$ base class to
+help make this easier. These are $printheader$, $printnewrow$,
+$printcol$, and $printrow$. The example illustrates how these
+are used.
 
 %----------------------- Questions -------------------------
 \section{Questions}
