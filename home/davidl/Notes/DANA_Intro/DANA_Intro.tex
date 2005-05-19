@@ -57,16 +57,16 @@ FCAL. Similarly, in order to produce a list of tracks, I would first
 need a list of hits in the CDC, FDC, etc. In general, factories get their
 inputs from other factories. End point users (persons doing an analysis
 and not trying to produce a list for anyone else) get at the data in the
-same way, by accessing the factory.
+same way, by accessing the factories.
 
 The factory objects themselves provide ``data on demand''
 \footnote{This concept is also called ``just in time''.}. What this
 means is that when an event is read in, nothing is analyzed until the
 data is actually requested from the factory. If the program being run
 is only interested in Barrel Calorimeter (BCAL) data, then there is
-no need to do full scale tracking or FCAL reconstruction or anything
-else other than BCAL related reconstruction on the event.
-Since factories get their input from other factories, a heirarchy
+no need to do things like full scale tracking or FCAL reconstruction
+on the event.
+Since factories get their input from other factories, a linked ``web''
 of factories is naturally formed with each knowing what factories it
 needs to access for its inputs.
 
@@ -75,18 +75,19 @@ needs to access for its inputs.
 %----------------------- Getting and Compiling the Source Code -------------------------
 \section{Getting and Compiling the Source Code}
 The Hall-D reconstruction code is kept in a CVS repository on the 
-Hall-D group disk (/group/halld) at Jefferson Lab. To access it,
+Hall-D group disk (/group/halld/Repositories/cvsroot) at Jefferson Lab.
+To access it,
 you need an account on the JLab CUE which belongs to the halld unix
 group\footnote{contact the JLab Computer Center if you need don't
 already have such an account}. Follow these steps to checkout and compile
 the code:
 
 \begin{itemize}
-	\item{\bf Create working directory} All of the source code and binaries
+	\item{\bf Create working directory:} All of the source code and binaries
 	will reside in this directory. It can be named anything and placed 
 	anywhere. In my account, I use $/home/davidl/HallD$.
 	
-	\item{\bf Set HALLD\_HOME environment variable} The HALLD\_HOME
+	\item{\bf Set HALLD\_HOME environment variable:} The HALLD\_HOME
 	variable should
 	be set to the working directory you just made. The makefile system
 	\footnote{See GlueX-doc-473 on the BMS system}
@@ -100,7 +101,7 @@ setenv HALLD_HOME /home/davidl/HallD
 	(I use tcsh in these instructions I'll leave it to $bash$ users to translate
 	where appropriate.)
 
-	\item{\bf Checkout the source} Go into
+	\item{\bf Checkout the source:} Go into
 	your working directory and checkout the code by doing the following:
 	
 		\begin{lstlisting}[frame=shadowbox,backgroundcolor=\color{cmdbkgd}]
@@ -115,7 +116,7 @@ cvs co src include
 	$CVSROOT$ with your JLab account name followed by an `@'
 	\footnote{e.g. joe@cvs.jlab.org:/group/halld/Repositories/cvsroot}.
 
-	\item{\bf Move the $include$ directory} Hopefully this step will be
+	\item{\bf Move the $include$ directory:} Hopefully this step will be
 	removed in the near future. But for now, you'll need to move the
 	include directory you just checked out into the src directory
 	(that you also just checked out).
@@ -124,7 +125,7 @@ cvs co src include
 mv include src
 		\end{lstlisting}
 	
-	\item{\bf Compile the libraries} Go into the $src/libraries$ directory
+	\item{\bf Compile the libraries:} Go into the $src/libraries$ directory
 	and run gmake:
 
 		\begin{lstlisting}[frame=shadowbox,backgroundcolor=\color{cmdbkgd}]
@@ -136,7 +137,7 @@ gmake
 	{\it \$HALLD\_HOME/lib/\$OSNAME} where $\$OSNAME$ is the uname of
 	the system you're working on (e.g $Linux$).
 
-	\item{\bf Compile the executables} Go into the {\it src/programs/Analysis}
+	\item{\bf Compile the executables:} Go into the {\it src/programs/Analysis}
 	and run $gmake$ in the $hd\_dump$, $hd\_ana$, and $hdview$ directories:
 
 		\begin{lstlisting}[frame=shadowbox,backgroundcolor=\color{cmdbkgd}]
@@ -247,9 +248,10 @@ hd_dump -DDBCALHit -DDFCALHit hdgeant.hddm
 
 This program is useful just to see that you're able to read the
 data. It relies on the factory objects themselves to format the
-output since factories are not required to implement a
-``toString()'' method, not all of them will produce useful output
-from $hd\_dump$.
+output. Since factories are not required to implement a
+``toString()'' method, some of them may not produce very useful output
+from $hd\_dump$. At the very least, the factory name and the number
+of elements will always be printed.
 
 %----------------------- hd_ana -------------------------
 \subsection{{\it hd\_ana}}
@@ -257,9 +259,10 @@ The $hd\_ana$ program is intended to be the definitive example
 program for end user analysis. It opens a ROOT file, creates a
 few histograms, and then fills them using data obtained through
 $DANA$. If you're writing a new analysis program, you probably just
-want to copy the source from this directory and edit from there.
-It is worth compiling and running to test that things are working,
-but the output isn't terribly useful beyond that. Run it like this:
+want to copy the source from this directory and edit from there.\\
+
+It is worth compiling and running to test that things are working.
+Run it like this:
 
 \begin{lstlisting}[frame=shadowbox,backgroundcolor=\color{cmdbkgd}]
 hd_ana hdgeant.hddm
@@ -267,10 +270,12 @@ hd_ana hdgeant.hddm
 
 %----------------------- hdview -------------------------
 \subsection{{\it hdview}}
-The $hdview$ program provides a simple graphical representation
+The $hdview$ program provides a simple 2-dimensional graphical
+representation
 of events. It was developed to help visualize things for tracking
-and so is of limited use for other systems. However, it may be
-of some diagnostic use. Run it just like all of the other programs:
+and so may be of limited use for other systems. Nevertheless,
+it has some basic diagnostic value. Run it just like all of the
+other programs:
 
 \begin{lstlisting}[frame=shadowbox,backgroundcolor=\color{cmdbkgd}]
 hdview hdgeant.hddm
@@ -283,12 +288,12 @@ At this point, you should have a working copy of the Hall-D source
 code and an $hdgeant$ produced data file ($hdgeant.hddm$) to work with.
 Modifying the source can be broken up into two groups:
 \begin{itemize}
-	\item{\bf End User} Projects in this group want to perform
-	data analysis for a special study. These projects do not result
-	in output data which can be used either by factories or other
-	end users. These are executable programs. See section \ref{enduser}.
+	\item{\bf End User:} Basically, these are executable programs. If
+	you're just looking to make some histograms or $trees$, then
+	you belong in this group. Projects in this group create a class
+	derived from $DEventProcessor$. See section \ref{enduser}.
 	
-	\item{\bf Factories} Projects in this group perform some piece
+	\item{\bf Factories:} Projects in this group perform some piece
 	of reconstruction or analysis that is made available to other
 	factories or end user's. These are kept in libraries, usually with
 	other related factories. See section \ref{factory}.
@@ -332,8 +337,13 @@ a list of those objects to you.
 \label{factory}
 If you are writing reconstruction code that produces output for others
 to use, then you should write a factory. A factory consists, at a
-minimum, of 3 files which define: 1. the produced object header.
-2. the factory object header, and  3. the factory object methods.
+minimum, of 3 files:
+
+\begin{itemize}
+	\item{the produced object header}
+	\item{the factory object header}
+	\item{the factory object methods}
+\end{itemize}
 These can be produced using the $mkfactory$ script which resides in
 the $scripts$ directory in CVS
 \footnote{cvs -d cvs.jlab.org:/group/halld/Repositories/cvsroot co scripts/mkfactory}.
@@ -347,7 +357,7 @@ mkfactory DParticle
 would produce 3 files named $DParticle.h$, $DFactory\_DParticle.h$,
 and $DFactory\_DParticle.cc$.\\
 
-The header files should be copied to the $\$HALLD\_HOME/src/libraries/include$
+The 2 header files should be copied to the $\$HALLD\_HOME/src/libraries/include$
 directory. The source should be placed in the appropriate subsystem
 directory. For example, a factory dealing with BCAL should be placed
 in the $\$HALLD\_HOME/src/libraries/BCAL$ directory. In that same
@@ -360,10 +370,15 @@ which looks like this:
 $BCAL\_init()$ (as well as all of the other subsystems' $*\_init$
 routines) gets called when the $DEventLoop$ object is instantiated in
 the $main()$ routine of all programs using DANA. This is how your
-factory gets added to the list of factories kept by the $DEventLoop$.\\
+factory gets added to the list of factories kept by the DANA.\\
+
+One thing to keep in mind is that a program may be multi-threaded.
+In this case, multiple objects of your factory class may be created.
+Basically what this means is that you should just avoid using global
+or static variables.\\
 
 The place where you actually want to place your code for the
-factories is in the $init()$, $brun()$, $evnt()$, $erun$, and $fini()$
+factories is in the $init()$, $brun()$, $evnt()$, $erun()$, and $fini()$
 methods\footnote{see section \ref{enduser}} of your new DFactory class.
 The most common usage, however, will be to read calibration constants in
 $brun()$ and then do the actual reconstruction in $evnt()$.\\
@@ -395,11 +410,11 @@ $\_data$ is a vector whose type is based on the class of the objects
 the factory creates. Listing \ref{DFactory_DMCReconstructed.cc} shows
 the $evnt()$ method for the factory that creates the $DMCReconstructed$
 objects. This factory accesses data from two other factories in
-order to produce it's output. The key thing to notice that near the bottom
-of the routine is a line $\_data.push_back(mcreconstructed)$. This
+order to produce it's output. The key thing to notice is that near the bottom
+of the routine is a line $\_data.push\_back(mcreconstructed)$. This
 is how the objects are stored so that DANA can access them. DANA
 will take care of casting the pointers as $const$ before delivering them
-to others. DANA will take care of deleting the objects later, when
+to others. DANA will also take care of deleting the objects later, when
 the next event is read in.\\
 
 \lstinputlisting[caption=DFactory\_DMCReconstructed.cc,label=DFactory_DMCReconstructed.cc,frame=shadowbox
@@ -409,7 +424,7 @@ the next event is read in.\\
 The bottom half of listing \ref{DFactory_DMCReconstructed.cc} is
 the factory's $toString()$ method. This is used by $hd\_dump$
 to print the factory contents to the screen. A few routines are
-provided to the factory by the $DFactory_base$ base class to
+provided to the factory by the $DFactory\_base$ base class to
 help make this easier. These are $printheader$, $printnewrow$,
 $printcol$, and $printrow$. The example illustrates how these
 are used.
@@ -439,12 +454,20 @@ the DEventLoop object when it is created. It will parse them for
 %-------------- MyProcessor.h -------------
 \newpage
 Listing \ref{MyProcessor.h} shows the header file which defines the
-$MyProcessor$ class. It defines 5 routines corresponding to the 5
+$MyProcessor$ class for this example. It defines 5 routines
+corresponding to the 5
 phases of event processing described in section \ref{enduser}. Here,
 the $brun()$ and $erun()$ routines are defined right in the header
 to do nothing and just return no error\footnote{$NOERROR$ is defined
-in $derror.h$ which is included from $DEventProcessor.h$.}. Pointers
-for the ROOT file and a few histograms are defined here as well.
+in $derror.h$ which is included from $DEventProcessor.h$.}. 
+In fact, those lines could be left out completely and you'd get the
+same effect since the $DEventProcessor$ base class defines them
+to do the same thing. They are defined in this example just to
+remind you of the format in case you actually need to use them.\\
+
+Pointers for the ROOT file and a few histograms are defined
+here as well. These pointers don't have to be kept here, that's
+just a style choice.
 
 \lstinputlisting[caption=MyProcessor.h,label=MyProcessor.h,frame=shadowbox
 	,backgroundcolor=\color{codebkgd}]{MyProcessor.h}
@@ -460,8 +483,8 @@ are defined. I'll describe each of them a little here:
 This routine is where the ROOT file is opened and the histograms are
 defined. The first line: {\it eventLoop$->$PrintFactories();} just
 dumps a list of all of the registered factories to the screen. It isn't
-required. The rest of the lines are just ROOT. See the documentation
-for ROOT for more details.
+required. The rest of the lines are just ROOT. See the ROOT documentation
+for details.
 
 \item{\bf derror\_t MyProcessor::evnt(int eventnumber)}
 This routine gets called every event and is where the histograms
@@ -473,12 +496,13 @@ the $MyProcessor$ methods.}. First, the variables $cdchits$ and
 $fcalhits$ are declared\footnote{Note that since we are asking for
 the DCDCHit and DFCALHit objects, their respective header files are
 included at the top of the file.}. Next, the eventLoop is asked to
-get these data types from whatever factory produces them.
+get these data types from whatever factory produces them.\\
 
-In the next section, there are two $for()$ loops which loop over the elements returned by
-the $eventLoop->Get()$ calls, filling the histograms.
+In the next section, the histograms are filled inside of
+two $for()$ loops which loop over the elements returned by
+the $eventLoop->Get()$ calls.\\
 
-The last line, $eventLoop->PrintRate();$, updates the event processing
+The last line, $eventLoop->PrintRate()$, updates the event processing
 rate on the screen. It only prints to the screen about once per second
 and so is safe to call every event. It is not required though.
 
