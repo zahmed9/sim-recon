@@ -40,7 +40,7 @@ document is intended for user's new to the DANA system. This
 includes both end user's who simply want to get at the data for
 their own analysis, and person's writing reconstruction code
 for a particular subsystem. It is purposely kept short to minimize
-you TTR (Time To Results).}
+your TTR (Time To Results).}
 
 \newpage
 \tableofcontents
@@ -308,7 +308,7 @@ source for this program is kept in
 {\it \$HALLD\_HOME/src/programs/Analysis/hd\_ana}. For convienience, the
 source has been included in this note in appendix \ref{hd_ana_src}.
 The basic idea is
-this: You need to create a class which inherits from the $DeventProcessor$
+this: You need to create a class which inherits from the $DEventProcessor$
 class. You can then overide any of the methods corresponding to the 5 phases
 of the data processing:
 
@@ -328,7 +328,7 @@ handed over to the framework which will call the above methods of your
 class at the appropriate times.
 
 Inside your $evnt()$ method, you will request data objects from the 
-framework. The framework will look through it's list of factories
+framework. The framework will look through its list of factories
 until it finds the one which produces the requested data type and returns
 a list of those objects to you.
 
@@ -410,7 +410,7 @@ $\_data$ is a vector whose type is based on the class of the objects
 the factory creates. Listing \ref{DFactory_DMCReconstructed.cc} shows
 the $evnt()$ method for the factory that creates the $DMCReconstructed$
 objects. This factory accesses data from two other factories in
-order to produce it's output. The key thing to notice is that near the bottom
+order to produce its output. The key thing to notice is that near the bottom
 of the routine is a line $\_data.push\_back(mcreconstructed)$. This
 is how the objects are stored so that DANA can access them. DANA
 will take care of casting the pointers as $const$ before delivering them
@@ -431,7 +431,12 @@ are used.
 
 %----------------------- Questions -------------------------
 \section{Questions}
-Please refer any questions to David Lawrence at $davidl@jlab.org$.
+For general discussion or questions which others may benefit from,
+you are encouraged to post to the GlueX forums at:\\
+
+{\it http://tantalus.phys.uregina.ca/gluex/modules.php?name=Forums}\\
+
+Please refer all other questions to David Lawrence at $davidl@jlab.org$.
 
 %--------------- Appendicies ----------------
 \newpage
@@ -512,6 +517,81 @@ This routine just flushes the histograms to the ROOT file and then closes it.
 
 \lstinputlisting[caption=MyProcessor.cc,label=MyProcessor.cc,frame=shadowbox
 	,backgroundcolor=\color{codebkgd}]{MyProcessor.cc}
+
+%------------------ Glossary of Terms --------------------
+\newpage
+\section{Glossary of Terms}
+\label{glossary}
+
+{\bf attribute:} In terms of a C++ object, an attribute is a data
+member of a class. See also {\it method}.\\
+
+{\bf casting, typecasting:} A way of instructing the C/C++ compiler to
+treat a variable as though it is of a certain type of data. This is
+often used to cast pointers so that the data being pointed to is treated
+as a certain type.\\
+
+
+{\bf class:} A {\it class} is a definition of an object. An object
+is just the implementation of a class. Hence, one writes a class, but
+when the program runs, there may be many instances(i.e. objects) of that
+class. A class consists of two types of members: attributes(data) and
+methods(algorithms).\\
+
+
+{\bf inheritance:} Once a class is defined, another class can be
+defined which extends or {\it inherits} from it. The class which inherits
+is called a {\it subclass} of the {\it base class} it inherited from.
+The idea is that the subclass contains everything that the base class
+does, but can then be specialized or enhanced. This is a powerful feature
+that allows for {\it polymorphism}.\\
+
+
+{\bf method:} An algorithm belonging to a class. To a FORTRAN or C
+programmer, this would simply be a subroutine or a function. Inside
+the method, the data memebers of the object are automatically available as
+local variables.\\
+
+
+{\bf OO, Object-Oriented:} A software design paradigm in which data
+and algorithms(methods) are combined into single entities -- objects. The
+objects communicate to each other through well defined interfaces which
+allow objects to keep some data private and inaccessible to other objects.
+FORTRAN and C are condsidered {\it procedural} languages while C++ is
+{\it object-oriented}.\\
+
+{\bf pointer:} An address in RAM memory. In languages such as FORTRAN
+which do not use dynamic memory allocation, pointers are not accessible
+to the programmer. In C/C++, the program can decide while it is running
+that it needs a new block of memory and request it from the system.
+The system will return a pointer to the new memory block (or the new
+object for C++).\\
+
+{\bf polymorphism:} This is a property that allows a subclass to be
+used as though it were the base class. For instance, if a class
+{\it shape} exists, one can define two subclasses called {\it circle}
+and {\it square}. Both circle and square objects can be treated as
+objects of type {\it shape} (e.g kept in a list of {\it shape} objects.\\
+
+{\bf STL, Standard Template Library:} Some standard C++ templates used
+mainly for dealing with arrays of objects. Note that templates are 
+an integrated part of C++ and are available even without STL.
+
+{\bf subclass:} See {\it inheritance}.\\
+
+{\bf vector:} A randomly accessible array of objects. This is defined
+as part of the STL. By contrast, the STL also defines a {\it list}
+which is a linked list of objects.\\
+
+%------------------ Other Useful Documents --------------------
+%\newpage
+\section{Other Useful Documents}
+\label{documents}
+
+\begin{itemize}
+\item{GlueX-doc-64} Geometry Specifications for Hall D (HDDS)
+\item{GlueX-doc-65} HDDM --- Hall D Data Model
+\end{itemize}
 
 \end{document}
 
