@@ -103,12 +103,12 @@ derror_t MyProcessor::PlotLines(void)
 	float cmax = 300.0; // in cm.
 	
 	// Delete lines from previous call
-	for(int i=0;i<lines.size();i++)delete lines[i];
+	for(unsigned int i=0;i<lines.size();i++)delete lines[i];
 	lines.clear();
 
 	// Loop over the archits to find the two points defining each line
 	vector<DArcHit*> archits = factory->GetDArcHits();
-	for(int i=0; i<archits.size(); i++){
+	for(unsigned int i=0; i<archits.size(); i++){
 		DArcHit *a = archits[i];
 		float m = a->m;
 		float b = a->b;
@@ -135,7 +135,7 @@ derror_t MyProcessor::PlotLines(void)
 	
 	// Draw circles at focus points
 	vector<TEllipse*> circles = factory->GetCircles();
-	for(int i = 0; i<circles.size(); i++){
+	for(unsigned int i = 0; i<circles.size(); i++){
 		TEllipse *circle = circles[i];
 		circle->SetLineColor(kRed);
 		circle->SetFillStyle(0);
@@ -168,7 +168,7 @@ derror_t MyProcessor::PlotDensity(void)
 	density->Draw("cont");
 
 	// Draw circles at focus points
-	for(int i = 0; i<circles.size(); i++){
+	for(unsigned int i = 0; i<circles.size(); i++){
 		TEllipse *circle = circles[i];
 		circle->SetLineColor(kRed);
 		circle->SetFillStyle(0);
@@ -238,9 +238,10 @@ derror_t MyProcessor::PlotPhiVsZ(void)
 	vector<const DMCTrackCandidate*> mctc;
 	eventloop->Get(mctc);
 	mmf->EnableRadioButtons(mctc.size());
+	Int_t option = mmf->GetRadioOption();
 
 	axes_phiz->Draw();
-	factory->DrawPhiZPoints();
+	factory->DrawPhiZPoints(option);
 	
 	mmf->SetGrid(1);
 	mmf->Update();
@@ -263,11 +264,11 @@ derror_t MyProcessor::PlotHits(void)
 	axes_hits->Draw("AXIS");
 	
 	// Delete old Markers
-	for(int i=0; i<markers.size(); i++)delete markers[i];
+	for(unsigned int i=0; i<markers.size(); i++)delete markers[i];
 	markers.clear();
 
 	// Delete old Ellipses
-	for(int i=0; i<circles.size(); i++)delete circles[i];
+	for(unsigned int i=0; i<circles.size(); i++)delete circles[i];
 	circles.clear();
 
 	// Draw BCAL for reference
@@ -285,7 +286,7 @@ derror_t MyProcessor::PlotHits(void)
 	circles.push_back(circle);
 	
 	// Draw circles based on MCTrackCandidates
-	for(int i=0;i<mctc.size();i++){
+	for(unsigned int i=0;i<mctc.size();i++){
 		const DMCTrackCandidate *tc = mctc[i];
 		float x0 = tc->x0;
 		float y0 = tc->y0;
@@ -295,12 +296,12 @@ derror_t MyProcessor::PlotHits(void)
 	}
 	
 	// Draw all ellipses
-	for(int i=0; i<circles.size(); i++)circles[i]->Draw();
+	for(unsigned int i=0; i<circles.size(); i++)circles[i]->Draw();
 	
 	// Loop over all cheat hits and draw them
 	vector<const DMCCheatHit*> mccheathits;
 	eventloop->Get(mccheathits);
-	for(int i=0; i<mccheathits.size(); i++){
+	for(unsigned int i=0; i<mccheathits.size(); i++){
 		const DMCCheatHit *mccheathit = mccheathits[i];
 		float x = mccheathit->r*cos(mccheathit->phi);
 		float y = -mccheathit->r*sin(mccheathit->phi);
