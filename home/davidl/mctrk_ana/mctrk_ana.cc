@@ -5,8 +5,8 @@
 //
 
 #include "MyProcessor.h"
-#include "DEventLoop.h"
-#include "DFactory_DMCTrackHists.h"
+#include "DApplication.h"
+#include "DEventProcessor_TrackHists.h"
 
 //-----------
 // main
@@ -15,16 +15,17 @@ int main(int narg, char *argv[])
 {
 	// Instantiate our event processor
 	MyProcessor myproc;
+	
+	// Instantiate a TrackHists event processor
+	DEventProcessor_TrackHists trkHists;
 
 	// Instantiate an event loop object
-	DEventLoop eventloop(narg, argv);
-
-	// Add DMCTrackHists factory as processor so it automatically
-	// gets called every event.
-	eventloop.AddFactory(new DFactory_DMCTrackHists());
+	DApplication app(narg, argv);
 
 	// Run though all events, calling our event processor's methods
-	eventloop.Run(&myproc);
+	app.AddProcessor(&myproc);
+	app.AddProcessor(&trkHists);
+	app.Run(NULL,3);
 	
 	return 0;
 }

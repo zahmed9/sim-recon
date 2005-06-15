@@ -18,7 +18,7 @@ class MyProcessor:public DEventProcessor
 {
 	public:
 		derror_t init(void);					///< Called once at program start.
-		derror_t evnt(int eventnumber);	///< Called every event.
+		derror_t evnt(DEventLoop *eventLoop, int eventnumber);	///< Called every event.
 		derror_t fini(void);					///< Called after last event of last event source has been processed.
 
 		TFile *ROOTfile;
