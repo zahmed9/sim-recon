@@ -35,17 +35,14 @@ derror_t MyProcessor::init(void)
 	// Get a pointer to the MCTrackCandidates factory object so we can 
 	// access things not included in the normal _data container
 	factory = (DFactory_DMCTrackCandidate*)eventloop->GetFactory("DMCTrackCandidate");
-	
-	// Set factory to handle flipping of x-axis for proper viewing
-	factory->flip_x_axis = 1;
-	
+
 	// Tell factory to keep around a few density histos
 	factory->SetMaxDensityHistograms(10);
 	
 	// set limits for plot. This represents the space where the center 
 	// of the circle can be. It can be (and often is) outside of the
 	// bounds of the solenoid.
-	float cmax = 400.0; // in cm.
+	float cmax = 150.0; // in cm.
 
 	axes = new TH2F("axes","",10,-cmax,cmax,10,-cmax,cmax);
 	axes->SetStats(0);
@@ -308,7 +305,7 @@ derror_t MyProcessor::PlotHits(void)
 	for(unsigned int i=0; i<mccheathits.size(); i++){
 		const DMCCheatHit *mccheathit = mccheathits[i];
 		float x = mccheathit->r*cos(mccheathit->phi);
-		float y = -mccheathit->r*sin(mccheathit->phi);
+		float y = mccheathit->r*sin(mccheathit->phi);
 		int color = colors[mccheathit->track-1];
 		int markerstyle = 20+mccheathit->track-1;
 		if(mccheathit->system>2)continue;
