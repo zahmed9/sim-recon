@@ -54,7 +54,7 @@ MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(p,w,
 			display->AddEntry("z-intercept Density", dtInterceptDensity);
 			display->AddEntry("Phi vs. z", dtPhiVsZ);
 			display->AddEntry("Detector Hits", dtHits);
-			display->AddEntry("Detector Hits", dtStats);
+			//display->AddEntry("Detector Hits", dtStats);
 	
 	//------------------ Middle Frame ------------------
 	int canvas_size = 400;
@@ -120,7 +120,7 @@ MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(p,w,
 		maincanvas = emcanvas->GetCanvas();
 
 		// Options frame
-		optionsframe = new TGButtonGroup(middleframe, "Pass", kVerticalFrame);
+		optionsframe = new TGButtonGroup(middleframe, "Track", kVerticalFrame);
 		middleframe->AddFrame(optionsframe, defHints);
 
 
@@ -179,11 +179,11 @@ void MyMainFrame::Update(void)
 	
 	// Update event number
 	char str[32];
-	sprintf(str, "%d", eventloop->eventnumber());
+	sprintf(str, "%d", eventloop->GetDEvent().GetEventNumber());
 	eventno->SetText(str);
 
 	// Update filename (if needed)
-	const char* sname = eventloop->GetSourceName();
+	const char* sname = eventloop->GetDEvent().GetDEventSource()->GetSourceName();
 	if(sname != sourcename){
 		sourcename = sname;
 		filename->SetText(sourcename);
@@ -192,7 +192,7 @@ void MyMainFrame::Update(void)
 	// Update numbers of tracks etc.
 	vector<const DMCReconstructed*> mcreconstructed;
 	eventloop->Get(mcreconstructed);
-	sprintf(str, "%d", mcreconstructed.size());
+	sprintf(str, "%d", (int)mcreconstructed.size());
 	foundtrks->SetText(str);
 	Ntot_foundtrks += mcreconstructed.size();
 	sprintf(str, "%d", Ntot_foundtrks);
@@ -200,14 +200,14 @@ void MyMainFrame::Update(void)
 
 	vector<const DMCThrown*> mcthrown;
 	eventloop->Get(mcthrown);
-	sprintf(str, "%d", mcthrown.size());
+	sprintf(str, "%d", (int)mcthrown.size());
 	throwntrks->SetText(str);
 	Ntot_throwntrks += mcthrown.size();
 	sprintf(str, "%d", Ntot_throwntrks);
 	tot_throwntrks->SetText(str);
 	
 	int Ncorrecttrks = 0;
-	for(int i=0; i<mcreconstructed.size(); i++){
+	for(unsigned int i=0; i<mcreconstructed.size(); i++){
 		const DMCReconstructed *mcr = mcreconstructed[i];
 		if(mcr->thrown_delta_p/mcr->p < 0.2)Ncorrecttrks++;
 	}
@@ -222,12 +222,12 @@ void MyMainFrame::EnableRadioButtons(int N)
 	if(N<0)N=0;
 
 	// Remove any extra radio buttons
-	for(int i=N; i<radiobuttons.size(); i++){
+	for(unsigned int i=N; i<radiobuttons.size(); i++){
 		radiobuttons[i]->UnmapWindow();
 		optionsframe->RemoveFrame(radiobuttons[i]);
 		delete radiobuttons[i];
 	}
-	if(radiobuttons.size()>N)
+	if((int)radiobuttons.size()>N)
 		radiobuttons.erase(radiobuttons.begin()+N, radiobuttons.end());
 
 	// Add radio buttons if needed
@@ -239,7 +239,7 @@ void MyMainFrame::EnableRadioButtons(int N)
 	}
 	
 	if(radiobuttons.size()>0){
-		if(radiooption > radiobuttons.size()){
+		if(radiooption > (int)radiobuttons.size()){
 			radiooption = radiobuttons.size();
 			radiobuttons[radiooption-1]->SetState(kButtonDown);
 		}
@@ -274,7 +274,7 @@ void MyMainFrame::DoNext(void)
 //-------------------
 void MyMainFrame::DoPrev(void)
 {
-	eventloop->GotoEvent(eventloop->eventnumber()-1);
+	//eventloop->GotoEvent(eventloop->GetDEvent().GetEventNumber()-1);
 	DoNext();
 }
 
@@ -283,8 +283,8 @@ void MyMainFrame::DoPrev(void)
 //-------------------
 void MyMainFrame::DoSetDisplay(Int_t id)
 {
-	if(eventloop->eventnumber()>0) 
-		myproc->evnt(eventloop->eventnumber());
+	if(eventloop->GetDEvent().GetEventNumber()>0) 
+		myproc->evnt(eventloop, eventloop->GetDEvent().GetEventNumber());
 }
 
 //-------------------
@@ -303,7 +303,7 @@ void MyMainFrame::DoSetOption(Int_t id)
 {
 	if(radiooption != id){
 		radiooption = id;
-		myproc->evnt(eventloop->eventnumber());
+		myproc->evnt(eventloop, eventloop->GetDEvent().GetEventNumber());
 	}
 }
 

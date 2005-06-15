@@ -43,6 +43,7 @@ class MyMainFrame:public TGMainFrame {
 
 		// Other (non-slot) methods
 		void Update(void);
+		void Clear(void){maincanvas->Clear();}
 		inline void SetGrid(int s){maincanvas->SetGridx(s);maincanvas->SetGridy(s);}
 		inline Int_t GetDisplayType(void){return display->GetSelected();}
 		void EnableRadioButtons(int N);

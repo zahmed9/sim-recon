@@ -11,6 +11,7 @@
 #include "DEventLoop.h"
 
 
+DApplication *dapp = NULL;
 DEventLoop *eventloop = NULL;
 MyProcessor *myproc = NULL;
 MyMainFrame *mmf = NULL;
@@ -20,28 +21,30 @@ MyMainFrame *mmf = NULL;
 //-----------
 int main(int narg, char *argv[])
 {
-	// Instantiate an event loop object this has to be done BEFORE
+	// Instantiate a DApplication object this has to be done BEFORE
 	// creating the TApplication object since that modifes the argument list.
-	eventloop = new DEventLoop(narg, argv);
-
+	dapp = new DApplication(narg, argv);
+	
 	// Open Window
-	TApplication app("HDView", &narg, argv);
+	TApplication app("PatFind", &narg, argv);
 	mmf = new MyMainFrame(gClient->GetRoot(), 800, 800);
 	
 	// Create a MyProcessor
 	myproc = new MyProcessor();
-	eventloop->AddProcessor(myproc);
-	eventloop->Init();
+	dapp->AddProcessor(myproc);
+	eventloop = new DEventLoop(dapp);
+	dapp->Init();
 
 	// Hand control to ROOT event loop
 	app.Run();
 	
 	// Close out event loop
-	eventloop->Fini();
+	dapp->Fini();
 	
 	// clean up
 	delete myproc;
 	delete mmf;
+	delete dapp;
 	
 	return 0;
 }

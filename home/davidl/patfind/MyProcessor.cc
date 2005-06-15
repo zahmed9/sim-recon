@@ -12,6 +12,7 @@ using namespace std;
 #include "MyProcessor.h"
 #include "MyMainFrame.h"
 
+#include "DApplication.h"
 #include "DEventLoop.h"
 #include "DMagneticFieldMap.h"
 #include "DQuickFit.h"
@@ -31,9 +32,6 @@ extern MyMainFrame *mmf;
 //------------------------------------------------------------------
 derror_t MyProcessor::init(void)
 {
-	// Print list of factories
-	eventloop->PrintFactories();
-	
 	// Get a pointer to the MCTrackCandidates factory object so we can 
 	// access things not included in the normal _data container
 	factory = (DFactory_DMCTrackCandidate*)eventloop->GetFactory("DMCTrackCandidate");
@@ -47,7 +45,7 @@ derror_t MyProcessor::init(void)
 	// set limits for plot. This represents the space where the center 
 	// of the circle can be. It can be (and often is) outside of the
 	// bounds of the solenoid.
-	float cmax = 150.0; // in cm.
+	float cmax = 400.0; // in cm.
 
 	axes = new TH2F("axes","",10,-cmax,cmax,10,-cmax,cmax);
 	axes->SetStats(0);
@@ -66,8 +64,11 @@ derror_t MyProcessor::init(void)
 //------------------------------------------------------------------
 // evnt
 //------------------------------------------------------------------
-derror_t MyProcessor::evnt(int eventnumber)
+derror_t MyProcessor::evnt(DEventLoop *eventLoop, int eventnumber)
 {
+	// Copy eventLoop pointer to object for use by other methods
+	this->eventLoop = eventLoop;
+
 	// Invoke the MCTrackCandidates factory so it's internal structures
 	// are filled with the current event's data
 	vector<const DMCTrackCandidate*> mctrackcandidates;
@@ -196,8 +197,11 @@ derror_t MyProcessor::PlotSlope(void)
 
 	// Draw the histo
 	TH1F *hist = factory->GetSlopeDensityHistogram(option);
-	hist->SetLineColor(colors[(option-1)%5]);
-	hist->Draw();
+	if(hist){
+		hist->SetLineColor(colors[(option-1)%5]);
+		hist->Draw();
+	}
+	
 	
 	// Update the canvas so the new plot is drawn
 	mmf->Update();

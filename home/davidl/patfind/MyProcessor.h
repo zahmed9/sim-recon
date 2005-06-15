@@ -7,6 +7,7 @@
 ///
 
 
+#include "DApplication.h"
 #include "DEventProcessor.h"
 #include "DEventLoop.h"
 
@@ -26,7 +27,7 @@ class MyProcessor:public DEventProcessor
 {
 	public:
 		derror_t init(void);					///< Called once at program start.
-		derror_t evnt(int eventnumber);	///< Called every event.
+		derror_t evnt(DEventLoop *eventLoop, int eventnumber);	///< Called every event.
 		derror_t fini(void);					///< Called after last event of last event source has been processed.
 
 		derror_t PlotLines(void);
@@ -39,6 +40,7 @@ class MyProcessor:public DEventProcessor
 
 		TH2F *axes, *axes_phiz, *axes_hits;
 		DFactory_DMCTrackCandidate *factory;
+		DEventLoop *eventLoop;
 		
 		vector<TLine*> lines;
 		vector<TMarker*> markers;
