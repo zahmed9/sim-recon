@@ -23,6 +23,8 @@ class MyMainFrame:public TGMainFrame {
 			dtNone,
 			dtLines,
 			dtHoughDensity,
+			dtIntersectDensityX,
+			dtIntersectDensityY,
 			dtSlopeDensity,
 			dtInterceptDensity,
 			dtPhiVsZ,

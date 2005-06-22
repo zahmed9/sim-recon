@@ -50,6 +50,8 @@ MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(p,w,
 			
 			display->AddEntry("Lines", dtLines);
 			display->AddEntry("Hough Density", dtHoughDensity);
+			display->AddEntry("Intersection Density X", dtIntersectDensityX);
+			display->AddEntry("Intersection Density Y", dtIntersectDensityY);
 			display->AddEntry("Slope Density", dtSlopeDensity);
 			display->AddEntry("z-intercept Density", dtInterceptDensity);
 			display->AddEntry("Phi vs. z", dtPhiVsZ);
@@ -57,7 +59,7 @@ MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(p,w,
 			//display->AddEntry("Detector Hits", dtStats);
 	
 	//------------------ Middle Frame ------------------
-	int canvas_size = 400;
+	int canvas_size = w/2;
 	TGHorizontalFrame *middleframe = new TGHorizontalFrame(this, w, canvas_size);
 	AddFrame(middleframe, defHintsX);
 	

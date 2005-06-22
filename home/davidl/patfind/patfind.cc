@@ -27,7 +27,7 @@ int main(int narg, char *argv[])
 	
 	// Open Window
 	TApplication app("PatFind", &narg, argv);
-	mmf = new MyMainFrame(gClient->GetRoot(), 800, 800);
+	mmf = new MyMainFrame(gClient->GetRoot(), 1200, 1200);
 	
 	// Create a MyProcessor
 	myproc = new MyProcessor();

@@ -37,7 +37,7 @@ derror_t MyProcessor::init(void)
 	factory = (DFactory_DMCTrackCandidate*)eventloop->GetFactory("DMCTrackCandidate");
 
 	// Tell factory to keep around a few density histos
-	factory->SetMaxDensityHistograms(10);
+	factory->SetMaxDensityHistograms(16);
 	
 	// set limits for plot. This represents the space where the center 
 	// of the circle can be. It can be (and often is) outside of the
@@ -75,6 +75,8 @@ derror_t MyProcessor::evnt(DEventLoop *eventLoop, int eventnumber)
 	switch(mmf->GetDisplayType()){
 		case MyMainFrame::dtLines:					PlotLines();		break;
 		case MyMainFrame::dtHoughDensity:		PlotDensity();		break;
+		case MyMainFrame::dtIntersectDensityX:	PlotDensityX();	break;
+		case MyMainFrame::dtIntersectDensityY:	PlotDensityY();	break;
 		case MyMainFrame::dtSlopeDensity:		PlotSlope();		break;
 		case MyMainFrame::dtInterceptDensity:	PlotIntercept();	break;
 		case MyMainFrame::dtPhiVsZ:				PlotPhiVsZ();		break;
@@ -92,7 +94,6 @@ derror_t MyProcessor::evnt(DEventLoop *eventLoop, int eventnumber)
 //------------------------------------------------------------------
 derror_t MyProcessor::PlotLines(void)
 {
-	mmf->EnableRadioButtons(0);
 	axes->Draw();
 
 	// set limits for plot. This represents the space where the center 
@@ -133,10 +134,13 @@ derror_t MyProcessor::PlotLines(void)
 	
 	// Draw circles at focus points
 	vector<TEllipse*> circles = factory->GetCircles();
+	mmf->EnableRadioButtons(circles.size());
+	Int_t option = mmf->GetRadioOption();
 	for(unsigned int i = 0; i<circles.size(); i++){
 		TEllipse *circle = circles[i];
-		circle->SetLineColor(kRed);
+		circle->SetLineColor((int)i==option-1 ? kBlack:kRed);
 		circle->SetFillStyle(0);
+		circle->SetLineWidth((int)i==option-1 ? 2:1);
 		circle->Draw();
 	}
 
@@ -180,15 +184,54 @@ derror_t MyProcessor::PlotDensity(void)
 }
 
 //------------------------------------------------------------------
+// PlotDensityX
+//------------------------------------------------------------------
+derror_t MyProcessor::PlotDensityX(void)
+{
+	int ndensity = factory->GetNIntDensityX();
+	mmf->EnableRadioButtons(ndensity);
+
+	// Get and draw density histogram
+	Int_t option = mmf->GetRadioOption();
+	TH1F *density = factory->GetIntersectDensityHistogramX(option);
+	if(density)density->Draw();
+	
+	// Update the canvas so the new plot is drawn
+	mmf->Update();
+	
+	return NOERROR;
+}
+
+//------------------------------------------------------------------
+// PlotDensityY
+//------------------------------------------------------------------
+derror_t MyProcessor::PlotDensityY(void)
+{
+	int ndensity = factory->GetNIntDensityY();
+	mmf->EnableRadioButtons(ndensity);
+
+	// Get and draw density histogram
+	Int_t option = mmf->GetRadioOption();
+	TH1F *density = factory->GetIntersectDensityHistogramY(option);
+	if(density)density->Draw();
+	
+	// Update the canvas so the new plot is drawn
+	mmf->Update();
+	
+	return NOERROR;
+}
+
+//------------------------------------------------------------------
 // PlotSlope
 //------------------------------------------------------------------
 derror_t MyProcessor::PlotSlope(void)
 {
-	mmf->EnableRadioButtons(factory->GetNumDensityHistograms()-1);
+	int Nhistos = factory->GetNumSlopeHistograms();
+	mmf->EnableRadioButtons(Nhistos);
 	Int_t option = mmf->GetRadioOption();
-	if(option<1 || option>factory->GetNumDensityHistograms()){
+	if(option<1 || option>Nhistos){
 		cout<<__FILE__<<":"<<__LINE__<<" out of range ("<<option<<")";
-		cout<<"Ndensity_histos="<<factory->GetNumDensityHistograms()<<endl;
+		cout<<"Nslope_histos="<<Nhistos<<endl;
 		return NOERROR;
 	}
 
@@ -211,11 +254,12 @@ derror_t MyProcessor::PlotSlope(void)
 //------------------------------------------------------------------
 derror_t MyProcessor::PlotIntercept(void)
 {
-	mmf->EnableRadioButtons(factory->GetNumDensityHistograms()-1);
+	int Nhistos = factory->GetNumOffsetHistograms();
+	mmf->EnableRadioButtons(Nhistos);
 	Int_t option = mmf->GetRadioOption();
-	if(option<1 || option>factory->GetNumDensityHistograms()){
+	if(option<1 || option>Nhistos){
 		cout<<__FILE__<<":"<<__LINE__<<" out of range ("<<option<<")";
-		cout<<"Ndensity_histos="<<factory->GetNumDensityHistograms()<<endl;
+		cout<<"Nslope_histos="<<Nhistos<<endl;
 		return NOERROR;
 	}
 

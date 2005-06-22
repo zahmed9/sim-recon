@@ -32,6 +32,8 @@ class MyProcessor:public DEventProcessor
 
 		derror_t PlotLines(void);
 		derror_t PlotDensity(void);
+		derror_t PlotDensityX(void);
+		derror_t PlotDensityY(void);
 		derror_t PlotSlope(void);
 		derror_t PlotIntercept(void);
 		derror_t PlotPhiVsZ(void);
