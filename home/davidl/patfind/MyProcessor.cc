@@ -47,7 +47,7 @@ derror_t MyProcessor::init(void)
 	axes = new TH2F("axes","",10,-cmax,cmax,10,-cmax,cmax);
 	axes->SetStats(0);
 
-	axes_phiz = new TH2F("axes_phiz","",10,0.0,650.0, 10, -2.0*M_PI, 2.0*M_PI);
+	axes_phiz = new TH2F("axes_phiz","",10,0.0,650.0, 10, -6.0*M_PI, +6.0*M_PI);
 	axes_phiz->SetStats(0);
 	axes_phiz->SetXTitle("z-coordinate (cm)");
 	axes_phiz->SetYTitle("\\phi angle (radians)");
@@ -227,7 +227,7 @@ derror_t MyProcessor::PlotDensityY(void)
 derror_t MyProcessor::PlotSlope(void)
 {
 	int Nhistos = factory->GetNumSlopeHistograms();
-	mmf->EnableRadioButtons(Nhistos);
+	mmf->EnableRadioButtons(Nhistos-1);
 	Int_t option = mmf->GetRadioOption();
 	if(option<1 || option>Nhistos){
 		cout<<__FILE__<<":"<<__LINE__<<" out of range ("<<option<<")";
@@ -255,7 +255,7 @@ derror_t MyProcessor::PlotSlope(void)
 derror_t MyProcessor::PlotIntercept(void)
 {
 	int Nhistos = factory->GetNumOffsetHistograms();
-	mmf->EnableRadioButtons(Nhistos);
+	mmf->EnableRadioButtons(Nhistos-1);
 	Int_t option = mmf->GetRadioOption();
 	if(option<1 || option>Nhistos){
 		cout<<__FILE__<<":"<<__LINE__<<" out of range ("<<option<<")";
@@ -280,9 +280,8 @@ derror_t MyProcessor::PlotIntercept(void)
 derror_t MyProcessor::PlotPhiVsZ(void)
 {
 	// Enable options for all tracks
-	vector<const DMCTrackCandidate*> mctc;
-	eventloop->Get(mctc);
-	mmf->EnableRadioButtons(mctc.size());
+	vector<TEllipse*> circles = factory->GetCircles();
+	mmf->EnableRadioButtons(circles.size());
 	Int_t option = mmf->GetRadioOption();
 
 	axes_phiz->Draw();
