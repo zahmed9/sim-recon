@@ -2,7 +2,7 @@
 
 setenv JAVAROOT /apps
 setenv HALLD_EXTERNALPACKAGES /group/halld/Software/ExternalPackages
-setenv XERCESCROOT ${HALLD_EXTERNALPACKAGES}/xerces-c-src_2_5_0
+setenv XERCESCROOT ${HALLD_EXTERNALPACKAGES}/xerces-c-src_2_5_0.${OSNAME}
 setenv XERCES_INCLUDE ${HALLD_EXTERNALPACKAGES}/include
 setenv XERCES_LIB ${HALLD_EXTERNALPACKAGES}/lib/${OSNAME}
 setenv PERL5LIB ${HALLD_EXTERNALPACKAGES}/perl_mods/lib/site_perl/5.8.2/i686-linux
