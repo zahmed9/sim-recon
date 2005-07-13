@@ -48,17 +48,20 @@ if( $ENV{"HALLD_MAKE_RELEASE_REUSE"} eq "YES"){
 	system("mv HDFast HDGeant genr8 mcroot stdhep_translators hdds src/programs/Simulation");
 	system("mv hddm src/programs/Analysis");
 	system("mv include src");
-}
 
-# Regenerate hddm files from schema
-print "\nBuilding HDDM tools ...\n\n";
-chdir "src/programs/Analysis/hddm";
-system("make install");
-print "\n...generating hddm C/C++ source ...\n";
-system("rm -f event.xml");
-system("schema-hddm event.xsd > event.xml");
-system("hddm-c event.xml");
-system("cp hddm_s.h ../../../libraries/include");
+	# Regenerate hddm files from schema
+	print "\nBuilding HDDM tools ...\n\n";
+	chdir "src/programs/Analysis/hddm";
+	system("make install");
+	print "\n...generating hddm C/C++ source ...\n";
+	system("rm -f event.xml");
+	system("schema-hddm event.xsd > event.xml");
+	system("hddm-c event.xml");
+	system("cp hddm_s.h ../../../libraries/include");
+
+	chdir "$halld_home/src/programs/Simulation/hdds";
+	system("make");
+}
 
 # Build libraries
 print "\nBuilding Libraries ...\n\n";
@@ -77,15 +80,11 @@ chdir "$halld_home/src/programs/Analysis/hdview";
 system("make");
 chdir "$halld_home/src/programs/Analysis/bfield2root";
 system("make");
-chdir "$halld_home/src/programs/Simulation/hdds";
-system("make");
 chdir "$halld_home/src/programs/Simulation/stdhep_translators";
 system("make install");
 chdir "$halld_home/src/programs/Simulation/genr8_2_hddm";
 system("make");
 chdir "$halld_home/src/programs/Simulation/mcroot";
-system("make install");
-chdir "$halld_home/src/programs/Simulation/HDFast";
 system("make install");
 
 
@@ -95,12 +94,23 @@ system("make");
 chdir "$halld_home/src/programs/Simulation/HDGeant";
 system("make");
 
-# Rebuild documentation
-chdir "$halld_home/src/doc";
-system("make clean ; make");
-system("$halld_home/scripts/make_CVSreport ; mv CVSstats html");
-if($making_latest != 0){
+
+# This can only be remade on Linux
+if( $ENV{"OSNAME"} eq "Linux"){
+	chdir "$halld_home/src/programs/Simulation/HDFast";
 	system("make install");
+}
+
+# Some other things that don't need to be redone
+if( $ENV{"HALLD_MAKE_RELEASE_REUSE"} ne "YES"){
+
+	# Rebuild documentation
+	chdir "$halld_home/src/doc";
+	system("make clean ; make");
+	system("$halld_home/scripts/make_CVSreport ; mv CVSstats html");
+	if($making_latest != 0){
+		system("make install");
+	}
 }
 
 # Print usage statement and exit
