@@ -14,7 +14,7 @@ setenv MCFIO_DIR ${MCFAST_DIR}/mcfio
 setenv QQ_DIR ${HALLD_EXTERNALPACKAGES}/qq_v9_2b_Linux+2.4
 
 # ROOT
-setenv ROOTSYS /apps/root/PRO/root
+setenv ROOTSYS /group/halld/Software/ExternalPackages/ROOT/root.${OSNAME}
 setenv PATH ${ROOTSYS}/bin:${PATH}
 if ( ! $?LD_LIBRARY_PATH ) then
 	setenv LD_LIBRARY_PATH ${ROOTSYS}/lib
