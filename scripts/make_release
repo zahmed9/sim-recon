@@ -84,8 +84,6 @@ chdir "$halld_home/src/programs/Simulation/stdhep_translators";
 system("make install");
 chdir "$halld_home/src/programs/Simulation/genr8_2_hddm";
 system("make");
-chdir "$halld_home/src/programs/Simulation/mcroot";
-system("make install");
 
 
 # HDGeant
@@ -95,8 +93,10 @@ chdir "$halld_home/src/programs/Simulation/HDGeant";
 system("make");
 
 
-# This can only be remade on Linux
+# These should only be remade on Linux
 if( $ENV{"OSNAME"} eq "Linux"){
+	chdir "$halld_home/src/programs/Simulation/mcroot";
+	system("make install");
 	chdir "$halld_home/src/programs/Simulation/HDFast";
 	system("make install");
 }
