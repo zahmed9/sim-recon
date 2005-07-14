@@ -80,8 +80,6 @@ chdir "$halld_home/src/programs/Analysis/hdview";
 system("make");
 chdir "$halld_home/src/programs/Analysis/bfield2root";
 system("make");
-chdir "$halld_home/src/programs/Simulation/stdhep_translators";
-system("make install");
 chdir "$halld_home/src/programs/Simulation/genr8_2_hddm";
 system("make");
 
@@ -95,6 +93,8 @@ system("make");
 
 # These should only be remade on Linux
 if( $ENV{"OSNAME"} eq "Linux"){
+	chdir "$halld_home/src/programs/Simulation/stdhep_translators";
+	system("make install");
 	chdir "$halld_home/src/programs/Simulation/mcroot";
 	system("make install");
 	chdir "$halld_home/src/programs/Simulation/HDFast";
