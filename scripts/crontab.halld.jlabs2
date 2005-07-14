@@ -1,0 +1,7 @@
+# Build the Hall-D software nightly using the source
+# already checked out by the jlabl1 cron job.
+#
+#
+# run at 3:45 am every day
+45 3 * * *   	/group/halld/Software/scripts/cron_nightly_reuse
+
