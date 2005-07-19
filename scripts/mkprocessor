@@ -1,0 +1,168 @@
+#!/usr/bin/env perl
+
+if($#ARGV < 0){&Usage();exit;}
+
+$classname = $ARGV[0];
+print "\n";
+print "Generating files for event processor $classname ....\n";
+
+
+$dhfile = $fname = "DEventProcessor_${classname}.h";
+open(FILE,">$dhfile");
+&PrintFileHeader();
+&PrintClass();
+close(FILE);
+print " - $dhfile\n";
+
+$ccfile = $fname = "DEventProcessor_${classname}.cc";
+open(FILE,">$ccfile");
+&PrintFileHeader();
+&PrintMethods();
+close(FILE);
+print " - $ccfile\n";
+
+print "\n";
+print "The file $dhfile should be placed in the \n";
+print "src/libraries/include directory. The $ccfile should be \n";
+print "placed in the appropriate subdirectory in /src/libraries.\n";
+print "\n";
+
+###############
+# PrintFileHeader
+###############
+sub PrintFileHeader()
+{
+	# print a few lines at the very top of the file
+	$uname = `uname -nprs`;
+	chomp($uname);
+	print FILE "// \$Id\$\n";
+	print FILE "//\n";
+	print FILE "//    File: $fname\n";
+	print FILE "// Created: ".`date`;
+	print FILE "// Creator: ".$ENV{"USER"}." (on $uname)\n";
+	print FILE "//\n";
+}
+
+
+###############
+# PrintClass
+###############
+sub PrintClass()
+{
+	$content = "
+\#ifndef _DEventProcessor_${classname}_
+\#define _DEventProcessor_${classname}_
+
+\#include \"DEventProcessor.h\"
+
+class DEventProcessor_${classname}:public DEventProcessor{
+	public:
+		DEventProcessor_${classname}(){};
+		~DEventProcessor_${classname}(){};
+		const char* className(void){return \"DEventProcessor_${classname}\";}
+
+	private:
+		derror_t init(void);						///< Called once at program start.
+		derror_t brun(DEventLoop *eventLoop, int runnumber);	///< Called everytime a new run number is detected.
+		derror_t evnt(DEventLoop *eventLoop, int eventnumber);	///< Called every event.
+		derror_t erun(void);						///< Called everytime run number changes, provided brun has been called.
+		derror_t fini(void);						///< Called after last event of last event source has been processed.
+};
+
+\#endif // _DEventProcessor_${classname}_
+
+";
+	print FILE $content;
+	
+}
+
+###############
+# PrintMethods
+###############
+sub PrintMethods()
+{
+	$content = "
+\#include \"DEventProcessor_${classname}.h\"
+
+//------------------
+// init
+//------------------
+derror_t DEventProcessor_${classname}::init(void)
+{
+	// Create histograms here
+	return NOERROR;
+}
+
+//------------------
+// brun
+//------------------
+derror_t DEventProcessor_${classname}::brun(DEventLoop *eventLoop, int runnumber)
+{
+	return NOERROR;
+}
+
+//------------------
+// evnt
+//------------------
+derror_t DEventProcessor_${classname}::evnt(DEventLoop *loop, int eventnumber)
+{
+	// Fill histograms here
+
+	return NOERROR;
+}
+
+//------------------
+// erun
+//------------------
+derror_t DEventProcessor_${classname}::erun(void)
+{
+	// Any final calculations on histograms (like dividing them)
+	// should be done here. This may get called more than once.
+	return NOERROR;
+}
+
+//------------------
+// fini
+//------------------
+derror_t DEventProcessor_${classname}::fini(void)
+{
+	// If another DEventProcessor is in the list ahead of this one, then
+	// it will have finished before this is called. e.g. closed the
+	// ROOT file!
+	return NOERROR;
+}
+
+";
+	print FILE $content;
+	
+}
+
+###############
+# Usage
+###############
+sub Usage()
+{
+	print "\n";
+	print "Usage:\n\t mkprocessor name\n";
+	print "\n";
+	print "Generate the C++ source and header files to implement a new\n";
+	print "event processor for use with the Hall-D analysis framework.\n";
+	print "The files will define a class which inherits from.\n";
+	print "DEventProcessor and can therefore be added to a program\n";
+	print "using the the AddEventProcessor() method of DApplication.\n";
+	print "\n";
+	print "The \"name\" parameter specifies a unique name for the class.\n";
+	print "The class will, by default, be called DEventProcessor_name.\n";
+	print "This can lead to long names, but at least it is clear.\n";
+	print "what they are.\n";
+	print "\n";
+	print "Event processors are end points in the analysis chain.\n";
+	print "They are typically used for creating histograms and trees.\n";
+	print "Only one (of each type) of event processor object is created\n";
+	print "in an program which is then used by all threads. This is in\n";
+	print "contrast to factories which are created for each thread.\n";
+	print "If you wish to generate data visible by other factories and\n";
+	print "event processors, then see mkfactory.\n";
+	print "\n";
+	print "\n";
+}
