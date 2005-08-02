@@ -20,7 +20,7 @@
 #include <TCanvas.h>
 #include <TMarker.h>
 
-#include "DtrkHit.h"
+#include "DTrkHit.h"
 #include "DQuickFit.h"
 
 class DMagneticFieldMap;
