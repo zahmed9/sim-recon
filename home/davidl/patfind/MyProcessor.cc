@@ -17,15 +17,22 @@ using namespace std;
 #include "DMagneticFieldMap.h"
 #include "DQuickFit.h"
 #include "DFactory_DMCCheatHit.h"
-#include "DFactory_DMCTrackCandidate.h"
+#include "DFactory_DMCTrackCandidate_B.h"
 
 #define rad2deg 57.3
 #define PI_MASS 0.139568
 
-static int colors[] = {kRed,kBlue,kCyan,kGreen,kBlack};
+//static int colors[] = {kRed,kBlue,kCyan,kGreen,kBlack};
 
 extern DEventLoop *eventloop;
 extern MyMainFrame *mmf;
+
+class TrkHitZSort{
+	public:
+		bool operator()(DTrkHit* const &hit1, DTrkHit* const &hit2) const {
+			return hit1->z < hit2->z;
+		}
+};
 
 //------------------------------------------------------------------
 // init   -Open output file here (e.g. a ROOT file)
@@ -34,10 +41,18 @@ derror_t MyProcessor::init(void)
 {
 	// Get a pointer to the MCTrackCandidates factory object so we can 
 	// access things not included in the normal _data container
-	factory = (DFactory_DMCTrackCandidate*)eventloop->GetFactory("DMCTrackCandidate");
+	DFactory_base *base = eventloop->GetFactory("DMCTrackCandidate", "B");
+	factory = dynamic_cast<DFactory_DMCTrackCandidate_B*>(base);
+	if(!factory){
+		cerr<<endl;
+		cerr<<"Unable to get pointer to DFactory_DMCTrackCandidate_B factory!"<<endl;
+		cerr<<"I can't do much without it! Exiting ..."<<endl;
+		cerr<<endl;
+		exit(-1);
+	}
 
 	// Tell factory to keep around a few density histos
-	factory->SetMaxDensityHistograms(16);
+	factory->SetMaxDebugBuffers(16);
 	
 	// set limits for plot. This represents the space where the center 
 	// of the circle can be. It can be (and often is) outside of the
@@ -47,7 +62,7 @@ derror_t MyProcessor::init(void)
 	axes = new TH2F("axes","",10,-cmax,cmax,10,-cmax,cmax);
 	axes->SetStats(0);
 
-	axes_phiz = new TH2F("axes_phiz","",10,0.0,650.0, 10, -6.0*M_PI, +6.0*M_PI);
+	axes_phiz = new TH2F("axes_phiz","",100,0.0,650.0, 100, -6.0*M_PI, +6.0*M_PI);
 	axes_phiz->SetStats(0);
 	axes_phiz->SetXTitle("z-coordinate (cm)");
 	axes_phiz->SetYTitle("\\phi angle (radians)");
@@ -69,19 +84,32 @@ derror_t MyProcessor::evnt(DEventLoop *eventLoop, int eventnumber)
 	// Invoke the MCTrackCandidates factory so it's internal structures
 	// are filled with the current event's data
 	vector<const DMCTrackCandidate*> mctrackcandidates;
-	eventloop->Get(mctrackcandidates);
+	eventloop->Get(mctrackcandidates, "B");
+
+	// Get copies of the internal factory structures
+	trkhits = factory->Get_trkhits();
+	dbg_in_seed = factory->Get_dbg_in_seed();
+	dbg_hoc = factory->Get_dbg_hoc();
+	dbg_hot = factory->Get_dbg_hot();
+	dbg_seed_fit = factory->Get_dbg_seed_fit();
+	dbg_track_fit = factory->Get_dbg_track_fit();
+	dbg_seed_index = factory->Get_dbg_seed_index();
+	dbg_phiz_hist = factory->Get_dbg_phiz_hist();
+	dbg_zvertex_hist = factory->Get_dbg_zvertex_hist();
+	dbg_phizangle = factory->Get_dbg_phizangle();
+	dbg_z_vertex = factory->Get_dbg_z_vertex();
+	
+	// Delete any existing graphical objects
+	for(unsigned int i=0; i<graphics.size(); i++)delete graphics[i];
+	graphics.clear();
 
 	// Call the appropriate plotting routine depending upon what's selected
 	switch(mmf->GetDisplayType()){
-		case MyMainFrame::dtLines:					PlotLines();		break;
-		case MyMainFrame::dtHoughDensity:		PlotDensity();		break;
-		case MyMainFrame::dtIntersectDensityX:	PlotDensityX();	break;
-		case MyMainFrame::dtIntersectDensityY:	PlotDensityY();	break;
-		case MyMainFrame::dtSlopeDensity:		PlotSlope();		break;
-		case MyMainFrame::dtInterceptDensity:	PlotIntercept();	break;
-		case MyMainFrame::dtPhiVsZ:				PlotPhiVsZ();		break;
-		case MyMainFrame::dtHits:					PlotHits();			break;
-		case MyMainFrame::dtStats:					PlotStats();		break;
+		case MyMainFrame::dtXYHits:		PlotXYHits();		break;
+		case MyMainFrame::dtPhiVsZ:		PlotPhiVsZ();		break;
+		case MyMainFrame::dtPhiZSlope:	PlotPhiZSlope();	break;
+		case MyMainFrame::dtZVertex:		PlotZVertex();		break;
+		case MyMainFrame::dtStats:			PlotStats();		break;
 		default:
 			cout<<__FILE__<<":"<<__LINE__<<" Unknown display type ("<<mmf->GetDisplayType()<<")"<<endl;
 	}
@@ -89,6 +117,282 @@ derror_t MyProcessor::evnt(DEventLoop *eventLoop, int eventnumber)
 	return NOERROR;
 }
 
+
+//------------------------------------------------------------------
+// DrawXYFit
+//------------------------------------------------------------------
+void MyProcessor::DrawXYFit(DQuickFit *fit, int color, int width)
+{
+	float x0 = fit->x0;
+	float y0 = fit->y0;
+	float r0 = sqrt(x0*x0 + y0*y0);
+	DrawCircle(x0,y0,r0,color,width);
+}
+
+//------------------------------------------------------------------
+// DrawCircle
+//------------------------------------------------------------------
+void MyProcessor::DrawCircle(float x0, float y0, float r0, int color, int width)
+{
+	TEllipse *circle = new TEllipse(x0, y0, r0, r0);
+	circle->SetLineWidth(width);
+	circle->SetLineColor(color);
+	circle->Draw();
+	graphics.push_back(circle);
+}
+
+//------------------------------------------------------------------
+// DrawXYDot
+//------------------------------------------------------------------
+void MyProcessor::DrawXYDot(DTrkHit *hit, float size, int style, int color)
+{
+	TMarker *marker = new TMarker(hit->x, hit->y, style);
+	marker->SetMarkerColor(color);
+	marker->SetMarkerSize(size);
+	marker->Draw();
+	graphics.push_back(marker);
+}
+
+//------------------------------------------------------------------
+// DrawPhiZDots
+//------------------------------------------------------------------
+void MyProcessor::DrawPhiZDots(vector<DTrkHit *> hits, DQuickFit *fit, float size, int style, int color)
+{
+	
+	// Order the track hits by z.
+	sort(hits.begin(), hits.end(), TrkHitZSort());
+
+	float x0 = fit->x0;
+	float y0 = fit->y0;
+	float x_last = -x0;
+	float y_last = -y0;
+	float r0 = sqrt(x0*x0 + y0*y0);
+	float r_last = r0;
+	float phi_last = 0.0;
+
+	for(unsigned int i=0; i<hits.size(); i++){
+		DTrkHit *a = hits[i];
+
+		float dx = a->x - x0;
+		float dy = a->y - y0;
+		float r = sqrt(dx*dx + dy*dy);
+		float dphi = atan2f(dx*y_last - dy*x_last, dx*x_last + dy*y_last);
+		//float sin_dphi = (x*y_last - x_last*y)/r/r_last;
+		//float dphi = asin(sin_dphi);
+		float phi = phi_last +dphi;
+		
+		x_last = dx;
+		y_last = dy;
+		r_last = r;
+		phi_last = phi;
+
+		//cout<<__FILE__<<":"<<__LINE__<<" color="<<color<<" z="<<a->z<<" phi="<<phi<<" dphi="<<dphi<<" dx="<<dx<<" dy="<<dy<<endl;
+
+		TMarker *marker = new TMarker(a->z, phi, style);
+		marker->SetMarkerColor(color);
+		marker->SetMarkerSize(size);
+		marker->Draw();
+		graphics.push_back(marker);
+	}
+	//cout<<__FILE__<<":"<<__LINE__<<endl;
+}
+
+//------------------------------------------------------------------
+// DrawPhiZFit
+//------------------------------------------------------------------
+void MyProcessor::DrawPhiZFit(DQuickFit *fit, int color, int width)
+{
+	float x0 = fit->x0;
+	float y0 = fit->y0;
+	float r0 = sqrt(x0*x0 + y0*y0);
+	float dphidz = -fit->q*tan(fit->theta)/r0;
+	
+	DrawPhiZLine(dphidz, fit->z_vertex, color, width);
+}
+
+//------------------------------------------------------------------
+// DrawPhiZLine
+//------------------------------------------------------------------
+void MyProcessor::DrawPhiZLine(float dphidz, float z_vertex, int color, int width)
+{
+	float z1 = 0.0;
+	float z2 = 650.0;
+	float phi1 = -dphidz*(z_vertex - z1);
+	float phi2 = phi1 + dphidz*(z2-z1);
+	TLine *line = new TLine(z1,phi1,z2,phi2);
+	line->SetLineColor(color);
+	line->SetLineWidth(width);
+	line->Draw();
+	graphics.push_back(line);
+}
+
+//------------------------------------------------------------------
+// PlotXYHits
+//------------------------------------------------------------------
+derror_t MyProcessor::PlotXYHits(void)
+{
+	// Radio buttons select the XY seed
+	mmf->EnableRadioButtons(dbg_seed_fit.size());
+	unsigned int option = (unsigned int)mmf->GetRadioOption();
+
+	// Draw the empty screen
+	axes_hits->Draw("AXIS");
+	
+	// Draw BCAL for reference
+	float R1=65.0;
+	float R2=90.0;
+	DrawCircle(0.0, 0.0, R1, 14, 1);
+	DrawCircle(0.0, 0.0, R2, 14, 1);
+	DrawCircle(0.0, 0.0, (R1+R2)/2.0, 16, 56);
+	
+	// Draw seed fits
+	for(unsigned int i=0; i<dbg_seed_fit.size(); i++){
+		DrawXYFit(dbg_seed_fit[i], i==option-1 ? 7:5, 5);
+	}
+	
+	// Draw track fits
+	for(unsigned int i=0; i<dbg_track_fit.size(); i++){
+		int color = dbg_seed_index[i] == (int)option-1 ? 38:41;
+		DrawXYFit(dbg_track_fit[i], color, 2);
+	}
+	
+	// Draw all hits as small black dots
+	for(unsigned int i=0; i<trkhits.size(); i++){
+		DrawXYDot(trkhits[i], 0.50, 20, 1);
+	}
+	
+	// Hits for selected seed
+	unsigned int seed_index = option-1;
+	if(seed_index>=0 && seed_index<dbg_in_seed.size()){
+		
+		// Draw seed hits for selected seed as big green dots
+		vector<DTrkHit*> is_trkhits = dbg_in_seed[seed_index];
+		for(unsigned int i=0; i<is_trkhits.size(); i++){
+			DrawXYDot(is_trkhits[i], 1.0, 20, 3);
+		}
+		
+		// Draw on-circle hits for selected seed as small red dots
+		vector<DTrkHit*> oc_trkhits = dbg_hoc[seed_index];
+		for(unsigned int i=0; i<oc_trkhits.size(); i++){
+			DrawXYDot(oc_trkhits[i], 0.5, 20, 2);
+		}
+	}
+	
+	mmf->Update();
+
+	return NOERROR;
+}
+
+//------------------------------------------------------------------
+// PlotPhiVsZ
+//------------------------------------------------------------------
+derror_t MyProcessor::PlotPhiVsZ(void)
+{
+	// Radio buttons select the XY seed
+	mmf->EnableRadioButtons(dbg_track_fit.size());
+	unsigned int option = (unsigned int)mmf->GetRadioOption();
+
+	// Draw the empty screen
+	axes_phiz->Draw();
+
+	// Hits for selected track
+	unsigned int trk_index = option-1;
+	if(trk_index>=0 && trk_index<dbg_track_fit.size()){
+	
+		DQuickFit *trk_fit = dbg_track_fit[trk_index];
+		DQuickFit *seed_fit = dbg_seed_fit[dbg_seed_index[trk_index]];
+		float x0 = seed_fit->x0;
+		float y0 = seed_fit->y0;
+		float r0 = sqrt(x0*x0 + y0*y0);
+		
+		// Draw line used to pick out track hits
+		DrawPhiZLine(tan(dbg_phizangle[trk_index])/r0, dbg_z_vertex[trk_index], 40, 6);
+
+		// Draw fit result
+		DrawPhiZFit(trk_fit, kBlack, 1);
+
+		// Draw seed hits for selected trk as big green dots
+		vector<DTrkHit*> is_trkhits = dbg_in_seed[dbg_seed_index[trk_index]];
+		DrawPhiZDots(is_trkhits, seed_fit, 2.0, 20, kGreen);
+		
+		// Draw on-circle hits for selected seed as small red dots
+		vector<DTrkHit*> oc_trkhits = dbg_hoc[dbg_seed_index[trk_index]];
+		DrawPhiZDots(oc_trkhits, seed_fit, 1.0, 20, kRed);
+		
+		// Draw on-track hits for selected seed as tiny blue dots
+		vector<DTrkHit*> ot_trkhits = dbg_hot[trk_index];
+		DrawPhiZDots(ot_trkhits, trk_fit, 0.5, 20, kBlue);
+	}
+	
+	mmf->SetGrid(1);
+	mmf->Update();
+	mmf->SetGrid(0);
+
+	return NOERROR;
+}
+
+//------------------------------------------------------------------
+// PlotPhiZSlope
+//------------------------------------------------------------------
+derror_t MyProcessor::PlotPhiZSlope(void)
+{
+	// Radio buttons select the XY seed
+	mmf->EnableRadioButtons(dbg_phiz_hist.size());
+	unsigned int option = (unsigned int)mmf->GetRadioOption();
+
+	if(option<1 || option>dbg_phiz_hist.size())return NOERROR;
+	
+	dbg_phiz_hist[option-1]->Draw();
+	mmf->Update();
+
+	return NOERROR;
+}
+
+//------------------------------------------------------------------
+// PlotZVertex
+//------------------------------------------------------------------
+derror_t MyProcessor::PlotZVertex(void)
+{
+	// Radio buttons select the XY seed
+	mmf->EnableRadioButtons(dbg_zvertex_hist.size());
+	unsigned int option = (unsigned int)mmf->GetRadioOption();
+
+	if(option<1 || option>dbg_zvertex_hist.size())return NOERROR;
+	
+	dbg_zvertex_hist[option-1]->Draw();
+	mmf->Update();
+
+	return NOERROR;
+}
+
+//------------------------------------------------------------------
+// PlotStats
+//------------------------------------------------------------------
+derror_t MyProcessor::PlotStats(void)
+{
+
+	return NOERROR;
+}
+
+//------------------------------------------------------------------
+// fini   -Close output file here
+//------------------------------------------------------------------
+derror_t MyProcessor::fini(void)
+{
+	delete axes;
+	delete axes_phiz;
+	delete axes_hits;
+
+	return NOERROR;
+}
+
+//====================================================================
+//====================================================================
+//===========================  UNUSED   ==============================
+//====================================================================
+//====================================================================
+
+#if 0
 //------------------------------------------------------------------
 // PlotLines
 //------------------------------------------------------------------
@@ -273,117 +577,5 @@ derror_t MyProcessor::PlotIntercept(void)
 
 	return NOERROR;
 }
-
-//------------------------------------------------------------------
-// PlotPhiVsZ
-//------------------------------------------------------------------
-derror_t MyProcessor::PlotPhiVsZ(void)
-{
-	// Enable options for all tracks
-	vector<TEllipse*> circles = factory->GetCircles();
-	mmf->EnableRadioButtons(circles.size());
-	Int_t option = mmf->GetRadioOption();
-
-	axes_phiz->Draw();
-	factory->DrawPhiZPoints(option);
-	
-	mmf->SetGrid(1);
-	mmf->Update();
-	mmf->SetGrid(0);
-
-	return NOERROR;
-}
-
-//------------------------------------------------------------------
-// PlotHits
-//------------------------------------------------------------------
-derror_t MyProcessor::PlotHits(void)
-{
-	// Enable options for all tracks
-	vector<const DMCTrackCandidate*> mctc;
-	eventloop->Get(mctc);
-	mmf->EnableRadioButtons(mctc.size());
-
-	// Draw the empty screen
-	axes_hits->Draw("AXIS");
-	
-	// Delete old Markers
-	for(unsigned int i=0; i<markers.size(); i++)delete markers[i];
-	markers.clear();
-
-	// Delete old Ellipses
-	for(unsigned int i=0; i<circles.size(); i++)delete circles[i];
-	circles.clear();
-
-	// Draw BCAL for reference
-	float R1=65.0;
-	float R2=90.0;
-	TEllipse *circle = new TEllipse(0.0,0.0,R1,R1);
-	circle->SetLineColor(14);
-	circles.push_back(circle);
-	circle = new TEllipse(0.0,0.0,R2,R2);
-	circle->SetLineColor(14);
-	circles.push_back(circle);
-	circle = new TEllipse(0.0,0.0,(R1+R2)/2.0,(R1+R2)/2.0);
-	circle->SetLineWidth(56);
-	circle->SetLineColor(16); // 16= light grey
-	circles.push_back(circle);
-	
-	// Draw circles based on MCTrackCandidates
-	for(unsigned int i=0;i<mctc.size();i++){
-		const DMCTrackCandidate *tc = mctc[i];
-		float x0 = tc->x0;
-		float y0 = tc->y0;
-		float r0 = sqrt(x0*x0 + y0*y0);
-		TEllipse *circle = new TEllipse(x0, y0, r0, r0);
-		circles.push_back(circle);
-	}
-	
-	// Draw all ellipses
-	for(unsigned int i=0; i<circles.size(); i++)circles[i]->Draw();
-	
-	// Loop over all cheat hits and draw them
-	vector<const DMCCheatHit*> mccheathits;
-	eventloop->Get(mccheathits);
-	for(unsigned int i=0; i<mccheathits.size(); i++){
-		const DMCCheatHit *mccheathit = mccheathits[i];
-		float x = mccheathit->r*cos(mccheathit->phi);
-		float y = mccheathit->r*sin(mccheathit->phi);
-		int color = colors[mccheathit->track-1];
-		int markerstyle = 20+mccheathit->track-1;
-		if(mccheathit->system>2)continue;
-		if(mccheathit->system>2){markerstyle = 22; color+=100;}
-		TMarker *marker = new TMarker(x,y,markerstyle);
-		marker->SetMarkerColor(color);
-		marker->SetMarkerSize(0.75);
-		marker->Draw();
-		markers.push_back(marker);
-		if(markers.size()>=500)break;
-	}
-	
-	mmf->Update();
-
-	return NOERROR;
-}
-
-//------------------------------------------------------------------
-// PlotStats
-//------------------------------------------------------------------
-derror_t MyProcessor::PlotStats(void)
-{
-
-	return NOERROR;
-}
-
-//------------------------------------------------------------------
-// fini   -Close output file here
-//------------------------------------------------------------------
-derror_t MyProcessor::fini(void)
-{
-	delete axes;
-	delete axes_phiz;
-	delete axes_hits;
-
-	return NOERROR;
-}
+#endif
 

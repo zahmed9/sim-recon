@@ -36,7 +36,7 @@ MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(p,w,
 			TGTextButton	*save			= new TGTextButton(	topframe, "  &Save  ");
 			TGTextButton	*saveall		= new TGTextButton(	topframe, "Save &All");
 			TGLabel			*displaylab	= new TGLabel(			topframe, "Display:");
-								 display		= new TGComboBox(		topframe, "Lines",dtLines);
+								 display		= new TGComboBox(		topframe, "XYHits",dtXYHits);
 			TGTextButton	*quit			= new TGTextButton(	topframe, "&Quit");
 
 			topframe->AddFrame(save,			new TGLayoutHints(kLHintsLeft, 2,2,2,2));
@@ -45,17 +45,13 @@ MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(p,w,
 			topframe->AddFrame(display,		new TGLayoutHints(kLHintsNoHints, 2,2,2,2));			
 			topframe->AddFrame(quit,			new TGLayoutHints(kLHintsRight, 2,2,2,2));
 			
-			display->Select(dtLines);
+			display->Select(dtXYHits);
 			display->Resize(150,20);
 			
-			display->AddEntry("Lines", dtLines);
-			display->AddEntry("Hough Density", dtHoughDensity);
-			display->AddEntry("Intersection Density X", dtIntersectDensityX);
-			display->AddEntry("Intersection Density Y", dtIntersectDensityY);
-			display->AddEntry("Slope Density", dtSlopeDensity);
-			display->AddEntry("z-intercept Density", dtInterceptDensity);
-			display->AddEntry("Phi vs. z", dtPhiVsZ);
-			display->AddEntry("Detector Hits", dtHits);
+			display->AddEntry("XYHits", dtXYHits);
+			display->AddEntry("Phi-Z Hits", dtPhiVsZ);
+			display->AddEntry("Phi-Z Slope", dtPhiZSlope);
+			display->AddEntry("Z vertex", dtZVertex);
 			//display->AddEntry("Detector Hits", dtStats);
 	
 	//------------------ Middle Frame ------------------
@@ -166,7 +162,7 @@ MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(p,w,
 	Ntot_foundtrks = 0;
 	Ntot_throwntrks = 0;
 	Ntot_correcttrks = 0;
-	if(GetDisplayType()<0)display->Select(dtLines);
+	if(GetDisplayType()<0)display->Select(dtXYHits);
 }
 
 

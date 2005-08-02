@@ -21,14 +21,10 @@ class MyMainFrame:public TGMainFrame {
 	public:
 		enum displayType{
 			dtNone,
-			dtLines,
-			dtHoughDensity,
-			dtIntersectDensityX,
-			dtIntersectDensityY,
-			dtSlopeDensity,
-			dtInterceptDensity,
+			dtXYHits,
 			dtPhiVsZ,
-			dtHits,
+			dtPhiZSlope,
+			dtZVertex,
 			dtStats
 		};
 

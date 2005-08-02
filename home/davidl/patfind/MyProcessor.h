@@ -20,8 +20,11 @@
 #include <TCanvas.h>
 #include <TMarker.h>
 
+#include "DtrkHit.h"
+#include "DQuickFit.h"
+
 class DMagneticFieldMap;
-class DFactory_DMCTrackCandidate;
+class DFactory_DMCTrackCandidate_B;
 
 class MyProcessor:public DEventProcessor
 {
@@ -30,23 +33,37 @@ class MyProcessor:public DEventProcessor
 		derror_t evnt(DEventLoop *eventLoop, int eventnumber);	///< Called every event.
 		derror_t fini(void);					///< Called after last event of last event source has been processed.
 
-		derror_t PlotLines(void);
-		derror_t PlotDensity(void);
-		derror_t PlotDensityX(void);
-		derror_t PlotDensityY(void);
-		derror_t PlotSlope(void);
-		derror_t PlotIntercept(void);
+		derror_t PlotXYHits(void);
 		derror_t PlotPhiVsZ(void);
-		derror_t PlotHits(void);
+		derror_t PlotPhiZSlope(void);
+		derror_t PlotZVertex(void);
 		derror_t PlotStats(void);
+		void DrawXYFit(DQuickFit *fit, int color, int width);
+		void DrawCircle(float x0, float y0, float r0, int color, int width);
+		void DrawXYDot(DTrkHit *hit, float size, int style, int color);
+		void DrawPhiZDots(vector<DTrkHit *> hits, DQuickFit *fit, float size, int style, int color);
+		void DrawPhiZFit(DQuickFit *fit, int color, int width);
+		void DrawPhiZLine(float dphidz, float z_vertex, int color, int width);
 
 		TH2F *axes, *axes_phiz, *axes_hits;
-		DFactory_DMCTrackCandidate *factory;
+		DFactory_DMCTrackCandidate_B *factory;
 		DEventLoop *eventLoop;
 		
-		vector<TLine*> lines;
-		vector<TMarker*> markers;
-		vector<TEllipse*> circles;
+		vector<TObject*> graphics;
+
+		vector<DTrkHit*> trkhits;
+		vector<vector<DTrkHit*> > dbg_in_seed;
+		vector<vector<DTrkHit*> > dbg_hoc;
+		vector<vector<DTrkHit*> > dbg_hol;
+		vector<vector<DTrkHit*> > dbg_hot;
+		vector<DQuickFit*> dbg_seed_fit;
+		vector<DQuickFit*> dbg_track_fit;
+		vector<int> dbg_seed_index;
+		vector<TH1F*> dbg_phiz_hist;
+		vector<TH1F*> dbg_zvertex_hist;
+		vector<float> dbg_phizangle;
+		vector<float> dbg_z_vertex;
+
 };
 
 
