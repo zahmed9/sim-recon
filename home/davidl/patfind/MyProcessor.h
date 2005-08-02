@@ -41,6 +41,7 @@ class MyProcessor:public DEventProcessor
 		void DrawXYFit(DQuickFit *fit, int color, int width);
 		void DrawCircle(float x0, float y0, float r0, int color, int width);
 		void DrawXYDot(DTrkHit *hit, float size, int style, int color);
+		void DrawXYDots(vector<DTrkHit *> hits, float size, int style, int color);
 		void DrawPhiZDots(vector<DTrkHit *> hits, DQuickFit *fit, float size, int style, int color);
 		void DrawPhiZFit(DQuickFit *fit, int color, int width);
 		void DrawPhiZLine(float dphidz, float z_vertex, int color, int width);
@@ -60,7 +61,9 @@ class MyProcessor:public DEventProcessor
 		vector<DQuickFit*> dbg_track_fit;
 		vector<int> dbg_seed_index;
 		vector<TH1F*> dbg_phiz_hist;
+		vector<int> dbg_phiz_hist_seed;
 		vector<TH1F*> dbg_zvertex_hist;
+		vector<int> dbg_zvertex_hist_seed;
 		vector<float> dbg_phizangle;
 		vector<float> dbg_z_vertex;
 

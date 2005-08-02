@@ -118,7 +118,7 @@ MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(p,w,
 		maincanvas = emcanvas->GetCanvas();
 
 		// Options frame
-		optionsframe = new TGButtonGroup(middleframe, "Track", kVerticalFrame);
+		optionsframe = new TGButtonGroup(middleframe, "Seed", kVerticalFrame);
 		middleframe->AddFrame(optionsframe, defHints);
 
 
@@ -215,7 +215,7 @@ void MyMainFrame::Update(void)
 //-------------------
 // EnableRadioButtons
 //-------------------
-void MyMainFrame::EnableRadioButtons(int N)
+void MyMainFrame::EnableRadioButtons(int N, vector<int> *labels)
 {
 	if(N<0)N=0;
 
@@ -230,9 +230,7 @@ void MyMainFrame::EnableRadioButtons(int N)
 
 	// Add radio buttons if needed
 	for(int i=radiobuttons.size();i<N;i++){
-		char str[16];
-		sprintf(str,"%d", i+1);
-		TGRadioButton *button = new TGRadioButton(optionsframe, str);
+		TGRadioButton *button = new TGRadioButton(optionsframe, "none");
 		radiobuttons.push_back(button);
 	}
 	
@@ -244,6 +242,12 @@ void MyMainFrame::EnableRadioButtons(int N)
 		if(radiooption < 1){
 			radiooption = 1;
 			radiobuttons[radiooption-1]->SetState(kButtonDown);
+		}
+		
+		for(unsigned int i=0; i<radiobuttons.size(); i++){
+			char str[16];
+			sprintf(str,"%d",(labels ? (*labels)[i]:i) + 1);
+			radiobuttons[i]->SetTitle(str);
 		}
 	}
 	

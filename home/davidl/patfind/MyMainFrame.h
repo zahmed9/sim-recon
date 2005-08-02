@@ -44,7 +44,7 @@ class MyMainFrame:public TGMainFrame {
 		void Clear(void){maincanvas->Clear();}
 		inline void SetGrid(int s){maincanvas->SetGridx(s);maincanvas->SetGridy(s);}
 		inline Int_t GetDisplayType(void){return display->GetSelected();}
-		void EnableRadioButtons(int N);
+		void EnableRadioButtons(int N, vector<int> *labels=NULL);
 		Int_t GetRadioOption(void){return radiooption;}
 		
 	private:

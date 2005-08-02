@@ -90,12 +90,15 @@ derror_t MyProcessor::evnt(DEventLoop *eventLoop, int eventnumber)
 	trkhits = factory->Get_trkhits();
 	dbg_in_seed = factory->Get_dbg_in_seed();
 	dbg_hoc = factory->Get_dbg_hoc();
+	dbg_hol = factory->Get_dbg_hol();
 	dbg_hot = factory->Get_dbg_hot();
 	dbg_seed_fit = factory->Get_dbg_seed_fit();
 	dbg_track_fit = factory->Get_dbg_track_fit();
 	dbg_seed_index = factory->Get_dbg_seed_index();
 	dbg_phiz_hist = factory->Get_dbg_phiz_hist();
+	dbg_phiz_hist_seed = factory->Get_dbg_phiz_hist_seed();
 	dbg_zvertex_hist = factory->Get_dbg_zvertex_hist();
+	dbg_zvertex_hist_seed = factory->Get_dbg_zvertex_hist_seed();
 	dbg_phizangle = factory->Get_dbg_phizangle();
 	dbg_z_vertex = factory->Get_dbg_z_vertex();
 	
@@ -154,6 +157,16 @@ void MyProcessor::DrawXYDot(DTrkHit *hit, float size, int style, int color)
 }
 
 //------------------------------------------------------------------
+// DrawXYDots
+//------------------------------------------------------------------
+void MyProcessor::DrawXYDots(vector<DTrkHit*> hits, float size, int style, int color)
+{
+	for(unsigned int i=0; i<hits.size(); i++){
+		DrawXYDot(hits[i], size, style, color);
+	}
+}
+
+//------------------------------------------------------------------
 // DrawPhiZDots
 //------------------------------------------------------------------
 void MyProcessor::DrawPhiZDots(vector<DTrkHit *> hits, DQuickFit *fit, float size, int style, int color)
@@ -162,39 +175,21 @@ void MyProcessor::DrawPhiZDots(vector<DTrkHit *> hits, DQuickFit *fit, float siz
 	// Order the track hits by z.
 	sort(hits.begin(), hits.end(), TrkHitZSort());
 
+	DFactory_DMCTrackCandidate_B::Fill_phi_circle(hits, fit->x0, fit->y0);
+
 	float x0 = fit->x0;
 	float y0 = fit->y0;
-	float x_last = -x0;
-	float y_last = -y0;
 	float r0 = sqrt(x0*x0 + y0*y0);
-	float r_last = r0;
-	float phi_last = 0.0;
 
 	for(unsigned int i=0; i<hits.size(); i++){
 		DTrkHit *a = hits[i];
 
-		float dx = a->x - x0;
-		float dy = a->y - y0;
-		float r = sqrt(dx*dx + dy*dy);
-		float dphi = atan2f(dx*y_last - dy*x_last, dx*x_last + dy*y_last);
-		//float sin_dphi = (x*y_last - x_last*y)/r/r_last;
-		//float dphi = asin(sin_dphi);
-		float phi = phi_last +dphi;
-		
-		x_last = dx;
-		y_last = dy;
-		r_last = r;
-		phi_last = phi;
-
-		//cout<<__FILE__<<":"<<__LINE__<<" color="<<color<<" z="<<a->z<<" phi="<<phi<<" dphi="<<dphi<<" dx="<<dx<<" dy="<<dy<<endl;
-
-		TMarker *marker = new TMarker(a->z, phi, style);
+		TMarker *marker = new TMarker(a->z, a->phi_circle/r0, style);
 		marker->SetMarkerColor(color);
 		marker->SetMarkerSize(size);
 		marker->Draw();
 		graphics.push_back(marker);
 	}
-	//cout<<__FILE__<<":"<<__LINE__<<endl;
 }
 
 //------------------------------------------------------------------
@@ -247,8 +242,10 @@ derror_t MyProcessor::PlotXYHits(void)
 	
 	// Draw seed fits
 	for(unsigned int i=0; i<dbg_seed_fit.size(); i++){
-		DrawXYFit(dbg_seed_fit[i], i==option-1 ? 7:5, 5);
+		DrawXYFit(dbg_seed_fit[i],  kYellow, 5);
 	}
+	if(option<=dbg_seed_fit.size() && option>=1)
+		DrawXYFit(dbg_seed_fit[option-1],  kCyan, 5);
 	
 	// Draw track fits
 	for(unsigned int i=0; i<dbg_track_fit.size(); i++){
@@ -257,24 +254,24 @@ derror_t MyProcessor::PlotXYHits(void)
 	}
 	
 	// Draw all hits as small black dots
-	for(unsigned int i=0; i<trkhits.size(); i++){
-		DrawXYDot(trkhits[i], 0.50, 20, 1);
-	}
+	DrawXYDots(trkhits, 0.4, 20, kBlack);
 	
 	// Hits for selected seed
 	unsigned int seed_index = option-1;
 	if(seed_index>=0 && seed_index<dbg_in_seed.size()){
 		
 		// Draw seed hits for selected seed as big green dots
-		vector<DTrkHit*> is_trkhits = dbg_in_seed[seed_index];
-		for(unsigned int i=0; i<is_trkhits.size(); i++){
-			DrawXYDot(is_trkhits[i], 1.0, 20, 3);
-		}
+		DrawXYDots(dbg_in_seed[seed_index], 2.0, 20, kGreen);
 		
-		// Draw on-circle hits for selected seed as small red dots
-		vector<DTrkHit*> oc_trkhits = dbg_hoc[seed_index];
-		for(unsigned int i=0; i<oc_trkhits.size(); i++){
-			DrawXYDot(oc_trkhits[i], 0.5, 20, 2);
+		// Draw on-circle hits for selected seed as smaller magenta dots
+		DrawXYDots(dbg_hoc[seed_index], 1.5, 20, kMagenta);
+		
+		for(unsigned int i=0; i<dbg_seed_index.size(); i++){
+			if(dbg_seed_index[i] == (int)seed_index){
+				// Hits on line and hits on track
+				DrawXYDots(dbg_hol[i], 1.0, 20, kBlue);
+				DrawXYDots(dbg_hot[i], 0.5, 20, kRed);
+			}
 		}
 	}
 	
@@ -289,7 +286,7 @@ derror_t MyProcessor::PlotXYHits(void)
 derror_t MyProcessor::PlotPhiVsZ(void)
 {
 	// Radio buttons select the XY seed
-	mmf->EnableRadioButtons(dbg_track_fit.size());
+	mmf->EnableRadioButtons(dbg_track_fit.size(), &dbg_seed_index);
 	unsigned int option = (unsigned int)mmf->GetRadioOption();
 
 	// Draw the empty screen
@@ -317,11 +314,15 @@ derror_t MyProcessor::PlotPhiVsZ(void)
 		
 		// Draw on-circle hits for selected seed as small red dots
 		vector<DTrkHit*> oc_trkhits = dbg_hoc[dbg_seed_index[trk_index]];
-		DrawPhiZDots(oc_trkhits, seed_fit, 1.0, 20, kRed);
+		DrawPhiZDots(oc_trkhits, seed_fit, 1.5, 20, kMagenta);
+		
+		// Draw on-circle hits for selected seed as small red dots
+		vector<DTrkHit*> ol_trkhits = dbg_hol[trk_index];
+		DrawPhiZDots(ol_trkhits, seed_fit, 1.0, 20, kBlue);
 		
 		// Draw on-track hits for selected seed as tiny blue dots
 		vector<DTrkHit*> ot_trkhits = dbg_hot[trk_index];
-		DrawPhiZDots(ot_trkhits, trk_fit, 0.5, 20, kBlue);
+		DrawPhiZDots(ot_trkhits, trk_fit, 0.5, 20, kRed);
 	}
 	
 	mmf->SetGrid(1);
@@ -337,7 +338,7 @@ derror_t MyProcessor::PlotPhiVsZ(void)
 derror_t MyProcessor::PlotPhiZSlope(void)
 {
 	// Radio buttons select the XY seed
-	mmf->EnableRadioButtons(dbg_phiz_hist.size());
+	mmf->EnableRadioButtons(dbg_phiz_hist.size(), &dbg_phiz_hist_seed);
 	unsigned int option = (unsigned int)mmf->GetRadioOption();
 
 	if(option<1 || option>dbg_phiz_hist.size())return NOERROR;
@@ -354,7 +355,7 @@ derror_t MyProcessor::PlotPhiZSlope(void)
 derror_t MyProcessor::PlotZVertex(void)
 {
 	// Radio buttons select the XY seed
-	mmf->EnableRadioButtons(dbg_zvertex_hist.size());
+	mmf->EnableRadioButtons(dbg_zvertex_hist.size(), &dbg_zvertex_hist_seed);
 	unsigned int option = (unsigned int)mmf->GetRadioOption();
 
 	if(option<1 || option>dbg_zvertex_hist.size())return NOERROR;
