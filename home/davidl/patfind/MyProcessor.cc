@@ -102,6 +102,10 @@ derror_t MyProcessor::evnt(DEventLoop *eventLoop, int eventnumber)
 	dbg_phizangle = factory->Get_dbg_phizangle();
 	dbg_z_vertex = factory->Get_dbg_z_vertex();
 	
+	// Clear the flags on all track hits since Fill_phi_circle uses them
+	for(unsigned int i=0; i<trkhits.size(); i++)trkhits[i]->flags=0;
+	
+	
 	// Delete any existing graphical objects
 	for(unsigned int i=0; i<graphics.size(); i++)delete graphics[i];
 	graphics.clear();
@@ -175,14 +179,15 @@ void MyProcessor::DrawPhiZDots(vector<DTrkHit *> hits, DQuickFit *fit, float siz
 	// Order the track hits by z.
 	sort(hits.begin(), hits.end(), TrkHitZSort());
 
-	DFactory_DMCTrackCandidate_B::Fill_phi_circle(hits, fit->x0, fit->y0);
-
 	float x0 = fit->x0;
 	float y0 = fit->y0;
 	float r0 = sqrt(x0*x0 + y0*y0);
+	DFactory_DMCTrackCandidate_B::Fill_phi_circle(hits, x0, y0);
 
 	for(unsigned int i=0; i<hits.size(); i++){
 		DTrkHit *a = hits[i];
+
+		//cout<<__FILE__<<":"<<__LINE__<<" z="<<a->z<<" dphi="<<a->phi_circle<<endl;
 
 		TMarker *marker = new TMarker(a->z, a->phi_circle/r0, style);
 		marker->SetMarkerColor(color);
@@ -190,6 +195,7 @@ void MyProcessor::DrawPhiZDots(vector<DTrkHit *> hits, DQuickFit *fit, float siz
 		marker->Draw();
 		graphics.push_back(marker);
 	}
+	//cout<<__FILE__<<":"<<__LINE__<<endl;
 }
 
 //------------------------------------------------------------------
@@ -286,41 +292,47 @@ derror_t MyProcessor::PlotXYHits(void)
 derror_t MyProcessor::PlotPhiVsZ(void)
 {
 	// Radio buttons select the XY seed
-	mmf->EnableRadioButtons(dbg_track_fit.size(), &dbg_seed_index);
+	mmf->EnableRadioButtons(dbg_seed_fit.size());
 	unsigned int option = (unsigned int)mmf->GetRadioOption();
+	int seed_index = option - 1;
 
 	// Draw the empty screen
 	axes_phiz->Draw();
-
-	// Hits for selected track
-	unsigned int trk_index = option-1;
-	if(trk_index>=0 && trk_index<dbg_track_fit.size()){
 	
-		DQuickFit *trk_fit = dbg_track_fit[trk_index];
-		DQuickFit *seed_fit = dbg_seed_fit[dbg_seed_index[trk_index]];
-		float x0 = seed_fit->x0;
-		float y0 = seed_fit->y0;
-		float r0 = sqrt(x0*x0 + y0*y0);
+	// Find track index (if any) corresponding to this seed
+	int trk_index = -1;
+	for(unsigned int i=0; i<dbg_seed_index.size(); i++){
+		if(dbg_seed_index[i] == seed_index)trk_index = i;
+	}
+
+	DQuickFit *trk_fit = trk_index>=0 ? dbg_track_fit[trk_index]:NULL;
+	DQuickFit *seed_fit = dbg_seed_fit[seed_index];
+	float x0 = seed_fit->x0;
+	float y0 = seed_fit->y0;
+	float r0 = sqrt(x0*x0 + y0*y0);
 		
+	if(trk_index>=0){
 		// Draw line used to pick out track hits
 		DrawPhiZLine(tan(dbg_phizangle[trk_index])/r0, dbg_z_vertex[trk_index], 40, 6);
 
 		// Draw fit result
 		DrawPhiZFit(trk_fit, kBlack, 1);
-
-		// Draw seed hits for selected trk as big green dots
-		vector<DTrkHit*> is_trkhits = dbg_in_seed[dbg_seed_index[trk_index]];
-		DrawPhiZDots(is_trkhits, seed_fit, 2.0, 20, kGreen);
+	}
 		
-		// Draw on-circle hits for selected seed as small red dots
-		vector<DTrkHit*> oc_trkhits = dbg_hoc[dbg_seed_index[trk_index]];
-		DrawPhiZDots(oc_trkhits, seed_fit, 1.5, 20, kMagenta);
+	// Draw seed hits for selected trk as big green dots
+	vector<DTrkHit*> is_trkhits = dbg_in_seed[seed_index];
+	DrawPhiZDots(is_trkhits, seed_fit, 2.0, 20, kGreen);
 		
-		// Draw on-circle hits for selected seed as small red dots
+	// Draw on-circle hits for selected seed as large magenta dots
+	vector<DTrkHit*> oc_trkhits = dbg_hoc[seed_index];
+	DrawPhiZDots(oc_trkhits, seed_fit, 1.5, 20, kMagenta);
+		
+	if(trk_index>=0){
+		// Draw on-line hits for selected seed as blue dots
 		vector<DTrkHit*> ol_trkhits = dbg_hol[trk_index];
 		DrawPhiZDots(ol_trkhits, seed_fit, 1.0, 20, kBlue);
 		
-		// Draw on-track hits for selected seed as tiny blue dots
+		// Draw on-track hits for selected seed as tiny red dots
 		vector<DTrkHit*> ot_trkhits = dbg_hot[trk_index];
 		DrawPhiZDots(ot_trkhits, trk_fit, 0.5, 20, kRed);
 	}
