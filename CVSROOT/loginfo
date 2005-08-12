@@ -16,7 +16,7 @@
 # name and listing the modified file names.
 #
 # For example:
-ALL (echo $USER; date; cat) | `if [ -f /usr/bin/mailx ]; then echo mailx; else echo mail; fi` -s 'Hall-D CVS: '%s davidl@jlab.org brash@pcs.cnu.edu wolin@jlab.org zisis@uregina.ca
+ALL (echo $USER; date; cat) | `if [ -f /usr/bin/mailx ]; then echo mailx; else echo mail; fi` -s 'Hall-D CVS: '%s davidl@jlab.org brash@pcs.cnu.edu wolin@jlab.org zisis@uregina.ca mashephe@indiana.edu remitche@indiana.edu
 DEFAULT		(echo ""; who am i; echo %s; date; cat) >> $CVSROOT/CVSROOT/commitlog
 ^HDGeant        mail -s %s richard.t.jones@uconn.edu
 ^hdds           mail -s %s richard.t.jones@uconn.edu
