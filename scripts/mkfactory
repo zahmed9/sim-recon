@@ -79,7 +79,7 @@ sub PrintDataClass()
 
 \#include \"DFactory.h\"
 
-class ${classname}{
+class ${classname}:public DObject{
 	public:
 		HDCLASSDEF(${classname});
 		
