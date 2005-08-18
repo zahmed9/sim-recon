@@ -77,6 +77,7 @@ sub PrintDataClass()
 \#ifndef _${classname}_
 \#define _${classname}_
 
+\#include \"DObject.h\"
 \#include \"DFactory.h\"
 
 class ${classname}:public DObject{
