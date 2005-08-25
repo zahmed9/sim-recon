@@ -16,8 +16,8 @@ using namespace std;
 #include "DEventLoop.h"
 #include "DMagneticFieldMap.h"
 #include "DQuickFit.h"
-#include "DFactory_DMCCheatHit.h"
-#include "DFactory_DMCTrackCandidate_B.h"
+#include "DFactory_DTrackHit.h"
+#include "DFactory_DTrackCandidate.h"
 
 #define rad2deg 57.3
 #define PI_MASS 0.139568
@@ -29,10 +29,19 @@ extern MyMainFrame *mmf;
 
 class TrkHitZSort{
 	public:
-		bool operator()(DTrkHit* const &hit1, DTrkHit* const &hit2) const {
+		bool operator()(DTrackHit* const &hit1, DTrackHit* const &hit2) const {
 			return hit1->z < hit2->z;
 		}
 };
+
+//------------------------------------------------------------------
+// MyProcessor (constructor)
+//------------------------------------------------------------------
+MyProcessor::MyProcessor(void)
+{
+	// Tell factory to keep around a few density histos	
+	dparms.SetParameter("TRK:MAX_DEBUG_BUFFERS",	16);
+}
 
 //------------------------------------------------------------------
 // init   -Open output file here (e.g. a ROOT file)
@@ -41,19 +50,16 @@ derror_t MyProcessor::init(void)
 {
 	// Get a pointer to the MCTrackCandidates factory object so we can 
 	// access things not included in the normal _data container
-	DFactory_base *base = eventloop->GetFactory("DMCTrackCandidate", "B");
-	factory = dynamic_cast<DFactory_DMCTrackCandidate_B*>(base);
+	DFactory_base *base = eventloop->GetFactory("DTrackCandidate");
+	factory = dynamic_cast<DFactory_DTrackCandidate*>(base);
 	if(!factory){
 		cerr<<endl;
-		cerr<<"Unable to get pointer to DFactory_DMCTrackCandidate_B factory!"<<endl;
+		cerr<<"Unable to get pointer to DFactory_DTrackCandidate factory!"<<endl;
 		cerr<<"I can't do much without it! Exiting ..."<<endl;
 		cerr<<endl;
 		exit(-1);
 	}
 
-	// Tell factory to keep around a few density histos
-	factory->SetMaxDebugBuffers(16);
-	
 	// set limits for plot. This represents the space where the center 
 	// of the circle can be. It can be (and often is) outside of the
 	// bounds of the solenoid.
@@ -83,8 +89,8 @@ derror_t MyProcessor::evnt(DEventLoop *eventLoop, int eventnumber)
 
 	// Invoke the MCTrackCandidates factory so it's internal structures
 	// are filled with the current event's data
-	vector<const DMCTrackCandidate*> mctrackcandidates;
-	eventloop->Get(mctrackcandidates, "B");
+	vector<const DTrackCandidate*> trackcandidates;
+	eventloop->Get(trackcandidates);
 
 	// Get copies of the internal factory structures
 	trkhits = factory->Get_trkhits();
@@ -151,7 +157,7 @@ void MyProcessor::DrawCircle(float x0, float y0, float r0, int color, int width)
 //------------------------------------------------------------------
 // DrawXYDot
 //------------------------------------------------------------------
-void MyProcessor::DrawXYDot(DTrkHit *hit, float size, int style, int color)
+void MyProcessor::DrawXYDot(Dtrkhit *hit, float size, int style, int color)
 {
 	TMarker *marker = new TMarker(hit->x, hit->y, style);
 	marker->SetMarkerColor(color);
@@ -163,7 +169,7 @@ void MyProcessor::DrawXYDot(DTrkHit *hit, float size, int style, int color)
 //------------------------------------------------------------------
 // DrawXYDots
 //------------------------------------------------------------------
-void MyProcessor::DrawXYDots(vector<DTrkHit*> hits, float size, int style, int color)
+void MyProcessor::DrawXYDots(vector<Dtrkhit*> hits, float size, int style, int color)
 {
 	for(unsigned int i=0; i<hits.size(); i++){
 		DrawXYDot(hits[i], size, style, color);
@@ -173,7 +179,7 @@ void MyProcessor::DrawXYDots(vector<DTrkHit*> hits, float size, int style, int c
 //------------------------------------------------------------------
 // DrawPhiZDots
 //------------------------------------------------------------------
-void MyProcessor::DrawPhiZDots(vector<DTrkHit *> hits, DQuickFit *fit, float size, int style, int color)
+void MyProcessor::DrawPhiZDots(vector<Dtrkhit *> hits, DQuickFit *fit, float size, int style, int color)
 {
 	
 	// Order the track hits by z.
@@ -182,10 +188,10 @@ void MyProcessor::DrawPhiZDots(vector<DTrkHit *> hits, DQuickFit *fit, float siz
 	float x0 = fit->x0;
 	float y0 = fit->y0;
 	float r0 = sqrt(x0*x0 + y0*y0);
-	DFactory_DMCTrackCandidate_B::Fill_phi_circle(hits, x0, y0);
+	DFactory_DTrackCandidate::Fill_phi_circle(hits, x0, y0);
 
 	for(unsigned int i=0; i<hits.size(); i++){
-		DTrkHit *a = hits[i];
+		Dtrkhit *a = hits[i];
 
 		//cout<<__FILE__<<":"<<__LINE__<<" z="<<a->z<<" dphi="<<a->phi_circle<<endl;
 
@@ -320,20 +326,20 @@ derror_t MyProcessor::PlotPhiVsZ(void)
 	}
 		
 	// Draw seed hits for selected trk as big green dots
-	vector<DTrkHit*> is_trkhits = dbg_in_seed[seed_index];
+	vector<Dtrkhit*> is_trkhits = dbg_in_seed[seed_index];
 	DrawPhiZDots(is_trkhits, seed_fit, 2.0, 20, kGreen);
 		
 	// Draw on-circle hits for selected seed as large magenta dots
-	vector<DTrkHit*> oc_trkhits = dbg_hoc[seed_index];
+	vector<Dtrkhit*> oc_trkhits = dbg_hoc[seed_index];
 	DrawPhiZDots(oc_trkhits, seed_fit, 1.5, 20, kMagenta);
 		
 	if(trk_index>=0){
 		// Draw on-line hits for selected seed as blue dots
-		vector<DTrkHit*> ol_trkhits = dbg_hol[trk_index];
+		vector<Dtrkhit*> ol_trkhits = dbg_hol[trk_index];
 		DrawPhiZDots(ol_trkhits, seed_fit, 1.0, 20, kBlue);
 		
 		// Draw on-track hits for selected seed as tiny red dots
-		vector<DTrkHit*> ot_trkhits = dbg_hot[trk_index];
+		vector<Dtrkhit*> ot_trkhits = dbg_hot[trk_index];
 		DrawPhiZDots(ot_trkhits, trk_fit, 0.5, 20, kRed);
 	}
 	

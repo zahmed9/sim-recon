@@ -20,16 +20,12 @@ int main(int narg, char *argv[])
 	// Instantiate a TrackHists event processor
 	DEventProcessor_TrackHists trkHists;
 
-	// Instantiate a MCStats event processor
-	DEventProcessor_MCStats mcstats;
-
 	// Instantiate an event loop object
 	DApplication app(narg, argv);
 
 	// Run though all events, calling our event processor's methods
 	app.AddProcessor(&myproc);
 	app.AddProcessor(&trkHists);
-	app.AddProcessor(&mcstats);
 	app.Run(NULL,3);
 	
 	return 0;

@@ -11,7 +11,7 @@ using namespace std;
 #include "MyProcessor.h"
 #include "MyMainFrame.h"
 #include "DEventLoop.h"
-#include "DMCReconstructed.h"
+#include "DTrack.h"
 #include "DMCThrown.h"
 
 extern MyProcessor *myproc;
@@ -188,11 +188,11 @@ void MyMainFrame::Update(void)
 	}
 	
 	// Update numbers of tracks etc.
-	vector<const DMCReconstructed*> mcreconstructed;
-	eventloop->Get(mcreconstructed);
-	sprintf(str, "%d", (int)mcreconstructed.size());
+	vector<const DTrack*> tracks;
+	eventloop->Get(tracks);
+	sprintf(str, "%d", (int)tracks.size());
 	foundtrks->SetText(str);
-	Ntot_foundtrks += mcreconstructed.size();
+	Ntot_foundtrks += tracks.size();
 	sprintf(str, "%d", Ntot_foundtrks);
 	tot_foundtrks->SetText(str);
 
@@ -204,11 +204,11 @@ void MyMainFrame::Update(void)
 	sprintf(str, "%d", Ntot_throwntrks);
 	tot_throwntrks->SetText(str);
 	
-	int Ncorrecttrks = 0;
-	for(unsigned int i=0; i<mcreconstructed.size(); i++){
-		const DMCReconstructed *mcr = mcreconstructed[i];
-		if(mcr->thrown_delta_p/mcr->p < 0.2)Ncorrecttrks++;
-	}
+//	int Ncorrecttrks = 0;
+//	for(unsigned int i=0; i<tracks.size(); i++){
+		//const DTrack *track = tracks[i];
+		//if(mcr->thrown_delta_p/track->p < 0.2)Ncorrecttrks++;
+//	}
 	//sprintf(str,"%3.0f%%", (float)Ncorrecttrks/(float)
 }
 

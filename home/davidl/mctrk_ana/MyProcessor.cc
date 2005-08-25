@@ -9,8 +9,8 @@ using namespace std;
 
 #include "MyProcessor.h"
 
-#include "DMCCheatHit.h"
-#include "DMCTrackCandidate.h"
+#include "DTrackHit.h"
+#include "GlueX.h"
 
 
 TH1F *FDC_z, *FDC_r, *CDC_z, *CDC_r;
@@ -40,20 +40,17 @@ derror_t MyProcessor::evnt(DEventLoop *eventLoop, int eventnumber)
 	// Histograms are created and filled in DEventProcessor_TrackHists
 	// Automatically since it was added to the app in mctrk_ana.cc
 
-	vector<const DMCTrackCandidate*> mctc;
-	eventLoop->Get(mctc, "B");
-
 
 	// Histograms to determine angles from geometry
-	vector<const DMCCheatHit*> mccheathits;
-	eventLoop->Get(mccheathits);
-	for(unsigned int i=0; i<mccheathits.size(); i++){
-		const DMCCheatHit *hit = mccheathits[i];
-		if(hit->system==1){
+	vector<const DTrackHit*> trackhits;
+	eventLoop->Get(trackhits);
+	for(unsigned int i=0; i<trackhits.size(); i++){
+		const DTrackHit *hit = trackhits[i];
+		if(hit->system==SYS_CDC){
 			CDC_z->Fill(hit->z);
 			CDC_r->Fill(hit->r);
 		}
-		if(hit->system==2){
+		if(hit->system==SYS_FDC){
 			FDC_z->Fill(hit->z);
 			FDC_r->Fill(hit->r);
 		}

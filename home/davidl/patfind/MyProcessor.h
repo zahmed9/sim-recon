@@ -20,15 +20,16 @@
 #include <TCanvas.h>
 #include <TMarker.h>
 
-#include "DTrkHit.h"
+#include "../TRACKING/Dtrkhit.h"
 #include "DQuickFit.h"
 
 class DMagneticFieldMap;
-class DFactory_DMCTrackCandidate_B;
+class DFactory_DTrackCandidate;
 
 class MyProcessor:public DEventProcessor
 {
 	public:
+		MyProcessor();
 		derror_t init(void);					///< Called once at program start.
 		derror_t evnt(DEventLoop *eventLoop, int eventnumber);	///< Called every event.
 		derror_t fini(void);					///< Called after last event of last event source has been processed.
@@ -40,23 +41,23 @@ class MyProcessor:public DEventProcessor
 		derror_t PlotStats(void);
 		void DrawXYFit(DQuickFit *fit, int color, int width);
 		void DrawCircle(float x0, float y0, float r0, int color, int width);
-		void DrawXYDot(DTrkHit *hit, float size, int style, int color);
-		void DrawXYDots(vector<DTrkHit *> hits, float size, int style, int color);
-		void DrawPhiZDots(vector<DTrkHit *> hits, DQuickFit *fit, float size, int style, int color);
+		void DrawXYDot(Dtrkhit *hit, float size, int style, int color);
+		void DrawXYDots(vector<Dtrkhit *> hits, float size, int style, int color);
+		void DrawPhiZDots(vector<Dtrkhit *> hits, DQuickFit *fit, float size, int style, int color);
 		void DrawPhiZFit(DQuickFit *fit, int color, int width);
 		void DrawPhiZLine(float dphidz, float z_vertex, int color, int width);
 
 		TH2F *axes, *axes_phiz, *axes_hits;
-		DFactory_DMCTrackCandidate_B *factory;
+		DFactory_DTrackCandidate *factory;
 		DEventLoop *eventLoop;
 		
 		vector<TObject*> graphics;
 
-		vector<DTrkHit*> trkhits;
-		vector<vector<DTrkHit*> > dbg_in_seed;
-		vector<vector<DTrkHit*> > dbg_hoc;
-		vector<vector<DTrkHit*> > dbg_hol;
-		vector<vector<DTrkHit*> > dbg_hot;
+		vector<Dtrkhit*> trkhits;
+		vector<vector<Dtrkhit*> > dbg_in_seed;
+		vector<vector<Dtrkhit*> > dbg_hoc;
+		vector<vector<Dtrkhit*> > dbg_hol;
+		vector<vector<Dtrkhit*> > dbg_hot;
 		vector<DQuickFit*> dbg_seed_fit;
 		vector<DQuickFit*> dbg_track_fit;
 		vector<int> dbg_seed_index;
