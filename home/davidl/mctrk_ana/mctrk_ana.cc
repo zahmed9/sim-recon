@@ -7,7 +7,6 @@
 #include "MyProcessor.h"
 #include "DApplication.h"
 #include "DEventProcessor_TrackHists.h"
-#include "DEventProcessor_MCStats.h"
 
 //-----------
 // main
