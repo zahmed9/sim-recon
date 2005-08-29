@@ -25,7 +25,7 @@ int main(int narg, char *argv[])
 	// Run though all events, calling our event processor's methods
 	app.AddProcessor(&myproc);
 	app.AddProcessor(&trkHists);
-	app.Run(NULL,3);
+	app.Run(NULL,4);
 	
 	return 0;
 }
