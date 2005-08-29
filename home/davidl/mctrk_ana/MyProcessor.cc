@@ -43,7 +43,7 @@ derror_t MyProcessor::evnt(DEventLoop *eventLoop, int eventnumber)
 
 	// Histograms to determine angles from geometry
 	vector<const DTrackHit*> trackhits;
-	eventLoop->Get(trackhits);
+	eventLoop->Get(trackhits, "MC");
 	for(unsigned int i=0; i<trackhits.size(); i++){
 		const DTrackHit *hit = trackhits[i];
 		if(hit->system==SYS_CDC){
