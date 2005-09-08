@@ -142,6 +142,9 @@ sub PrintFactoryMethods()
 //------------------
 derror_t DFactory_${classname}${tag_suffix}::evnt(DEventLoop *loop, int eventnumber)
 {
+	// _data should be emptied before this method gets called
+	assert( _data.size() == 0 );
+
 	// Code to generate factory data goes here. Add it like:
 	//
 	// ${classname} *my${classname} = new ${classname};
