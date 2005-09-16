@@ -135,6 +135,8 @@ class DFactory_${classname}${tag_suffix}:public DFactory<${classname}>{
 sub PrintFactoryMethods()
 {
 	$content = "
+\#include \<cassert\>	
+
 \#include \"DFactory_${classname}${tag_suffix}.h\"
 
 //------------------
