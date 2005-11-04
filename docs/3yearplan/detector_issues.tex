@@ -1,0 +1,138 @@
+%             
+% CLAS NOTE  (tof rates)
+% 
+\documentclass[12pt,dvips]{article}
+
+\setlength{\textwidth}{6.0in}
+\setlength{\textheight}{8.0in}
+%\setlength{\evensidemargin}{0in}
+%\setlength{\oddsidemargin}{0in}
+%\setlength{\topmargin}{0in}
+%\setlength{\parindent}{0pt}
+%\setlength{\parskip}{0in}
+\usepackage{graphicx}
+\pagenumbering{arabic}
+%\input epsf
+
+\begin{document}
+
+\begin{flushright}
+%GLUEX-NOTE \\
+Original: October 24, 2005
+\end{flushright}
+ 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  TITLE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+{\Large \bf DRAFT DRAFT List of Detector R\&D Issues} \\
+\end{center}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  AUTHORS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+\begin{center}
+{\sc  E.S. Smith}\\
+\end{center}
+
+To facilitate a discussion of major R\&D issues that need to be addressed
+in the next few years, it will be useful to develop a table with
+a brief description of each. Each issue should be addressed in more detail in an
+expanded format as suggested by Alex.
+
+Here is an initial list of issues that first came to my mind, but each subsystem
+should review the list both for completeness, priority, and ways to address it.
+I suggest that everyone go back to the report of the detector and electronics  reviews 
+to pull out
+any issues that were raised by them, if they are still relevant.
+Once we converge on a list which is fairly complete, we will need to develop a 
+plan which can address each of these issues in a systematic way.
+In preparation for CD-2 essentially all the design parameters need to be defined
+because we will need to develop a detailed cost and schedule basis for the
+entire detector. 
+
+
+\begin{table}[htb] 
+\caption{List of detector issues and questions that can help address them. }
+\begin{center}
+\begin{tabular}{|l|l|l|}\hline \hline
+
+System      & Issue   & Question to address issue \\ \hline \hline
+solenoid    &         &                           \\
+            & coil shorts & repair \\
+            & full scale assembly & cost, schedule?  \\\hline
+FDC         &         &                           \\
+            & pos resolution & strip configuration? anode resolution? \\
+            & momentum resolution & number of planes and spacing? \\
+            & dE/dx on anodes & capability with cathodes alone? \\\hline
+CDC         &         &                           \\
+            &z-measurement        & feasibility of charge division  \\
+            & dE/dx &  FADC bit requirements\\
+            & gain & design of preamp, postamps \\
+            &  &  \\\hline
+start       &         &                           \\
+            &  &  \\\hline
+barrel cal  &         &                           \\
+            & fibers & color, types and cladding? \\
+            & photodetector & feasibility of SiPms? \\
+            &               & light guide design for conventional pmt? \\\hline
+forward cal &         &                           \\
+            & light guides & evaluate alternatives to air guides \\
+            & time resolution & extraction of time from FADCs\\
+            &  &  \\\hline
+UPV         &         &                           \\
+            & beam hole & design to accommodate? \\
+
+\hline \hline
+\end{tabular}
+\label{tab:thscat}
+\end{center}
+\end{table} 
+
+
+\begin{table}[htb] 
+\caption{List of detector issues and questions that can help address them (cont.). }
+\begin{center}
+\begin{tabular}{|l|l|l|}\hline \hline
+
+tof         &         &                           \\
+            & time resolution & design for sigma=60 ps?  \\ \hline
+Cer Detector &         &                           \\
+            & minimum number of pe & optics and pmt shielding? \\ \hline
+DIRC        &         &                           \\
+            & quartz  & availability from SLAC? \\
+            & readout & feasibility of multi-channel pmts? \\ \hline
+DAQ         &         &                           \\
+            & multiple event builders & design? \\ \hline
+Online      &         &                           \\
+            &  &  \\ \hline
+Offline     &         &                           \\
+            &  &  \\ \hline
+FADC        &         &                           \\
+            & number of bits, frequency  & inputs from detector subsystems \\ \hline
+Trigger     &         &                           \\
+            & communication between trigger modules & serial link development? \\
+            & detector inputs & what information is needed for L1?  \\ \hline
+Racks crates &         &                           \\
+            &  &  \\ \hline
+Logic, HV    &         &                           \\
+            & electronic interfaces & cables and wiring diagram    \\ \hline
+Tag magnet  &         &                           \\
+            & 1 vs 2 diples & costing, assembly?  \\ \hline
+Tag hodos   &         &                           \\
+            & backgrounds & GEANT simulation of tagger \\ \hline
+Target      &         &                           \\ 
+            & design & use of non-hydrogen targets? \\ \hline
+Beamline    &         &                           \\
+            & polarization & polarimeter required? \\ \hline
+Assembly    &         &                           \\ \hline
+Installation &         &                           \\ \hline
+Cryogenics  &         &                           \\
+            & compatibility with refrigerator & cryo connections for magnet ok? \\
+            &  &  \\
+
+\hline \hline
+\end{tabular}
+\label{tab:thscat}
+\end{center}
+\end{table} 
+
+
+\end{document}
