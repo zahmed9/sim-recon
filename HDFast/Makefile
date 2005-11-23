@@ -20,6 +20,8 @@
 # trying to build HDFast
 #################################################
 
+CRNLIB	= $(CERN)/$(CERN_LEVEL)/lib
+
 #
 # ROOT Crap
 ObjSuf        = o
