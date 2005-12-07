@@ -1,0 +1,182 @@
+%\input{aa_head}
+\documentclass[10pt]{article}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\usepackage[]{epsfig}
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `basename #1 .tif`.png}
+
+\textwidth = 7.0 in
+\textheight = 9.5 in
+\oddsidemargin = -0.25 in
+\evensidemargin = 0.0 in
+\topmargin = 0.0 in
+\headheight = 0.0 in
+\headsep = 0.0 in
+\parskip = 0.05in
+\parindent = 0.0in
+
+\def \fdc    {{\textsc{fdc}}}
+
+\begin{document}
+
+
+
+\section*{GlueX Electronics for DAQ}
+
+
+\subsubsection*{Overview}
+
+The GlueX DAQ electronics plan encompasses both analog and digital requirements and will be 
+responsible for discriminating, and digitizing raw detector signals
+storing them for later readout at level 1 trigger rates of 200 kHz
+without incurring deadtime.  The GlueX detector includes approximately 18,600 ADC 
+channels and 4,300 TDC channels. Additional DAQ related electronics must be developed for
+collecting energy sums and track counts in order to process the L1 trigger decision, and
+then to distribute this trigger information to upwards of 70-80 front-end crates. Other
+electronics needs including preamps and other detector specific needs are not covered
+in this document.
+
+A pipelined approach will be required to support the high trigger rate.  The
+digitized charge and time information must be stored for several $ \mu s $ while the
+level 1 trigger is formed and then distributed.  Multiple events must be buffered within
+the digitizer modules and read or transmitted while the front ends continue to
+acquire new events.  The aggregate raw data rate from the GlueX detector is expected to
+reach  about 1 Gbyte/second. A sophisticated timing system is required to synchronize the
+pipelines in the front-end modules.  The plan is to clock all digitizers in synchronization
+with the accelerator timing.
+
+In parallel, formed energy sums from the calorimeter crates as well as track counts from the 
+barrel and TOF systems must be collected and clocked back to the Master L1 trigger crate/module 
+where the data and logic that compromise the level 1 trigger can be processed.
+
+
+\subsubsection*{Stage One R\&D}
+
+There are a number of parallel board development projects which must progress over the next 3
+years both to support existing DAQ requirements and to provide R\&D for future designs.
+In total to date 8 board designs have been identified, in rough order of development:
+\begin{itemize}
+\item 250 MHz 16 Channel Flash ADC (Ver 1 VME/VXS)  FY06 FY07
+\item VME Trigger Interface (Ver 3 VME only)        FY06
+\item F1TDC 64/32 Channel (Ver 2 VME/VXS)           FY06 FY07
+\item Backplane Distribution Card (Ver 2 VME only)  FY06
+\item Crate Energy Sum/Trigger Process (Ver 1 VXS)  FY06 FY07 FY08
+\item VXS Trigger/Clock Interface (Ver 1 VXS)       FY07 FY08
+\item Trigger Distribution Board (Ver 1 VME/VXS)    FY08 FY09
+\item Master L1 Trigger Processor (Ver 1 VME/VXS)   FY08 FY09
+\end{itemize}
+
+The DAQ group is involved jointly with the JLAB electronics group in the 
+development of all of the above designs. These boards can be roughly catagorized into
+three different subsystems: Digitizing, L1 Trigger Processing, and Trigger/Clock Distribution.
+However, they all must provide cross support for communication between subsystems.
+All experimental halls in the 12 GeV upgrade plan are expected to use modules in both
+the Digitizing and/or Trigger/Clock Distribution Systems. Therefore these boards are going
+to be developed without requiring the VXS backplane support.
+
+With the design for the 250 MHz FADC underway, simultanious development must be done on
+a new VME Trigger Interface (TI Board Ver 3). The JLAB trigger interface card is a 
+critical hardware component used to support many aspects of the CODA data 
+acquisition system, specifically in the front-end, but it also provides data 
+to the backend for event-building. It is used in both single and multi-crate systems 
+and provides both trigger information and general I/O to the ROC software component.
+
+As the CODA DAQ system evolves to support higher rate experiments, pipelined 
+front-ends, and soft real-time systems via embedded Linux, the capabilities 
+of this module must evolve as well. Below are outlined the general features 
+of the version 3 trigger interface that are required.
+
+\begin{itemize}
+\item Software and hardware compatibility with TI version 2. Must work with the 
+existing Trigger supervisor preferably with minimal modification of existing 
+software.
+\item Include remote VME Reset capability currently provided by separate 
+microcontroller card.
+\item Support trigger buffering locally. Record high resolution time stamp with 
+each accepted trigger. Creation of a trigger event bank in RAM as events are 
+accepted.
+\item VME slave must support block readout of trigger event bank information. 
+Can be used with F1 and FADC in chained block reads.
+\item Onboard scalers available, trigger count and connected to user inputs.
+\item VME Master capability. For example upon receiving a trigger the card would 
+have the ability to go on the bus and read module status or latched scaler 
+and buffer this info in the trigger event bank.
+\item Clock/Trigger source for F1TDC and/or FADC - linked to time stamp. Lines to 
+P2 for input to the backplane distribution card. 
+\item User ability to program local FPGA. Appropriate code should be loadable 
+over VME and then be able to downloadable into the FPGA. This code should 
+then be selectable to be executed over the standard trigger processing code. 
+This effectively becomes the "primary" user readout list for the crate.
+\end{itemize}
+
+The addition of updated versions of the Backplane Distribution Card and F1TDC Board 
+will complete an initial phase of electronics development in that a consistant DAQ
+system that supports pipelining, and event blocking will be available. It will also
+be supported by the existing JLAB Trigger Distribution System (Trigger Supervisor) and
+be useable by existing 6 GeV experiments. Most of the GlueX detector development DAQ
+will also be supported by this system.
+
+Ideally this stage of development should be completed by the end of FY07.
+
+
+\subsubsection*{Stage Two R\&D}
+
+Traditional DAQ systems typically split detector signals and send one set for
+discrimination and L1 trigger processing, and the other set for digitization. With
+the availability of pipeline electronics and high speed flash ADCs one now has
+the ability for the digitizers to do both, requiring only a single input
+from the detector and no delay cabling. 
+
+We plan to use a commerically supported extension to VME called VXS (VME Switched Serial)
+which provides a full 8 lane crossbar fabric interconnecting 18 VME payload slots in a crate 
+with two specialized switched slots. These data lanes currently support 3 Gbit/s transfers
+and are expected to increase to 10 GBit/s. Using this technology we intend to design two
+additional switch slot crate level boards. One, the Crate Sum/Trigger Processor, will collect
+partial sums from all FADCs in the crate and perform addtional sums and/or trigger processing.
+This board would also be responsible for sending trigger data to a final Master Trigger board
+elsewhere in the GlueX experimental Hall. The second board would be a forth revision of the
+Trigger Interface card only this board would reside in a switch slot so as not to take up a 
+payload slot. In addition the trigger and clock signals would be distributed to all payload
+boards via the VXS backplane. No backplane distribution card should be necessary in this
+configuration.
+
+The two final subsystems that will be developed (in parallel with the VXS crate cards) are the
+Master L1 Trigger Subsystem and the Trigger/Clock Distribution System (Trigger Supervisor
+replacement). The design of these boards cannot be fully specified at this time. Much of this
+will depend on the R\&D being done with VXS. The form factor necessary to collect signals from
+a large number of crates (around 20-30) and process that data within a few microsecs is not
+known. The Trigger/Clock distribution board however is expected to fit in a 6 or 9U VME form factor
+as it should be available for use by all experimental halls regardless if they intend to 
+use the L1 trigger processor or not. There is no reason to expect to have to design two different
+Trigger Distribution Boards, so consideration should be given to the design to allow a 
+compatable interface between it and the output of Master L1 Trigger board.
+
+
+\subsubsection*{Goals Milestones and Personnel}
+
+The high speed FADC is expected to be in prototype by the summer or early fall of 2006,
+The new VME trigger interface (Version 3) capable of supporting both the old
+trigger supervisor as well as the new pipelined front-end should be prototyped in the
+same timeframe. This board along with the Backplane Distribution card must be designed
+to fully support and work cooperatvely with the FADC. Once these systems have been 
+sufficiently prototyped, version two for the F1TDC can be specified and designed. 
+
+By early 2007 there should be enough hardware and software development to
+support small detector system prototyping, and beam tests that would
+encompass the core functionality of the GlueX DAQ system. By the end of FY07 we should
+have available a complete set of hardware to support fully pipelined high-rate
+systems at least at the single crate level.
+
+VXS R\&D should be sufficiently advanced by the summer of 2007 to begin protoyping the
+Crate Sum and VSX Trigger interface cards. Prototypes could be available in 2008.
+
+Personnel working on these projects include the JLAB electronics group as well as Ed Jastrzembski
+of the DAQ Group. There are currently 3 design engineers working on these projects all part time.
+A 4th design engineer will be needed to sufficently cover the overlaping requirements of these
+designs. In addition as prototyping moves to production, more help will be needed in
+the form of an electrical tech that will be able to test, debug and repair. Support for all
+these designs will be ongoing as they are produced.
+
+
+\end{document} 

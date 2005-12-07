@@ -11,6 +11,7 @@
 #     updated for eg3_beamtest - Elton Aug/04
 #     updated for eg3_target - Elton Sep/04
 #     updated for detector_issues - Elton Oct/05
+#     updated for Electronics_plan - Elton Oct/05
 #
 #
 TEX_FILES_0 = detector_issues
@@ -24,9 +25,15 @@ EPS_FILES = $(addsuffix .eps,$(EPS_FILES_0)) # add .eps suffix
 
 all: detector_issues detector_issues.ps
 
+Electronics_plan: Electronics_plan.ps
+
 detector_issues.dvi : $(TEX_FILES) $(PS_FILES) $(EPS_FILES) # make the dvi file
 	latex detector_issues
 	latex detector_issues
+
+Electronics_plan.dvi : Electronics_plan.tex
+	latex Electronics_plan.tex
+	latex Electronics_plan.tex
 
 %.ps : %.dvi
 	dvips -o $*.ps $*
