@@ -33,7 +33,7 @@ detector_issues.dvi : $(TEX_FILES) $(PS_FILES) $(EPS_FILES) # make the dvi file
 	latex detector_issues
 	latex detector_issues
 
-Electronics_plan.dvi : Electronics_plan.tex
+Electronics_plan.dvi : Electronics_plan.tex Electronics_plan.eps 
 	latex Electronics_plan.tex
 	latex Electronics_plan.tex
 
