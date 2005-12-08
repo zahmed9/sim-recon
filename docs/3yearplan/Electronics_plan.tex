@@ -36,7 +36,7 @@ collecting energy sums and track counts in order to process the L1 trigger decis
 then to distribute this trigger information to upwards of 70-80 front-end crates. Other
 electronics needs including preamps and other detector specific needs are not covered
 in this document.
-
+ 
 A pipelined approach will be required to support the high trigger rate.  The
 digitized charge and time information must be stored for several $ \mu s $ while the
 level 1 trigger is formed and then distributed.  Multiple events must be buffered within
@@ -49,6 +49,19 @@ with the accelerator timing.
 In parallel, formed energy sums from the calorimeter crates as well as track counts from the 
 barrel and TOF systems must be collected and clocked back to the Master L1 trigger crate/module 
 where the data and logic that compromise the level 1 trigger can be processed.
+
+\begin{figure}[p]
+\begin{center}
+\includegraphics[height=15cm]{Electronics_plan.eps}
+\caption{Schematic of the electronic boards that are required to support
+the plans for GlueX pipeline electronics and DAQ. 
+Indicated are the crates needed, responsible groups,
+expected use in the 6 GeV program, and estimate of time frame for design and
+prototyping.
+\label{fig:plan}}
+\end{center}
+\end{figure}
+
 
 
 \subsubsection*{Stage One R\&D}
