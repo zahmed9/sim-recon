@@ -37,7 +37,7 @@ Electronics_plan.dvi : Electronics_plan.tex Electronics_plan.eps
 	latex Electronics_plan.tex
 	latex Electronics_plan.tex
 
-DAQ_plan.dvi : DAQ_plan.tex
+DAQ_plan.dvi : DAQ_plan.tex GluexDAQ.eps
 	latex DAQ_plan.tex
 	latex DAQ_plan.tex
 
