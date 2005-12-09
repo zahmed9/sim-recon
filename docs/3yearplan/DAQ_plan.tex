@@ -38,7 +38,7 @@ The GlueX data acquisition system must:
   monitoring systems
 \end{itemize}
 
-GlueX expects to fill approximately 70 readout crates 
+GlueX expects to fill approximately 70-80 readout crates 
 containing 25,000 channels of electronics. 
 We expect a level 3 reduction of 90\%, which reduces the 1 GB/s raw
 rate to an accepted event data rate to disk of around 100 MB/s.
@@ -67,7 +67,7 @@ end to interface with GlueX detector subsystems. These modules can also be
 used in the existing experimental Halls. Addional hardware support for the 
 pipelined systems should include the design of a new VME trigger interface 
 board, and a prototype (for small numbers of crates) trigger/clock 
-distribution system. 
+distribution system (See the GlueX Electronics for DAQ plan for details). 
 
 Software R\&D include the development of a new CODA Readout Controller
 (ROC) component that will run on either an Embedded Linux or VxWorks
@@ -98,11 +98,12 @@ The first stage of the DAQ farm is expected to be installed by February
 event builder, and run control will continue throughout the year with
 working models for all expected by the end of 2006. 
 
-The high speed FADC is expected to be in prototype by the summer of 2006,
-and from that stage library support can begin to be developed and
+The high speed FADC is expected to be in prototype by the summer or early 
+Fall of 2006, and from that stage library support can begin to be developed and
 tested. The new VME trigger interface capable of supporting both the old
 trigger supervisor as well as the new pipelined front-end should be
-prototyped by the Fall of 2006. 
+prototyped roughly within the same time frame. This hardware too will need software
+support developed for it. 
 
 The extension of providing a new trigger (and clock) distribution system 
 will be difficult to fully specify before the end of 2006 and is somewhat
@@ -123,6 +124,23 @@ staffing is currently five full time (D. Abbott, E. Wolin, C. Timmer,
 V. Gyurjyan, and E. Jastrzembski) and one part-time (D. Lawrence) FTE. DAQ hardware
 development (managed by E. Jastrzembski) is highly dependent on
 availability of additional engineering support from the Physics Electronics group.
+
+There is a request for one additional DAQ group member to help primarily in the development
+of the DAQ farm and parallel Event Building R\&D. Additional support could be used in the
+development of driver libraries, diagnostics, and utilities for all of the new DAQ electronics
+hardware being designed.
+
+
+
+\begin{figure}[p]
+\begin{center}
+\includegraphics[height=15cm]{GluexDAQ.eps}
+\caption{Schematic of the GlueX data acquisition system and specific
+subsystems. Event and data rates are indicated at the various stages.
+\label{fig:plan}}
+\end{center}
+\end{figure}
+
 
 
 \end{document} 

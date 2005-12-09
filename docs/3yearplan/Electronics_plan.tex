@@ -22,6 +22,7 @@
 
 
 
+
 \section*{GlueX Electronics for DAQ}
 
 
@@ -50,6 +51,14 @@ pipelines of all front-end modules in all crates.
 In parallel, formed energy sums from the calorimeter crates as well as track counts from the 
 barrel and TOF systems must be collected and clocked back to a Master L1 trigger module (or crate) 
 where all the data and logic that compromise the level 1 trigger can be processed.
+
+In the following sections we describe the DAQ electronics plan. It can be generally broken down 
+into two stages. The first stage attempts to bring together a complete set of digitizing and trigger
+distribution hardware to provide a platform that fully supports pipelining and event blocking. This
+hardware can then be used by both the existing 6 GeV program as well as R\&D efforts of GlueX and
+the 12 GeV program. The second stage will attempt to fully integrate the Level 1 trigger processing 
+and the a new global trigger distribution system. This stage depends on newer commercial technology 
+(VXS and  high speed serial transport) that must be developed and better understood.
 
 
 \subsubsection*{Stage One R\&D}
