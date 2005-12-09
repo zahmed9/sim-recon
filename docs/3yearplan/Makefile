@@ -29,6 +29,8 @@ Electronics_plan: Electronics_plan.ps
 
 DAQ_plan: DAQ_plan.ps
 
+Offline_plan: Offline_plan.ps
+
 detector_issues.dvi : $(TEX_FILES) $(PS_FILES) $(EPS_FILES) # make the dvi file
 	latex detector_issues
 	latex detector_issues
@@ -40,6 +42,11 @@ Electronics_plan.dvi : Electronics_plan.tex Electronics_plan.eps
 DAQ_plan.dvi : DAQ_plan.tex GluexDAQ.eps
 	latex DAQ_plan.tex
 	latex DAQ_plan.tex
+
+
+Offline_plan.dvi : Offline_plan.tex
+	latex Offline_plan.tex
+	latex Offline_plan.tex
 
 %.ps : %.dvi
 	dvips -o $*.ps $*

@@ -1,0 +1,108 @@
+%\input{aa_head}
+\documentclass[10pt]{article}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\usepackage[]{epsfig}
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `basename #1 .tif`.png}
+
+\textwidth = 7.0 in
+\textheight = 9.5 in
+\oddsidemargin = -0.25 in
+\evensidemargin = 0.0 in
+\topmargin = 0.0 in
+\headheight = 0.0 in
+\headsep = 0.0 in
+\parskip = 0.05in
+\parindent = 0.0in
+
+\def \fdc    {{\textsc{fdc}}}
+
+\begin{document}
+
+
+
+
+\section*{Offline Software at JLab} 
+
+
+\subsubsection*{Overview}
+
+The offline software effort for GlueX was reviewed extensively during
+the Software Workshop on October 21-22, 2005. 
+At that time  the present
+status was reviewed and near and longer term goals were discussed. 
+The workshop was summarized in GlueX-doc-537-v1.  
+Milestones 
+for this system were summarized at the collaboration meeting. 
+
+
+\subsubsection*{FTE for software framework}
+
+A framework exists that has been written specifically for GlueX
+reconstruction (DANA). However, there are a number of
+features/improvements that still need to be developed and incorporated
+into the existing framework. These include: Logging system, Exception
+handling, Object introspection, Improved thread management, Interface to
+ET system for monitoring, Calibration/Geometry database access, and
+Interface to PWA code. Development of a program that implements a Hall-A
+style histogram definition file is also needed to provide access to the
+analysis software to a wider group of GlueX collaborators as well as
+improve the efficiency in which analyses are performed. Integration of
+the framework into the L3 trigger is also needed along with extensive
+testing.
+
+
+\subsubsection*{FTE for charged particle tracking}
+
+At this point, code has been written that does an initial track finding
+pass on parametrically smeared Monte Carlo data using a homogeneous
+magnetic field with some noise hits added. The next step will be to
+develop a Kalman filter than can propagate a track through a
+inhomogeneous magnetic field, using covariance matrices passed from the
+underlying detector systems to describe the hits. This will require
+identifying and integrating a linear algebra package into the GlueX
+software framework, implementing code to read in and interpolate the
+magnetic field and coordinating with the authors of the  reconstruction
+code for the  individual detector systems.  Proper  application of the
+Kalman filter will also require integration of geometry and materials
+information in order to calculate process noise due to scattering from
+material in the particle path. The tracking code will also need to
+accommodate both off beam-line vertex reconstruction and re-fitting
+using information
+derived from particle ID kinematic fitting code.
+
+
+Thee following tasks have been identified as goals for the offline
+software effort:
+
+\begin{enumerate}
+\item ``Phase 1" Tracking and particle ID. Output into format that can
+by read by CMU PWA code.
+   \begin{itemize}
+    \item Pattern recognition using hit-based information completed and optimized for Monte Carlo data.
+    \item Full tracking through an inhomogeneous magnetic field. The Kalman
+   filter should be implemented at least in a rudimentary way.
+    \item Particle identification factory designed with well defined outputs.
+   Not necessarily final algorithm, but at least capable of identifying probable Kaons.
+   \end{itemize}                                                                                            
+\item ``Phase 2" Tracking and particle ID.
+  \begin{itemize}
+   \item Off beamline vertex reconstruction.
+   \item Improved particle ID through kinematic fitting.
+   \end{itemize}
+\end{enumerate}
+
+
+\subsubsection*{Goals and Milestones}
+
+
+\subsubsection*{Personnel}
+
+Primary responsibility for developing the software framework belongs to Dave Lawrence.
+Although preliminary track finding and fitting has been studied using the
+Montecarlo ``cheat codes,'' a substantial effort is still required for full reconstruction
+and requires an additional person.
+
+
+\end{document}
