@@ -31,6 +31,8 @@ DAQ_plan: DAQ_plan.ps
 
 Offline_plan: Offline_plan.ps
 
+Trigger_CNU_plan: Trigger_CNU_plan.ps
+
 detector_issues.dvi : $(TEX_FILES) $(PS_FILES) $(EPS_FILES) # make the dvi file
 	latex detector_issues
 	latex detector_issues
@@ -47,6 +49,10 @@ DAQ_plan.dvi : DAQ_plan.tex GluexDAQ.eps
 Offline_plan.dvi : Offline_plan.tex
 	latex Offline_plan.tex
 	latex Offline_plan.tex
+
+Trigger_CNU_plan.dvi : Trigger_CNU_plan.tex
+	latex Trigger_CNU_plan.tex
+	latex Trigger_CNU_plan.tex
 
 %.ps : %.dvi
 	dvips -o $*.ps $*

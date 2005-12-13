@@ -1,0 +1,80 @@
+%\input{aa_head}
+\documentclass[10pt]{article}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\usepackage[]{epsfig}
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `basename #1 .tif`.png}
+
+\textwidth = 7.0 in
+\textheight = 9.5 in
+\oddsidemargin = -0.25 in
+\evensidemargin = 0.0 in
+\topmargin = 0.0 in
+\headheight = 0.0 in
+\headsep = 0.0 in
+\parskip = 0.05in
+\parindent = 0.0in
+
+\def \fdc    {{\textsc{fdc}}}
+
+\begin{document}
+
+
+
+
+\section*{CNU trigger development}
+
+
+\subsubsection*{Overview}
+
+	CNU has committed to developing the VXS-based Energy Sum Slot A (VESSA) board, 
+which will reside in Slot A of a VXS backplane.  This board receives Energy Sum 
+information over the VXS serial backplane lines from each of the FADC boards in the crate.  
+It combines (essentially adds) the information from all boards in its crate to create 
+a Crate Energy Sum, which will be sent to the Global Level 1 Trigger Processor.
+
+	To perform its task, the VESSA will use multiple FPGAs, arranged in a three 
+stage pipeline.  With a total of 18 payload slots (nine on each side) available in a 
+VXS backplane, the first stage uses a total of six FPGAs to handle the 
+serial input data, with each FPGA handling the data from three slots (FADCs).  Each 
+of these inbound FPGAs needs to have  multiple Multi-Gigabit Transceivers (MGTs) to 
+receive the data from the VXS backplane.  Each of the inbound FPGAs will aggregate the data from their 
+boards, then pass the data to one of two second stage FPGAs (three to one, 
+three to the other).  Each of these second stage FPGAs will then aggregate the 
+data from each side.  This data will be passed to the final summing stage, which 
+will also serve as the outbound link manager.
+
+
+\subsubsection*{Stages of  R\&D}
+
+	The development of a completed VESSA board is anticipated to take place in four stages.
+
+	The first stage is the development is to design and layout VESSA-1, used 
+for prototyping communications over the backplane.  It contains a single FPGA, and 
+sends data on several (but by no means all) of the VXS backplane links to several of 
+the slots in the crate.  A companion loopback board will also be designed, which can 
+be moved to different slots, to reflect the signal back to the VESSA-1 board
+The second prototype, VESSA-2, is used to aggregate the data from multiple FADC boards 
+in one crate.  It will not handle the full 18 slots, and it will not have an outbound 
+serial link, but it will handle at least one side of nine slots, and have a two stage 
+pipeline (the third stage is not necessary) with a trigger output signal.  This is a 
+fully functional board which will be used in a prototype detector system.
+
+	The third stage of the prototyping is a prototype of the outbound link system, 
+currently anticipated to be a fiber optic version of the Slink-64.
+
+	The final stage is to integrate the Slink-64 with an enhanced VESSA-2 to 
+create the VESSA-3, which handles up to 18 FADC boards, and has the outbound link 
+to the Global Trigger Processor.
+
+\subsubsection*{Estimated cost}
+
+	Thus the development of the completed VESSA board requires at least five boards 
+of differing complexity to be developed.  It should be noted that each of these boards 
+needs to be controlled impedance.  The anticipated cost for developing these five boards, 
+along with associated components and assembly cost is roughly \$25,000.  With a 50\% 
+contingency, we arrive at a final cost of \$37,500.	
+
+
+\end{document} 
