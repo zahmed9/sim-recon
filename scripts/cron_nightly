@@ -70,7 +70,8 @@ cat latest_${OSNAME}.out | \
  grep -v "^Generating " | \
  grep -v "^Preprocessing " | \
  grep -v "^Parsing file " | \
- grep -v "^U "
+ grep -v "^U " | \
+ grep -v "^f90comp: 0 ERRORS,"
  echo " "
  echo " "
 
@@ -80,7 +81,10 @@ cat latest_${OSNAME}.out | \
  grep -v mkstemp | \
  grep -v "has modification time in the future" | \
  grep -v "Clock skew detected" | \
- grep -v "sys_errlist' is deprecated"
+ grep -v "sys_errlist' is deprecated" | \
+ grep -v "^f90: Warning: Option -Wno-globals passed to ld" | \
+ grep -v "^cc: Warning: option -2 passed to ld" | \
+ grep -v "^f90comp: 0 ERRORS,"
  echo " "
  echo " "
 
