@@ -27,12 +27,11 @@ chdir $release;
 # Checkout release to new directory
 system("cvs -d cvs.jlab.org:/group/halld/Repositories/cvsroot co $tags release");
 
-# For now, just move these things by hand. They should be moved
-# in the repository itself eventually
+# At this point, the HDFast and mcroot packages are not fully supported
+# so they still exist in their orginal home at the top of the 
+# CVS repository tree. Move them into a more logical location here.
 system("mkdir -p src/programs/Simulation");
-system("mv HDFast HDGeant genr8 mcroot stdhep_translators hdds src/programs/Simulation");
-system("mv hddm src/programs/Analysis");
-system("mv include src");
+system("mv HDFast mcroot src/programs/Simulation");
 
 # Regenerate hddm files from schema
 print "\nBuilding HDDM tools ...\n\n";

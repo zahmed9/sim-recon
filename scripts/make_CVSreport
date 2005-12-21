@@ -18,11 +18,11 @@ cvs co CVSstats
 # remove files we want to ignore such as Postscript files or generated files
 rm -f `find . -name "*.ps"`
 rm -f `find . -name "*.pdf"`
-rm -f HDGeant/hddsGeant3.F
-rm -f HDGeant/dsolenoid.table
-rm -f HDGeant/hddm_s.c
-rm -f HDGeant/hddm_s.h
-rm -f hddm/hddm_t.c
+rm -f src/programs/Simulation/HDGeant/hddsGeant3.F
+rm -f src/programs/Simulation/HDGeant/dsolenoid.table
+rm -f src/programs/Simulation/HDGeant/hddm_s.c
+rm -f src/programs/Simulation/HDGeant/hddm_s.h
+rm -f src/programs/Analysis/hddm/hddm_t.c
 rm -rf mcroot/html
 rm -rf mcroot/cvsOLD
 rm -f src/libraries/include/hddm_s.h
