@@ -1,0 +1,31 @@
+// Author: David Lawrence  June 25, 2004
+//
+//
+// hd_ana.cc
+//
+
+//#include "MyProcessor.h"
+#include "DApplication.h"
+#include "DEventSinkJIL.h"
+
+//-----------
+// main
+//-----------
+int main(int narg, char *argv[])
+{
+	// Instantiate our event processor
+	//MyProcessor myproc;
+	
+	DEventSinkJIL sink("test.jil");
+
+	// Instantiate an event loop object
+	DApplication app(narg, argv);
+
+	// Run though all events, calling our event processor's methods
+	//app.AddProcessor(&myproc);
+	app.AddProcessor(&sink);
+	app.Run();
+	
+	return 0;
+}
+
