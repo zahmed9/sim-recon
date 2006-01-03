@@ -1,9 +1,0 @@
-;
-; D0 --> K- pi+
-;
-;Note: particle names must be in capital letters
-
-decay  D0
-channel  0 1.0  K-  PI+
-enddecay
-

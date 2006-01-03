@@ -1,4 +1,0 @@
-template BeamVrtx(2)
-  real xyz(3)
-  real sig(3)
-end template

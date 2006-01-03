@@ -1,2 +1,0 @@
-#
-echo "You must source setup5_2.Linux_gcc2x or setup5_2.Linux_gcc3x.  See 'gcc --version' "

@@ -1,5 +1,0 @@
-template HitsOnTrack(2)
-  int all
-  int z
-  int svx
-end template

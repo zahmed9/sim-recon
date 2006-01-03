@@ -1,8 +1,0 @@
-
-template SiXY(100)
-  int num
-  char name
-  int nly
-  child LayerSiXY
-  real zpos
-end template
