@@ -17,7 +17,7 @@ class combinedResidFunc:public residFunc {
 		    vector<const DCDCTrackHit*> *trackhits,
 		    MyTrajectory *trajectory, const DLorentzDeflections *lorentz_def,
 		    int level = 1);
-  void resid(const HepVector *x, void *data, HepVector *f);
+  int resid(const HepVector *x, void *data, HepVector *f);
   void deriv(const HepVector *x, void *data, HepMatrix *J);
   void residAndDeriv(const HepVector *x, void *data, HepVector *f,
 		     HepMatrix *J);

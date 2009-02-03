@@ -75,6 +75,11 @@ template<class C> double MyTrajectory::doca(C& spaceObject, HepLorentzVector &po
     inew = (unsigned int)(xnew + 0.5);
     distnew = dist(spaceObject, inew);
     if (debug_level >= 4) cout << "MyTrajectory::doca: xnew = " << xnew << " inew = " << inew << " distnew = " << distnew << endl;
+    if (isnan(distnew)) {
+      cout << "MyTrajectory::doca: xnew = " << xnew << " inew = " << inew << " distnew = " << distnew << endl;
+      int error = 21098;
+      throw error;
+    }
     if (inew == imid) {
       // Look on either side for minimum bracket
       distup = dist(spaceObject, imid + 1);

@@ -4,15 +4,23 @@
 residFunc *residFuncPtr; // global pointer to a fitter class for gsl callback
 
 int fGsl(const gsl_vector *x, void *data, gsl_vector *f) {
-  //  cout << "fGsl called\n";
+  //cout << "fGsl called\n";
   unsigned int n = residFuncPtr->getN(), p = residFuncPtr->getP(), i;
   HepVector xHep(p), fHep(n);
   for (i = 0; i < p; i++) xHep(i + 1) = gsl_vector_get(x, (size_t)i);
-  //  cout << "input params:" << xHep << endl;
-  residFuncPtr->resid(&xHep, data, &fHep);
-  //cout << "residuals:" << fHep;
-  for (i = 0; i < n; i++) gsl_vector_set(f, (size_t)i, fHep(i + 1));
-  return GSL_SUCCESS;
+  //cout << "input params:" << xHep << endl;
+  int status = residFuncPtr->resid(&xHep, data, &fHep);
+  //cout << "status = " << status << endl;
+  switch (status) {
+  case 0:
+    //cout << "residuals:" << fHep;
+    for (i = 0; i < n; i++) gsl_vector_set(f, (size_t)i, fHep(i + 1));
+    return GSL_SUCCESS;
+  case 1:
+    return GSL_EDOM;
+  default:
+    return GSL_ESANITY; 
+  }
 }
 
 int dfGsl(const gsl_vector *x, void *data, gsl_matrix *J){

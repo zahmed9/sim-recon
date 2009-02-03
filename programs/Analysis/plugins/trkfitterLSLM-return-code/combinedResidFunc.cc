@@ -23,12 +23,13 @@ combinedResidFunc::combinedResidFunc(vector<const DFDCPseudo*> *pseudopoints,
   innerResidFrac(1.0)
 {}
 
-void combinedResidFunc::resid(const HepVector *x, void *data, HepVector *f){
+int combinedResidFunc::resid(const HepVector *x, void *data, HepVector *f){
 // input parameters
 //   x: pointer to a vector of fit parameters
 //   data: ???
 // output parameters
 //   f: pointer to vector of residuals
+  int return_code = -1;
   double doca;
   if (debug_level > 2) {
     cout << "combinedResidFunc::resid: resid called\n";
@@ -54,32 +55,39 @@ void combinedResidFunc::resid(const HepVector *x, void *data, HepVector *f){
   CDCHitDetails *CDCHitDetailsPtr;
   double thisChiSquared = 0.0;
   double thisResid;
-  for (unsigned int j = 0; j < n_cdc; j++) {
-    if (debug_level > 2) cout << "working on cdc hit " << j << endl;
-    line = trackhit2line(*((*trkhitPtr)[j]));
-    doca = trajPtr->doca(line, poca);
-    dist = velDrift*((*trkhitPtr)[j]->tdrift - poca.getT()/c);
-    if (debug_level > 2) cout << "resid, cdc: j = " << j << " dist = " << dist << " doca = " << doca << " poca xyzt = " << poca.getX() << ' ' << poca.getY() << ' ' << poca.getZ() << ' ' << poca.getT()/c << " resid = " << dist - doca << endl;
-    if (isnan(dist)) {
-      thisResid = 0.0;
-    } else {
-      if (doca > dist) {
-	thisResid = dist - doca;
+  try {
+    for (unsigned int j = 0; j < n_cdc; j++) {
+      if (debug_level > 2) cout << "working on cdc hit " << j << endl;
+      line = trackhit2line(*((*trkhitPtr)[j]));
+      doca = trajPtr->doca(line, poca);
+      dist = velDrift*((*trkhitPtr)[j]->tdrift - poca.getT()/c);
+      if (debug_level > 2) cout << "resid, cdc: j = " << j << " dist = " << dist << " doca = " << doca << " poca xyzt = " << poca.getX() << ' ' << poca.getY() << ' ' << poca.getZ() << ' ' << poca.getT()/c << " resid = " << dist - doca << endl;
+      if (isnan(dist)) {
+	thisResid = 0.0;
       } else {
-	thisResid = innerResidFrac*(dist - doca);
+	if (doca > dist) {
+	  thisResid = dist - doca;
+	} else {
+	  thisResid = innerResidFrac*(dist - doca);
+	}
+      }
+      (*f)(n_fdc + j + 1) = thisResid;
+      if (storeDetails) {
+	thisChiSquared += thisResid*thisResid;
+	CDCHitDetailsPtr = new CDCHitDetails();
+	*CDCHitDetailsPtr = getDetails((*trkhitPtr)[j], line);
+	CDCDetails.push_back(CDCHitDetailsPtr);
       }
     }
-    (*f)(n_fdc + j + 1) = thisResid;
-    if (storeDetails) {
-      thisChiSquared += thisResid*thisResid;
-      CDCHitDetailsPtr = new CDCHitDetails();
-      *CDCHitDetailsPtr = getDetails((*trkhitPtr)[j], line);
-      CDCDetails.push_back(CDCHitDetailsPtr);
-    }
+    return_code = 0;
+  } catch (int code) {
+    return_code = 1;
+    if (debug_level >= 3) cout << "combinedResidFunc::resid: caught an exception, code = " << code << endl;
   }
   if (debug_level > 2) cout << "combinedResidFunc::resid: resids:" << *f;
   if (storeDetails) chiSquared = thisChiSquared;
   trajPtr->clear();
+  return return_code;
 };
 
 void combinedResidFunc::deriv(const HepVector *x, void *data, HepMatrix *J){

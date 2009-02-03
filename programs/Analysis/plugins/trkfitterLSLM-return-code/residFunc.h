@@ -6,7 +6,7 @@ using namespace CLHEP;
 class residFunc {
  public:
   virtual ~residFunc();
-  virtual void resid(const HepVector *x, void *data, HepVector *f) = 0;
+  virtual int resid(const HepVector *x, void *data, HepVector *f) = 0;
   virtual void deriv(const HepVector *x, void *data, HepMatrix *J) = 0;
   virtual void residAndDeriv(const HepVector *x, void *data, HepVector *f, HepMatrix *J) = 0;
   virtual unsigned int getN() = 0;
