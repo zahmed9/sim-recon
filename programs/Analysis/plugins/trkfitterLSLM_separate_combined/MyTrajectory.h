@@ -18,6 +18,7 @@ class MyTrajectory {
   void clear();
   virtual void swim(HepVector startingPoint, double theta, double phi);
   virtual void swim(const HepVector &startingVector);
+  void swim(const vector<double> &startingStdVector);
   void swimMC(vector<const DMCTrackHit*> &mctrackhits);
   void print();
   vector<HepLorentzVector*>* getTrajectory();

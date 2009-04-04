@@ -69,6 +69,16 @@ void MyTrajectory::swim(const HepVector& startingVector) {
   return;
 }
 
+void MyTrajectory::swim(const vector<double> &params) {
+  int size = params.size();
+  HepVector hepParams(size);
+  for (int i = 0; i < size; i++) {
+    hepParams(i + 1) = params[i];
+  }
+  swim(hepParams);
+  return;
+}
+
 void MyTrajectory::swimMC(vector<const DMCTrackHit*> &mctrackhits) {
   checkClear();
   const DMCTrackHit* mchit;

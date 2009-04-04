@@ -22,7 +22,7 @@ combinedResidFunc::combinedResidFunc(vector<const DFDCPseudo*> *pseudopoints,
   n_fdc(pseudopoints->size()), n_cdc(trackHits->size()), ppPtr(pseudopoints),
   trkhitPtr(trackHits), trajPtr(trajectory), delta(trajPtr->getDelta()),
   debug_level(level), lorentz_def(lorentz_def_in), storeDetails(false),
-  innerResidFrac(1.0)
+  innerResidFrac(1.0), rCDC(trackHits, trajectory, level)
 {}
 
 void combinedResidFunc::resid(const HepVector *x, void *data, HepVector *f){
@@ -82,6 +82,15 @@ void combinedResidFunc::resid(const HepVector *x, void *data, HepVector *f){
   if (debug_level > 2) cout << "combinedResidFunc::resid: resids:" << *f;
   if (storeDetails) chiSquared = thisChiSquared;
   trajPtr->clear();
+
+  rCDC.setInnerResidFrac(innerResidFrac);
+  rCDC.calcResids(x);
+  vector<double> testResids;
+  rCDC.getResids(testResids);
+  for (int ir = 0; ir < n_cdc; ir++) {
+    cout << (*f)(n_fdc + ir + 1) << " " << testResids[ir] << endl;
+  }
+
 };
 
 void combinedResidFunc::deriv(const HepVector *x, void *data, HepMatrix *J){

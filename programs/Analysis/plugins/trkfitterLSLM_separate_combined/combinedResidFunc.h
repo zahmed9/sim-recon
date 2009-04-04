@@ -7,6 +7,7 @@
 #include "CDC/DCDCTrackHit.h"
 #include "hitDetails.h"
 #include "MyTrajectory.h"
+#include "residCDC.h"
 
 #define BIG_DOUBLE 1.0e12
 #define DRIFT_VELOCITY 55e-4
@@ -48,6 +49,7 @@ class combinedResidFunc:public residFunc {
   CDCHitDetails getDetails(const DCDCTrackHit *trackhit, DLine line);
   vector<CDCHitDetails*> CDCDetails;
   double innerResidFrac;
+  residCDC rCDC;
 };
 
 #endif // _COMBINEDRESIDFUNC_H_
