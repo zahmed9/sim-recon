@@ -25,6 +25,8 @@ void residCDC::calcResids(){
   doca.clear();
   dist.clear();
   poca.clear();
+  error.clear();
+  resid.clear();
   for (unsigned int j = 0; j < n_cdc; j++) {
     trkhitPtr = (*trkhitVectorPtr)[j];
     line = trackhit2line(*trkhitPtr);
