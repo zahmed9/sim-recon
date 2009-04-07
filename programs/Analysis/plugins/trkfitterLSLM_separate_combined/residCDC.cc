@@ -12,15 +12,12 @@ const double c = 29.9792548; // speed of light, cm/ns
 // constructor, takes pointer to vector of trackhits and a pointer
 // to a trajectory
 residCDC::residCDC(vector<const DCDCTrackHit*> *trackHits,
-				     MyTrajectory *trajectory, int level) : 
-  n_cdc(trackHits->size()), trkhitVectorPtr(trackHits), trajPtr(trajectory), delta(trajPtr->getDelta()),
+				     const MyTrajectory *trajectory, int level) : 
+  n_cdc(trackHits->size()), trkhitVectorPtr(trackHits), trajPtr(trajectory),
   debug_level(level)
 {}
 
-void residCDC::calcResids(const vector<double> params){
-//   params: vector of fit parameters
-  // do a swim with the input parameters
-  trajPtr->swim(params);
+void residCDC::calcResids(){
   const DCDCTrackHit* trkhitPtr;
   DLine line;
   double docaThis, distThis, residThis, errorThis;
@@ -46,17 +43,7 @@ void residCDC::calcResids(const vector<double> params){
     resid.push_back(residThis);
     error.push_back(errorThis);
   }
-  trajPtr->clear();
 };
-
-void residCDC::calcResids(const HepVector* paramsHepPtr) {
-  vector<double> params;
-  for (int i = 0; i < paramsHepPtr->num_row(); i++) {
-    params.push_back((*paramsHepPtr)(i + 1));
-  }
-  calcResids(params);
-  return;
-}
 
 DLine residCDC::trackhit2line(const DCDCTrackHit &trkhit) {
   const DCDCWire *wire = trkhit.wire;

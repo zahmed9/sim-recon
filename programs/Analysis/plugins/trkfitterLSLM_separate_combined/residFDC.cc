@@ -14,16 +14,13 @@ const double c = 29.9792548; // speed of light, cm/ns
 // constructor, takes pointer to vector of pseudopoints and a pointer
 // to a trajectory
 residFDC::residFDC(vector<const DFDCPseudo*> *pseudopoints,
-		   MyTrajectory *trajectory,
+		   const MyTrajectory *trajectory,
 		   const DLorentzDeflections *lorentz_def_in, int level) : 
   n_fdc(pseudopoints->size()), ppPtr(pseudopoints),
-  trajPtr(trajectory), delta(trajPtr->getDelta()),
-  debug_level(level), lorentz_def(lorentz_def_in) {}
+  trajPtr(trajectory), debug_level(level) {}
 
-void residFDC::calcResids(const vector<double> params) {
+void residFDC::calcResids() {
   double docaThis, errorThis, residThis;
-  // do a swim with the input parameters
-  trajPtr->swim(params);
   HepVector point(3);
   HepLorentzVector pocaThis;
   const DFDCPseudo* ppointPtr;

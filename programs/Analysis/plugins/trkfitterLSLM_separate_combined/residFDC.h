@@ -13,15 +13,14 @@
 
 class residFDC {
  public:
-  residFDC(vector<const DFDCPseudo*> *pseudopoints, MyTrajectory *trajectory,
+  residFDC(vector<const DFDCPseudo*> *pseudopoints, const MyTrajectory *trajectory,
 		    const DLorentzDeflections *lorentz_def, int level = 1);
-  void calcResids(const vector<double> params);
+  void calcResids();
  private:
   unsigned int n_fdc;
   vector<const DFDCPseudo*> *ppPtr;
-  MyTrajectory *trajPtr;
+  const MyTrajectory *trajPtr;
   HepVector pseudo2HepVector(const DFDCPseudo &pseudopoint);
-  vector<double> delta;
   int debug_level;
   bool getCorrectionSign(const DFDCPseudo &pseudopoint, double x, double y,
 			 double deltaX, double deltaY);

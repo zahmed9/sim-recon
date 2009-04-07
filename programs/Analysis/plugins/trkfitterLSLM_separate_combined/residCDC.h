@@ -9,18 +9,16 @@
 
 class residCDC {
  public:
-  residCDC(vector<const DCDCTrackHit*> *trackhits, MyTrajectory *trajectory,
+  residCDC(vector<const DCDCTrackHit*> *trackhits, const MyTrajectory *trajectory,
 		    int level = 1);
-  void calcResids(vector<double> params);
-  void calcResids(const HepVector* paramsVectorPtr);
+  void calcResids();
   void setInnerResidFrac(double innerResidFracIn);
   void getResids(vector<double> &residsRef);
  private:
   unsigned int n_cdc;
   vector<const DCDCTrackHit*> *trkhitVectorPtr;
-  MyTrajectory *trajPtr;
+  const MyTrajectory *trajPtr;
   DLine trackhit2line(const DCDCTrackHit &trackhit);
-  vector<double> delta;
   int debug_level;
   double innerResidFrac;
   vector<double> doca, dist, resid, error;
