@@ -111,7 +111,7 @@ vector<HepLorentzVector*>* MyTrajectory::getTrajectory() {
   return &traj;
 }
 
-double MyTrajectory::dist(HepVector& point, int trajIndex) {
+double MyTrajectory::dist(HepVector& point, int trajIndex) const {
   Hep3Vector delta, point3(point(1), point(2), point(3));
   delta = point3 - traj[trajIndex]->getV();
   if (debug_level >= 4) cout << "point3 = " << point3
@@ -121,11 +121,11 @@ double MyTrajectory::dist(HepVector& point, int trajIndex) {
   return delta.mag();
 }
 
-double MyTrajectory::dist(DLine& line, int trajIndex) {
+double MyTrajectory::dist(DLine& line, int trajIndex) const {
   return line.doca(*traj[trajIndex]);
 }
 
-int MyTrajectory::getXYT(double z, double &x, double &y, double &t) {
+int MyTrajectory::getXYT(double z, double &x, double &y, double &t) const {
   int iBefore = 0, iAfter = traj.size() - 1, iTry;
   double zBefore = traj[iBefore]->z();
   double zAfter = traj[iAfter]->z();
@@ -177,7 +177,7 @@ int MyTrajectory::getXYT(double z, double &x, double &y, double &t) {
 }
 
 void MyTrajectory::para_min(double yMinus, double yZero, double yPlus,
-			    double &xMinFrac, double &yMin) {
+			    double &xMinFrac, double &yMin) const {
   double a, b, c;
   a = 0.5*(yPlus - 2.0*yZero + yMinus);
   b = 0.5*(yPlus - yMinus);
