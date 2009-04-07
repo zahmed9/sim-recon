@@ -96,7 +96,7 @@ void combinedResidFunc::resid(const HepVector *x, void *data, HepVector *f){
   // test FDC residuals
   rFDC.calcResids();
   vector<double> testResidsF;
-  //rFDC.getResids(testResidsF);
+  rFDC.getResids(testResidsF);
   /*
   for (unsigned int ir = 0; ir < n_fdc; ir++) {
     cout << (*f)(ir + 1) << " " << testResidsF[ir] << endl;

@@ -16,6 +16,7 @@ class residFDC {
   residFDC(vector<const DFDCPseudo*> *pseudopoints, const MyTrajectory *trajectory,
 		    const DLorentzDeflections *lorentz_def, int level = 1);
   void calcResids();
+  void getResids(vector<double> &residsRef);
  private:
   unsigned int n_fdc;
   vector<const DFDCPseudo*> *ppPtr;
@@ -27,6 +28,8 @@ class residFDC {
   void getCorrectionValue(const DFDCPseudo &pseudopoint, double x, double y,
 			  double z, double t, double &delta_x, double &delta_y);
   const DLorentzDeflections *lorentz_def;
+  vector<double> doca, resid, error;
+  vector<HepLorentzVector> poca;
 };
 
 #endif // _RESIDFDC_H_
