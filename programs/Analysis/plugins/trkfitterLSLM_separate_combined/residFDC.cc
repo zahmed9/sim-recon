@@ -108,4 +108,12 @@ void residFDC::getResids(vector<double> &residRef) {
   return;
 }
 
+void residFDC::getDetails(vector<double> &docasRef, vector<double> &errorsRef,
+			  vector<HepLorentzVector> &pocasRef) {
+  docasRef = doca;
+  errorsRef = error;
+  pocasRef = poca;
+  return;
+}
+
 // end of C++ source

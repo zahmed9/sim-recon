@@ -69,7 +69,17 @@ void residCDC::setInnerResidFrac(double innerResidFracIn) {
   innerResidFrac = innerResidFracIn;
 }
 
-void residCDC::getResids(vector<double> &residRef) {
-  residRef = resid;
+void residCDC::getResids(vector<double> &residsRef) {
+  residsRef = resid;
+  return;
+}
+
+void residCDC::getDetails(vector<double> &docasRef, vector<double> &distsRef,
+			  vector<double> &errorsRef,
+			  vector<HepLorentzVector> &pocasRef) {
+  docasRef = doca;
+  distsRef = dist;
+  errorsRef = error;
+  pocasRef = poca;
   return;
 }

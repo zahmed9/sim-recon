@@ -17,7 +17,9 @@ class residFDC {
 		    const DLorentzDeflections *lorentz_def, int level = 1);
   void calcResids();
   void getResids(vector<double> &residsRef);
- private:
+  void getDetails(vector<double> &docasRef, vector<double> &errorsRef,
+		  vector<HepLorentzVector> &pocasRef);
+  private:
   unsigned int n_fdc;
   vector<const DFDCPseudo*> *ppPtr;
   const MyTrajectory *trajPtr;
