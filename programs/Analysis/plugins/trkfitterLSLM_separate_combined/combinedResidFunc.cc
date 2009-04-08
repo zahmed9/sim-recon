@@ -87,21 +87,48 @@ void combinedResidFunc::resid(const HepVector *x, void *data, HepVector *f){
   // test CDC residuals
   rCDC.setInnerResidFrac(innerResidFrac);
   rCDC.calcResids();
-  vector<double> testResids;
-  rCDC.getResids(testResids);
+  vector<double> testResidsC;
+  rCDC.getResids(testResidsC);
+  vector<double> testDocasC, testDistsC, testErrorsC;
+  vector<HepLorentzVector> testPocasC;
+  rCDC.getDetails(testDocasC, testDistsC, testErrorsC, testPocasC);
   for (unsigned int ir = 0; ir < n_cdc; ir++) {
-    cout << (*f)(n_fdc + ir + 1) << " " << testResids[ir] << endl;
+    if ((*f)(n_fdc + ir + 1) != testResidsC[ir]) {
+      cout << "cdc resid error: " << (*f)(n_fdc + ir + 1) << " " << testResidsC[ir] << endl;
+    }
+    if (storeDetails) {
+      if (testDocasC[ir] != CDCDetails[ir]->doca ||
+	  testDistsC[ir] != CDCDetails[ir]->dist ||
+	  testErrorsC[ir] != ERROR_CDC ||
+	  testPocasC[ir] != CDCDetails[ir]->poca) {
+	cout << "cdc details error:\n";
+	cout << testDocasC[ir] << " " << testDistsC[ir] << " " << testErrorsC[ir] << " " << testPocasC[ir] << endl;
+	cout << CDCDetails[ir]->doca << " " << CDCDetails[ir]->dist << " " << ERROR_CDC << " " << CDCDetails[ir]->poca << " " << endl;
+      }
+    }
   }
 
   // test FDC residuals
   rFDC.calcResids();
   vector<double> testResidsF;
   rFDC.getResids(testResidsF);
-  /*
+  vector<double> testDocasF, testErrorsF;
+  vector<HepLorentzVector> testPocasF;
+  rFDC.getDetails(testDocasF, testErrorsF, testPocasF);
   for (unsigned int ir = 0; ir < n_fdc; ir++) {
-    cout << (*f)(ir + 1) << " " << testResidsF[ir] << endl;
+    if ((*f)(ir + 1) != testResidsF[ir]) {
+      cout << "fdc resid error: " << (*f)(ir + 1) << " " << testResidsF[ir] << endl;
+    }
+    if (storeDetails) {
+      if (testDocasF[ir] != FDCDetails[ir]->doca ||
+	  testErrorsF[ir] != ERROR_FDC ||
+	  testPocasF[ir] != FDCDetails[ir]->poca) {
+	cout << "fdc details error:\n";
+	cout << testDocasF[ir] << " " << testErrorsF[ir] << " " << testPocasF[ir] << endl;
+	cout << FDCDetails[ir]->doca << " " << ERROR_FDC << " " << FDCDetails[ir]->poca << " " << endl;
+      }
+    }
   }
-  */
 
   // non-test trajectory clear
   trajPtr->clear();
