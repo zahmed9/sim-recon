@@ -21,7 +21,7 @@ residFDC::residFDC(vector<const DFDCPseudo*> *pseudopoints,
 
 void residFDC::calcResids() {
   double docaThis, errorThis, residThis;
-  HepVector point(3);
+  HepVector pointThis(3);
   HepLorentzVector pocaThis;
   const DFDCPseudo* ppointPtr;
   doca.clear();
@@ -30,8 +30,9 @@ void residFDC::calcResids() {
   resid.clear();
   for (unsigned int i = 0; i < n_fdc; i++) {
     ppointPtr = (*ppPtr)[i];
-    point = pseudo2HepVector(*ppointPtr);
-    docaThis = trajPtr->doca(point, pocaThis);
+    pointThis = pseudo2HepVector(*ppointPtr);
+    point.push_back(pointThis);
+    docaThis = trajPtr->doca(pointThis, pocaThis);
     errorThis = ERROR_FDC;
     residThis = docaThis/errorThis;
     doca.push_back(docaThis);
@@ -108,8 +109,9 @@ void residFDC::getResids(vector<double> &residRef) {
   return;
 }
 
-void residFDC::getDetails(vector<double> &docasRef, vector<double> &errorsRef,
+void residFDC::getDetails(vector<HepVector> &pointsRef, vector<double> &docasRef, vector<double> &errorsRef,
 			  vector<HepLorentzVector> &pocasRef) {
+  pointsRef = point;
   docasRef = doca;
   errorsRef = error;
   pocasRef = poca;

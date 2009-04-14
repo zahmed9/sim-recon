@@ -17,7 +17,7 @@ class residFDC {
 		    const DLorentzDeflections *lorentz_def, int level = 1);
   void calcResids();
   void getResids(vector<double> &residsRef);
-  void getDetails(vector<double> &docasRef, vector<double> &errorsRef,
+  void getDetails(vector<HepVector> &points, vector<double> &docasRef, vector<double> &errorsRef,
 		  vector<HepLorentzVector> &pocasRef);
   private:
   unsigned int n_fdc;
@@ -30,6 +30,7 @@ class residFDC {
   void getCorrectionValue(const DFDCPseudo &pseudopoint, double x, double y,
 			  double z, double t, double &delta_x, double &delta_y);
   const DLorentzDeflections *lorentz_def;
+  vector<HepVector> point;
   vector<double> doca, resid, error;
   vector<HepLorentzVector> poca;
 };
