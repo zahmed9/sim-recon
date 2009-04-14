@@ -16,7 +16,8 @@ class residCDC {
   void getResids(vector<double> &residsRef);
   void getDetails(vector<double> &docasRef, vector<double> &distsRef,
 		  vector<double> &errorsRef,
-		  vector<HepLorentzVector> &pocasRef);
+		  vector<HepLorentzVector> &pocasRef,
+		  vector<HepVector> &posWiresRef);
  private:
   unsigned int n_cdc;
   vector<const DCDCTrackHit*> *trkhitVectorPtr;
@@ -26,6 +27,7 @@ class residCDC {
   double innerResidFrac;
   vector<double> doca, dist, resid, error;
   vector<HepLorentzVector> poca;
+  vector<HepVector> posWire;
 };
 
 #endif // _RESIDCDC_H_

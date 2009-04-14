@@ -22,9 +22,11 @@ void residCDC::calcResids(){
   DLine line;
   double docaThis, distThis, residThis, errorThis;
   HepLorentzVector pocaThis;
+  HepVector posWireThis;
   doca.clear();
   dist.clear();
   poca.clear();
+  posWire.clear();
   error.clear();
   resid.clear();
   for (unsigned int j = 0; j < n_cdc; j++) {
@@ -37,11 +39,13 @@ void residCDC::calcResids(){
     } else {
       residThis = innerResidFrac*(distThis - docaThis)/ERROR_CDC;
     }
+    posWireThis = line.poca(pocaThis);
     if (debug_level > 2) cout << "residCDC: j = " << j << " dist = " << distThis << " doca = " << docaThis << " poca xyzt = " << pocaThis.getX() << ' ' << pocaThis.getY() << ' ' << pocaThis.getZ() << ' ' << pocaThis.getT()/c << " resid = " << residThis << endl;
     errorThis = ERROR_CDC;
     doca.push_back(docaThis);
     dist.push_back(distThis);
     poca.push_back(pocaThis);
+    posWire.push_back(posWireThis);
     resid.push_back(residThis);
     error.push_back(errorThis);
   }
@@ -76,10 +80,12 @@ void residCDC::getResids(vector<double> &residsRef) {
 
 void residCDC::getDetails(vector<double> &docasRef, vector<double> &distsRef,
 			  vector<double> &errorsRef,
-			  vector<HepLorentzVector> &pocasRef) {
+			  vector<HepLorentzVector> &pocasRef,
+			  vector<HepVector> &posWiresRef) {
   docasRef = doca;
   distsRef = dist;
   errorsRef = error;
   pocasRef = poca;
+  posWiresRef = posWire;
   return;
 }
