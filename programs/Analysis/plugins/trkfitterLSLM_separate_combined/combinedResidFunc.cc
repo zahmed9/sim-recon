@@ -18,7 +18,9 @@ const double c = 29.9792548; // speed of light, cm/ns
 // to a trajectory
 combinedResidFunc::combinedResidFunc(vector<const DFDCPseudo*> *pseudopoints,
 				     vector<const DCDCTrackHit*> *trackHits,
-				     MyTrajectory *trajectory, const DLorentzDeflections *lorentz_def_in, int level) : 
+				     MyTrajectory *trajectory,
+				     const DLorentzDeflections *lorentz_def_in,
+				     int level) : 
   n_fdc(pseudopoints->size()), n_cdc(trackHits->size()), ppPtr(pseudopoints),
   trkhitPtr(trackHits), trajPtr(trajectory), delta(trajPtr->getDelta()),
   debug_level(level), lorentz_def(lorentz_def_in), storeDetails(false),
@@ -40,95 +42,57 @@ void combinedResidFunc::resid(const HepVector *x, void *data, HepVector *f){
   // do a swim with the input parameters
   trajPtr->swim(*x);
   // populate f vector with residuals
-  HepVector point(3);
-  HepLorentzVector poca;
+
+  // use new residFDC class
+
+  rFDC.calcResids();
+  vector<double> residsF;
+  rFDC.getResids(residsF);
   FDCHitDetails *FDCHitDetailsPtr;
-  for (unsigned int i = 0; i < n_fdc; i++) {
-    point = pseudo2HepVector(*((*ppPtr)[i]));
-    (*f)(i + 1) = trajPtr->doca(point, poca)/ERROR_FDC;
+  vector<HepVector> pointF;
+  vector<double> docasF, errorsF;
+  vector<HepLorentzVector> pocasF;
+  rFDC.getDetails(pointF, docasF, errorsF, pocasF);
+  for (unsigned int ir = 0; ir < n_fdc; ir++) {
+    (*f)(ir + 1) = residsF[ir];
     if (storeDetails) {
       FDCHitDetailsPtr = new FDCHitDetails();
-      *FDCHitDetailsPtr = getDetails((*ppPtr)[i], point);
+      FDCHitDetailsPtr->doca = docasF[ir];
+      FDCHitDetailsPtr->poca = pocasF[ir];
+      FDCHitDetailsPtr->rCorr = pointF[ir];
       FDCDetails.push_back(FDCHitDetailsPtr);
     }
   }
-  DLine line;
-  double dist;
+
+  // new CDC residual class
+
+  rCDC.setInnerResidFrac(innerResidFrac);
+  rCDC.calcResids();
+  vector<double> residsC;
+  rCDC.getResids(residsC);
   CDCHitDetails *CDCHitDetailsPtr;
   double thisChiSquared = 0.0;
   double thisResid;
-  for (unsigned int j = 0; j < n_cdc; j++) {
-    if (debug_level > 2) cout << "working on cdc hit " << j << endl;
-    line = trackhit2line(*((*trkhitPtr)[j]));
-    doca = trajPtr->doca(line, poca);
-    dist = velDrift*((*trkhitPtr)[j]->tdrift - poca.getT()/c);
-    if (debug_level > 2) cout << "resid, cdc: j = " << j << " dist = " << dist << " doca = " << doca << " poca xyzt = " << poca.getX() << ' ' << poca.getY() << ' ' << poca.getZ() << ' ' << poca.getT()/c << " resid = " << dist - doca << endl;
-    if (isnan(dist)) {
-      thisResid = 0.0;
-    } else {
-      if (doca > dist) {
-	thisResid = (dist - doca)/ERROR_CDC;
-      } else {
-	thisResid = innerResidFrac*(dist - doca)/ERROR_CDC;
-      }
-    }
-    (*f)(n_fdc + j + 1) = thisResid;
+  vector<double> docasC, distsC, errorsC;
+  vector<HepLorentzVector> pocasC;
+  vector<HepVector> posWiresC;
+  rCDC.getDetails(docasC, distsC, errorsC, pocasC, posWiresC);
+  for (unsigned int ir = 0; ir < n_cdc; ir++) {
+    thisResid = residsC[ir];
+    (*f)(n_fdc + ir + 1) = thisResid;
     if (storeDetails) {
       thisChiSquared += thisResid*thisResid;
       CDCHitDetailsPtr = new CDCHitDetails();
-      *CDCHitDetailsPtr = getDetails((*trkhitPtr)[j], line);
+      CDCHitDetailsPtr->doca = docasC[ir];
+      CDCHitDetailsPtr->poca = pocasC[ir];
+      CDCHitDetailsPtr->dist = distsC[ir];
+      CDCHitDetailsPtr->posWire = posWiresC[ir];
       CDCDetails.push_back(CDCHitDetailsPtr);
     }
   }
+
   if (debug_level > 2) cout << "combinedResidFunc::resid: resids:" << *f;
   if (storeDetails) chiSquared = thisChiSquared;
-
-
-  // test CDC residuals
-  rCDC.setInnerResidFrac(innerResidFrac);
-  rCDC.calcResids();
-  vector<double> testResidsC;
-  rCDC.getResids(testResidsC);
-  vector<double> testDocasC, testDistsC, testErrorsC;
-  vector<HepLorentzVector> testPocasC;
-  rCDC.getDetails(testDocasC, testDistsC, testErrorsC, testPocasC);
-  for (unsigned int ir = 0; ir < n_cdc; ir++) {
-    if ((*f)(n_fdc + ir + 1) != testResidsC[ir]) {
-      cout << "cdc resid error: " << (*f)(n_fdc + ir + 1) << " " << testResidsC[ir] << endl;
-    }
-    if (storeDetails) {
-      if (testDocasC[ir] != CDCDetails[ir]->doca ||
-	  testDistsC[ir] != CDCDetails[ir]->dist ||
-	  testErrorsC[ir] != ERROR_CDC ||
-	  testPocasC[ir] != CDCDetails[ir]->poca) {
-	cout << "cdc details error:\n";
-	cout << testDocasC[ir] << " " << testDistsC[ir] << " " << testErrorsC[ir] << " " << testPocasC[ir] << endl;
-	cout << CDCDetails[ir]->doca << " " << CDCDetails[ir]->dist << " " << ERROR_CDC << " " << CDCDetails[ir]->poca << " " << endl;
-      }
-    }
-  }
-
-  // test FDC residuals
-  rFDC.calcResids();
-  vector<double> testResidsF;
-  rFDC.getResids(testResidsF);
-  vector<double> testDocasF, testErrorsF;
-  vector<HepLorentzVector> testPocasF;
-  rFDC.getDetails(testDocasF, testErrorsF, testPocasF);
-  for (unsigned int ir = 0; ir < n_fdc; ir++) {
-    if ((*f)(ir + 1) != testResidsF[ir]) {
-      cout << "fdc resid error: " << (*f)(ir + 1) << " " << testResidsF[ir] << endl;
-    }
-    if (storeDetails) {
-      if (testDocasF[ir] != FDCDetails[ir]->doca ||
-	  testErrorsF[ir] != ERROR_FDC ||
-	  testPocasF[ir] != FDCDetails[ir]->poca) {
-	cout << "fdc details error:\n";
-	cout << testDocasF[ir] << " " << testErrorsF[ir] << " " << testPocasF[ir] << endl;
-	cout << FDCDetails[ir]->doca << " " << ERROR_FDC << " " << FDCDetails[ir]->poca << " " << endl;
-      }
-    }
-  }
 
   // non-test trajectory clear
   trajPtr->clear();
