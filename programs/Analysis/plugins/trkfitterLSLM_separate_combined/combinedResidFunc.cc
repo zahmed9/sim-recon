@@ -43,7 +43,7 @@ void combinedResidFunc::resid(const HepVector *x, void *data, HepVector *f){
   trajPtr->swim(*x);
   // populate f vector with residuals
 
-  // use new residFDC class
+  // get info from residFDC class
 
   rFDC.calcResids();
   vector<double> residsF;
@@ -64,7 +64,7 @@ void combinedResidFunc::resid(const HepVector *x, void *data, HepVector *f){
     }
   }
 
-  // new CDC residual class
+  // get info from CDC residual class
 
   rCDC.setInnerResidFrac(innerResidFrac);
   rCDC.calcResids();
@@ -94,7 +94,7 @@ void combinedResidFunc::resid(const HepVector *x, void *data, HepVector *f){
   if (debug_level > 2) cout << "combinedResidFunc::resid: resids:" << *f;
   if (storeDetails) chiSquared = thisChiSquared;
 
-  // non-test trajectory clear
+  // clear the trajectory
   trajPtr->clear();
 
 };
@@ -312,4 +312,27 @@ void combinedResidFunc::clearDetails() {
 
 void combinedResidFunc::setInnerResidFrac(double innerResidFracIn) {
   innerResidFrac = innerResidFracIn;
+}
+
+void combinedResidFunc::getResidsBoth(vector<double> &residsBoth) {
+
+  rCDC.setInnerResidFrac(innerResidFrac);
+  rCDC.calcResids();
+  vector<double> residsC;
+  rCDC.getResids(residsC);
+
+  rFDC.calcResids();
+  vector<double> residsF;
+  rFDC.getResids(residsF);
+
+  for (unsigned int i = 0; i < n_fdc; i++) {
+    residsBoth[i] = residsF[i];
+  }
+
+  for (unsigned int i = 0; i < n_cdc; i++) {
+    residsBoth[n_fdc + i] = residsC[i];
+  }
+
+  return;
+
 }
