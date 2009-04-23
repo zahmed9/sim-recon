@@ -25,7 +25,8 @@ combinedResidFunc::combinedResidFunc(vector<const DFDCPseudo*> *pseudopoints,
   trkhitPtr(trackHits), trajPtr(trajectory), delta(trajPtr->getDelta()),
   debug_level(level), lorentz_def(lorentz_def_in), storeDetails(false),
   innerResidFrac(1.0), rCDC(trackHits, trajectory, level),
-  rFDC(pseudopoints, trajectory, lorentz_def_in, level)
+  rFDC(pseudopoints, trajectory, lorentz_def_in, level),
+  ERROR_FDC(0.025), ERROR_CDC(0.018)
 {}
 
 void combinedResidFunc::resid(const HepVector *x, void *data, HepVector *f){
@@ -34,7 +35,6 @@ void combinedResidFunc::resid(const HepVector *x, void *data, HepVector *f){
 //   data: ???
 // output parameters
 //   f: pointer to vector of residuals
-  double doca;
   if (debug_level > 2) {
     cout << "combinedResidFunc::resid: resid called\n";
     cout << "                          params: " << *x;
@@ -134,15 +134,15 @@ void combinedResidFunc::deriv(const HepVector *x, void *data, HepMatrix *J){
   // base resids for CDC
   double docaThis, distThis;
   for (unsigned int j = 0; j < n_cdc; j++) {
-    distThis = velDrift*((*trkhitPtr)[j]->tdrift - poca.getT()/c);
     docaThis = trajPtr->doca(*(linePtrs[j]), poca);
+    distThis = velDrift*((*trkhitPtr)[j]->tdrift - poca.getT()/c);
     if (docaThis > distThis) {
       residBase(n_fdc + j + 1) = (distThis - docaThis)/ERROR_CDC;
     } else {
       residBase(n_fdc + j + 1) = innerResidFrac*(distThis - docaThis)/ERROR_CDC;
     }
   }
-  if (debug_level > 2) cout << "base resids:" << residBase;
+  if (debug_level > 2) cout << "base resids:" << setprecision(14) << residBase;
   trajPtr->clear();
   // calculate Jacobian
   unsigned int p = trajPtr->getNumberOfParams();
@@ -159,15 +159,15 @@ void combinedResidFunc::deriv(const HepVector *x, void *data, HepMatrix *J){
     for (unsigned int j = 0; j < n_fdc; j++) {
       jHep = j + 1;
       docaThis = trajPtr->doca(*(pPoints[j]), poca)/ERROR_FDC;
-      if (debug_level > 2) cout << "resid " << j << " = " << docaThis << endl;
+      if (debug_level > 2) cout << "FDC resid " << j << " = " << docaThis << endl;
       (*J)(jHep, iHep) = (docaThis - residBase(jHep))/delta[i];
     }
     // calculate derivatives for CDC points
     for (unsigned int j = 0; j < n_cdc; j++) {
       jHep = n_fdc + j + 1;
-      distThis = velDrift*((*trkhitPtr)[j]->tdrift - poca.getT()/c);
       docaThis = trajPtr->doca(*(linePtrs[j]), poca);
-      if (debug_level > 2) cout << j << " dist = " << distThis << " doca = " << docaThis << " resid  = " << distThis - docaThis << endl;
+      distThis = velDrift*((*trkhitPtr)[j]->tdrift - poca.getT()/c);
+      if (debug_level > 2) cout << j << " dist = " << distThis << " doca = " << docaThis << " resid  = " << (distThis - docaThis)/ERROR_CDC << endl;
       if (isnan(distThis)) {
 	(*J)(jHep, iHep) = 0;
       } else {
@@ -181,6 +181,7 @@ void combinedResidFunc::deriv(const HepVector *x, void *data, HepMatrix *J){
     trajPtr->clear();
   }
   if (debug_level >= 3) {
+    cout << "combinedResidFunc::deriv: Jacobian" << endl;
     for (unsigned int i = 0; i < p; i++) {
       iHep = i + 1;
       cout << iHep;
@@ -197,7 +198,20 @@ void combinedResidFunc::deriv(const HepVector *x, void *data, HepMatrix *J){
   for (unsigned int j = 0; j < n_cdc; j++) {
     delete linePtrs[j];
   }
-};
+
+  unsigned int nParams = trajPtr->getNumberOfParams();
+  HepMatrix Jacobian(n_fdc + n_cdc, nParams);
+  deriv2(x, Jacobian);
+  for (unsigned int icheck = 1; icheck <= n_fdc + n_cdc; icheck++) {
+    for (unsigned int jcheck = 1; jcheck <= nParams; jcheck++) {
+      if (Jacobian(icheck, jcheck) != (*J)(icheck, jcheck)) {
+	cout << "deriv2 does not match deriv, icheck, jcheck = " << icheck << ", " << jcheck << " Jacobian(icheck, jcheck) = " << Jacobian(icheck, jcheck) << " (*J)(icheck, jcheck) = " << (*J)(icheck, jcheck) << endl;
+	int error = 9195;
+	throw error;
+      }
+    }
+  }
+}
 
 void combinedResidFunc::residAndDeriv(const HepVector *x, void *data, HepVector *f,
 		   HepMatrix *J){};
@@ -325,6 +339,8 @@ void combinedResidFunc::getResidsBoth(vector<double> &residsBoth) {
   vector<double> residsF;
   rFDC.getResids(residsF);
 
+  residsBoth.reserve(n_fdc + n_cdc); // reserve slots for FDC and CDC residuals
+
   for (unsigned int i = 0; i < n_fdc; i++) {
     residsBoth[i] = residsF[i];
   }
@@ -335,4 +351,56 @@ void combinedResidFunc::getResidsBoth(vector<double> &residsBoth) {
 
   return;
 
+}
+
+void combinedResidFunc::deriv2(const HepVector *params, HepMatrix &Jacobian) {
+  HepVector paramsCentral = *params, paramsThis;
+  int nResids = n_fdc + n_cdc;
+  unsigned int nParams = trajPtr->getNumberOfParams();
+  int iHep = 0, jHep = 0;
+  if (debug_level > 2){
+    for (unsigned int j = 0; j < nParams; j++) {
+      jHep = j + 1;
+      cout << "central params: jHep = " << jHep << ", values:" << paramsCentral(jHep) << endl;
+    }
+  }
+  // do central swim
+  trajPtr->swim(paramsCentral);
+  // save central residuals
+  vector<double> residsCentral, residsThis;
+  getResidsBoth(residsCentral);
+  if (debug_level >=3) {
+    cout << "combindedResidFunc::deriv2: central resids, ";
+    for (int k = 0; k < nResids; k++) {
+      cout << k << "=" << residsCentral[k] << " ";
+    }
+    cout << endl;
+  }
+  trajPtr->clear();
+  // calculate the Jacobian matrix
+  for (unsigned int j = 0; j < nParams; j++) {
+    jHep = j + 1;
+    // prepare perturbed parameters
+    paramsThis = paramsCentral;
+    paramsThis(jHep) = paramsCentral(jHep) + delta[j];
+    if (debug_level > 2) cout << "perturbed params: jHep = " << jHep << ", values:" << paramsThis << endl;
+    // do the perturbed swim
+    trajPtr->swim(paramsThis);
+    // get the purturbed residuals
+    getResidsBoth(residsThis);
+    if (debug_level >=3) {
+      cout << "combindedResidFunc::deriv2: resids, ";
+      for (int k = 0; k < nResids; k++) {
+	cout << k << "=" << residsThis[k] << " ";
+      }
+      cout << endl;
+    }
+    // calculate the derivatives
+    for (int i = 0; i < nResids; i++) {
+      iHep = i + 1;
+      Jacobian(iHep, jHep) = (residsThis[i] - residsCentral[i])/delta[j];
+    } 
+    trajPtr->clear();
+  }
+  return;
 }
