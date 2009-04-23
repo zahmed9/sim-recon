@@ -5,8 +5,6 @@
 #include "MyTrajectory.h"
 #include "DLine.h"
 
-#define ERROR_CDC 0.0180
-
 class residCDC {
  public:
   residCDC(vector<const DCDCTrackHit*> *trackhits, const MyTrajectory *trajectory,
@@ -28,6 +26,7 @@ class residCDC {
   vector<double> doca, dist, resid, error;
   vector<HepLorentzVector> poca;
   vector<HepVector> posWire;
+  double errorCDC;
 };
 
 #endif // _RESIDCDC_H_

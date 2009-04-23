@@ -9,7 +9,6 @@
 
 #define BIG_DOUBLE 1.0e12
 #define DRIFT_VELOCITY 55e-4
-#define ERROR_FDC 0.0250
 
 class residFDC {
  public:
@@ -33,6 +32,7 @@ class residFDC {
   vector<HepVector> point;
   vector<double> doca, resid, error;
   vector<HepLorentzVector> poca;
+  double errorFDC;
 };
 
 #endif // _RESIDFDC_H_

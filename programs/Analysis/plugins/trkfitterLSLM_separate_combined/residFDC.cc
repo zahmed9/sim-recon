@@ -17,7 +17,7 @@ residFDC::residFDC(vector<const DFDCPseudo*> *pseudopoints,
 		   const MyTrajectory *trajectory,
 		   const DLorentzDeflections *lorentz_def_in, int level) : 
   n_fdc(pseudopoints->size()), ppPtr(pseudopoints),
-  trajPtr(trajectory), debug_level(level), lorentz_def(lorentz_def_in) {}
+  trajPtr(trajectory), debug_level(level), lorentz_def(lorentz_def_in), errorFDC(0.025) {}
 
 void residFDC::calcResids() {
   double docaThis, errorThis, residThis;
@@ -33,12 +33,14 @@ void residFDC::calcResids() {
     pointThis = pseudo2HepVector(*ppointPtr);
     point.push_back(pointThis);
     docaThis = trajPtr->doca(pointThis, pocaThis);
-    errorThis = ERROR_FDC;
+    errorThis = errorFDC;
     residThis = docaThis/errorThis;
     doca.push_back(docaThis);
     poca.push_back(pocaThis);
     resid.push_back(residThis);
     error.push_back(errorThis);
+    if (debug_level > 2) cout << "residFDC: i = " << i << " doca = " << docaThis << " poca xyzt = " << pocaThis.getX() << ' ' << pocaThis.getY() << ' ' << pocaThis.getZ() << ' ' << pocaThis.getT()/c << " resid = " << residThis << endl;
+
   }
 }
 

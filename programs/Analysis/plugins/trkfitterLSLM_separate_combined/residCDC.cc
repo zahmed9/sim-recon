@@ -14,7 +14,7 @@ const double c = 29.9792548; // speed of light, cm/ns
 residCDC::residCDC(vector<const DCDCTrackHit*> *trackHits,
 				     const MyTrajectory *trajectory, int level) : 
   n_cdc(trackHits->size()), trkhitVectorPtr(trackHits), trajPtr(trajectory),
-  debug_level(level)
+  debug_level(level), errorCDC(0.018)
 {}
 
 void residCDC::calcResids(){
@@ -35,13 +35,13 @@ void residCDC::calcResids(){
     docaThis = trajPtr->doca(line, pocaThis);
     distThis = velDrift*(trkhitPtr->tdrift - pocaThis.getT()/c);
     if (docaThis > distThis) {
-      residThis = (distThis - docaThis)/ERROR_CDC;
+      residThis = (distThis - docaThis)/errorCDC;
     } else {
-      residThis = innerResidFrac*(distThis - docaThis)/ERROR_CDC;
+      residThis = innerResidFrac*(distThis - docaThis)/errorCDC;
     }
     posWireThis = line.poca(pocaThis);
     if (debug_level > 2) cout << "residCDC: j = " << j << " dist = " << distThis << " doca = " << docaThis << " poca xyzt = " << pocaThis.getX() << ' ' << pocaThis.getY() << ' ' << pocaThis.getZ() << ' ' << pocaThis.getT()/c << " resid = " << residThis << endl;
-    errorThis = ERROR_CDC;
+    errorThis = errorCDC;
     doca.push_back(docaThis);
     dist.push_back(distThis);
     poca.push_back(pocaThis);
