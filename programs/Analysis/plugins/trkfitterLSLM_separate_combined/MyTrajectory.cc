@@ -172,7 +172,7 @@ int MyTrajectory::getXYT(double z, double &x, double &y, double &t) const {
   x = frac*traj[iAfter]->x() + otherfrac*traj[iBefore]->x();
   y = frac*traj[iAfter]->y() + otherfrac*traj[iBefore]->y();
   t = frac*traj[iAfter]->t() + otherfrac*traj[iBefore]->t();
-  if (debug_level > 3) cout << "x, y, t = " << x << " " << y
+  if (debug_level > 3) cout << "MyTrajectory::getXYT, x, y, t = " << x << " " << y
 			    << " " << t << endl;
   return 0;
 }
