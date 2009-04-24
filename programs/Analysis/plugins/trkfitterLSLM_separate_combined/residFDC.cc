@@ -61,7 +61,10 @@ HepVector residFDC::pseudo2HepVector(const DFDCPseudo &ppoint) {
     point(1) = ppoint.x - delta_x;
     point(2) = ppoint.y - delta_y;
   }
-  point(3) = z;
+  point(3) = z; 
+  if (debug_level >= 4) {
+    cout << "residFDC::pseudo2HepVector, x = " << x << " y = " << y << " z = " << z << " ct = " << ct << " delta_x = " << delta_x << " delta_y = " << delta_y << " ispos = " << ispos << " point = " << point << endl;
+  }
   return point;
 }
 
@@ -73,7 +76,11 @@ bool residFDC::getCorrectionSign(const DFDCPseudo &ppoint, double x, double y, d
   bool isposTraj = wireCrossTraj > 0?true:false;
   bool isposDelta = wireCrossDelta > 0?true:false;
   bool ispos = !(isposTraj ^ isposDelta);
-  if (debug_level > 3) cout << " ppx = " << ppoint.x
+  if (debug_level > 3) cout << setprecision(14)
+			    << "residFDC::getCorrectionSign,"
+			    << " x = " << x
+			    << " y = " << y
+			    << " ppx = " << ppoint.x
 			    << " ppy = " << ppoint.y
 			    << " dx = " << x - ppoint.x
 			    << " dy = " << y - ppoint.y
