@@ -152,13 +152,14 @@ void combinedResidFunc::deriv(const HepVector *x, void *data, HepMatrix *J){
     iHep = i + 1;
     xThis = xBase; // set params back to base
     xThis(iHep) = xBase(iHep) + delta[i];
-    if (debug_level > 2) cout << "perturbed params: iHep = " << iHep << ", values:" << xThis << endl;
+    if (debug_level > 2) cout << "perturbed params: iHep = " << iHep << " delta[i] = " << delta[i] << " values:" << xThis << endl;
     // do the perturbed swim
     trajPtr->swim(xThis);
     // calculate derivatives for FDC points
     for (unsigned int j = 0; j < n_fdc; j++) {
       jHep = j + 1;
-      docaThis = trajPtr->doca(*(pPoints[j]), poca)/ERROR_FDC;
+      HepVector pPointThis = pseudo2HepVector(*((*ppPtr)[j]));
+      docaThis = trajPtr->doca(pPointThis, poca)/ERROR_FDC;
       if (debug_level > 2) cout << "FDC resid " << j << " = " << docaThis << endl;
       (*J)(jHep, iHep) = (docaThis - residBase(jHep))/delta[i];
     }
@@ -234,6 +235,9 @@ HepVector combinedResidFunc::pseudo2HepVector(const DFDCPseudo &ppoint) {
     point(2) = ppoint.y - delta_y;
   }
   point(3) = z;
+  if (debug_level >= 4) {
+    cout << "combinedResidFunc::pseudo2HepVector, x = " << x << " y = " << y << " z = " << z << " ct = " << ct << " delta_x = " << delta_x << " delta_y = " << delta_y << " ispos = " << ispos << " point = " << point << endl;
+  }
   return point;
 }
 
@@ -245,7 +249,11 @@ bool combinedResidFunc::getCorrectionSign(const DFDCPseudo &ppoint, double x, do
   bool isposTraj = wireCrossTraj > 0?true:false;
   bool isposDelta = wireCrossDelta > 0?true:false;
   bool ispos = !(isposTraj ^ isposDelta);
-  if (debug_level > 3) cout << " ppx = " << ppoint.x
+  if (debug_level > 3) cout << setprecision(14)
+			    << "combinedResidFunc::getCorrectionSign,"
+			    << " x = " << x
+			    << " y = " << y
+			    << " ppx = " << ppoint.x
 			    << " ppy = " << ppoint.y
 			    << " dx = " << x - ppoint.x
 			    << " dy = " << y - ppoint.y
@@ -370,7 +378,7 @@ void combinedResidFunc::deriv2(const HepVector *params, HepMatrix &Jacobian) {
   vector<double> residsCentral, residsThis;
   getResidsBoth(residsCentral);
   if (debug_level >=3) {
-    cout << "combindedResidFunc::deriv2: central resids, ";
+    cout << "combinedResidFunc::deriv2: central resids, ";
     for (int k = 0; k < nResids; k++) {
       cout << k << "=" << residsCentral[k] << " ";
     }
@@ -386,10 +394,10 @@ void combinedResidFunc::deriv2(const HepVector *params, HepMatrix &Jacobian) {
     if (debug_level > 2) cout << "perturbed params: jHep = " << jHep << ", values:" << paramsThis << endl;
     // do the perturbed swim
     trajPtr->swim(paramsThis);
-    // get the purturbed residuals
+    // get the perturbed residuals
     getResidsBoth(residsThis);
     if (debug_level >=3) {
-      cout << "combindedResidFunc::deriv2: resids, ";
+      cout << "combinedResidFunc::deriv2: resids, ";
       for (int k = 0; k < nResids; k++) {
 	cout << k << "=" << residsThis[k] << " ";
       }
