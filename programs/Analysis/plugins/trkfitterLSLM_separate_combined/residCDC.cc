@@ -56,16 +56,10 @@ DLine residCDC::trackhit2line(const DCDCTrackHit &trkhit) {
   double x = wire->origin.X();
   double y = wire->origin.Y();
   double z = wire->origin.Z();
-  //  double phi_wire = atan2(y, x);
-  //  double phi_naive = phi_wire + PIOVER2;
-  //  double theta_naive = wire->stereo;
   double theta = acos(wire->udir.z());
   double phi = atan2(wire->udir.y(), wire->udir.x());
-  /*
-  cout << "theta " << theta_naive << " " << theta << " phi " << phi_naive
-       << " "<< phi << endl;
-  */
-  DLine line(x, y, z, theta, phi);
+  if (debug_level >= 4) cout << setprecision(14) << "residCDC::trackhit2line: x = " << x << " y = " << y << " z = " << z << " theta " << theta << " phi " << phi << endl;
+  DLine line(x, y, z, theta, phi, debug_level);
   return line;
 }
 
