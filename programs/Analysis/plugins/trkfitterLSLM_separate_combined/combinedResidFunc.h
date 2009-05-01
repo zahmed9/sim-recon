@@ -31,7 +31,7 @@ class combinedResidFunc:public residFunc {
   inline vector<FDCHitDetails*> *getFDCDetails(){return &FDCDetails;};
   void setInnerResidFrac(double innerResidFracIn);
   void getResidsBoth(vector<double> &residsBoth);
-  void deriv2(const HepVector *params, HepMatrix &Jacobian);
+  //  void deriv2(const HepVector *params, HepMatrix &Jacobian);
  private:
   unsigned int n_fdc, n_cdc;
   vector<const DFDCPseudo*> *ppPtr;

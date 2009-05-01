@@ -99,121 +99,6 @@ void combinedResidFunc::resid(const HepVector *x, void *data, HepVector *f){
 
 };
 
-void combinedResidFunc::deriv(const HepVector *x, void *data, HepMatrix *J){
-  if (debug_level > 2) {
-    cout << "combinedResidFunc::deriv: deriv called\n";
-    cout << "                          params: " << *x << endl;
-  }
-  HepLorentzVector poca(3);
-  // save base parameters
-  HepVector xBase = *x;
-  // do central swim
-  trajPtr->swim(xBase);
-  // store pseudo points as three vectors
-  vector<HepVector *>pPoints;
-  HepVector *thisPointPtr;
-  for (unsigned int i = 0; i < n_fdc; i++) {
-    thisPointPtr = new HepVector(3);
-    *thisPointPtr = pseudo2HepVector(*((*ppPtr)[i]));
-    pPoints.push_back(thisPointPtr);
-  }
-  // store track hits as lines
-  vector<DLine *> linePtrs;
-  DLine *thisLinePtr;
-  for (unsigned int j = 0; j < n_cdc; j++) {
-    thisLinePtr = new DLine();
-    *thisLinePtr = trackhit2line(*((*trkhitPtr)[j]));
-    linePtrs.push_back(thisLinePtr);
-  }
-  // store base residuals
-  HepVector residBase(n_fdc + n_cdc);
-  // base resids for FDC
-  for (unsigned int i = 0; i < n_fdc; i++) {
-    residBase(i + 1) = trajPtr->doca(*(pPoints[i]), poca)/ERROR_FDC;
-  }
-  // base resids for CDC
-  double docaThis, distThis;
-  for (unsigned int j = 0; j < n_cdc; j++) {
-    docaThis = trajPtr->doca(*(linePtrs[j]), poca);
-    distThis = velDrift*((*trkhitPtr)[j]->tdrift - poca.getT()/c);
-    if (docaThis > distThis) {
-      residBase(n_fdc + j + 1) = (distThis - docaThis)/ERROR_CDC;
-    } else {
-      residBase(n_fdc + j + 1) = innerResidFrac*(distThis - docaThis)/ERROR_CDC;
-    }
-  }
-  if (debug_level > 2) cout << "base resids:" << setprecision(14) << residBase;
-  trajPtr->clear();
-  // calculate Jacobian
-  unsigned int p = trajPtr->getNumberOfParams();
-  HepVector xThis(p);
-  int iHep, jHep; // index for HepVector () notation
-  for (unsigned int i = 0; i < p; i++) {
-    iHep = i + 1;
-    xThis = xBase; // set params back to base
-    xThis(iHep) = xBase(iHep) + delta[i];
-    if (debug_level > 2) cout << "perturbed params: iHep = " << iHep << " delta[i] = " << delta[i] << " values:" << xThis << endl;
-    // do the perturbed swim
-    trajPtr->swim(xThis);
-    // calculate derivatives for FDC points
-    for (unsigned int j = 0; j < n_fdc; j++) {
-      jHep = j + 1;
-      HepVector pPointThis = pseudo2HepVector(*((*ppPtr)[j]));
-      docaThis = trajPtr->doca(pPointThis, poca)/ERROR_FDC;
-      if (debug_level > 2) cout << "FDC resid " << j << " = " << docaThis << endl;
-      (*J)(jHep, iHep) = (docaThis - residBase(jHep))/delta[i];
-    }
-    // calculate derivatives for CDC points
-    for (unsigned int j = 0; j < n_cdc; j++) {
-      jHep = n_fdc + j + 1;
-      docaThis = trajPtr->doca(*(linePtrs[j]), poca);
-      distThis = velDrift*((*trkhitPtr)[j]->tdrift - poca.getT()/c);
-      if (debug_level > 2) cout << j << " dist = " << distThis << " doca = " << docaThis << " resid  = " << (distThis - docaThis)/ERROR_CDC << endl;
-      if (isnan(distThis)) {
-	(*J)(jHep, iHep) = 0;
-      } else {
-	if (docaThis > distThis) {
-	  (*J)(jHep, iHep) = ((distThis - docaThis)/ERROR_CDC - residBase(jHep))/delta[i];
-	} else {
-	  (*J)(jHep, iHep) = (innerResidFrac*(distThis - docaThis)/ERROR_CDC - residBase(jHep))/delta[i];
-	}
-      }
-    }
-    trajPtr->clear();
-  }
-  if (debug_level >= 3) {
-    cout << "combinedResidFunc::deriv: Jacobian" << endl;
-    for (unsigned int i = 0; i < p; i++) {
-      iHep = i + 1;
-      cout << iHep;
-      for (unsigned int j = 0; j < n_fdc + n_cdc; j++) {
-	jHep = j + 1;
-	cout << ' ' << (*J)(jHep, iHep);
-      }
-      cout << endl;
-    }
-  }
-  for (unsigned int i = 0; i < n_fdc; i++) {
-    delete pPoints[i];
-  }
-  for (unsigned int j = 0; j < n_cdc; j++) {
-    delete linePtrs[j];
-  }
-
-  unsigned int nParams = trajPtr->getNumberOfParams();
-  HepMatrix Jacobian(n_fdc + n_cdc, nParams);
-  deriv2(x, Jacobian);
-  for (unsigned int icheck = 1; icheck <= n_fdc + n_cdc; icheck++) {
-    for (unsigned int jcheck = 1; jcheck <= nParams; jcheck++) {
-      if (Jacobian(icheck, jcheck) != (*J)(icheck, jcheck)) {
-	cout << "deriv2 does not match deriv, icheck, jcheck = " << icheck << ", " << jcheck << " Jacobian(icheck, jcheck) = " << Jacobian(icheck, jcheck) << " (*J)(icheck, jcheck) = " << (*J)(icheck, jcheck) << endl;
-	int error = 9195;
-	throw error;
-      }
-    }
-  }
-}
-
 void combinedResidFunc::residAndDeriv(const HepVector *x, void *data, HepVector *f,
 		   HepMatrix *J){};
 
@@ -361,7 +246,7 @@ void combinedResidFunc::getResidsBoth(vector<double> &residsBoth) {
 
 }
 
-void combinedResidFunc::deriv2(const HepVector *params, HepMatrix &Jacobian) {
+void combinedResidFunc::deriv(const HepVector *params, void *data, HepMatrix *Jacobian) {
   HepVector paramsCentral = *params, paramsThis;
   int nResids = n_fdc + n_cdc;
   unsigned int nParams = trajPtr->getNumberOfParams();
@@ -406,7 +291,7 @@ void combinedResidFunc::deriv2(const HepVector *params, HepMatrix &Jacobian) {
     // calculate the derivatives
     for (int i = 0; i < nResids; i++) {
       iHep = i + 1;
-      Jacobian(iHep, jHep) = (residsThis[i] - residsCentral[i])/delta[j];
+      (*Jacobian)(iHep, jHep) = (residsThis[i] - residsCentral[i])/delta[j];
     } 
     trajPtr->clear();
   }
