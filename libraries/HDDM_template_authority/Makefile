@@ -1,16 +1,10 @@
+SOURCE = hddm_s.h hddm_s.c
+PACKAGES = JANA:ROOT
 
+all: lib
 
-all:
-	make -f Makefile.static
-#	make -C shlib
+$(SOURCE): event.xml
+	hddm-c $<
 
-install:
-	make -f Makefile.static install
-
-clean:
-
-	make -f Makefile.static clean
-#	make -C shlib clean
-
-pristine:
-	make -f Makefile.static pristine
+lib: $(SOURCE)
+	make -f $(HALLD_HOME)/src/BMS/Makefile.lib
