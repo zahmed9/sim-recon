@@ -75,8 +75,10 @@ void MyTrajectoryGrkuta::swim(double xp0, double z0, double theta, double phi,
   thisVectorPtr->setZ(vect[2]);
   thisVectorPtr->setT(ct);
   traj.push_back(thisVectorPtr);
-  for (int i = 0; i < 2000; i++) {
+  traj.push_back(thisVectorPtr); // do it again, will overwrite element 0 with swim back point
+  for (int i = 0; i < 10000; i++) {
     grkuta_(&charge, &step, vect, vout);
+    ct += ctStep;
     thisVectorPtr = new HepLorentzVector;
     thisVectorPtr->setX(vout[0]);
     thisVectorPtr->setY(vout[1]);
@@ -85,9 +87,28 @@ void MyTrajectoryGrkuta::swim(double xp0, double z0, double theta, double phi,
     if (debug_level > 3) cout << setprecision(14) << "MyTrajectoryGrcuta::swim: i = " << i << " LorentzVector = " << *thisVectorPtr << endl;
     traj.push_back(thisVectorPtr);
     if (sqrt(vout[0]*vout[0] + vout[1]*vout[1]) > TRACKING_RADIUS_MAX) break;
-    ct += ctStep;
     for (int j = 0; j < 7; j++) {vect[j] = vout[j];}
   }
+  // go backward
+  float charge_opposite = -charge;
+  vect[0] = xStart; vect[1] = yStart; vect[2] = zStart;
+  vect[3] = -sinTheta*cosPhi; vect[4] = -sinTheta*sinPhi; vect[5] = -cosTheta;
+  vect[6] = ptot;
+  ct = 0.0;
+  for (int i = 0; i < 10000; i++) {
+    grkuta_(&charge_opposite, &step, vect, vout);
+    ct -= ctStep;
+    thisVectorPtr = new HepLorentzVector;
+    thisVectorPtr->setX(vout[0]);
+    thisVectorPtr->setY(vout[1]);
+    thisVectorPtr->setZ(vout[2]);
+    thisVectorPtr->setT(ct);
+    if (debug_level > 3) cout << setprecision(14) << "MyTrajectoryGrcuta::swim: i = " << i << " LorentzVector = " << *thisVectorPtr << endl;
+    if (sqrt(vout[0]*vout[0] + vout[1]*vout[1]) > TRACKING_RADIUS_MAX) break;
+    for (int j = 0; j < 7; j++) {vect[j] = vout[j];}
+  }
+  // add swim back point
+  traj[0] = thisVectorPtr;
   return;
 }
 
