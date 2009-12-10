@@ -1,6 +1,6 @@
 
 PACKAGES = JANA:ROOT
-CXXFLAGS += -I$(HDDS_SRC) -I$(ROOTSYS)/include
+CXXFLAGS += -I$(HDDS_HOME)/src -I$(ROOTSYS)/include
 
 
 ifdef HALLD_SHARED
