@@ -14,7 +14,7 @@ VPATH = $(DEP_DIR)
 first: install
 
 #Make sure directories and dependancy files exist
-all: mkdirs $(DEPS) $(LIBNAME)($(OBJS))
+all: mkdirs $(LIBNAME)($(OBJS))
 	@rm -f $(DICT_FILES)
 ifeq ($(BMS_OSNAME),Darwin)
 	ranlib $(LIBNAME)
@@ -31,8 +31,8 @@ else
 endif
 
 mkdirs:
-	@mkdir -p $(LIB_DIR)
-	@mkdir -p $(DEP_DIR)
+	mkdir -p $(LIB_DIR)
+	mkdir -p $(DEP_DIR)
 
 install: all
 	mkdir -p $(INSTALL_DIR)/lib/$(BMS_OSNAME)
@@ -64,8 +64,10 @@ pristine: clean
 	$(DCXX) -MM -MT "$(LIBNAME)($(basename $@).o)" $(CXXFLAGS) $< > $(DEP_DIR)/$@
 %.d : %.c
 	$(DCC) -MM -MT "$(LIBNAME)($(basename $@).o)" $(CFLAGS) $< > $(DEP_DIR)/$@
-%.d : %.F
-	$(DFC) -MM -MT "$(LIBNAME)($(basename $@).o)" $(FFLAGS) $< > $(DEP_DIR)/$@
+$(DEP_DIR)/%.d : %.F
+	@echo making dependency file for $<, target is $@
+	mkdir -p $(DEP_DIR)
+	$(DFC) -MM -MT "$(LIBNAME)($(basename $@).o)" $(FFLAGS) $< > $@
 
 
 env:
