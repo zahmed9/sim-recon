@@ -8,8 +8,6 @@ include $(HALLD_HOME)/src/BMS/Makefile.common
 
 .PHONY: all mkdirs depclean clean env
 
-VPATH = $(DEP_DIR)
-
 # First rule. 
 first: install
 
@@ -56,16 +54,19 @@ pristine: clean
 
 # Rules to make DEPENDS files from source. Note that these are similar to the
 # rules in Makefile.bin, but use the implicit rules for archiving objects.
-%.d : %.cpp
-	$(DCXX) -MM -MT "$(LIBNAME)($(basename $@).o)" $(CXXFLAGS) $< > $(DEP_DIR)/$@
-%.d : %.cc
-	$(DCXX) -MM -MT "$(LIBNAME)($(basename $@).o)" $(CXXFLAGS) $< > $(DEP_DIR)/$@
-%.d : %.cxx
-	$(DCXX) -MM -MT "$(LIBNAME)($(basename $@).o)" $(CXXFLAGS) $< > $(DEP_DIR)/$@
-%.d : %.c
-	$(DCC) -MM -MT "$(LIBNAME)($(basename $@).o)" $(CFLAGS) $< > $(DEP_DIR)/$@
+$(DEP_DIR)/%.d : %.cpp
+	mkdir -p $(DEP_DIR)
+	$(DCXX) -MM -MT "$(LIBNAME)($(basename $@).o)" $(CXXFLAGS) $< > $@
+$(DEP_DIR)/%.d : %.cc
+	mkdir -p $(DEP_DIR)
+	$(DCXX) -MM -MT "$(LIBNAME)($(basename $@).o)" $(CXXFLAGS) $< > $@
+$(DEP_DIR)/%.d : %.cxx
+	mkdir -p $(DEP_DIR)
+	$(DCXX) -MM -MT "$(LIBNAME)($(basename $@).o)" $(CXXFLAGS) $< > $@
+$(DEP_DIR)/%.d : %.c
+	mkdir -p $(DEP_DIR)
+	$(DCC) -MM -MT "$(LIBNAME)($(basename $@).o)" $(CFLAGS) $< > $@
 $(DEP_DIR)/%.d : %.F
-	@echo making dependency file for $<, target is $@
 	mkdir -p $(DEP_DIR)
 	$(DFC) -MM -MT "$(LIBNAME)($(basename $@).o)" $(FFLAGS) $< > $@
 
