@@ -171,6 +171,9 @@ class DTrackFitterKalman: public DTrackFitter{
   void ResetKalman(void);
   jerror_t GetProcessNoise(double ds,double z,
 			   double X0,const DMatrix &S,DMatrix &Q);
+  jerror_t GetProcessNoise(double ds,double Z, double A,double density, 
+			   const DMatrix &S,DMatrix &Q);
+
   double Step(double oldz,double newz, double dEdx,DMatrix &S);
   jerror_t StepJacobian(double oldz,double newz,const DMatrix &S,double dEdx,
 		      DMatrix &J);
@@ -200,8 +203,10 @@ class DTrackFitterKalman: public DTrackFitter{
 			      const DMatrix &S,DMatrix &Sc);
 
   jerror_t GetProcessNoiseCentral(double ds,const DVector3 &pos,double X0,
-				  const DMatrix &Sc,
-				  DMatrix &Q);
+				  const DMatrix &Sc,DMatrix &Q);
+  jerror_t GetProcessNoiseCentral(double ds,double Z,double A,double density, 
+				  const DMatrix &S,DMatrix &Q);
+
   jerror_t SwimToPlane(DMatrix &S);
   jerror_t SwimToPlane(double z_start,double z_end, DMatrix &S,DMatrix &C);
   jerror_t SwimToPlane(double z_end, DMatrix &S);
