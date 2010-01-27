@@ -88,7 +88,7 @@ double FDC_PED_NOISE; //pC (calculated from FDC_CATHODE_SIGMA in SmearFDC)
 // resolution along the wires. This flag is used to indicated
 // the magic scale factor should be applied to FDC_PED_NOISE
 // when it is calculated below to get the correct resolution.
-bool FDC_ELOSS_OFF = true;
+bool FDC_ELOSS_OFF = false;
 
 // Time window for acceptance of FDC hits
 double FDC_TIME_WINDOW = 1000.0E-9; // in seconds
