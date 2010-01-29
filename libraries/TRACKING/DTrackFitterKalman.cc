@@ -47,8 +47,8 @@
 
 #define CHISQ_DIFF_CUT 20.
 #define MAX_DEDX 40.
-#define MIN_ITER 2
-#define MIN_CDC_ITER 5
+#define MIN_ITER 3
+#define MIN_CDC_ITER 6
 
 // Local boolean routines for sorting
 //bool static DKalmanHit_cmp(DKalmanHit_t *a, DKalmanHit_t *b){
@@ -78,6 +78,17 @@ bool static DKalmanCDCHit_cmp(DKalmanCDCHit_t *a, DKalmanCDCHit_t *b){
 inline double fdc_y_variance(double alpha,double x){
   double diffusion=2.*DIFFUSION_COEFF*fabs(x)/DRIFT_SPEED;
   return diffusion+FDC_CATHODE_VARIANCE+0.0064*tan(alpha)*tan(alpha);
+}
+
+// Smearing function from Yves
+inline double cdc_variance(double x){
+  x*=10.; // mm
+  if (x>7.895) x=7.895; // straw radius in mm
+  else if (x<0) x=0.;
+  double sigma_d 
+    =(108.55 + 7.62391*x + 556.176*exp(-(1.12566)*pow(x,1.29645)))*1e-4;
+
+  return sigma_d*sigma_d;
 }
 
 
@@ -1480,9 +1491,18 @@ jerror_t DTrackFitterKalman::ConvertStateVector(double z,double wire_x,
   Sc(state_q_over_pt,0)=q_over_p/cosl;
   Sc(state_phi,0)=atan2(ty,tx);
   Sc(state_tanl,0)=tanl;
-  //  Sc(state_D,0)=sqrt((x-wire_x)*(x-wire_x)+(y-wire_y)*(y-wire_y));
-  Sc(state_D,0)=sqrt(x*x+y*y);
+  Sc(state_D,0)=sqrt((x-wire_x)*(x-wire_x)+(y-wire_y)*(y-wire_y));
+  //Sc(state_D,0)=sqrt(x*x+y*y);
   Sc(state_z,0)=z;
+
+  // D is a signed quantity
+  double Bx,By,Bz;
+  bfield->GetFieldBicubic(x,y,z, Bx, By, Bz);    
+  double rc=1./Sc(state_q_over_pt,0)/qBr2p/fabs(Bz);
+  double xc=x+rc*sin(Sc(state_phi,0));
+  double yc=y+rc*cos(Sc(state_phi,0));
+  double r=sqrt(xc*xc+yc*yc);
+  if ((q_over_p>0 && r<rc) || (q_over_p<0 && r>rc)) Sc(state_D,0)*=-1.;
 
   DMatrix J(5,5);
   double tanl3=tanl*tanl*tanl;
@@ -1495,33 +1515,12 @@ jerror_t DTrackFitterKalman::ConvertStateVector(double z,double wire_x,
   J(state_q_over_pt,state_ty)=-ty*q_over_p*tanl3*factor;
   J(state_phi,state_tx)=-ty/tsquare;
   J(state_phi,state_ty)=tx/tsquare;
-  //J(state_D,state_x)=(x-wire_x)/S(state_D,0);
-  //J(state_D,state_y)=(y-wire_y)/S(state_D,0);
-  J(state_D,state_x)=x/Sc(state_D,0);
-  J(state_D,state_y)=y/Sc(state_D,0);
+  J(state_D,state_x)=(x-wire_x)/Sc(state_D,0);
+  J(state_D,state_y)=(y-wire_y)/Sc(state_D,0);
+  //J(state_D,state_x)=x/Sc(state_D,0);
+  //J(state_D,state_y)=y/Sc(state_D,0);
 
   Cc=J*(C*DMatrix(DMatrix::kTransposed,J));
-
-  return NOERROR;
-}
-
-// Convert between the forward parameter set {x,y,tx,ty,q/p} and the central
-// parameter set {q/pT,phi,tan(lambda),D,z}
-jerror_t DTrackFitterKalman::ConvertStateVector(double z,double wire_x, 
-                                           double wire_y,
-                                           const DMatrix &S,DMatrix &Sc){
-  double x=S(state_x,0),y=S(state_y,0);
-  double tx=S(state_tx,0),ty=S(state_ty,0),q_over_p=S(state_q_over_p,0);
-  double tsquare=tx*tx+ty*ty;
-  //  double factor=1./sqrt(1.+tsquare);
-  double tanl=1./sqrt(tsquare);
-  double cosl=cos(atan(tanl));
-  Sc(state_q_over_pt,0)=q_over_p/cosl;
-  Sc(state_phi,0)=atan2(ty,tx);
-  Sc(state_tanl,0)=tanl;
-  //  Sc(state_D,0)=sqrt((x-wire_x)*(x-wire_x)+(y-wire_y)*(y-wire_y));
-  Sc(state_D,0)=sqrt(x*x+y*y);
-  Sc(state_z,0)=z;
 
   return NOERROR;
 }
@@ -1699,7 +1698,7 @@ jerror_t DTrackFitterKalman::GetProcessNoiseCentral(double ds,double Z,
     double chi2a=2.007e-5*pow(Z,2.*ONE_THIRD)
       *(1.+3.34*Z*Z*alpha*alpha*one_over_beta2)/p2;
     double nu=0.5*chi2c/chi2a/(1.-F);
-    double sig2_ms=chi2c*1e-6/(1.+F*F)*((1.+nu)/nu*log(1.+nu)-1.);
+    double sig2_ms=2.*chi2c*1e-6/(1.+F*F)*((1.+nu)/nu*log(1.+nu)-1.);
 
     //printf("lynch/dahl sig2ms %g\n",sig2_ms);
 
@@ -1797,7 +1796,7 @@ jerror_t DTrackFitterKalman::GetProcessNoise(double ds,double Z, double A,
     double chi2a=2.007e-5*pow(Z,2.*ONE_THIRD)
       *(1.+3.34*Z*Z*alpha*alpha*one_over_beta2)*one_over_p_sq;
     double nu=0.5*chi2c/chi2a/(1.-F);
-    double sig2_ms=chi2c*1e-6/(1.+F*F)*((1.+nu)/nu*log(1.+nu)-1.);
+    double sig2_ms=2.*chi2c*1e-6/(1.+F*F)*((1.+nu)/nu*log(1.+nu)-1.);
 
     //printf("lynch/dahl sig2ms %g\n",sig2_ms);
 
@@ -2154,24 +2153,22 @@ jerror_t DTrackFitterKalman::KalmanLoop(void){
 	   || chisq_forward-chisq_iter>0.)) break; 
       }
       chisq_iter=chisq_forward;
-      
-      // Find the state at the so-called "vertex" position
-      ExtrapolateToVertex(Slast,Clast);
+   
       C=Clast;
       S=Slast;
       zvertex=z_;
     }
+    // Extrapolate to the point of closest approach to the beam line
+    z_=zvertex;
+    ExtrapolateToVertex(Slast,Clast);
 
     // Convert from forward rep. to central rep.
-    ConvertStateVector(zvertex,0.,0.,Slast,Clast,Sc,Cc);
+    ConvertStateVector(z_,0.,0.,Slast,Clast,Sc,Cc);
 
     // Track Parameters at "vertex"
     phi_=Sc(state_phi,0);
     q_over_pt_=Sc(state_q_over_pt,0);
     tanl_=Sc(state_tanl,0);
-    x_=Slast(state_x,0);
-    y_=Slast(state_y,0);
-    z_=zvertex;
 
     if (DEBUG_LEVEL>0)
       cout
@@ -2344,24 +2341,22 @@ jerror_t DTrackFitterKalman::KalmanLoop(void){
       }
       chisq_iter=chisq_forward;
       
-      // Find the state at the so-called "vertex" position
-      ExtrapolateToVertex(Slast,Clast);
       C=Clast;
       S=Slast;
       zvertex=z_;
     }
+    // Extrapolate to the point of closest approach to the beam line
+    z_=zvertex;
+    ExtrapolateToVertex(Slast,Clast);
 
     // Convert from forward rep. to central rep.
-    ConvertStateVector(zvertex,0.,0.,Slast,Clast,Sc,Cc);
-    
+    ConvertStateVector(z_,0.,0.,Slast,Clast,Sc,Cc);
+      
     // Track Parameters at "vertex"
     phi_=Sc(state_phi,0);
     q_over_pt_=Sc(state_q_over_pt,0);
     tanl_=Sc(state_tanl,0);
-    x_=Slast(state_x,0);
-    y_=Slast(state_y,0);
-    z_=zvertex;
-
+   
     if (DEBUG_LEVEL>0)
       cout << "----- Pass: " 
 	   << (fit_type==kTimeBased?"Time-based ---":"Wire-based ---") 
@@ -2667,7 +2662,7 @@ jerror_t DTrackFitterKalman::KalmanLoop(void){
       chisq_iter=chisq;
 
       // Find track parameters where track crosses beam line
-      ExtrapolateToVertex(pos0,Sclast,Cclast); 
+      //ExtrapolateToVertex(pos0,Sclast,Cclast); 
       Cc=Cclast;
       Sc=Sclast;
       best_pos=pos0;
@@ -2678,6 +2673,8 @@ jerror_t DTrackFitterKalman::KalmanLoop(void){
       return VALUE_OUT_OF_RANGE;
     }
    
+    ExtrapolateToVertex(best_pos,Sclast,Cclast); 
+
     // Track Parameters at "vertex"
     phi_=Sclast(state_phi,0);
     q_over_pt_=Sclast(state_q_over_pt,0);
@@ -3110,7 +3107,8 @@ jerror_t DTrackFitterKalman::KalmanCentral(double anneal_factor,
 				       -central_traj[k].t);
 
 	  // Measurement error
-	  V=anneal_factor*CDC_VARIANCE;
+	  //V=anneal_factor*CDC_VARIANCE;
+	  V=cdc_variance(measurement);
 	}
 	
 	// prediction for measurement  
@@ -3642,7 +3640,8 @@ jerror_t DTrackFitterKalman::KalmanForwardCDC(double anneal,DMatrix &S,
 			      -forward_traj_cdc[k].t);
 
 	  // variance
-	  V=CDC_VARIANCE*anneal;
+	  //V=CDC_VARIANCE*anneal;
+	  V=cdc_variance(dm);
 	}
 	// variance including prediction
 	double var=V,var_pred=0.;
