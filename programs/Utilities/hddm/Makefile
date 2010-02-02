@@ -32,37 +32,44 @@ ifeq ($(OStype),SunOS)
 	LIBXDR  := -lnsl
 endif
 
-all:	xml-hddm hddm-xml hddm-c hddm-cpp
+OBJDIR = .obj/$(BMS_OSNAME)
+BINDIR = .bin/$(BMS_OSNAME)
+BINARIES = $(BINDIR)/xml-hddm $(BINDIR)/hddm-xml $(BINDIR)/hddm-c $(BINDIR)/hddm-cpp $(BINDIR)/hddmcat
 
-install: hddm-c xml-hddm hddm-xml hddm-c xml-xml hddm-schema schema-hddm hddmcat hddm-cpp
-	mkdir -p $(HALLD_HOME)/bin
-	cp hddm-schema schema-hddm xml-xml $(HALLD_HOME)/bin
-	mkdir -p $(HALLD_HOME)/bin/$(BMS_OSNAME)
-	cp hddm-c hddm-cpp hddm-xml xml-hddm hddmcat $(HALLD_HOME)/bin/$(BMS_OSNAME)
+all:	mkdirs $(BINARIES)
 
-xml-hddm: xml-hddm.cpp XString.o XParsers.o
+mkdirs:
+	mkdir -p $(OBJDIR) $(BINDIR)
+
+install: xml-xml hddm-schema schema-hddm $(BINARIES)
+	mkdir -p $(HALLD_MY)/bin
+	cp -v hddm-schema schema-hddm xml-xml $(HALLD_MY)/bin
+	mkdir -p $(HALLD_MY)/bin/$(BMS_OSNAME)
+	cp -v $(BINARIES) $(HALLD_MY)/bin/$(BMS_OSNAME)
+
+$(BINDIR)/xml-hddm: xml-hddm.cpp $(OBJDIR)/XString.o $(OBJDIR)/XParsers.o
 	$(CPP) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
 	-I$(HALLD_HOME)/include -o $@ $^ \
 	-L$(HALLD_HOME)/lib/$(BMS_OSNAME) -L$(HALLD_HOME)/src/external/xstream/src -lxstream \
 	-L$(XERCESCROOT)/lib -lxerces-c $(LIBXDR)
 
-hddm-xml: hddm-xml.cpp XString.o XParsers.o
+$(BINDIR)/hddm-xml: hddm-xml.cpp $(OBJDIR)/XString.o $(OBJDIR)/XParsers.o
 	$(CPP) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
 	-I$(HALLD_HOME)/include -o $@ $^ \
 	-L$(HALLD_HOME)/lib/$(BMS_OSNAME) -L$(HALLD_HOME)/src/external/xstream/src -lxstream \
 	-L$(XERCESCROOT)/lib -lxerces-c $(LIBXDR)
 
-hddm-c: hddm-c.cpp XString.o XParsers.o
+$(BINDIR)/hddm-c: hddm-c.cpp $(OBJDIR)/XString.o $(OBJDIR)/XParsers.o
 	$(CPP) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
 	-I$(HALLD_HOME)/include -o $@ $^ \
 	-L$(XERCESCROOT)/lib -lxerces-c
 
-hddm-cpp: hddm-cpp.cpp XString.o XParsers.o
+$(BINDIR)/hddm-cpp: hddm-cpp.cpp $(OBJDIR)/XString.o $(OBJDIR)/XParsers.o
 	$(CPP) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
 	-I$(HALLD_HOME)/include -o $@ $^ \
 	-L$(XERCESCROOT)/lib -lxerces-c
 
-hddmcat: hddmcat.cpp
+$(BINDIR)/hddmcat: hddmcat.cpp
 	$(CPP) -o $@ $^
 
 test: hddm-c hddm-xml test.xml
@@ -76,15 +83,16 @@ test: hddm-c hddm-xml test.xml
 %.xsd: %.xml hddm-schema.xsl
 	./hddm-schema $< >$@
 
-%.o: %.cpp
+$(OBJDIR)/%.o: %.cpp
 	$(CPP) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
-	-I$(HALLD_HOME)/include -c $^ 
+	-I$(HALLD_HOME)/include -c -o $@ $^ 
 
 clean:
-	/bin/rm -f *.o core *.depend
+	/bin/rm -f $(OBJDIR)/*.o core *.depend
 
 depclean:
 	@echo "Nothing to do for make depclean in hddm"
 
 pristine: clean
-	
+
+# end of makefile
