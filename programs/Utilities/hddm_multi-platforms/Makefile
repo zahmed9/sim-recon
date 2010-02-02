@@ -32,7 +32,12 @@ ifeq ($(OStype),SunOS)
 	LIBXDR  := -lnsl
 endif
 
-all:	xml-hddm hddm-xml hddm-c hddm-cpp
+OBJDIR = .obj/$(BMS_OSNAME)
+
+all:	mkdirs xml-hddm hddm-xml hddm-c hddm-cpp
+
+mkdirs:
+	mkdir -p $(OBJDIR)
 
 install: hddm-c xml-hddm hddm-xml hddm-c xml-xml hddm-schema schema-hddm hddmcat hddm-cpp
 	mkdir -p $(HALLD_HOME)/bin
@@ -40,24 +45,24 @@ install: hddm-c xml-hddm hddm-xml hddm-c xml-xml hddm-schema schema-hddm hddmcat
 	mkdir -p $(HALLD_HOME)/bin/$(BMS_OSNAME)
 	cp hddm-c hddm-cpp hddm-xml xml-hddm hddmcat $(HALLD_HOME)/bin/$(BMS_OSNAME)
 
-xml-hddm: xml-hddm.cpp XString.o XParsers.o
+xml-hddm: xml-hddm.cpp $(OBJDIR)/XString.o $(OBJDIR)/XParsers.o
 	$(CPP) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
 	-I$(HALLD_HOME)/include -o $@ $^ \
 	-L$(HALLD_HOME)/lib/$(BMS_OSNAME) -L$(HALLD_HOME)/src/external/xstream/src -lxstream \
 	-L$(XERCESCROOT)/lib -lxerces-c $(LIBXDR)
 
-hddm-xml: hddm-xml.cpp XString.o XParsers.o
+hddm-xml: hddm-xml.cpp $(OBJDIR)/XString.o $(OBJDIR)/XParsers.o
 	$(CPP) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
 	-I$(HALLD_HOME)/include -o $@ $^ \
 	-L$(HALLD_HOME)/lib/$(BMS_OSNAME) -L$(HALLD_HOME)/src/external/xstream/src -lxstream \
 	-L$(XERCESCROOT)/lib -lxerces-c $(LIBXDR)
 
-hddm-c: hddm-c.cpp XString.o XParsers.o
+hddm-c: hddm-c.cpp $(OBJDIR)/XString.o $(OBJDIR)/XParsers.o
 	$(CPP) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
 	-I$(HALLD_HOME)/include -o $@ $^ \
 	-L$(XERCESCROOT)/lib -lxerces-c
 
-hddm-cpp: hddm-cpp.cpp XString.o XParsers.o
+hddm-cpp: hddm-cpp.cpp $(OBJDIR)/XString.o $(OBJDIR)/XParsers.o
 	$(CPP) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
 	-I$(HALLD_HOME)/include -o $@ $^ \
 	-L$(XERCESCROOT)/lib -lxerces-c
@@ -76,15 +81,16 @@ test: hddm-c hddm-xml test.xml
 %.xsd: %.xml hddm-schema.xsl
 	./hddm-schema $< >$@
 
-%.o: %.cpp
+$(OBJDIR)/%.o: %.cpp
 	$(CPP) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
-	-I$(HALLD_HOME)/include -c $^ 
+	-I$(HALLD_HOME)/include -c -o $@ $^ 
 
 clean:
-	/bin/rm -f *.o core *.depend
+	/bin/rm -f $(OBJDIR)/*.o core *.depend
 
 depclean:
 	@echo "Nothing to do for make depclean in hddm"
 
 pristine: clean
-	
+
+# end of makefile
