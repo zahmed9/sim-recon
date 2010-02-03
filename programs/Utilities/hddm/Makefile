@@ -41,7 +41,7 @@ all:	mkdirs $(BINARIES)
 mkdirs:
 	mkdir -p $(OBJDIR) $(BINDIR)
 
-install: xml-xml hddm-schema schema-hddm $(BINARIES)
+install: xml-xml hddm-schema schema-hddm mkdirs $(BINARIES)
 	mkdir -p $(HALLD_MY)/bin
 	cp -v hddm-schema schema-hddm xml-xml $(HALLD_MY)/bin
 	mkdir -p $(HALLD_MY)/bin/$(BMS_OSNAME)
