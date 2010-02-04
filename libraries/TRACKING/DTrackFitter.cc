@@ -320,20 +320,42 @@ jerror_t DTrackFitter::CalcdEdxHit(const DVector3 &mom,
   return VALUE_OUT_OF_RANGE;
 }
 
+// Calculate the variance in the energy loss in a Gaussian approximation
+// in units of MeV^2/cm^2
+// The full width at half maximum of the energy loss distribution is
+// approximated by Gamma=4.018 Xi, where
+//      Xi=0.1535*density*(Z/A)*x/beta^2  [MeV]
+// To convert that to the sigma of a Gaussian, use Gamma=2.354*sigma.
+double DTrackFitter::GetdEdxVariance(double p,double mass_hyp,double dx,
+				     DVector3 pos){
+  if (p<0.001) return 1000.;  // try to avoid division by zero errors
+   
+  double beta2=1./(1.+mass_hyp*mass_hyp/p/p);
+ 
+  // Get material properties
+  double A=0.,Z=0.,density=0.,radlen=0.;
+  geom->FindMat(pos,density,A,Z,radlen);
+
+  // Ignore errors in dx for now 
+  const double full_width_half_maximum=4.018;
+  double sigma=0.1535*full_width_half_maximum/2.354*density*Z/A/beta2;
+  return sigma*sigma;
+}
 
 // Calculate the most probable energy loss per unit length in units of 
-// MeV/cm^2/g in a material with a certain density, mean excitation energy 
+// MeV/cm in a material with a certain density, mean excitation energy 
 // I (in eV), and Z/A for a particle of momentum p and mass mass_hyp
 double DTrackFitter::GetdEdx(double p,double mass_hyp,double dx,
 			     DVector3 pos){
   if (p<0.001) return 0.;  // try to avoid division by zero errors
   double betagamma=p/mass_hyp;  
-  double beta2=1./(1.+mass_hyp*mass_hyp/p/p);
+  double betagamma2=betagamma*betagamma;
+  double beta2=1./(1.+1./betagamma2);
   
   // Electron mass and maximum energy transfer
   double Me=0.000511; //GeV
-  //  double Wmax=2.*Me*betagamma*betagamma
-  //  /(1.+2.*Me/mass_hyp*sqrt(1.+betagamma*betagamma)+Me*Me/mass_hyp/mass_hyp);
+  //  double Wmax=2.*Me*betagamma2
+  //  /(1.+2.*Me/mass_hyp*sqrt(1.+betagamma2)+Me*Me/mass_hyp/mass_hyp);
  
   // Get material properties
   double A=0.,Z=0.,density=0.,radlen=0.;
@@ -373,8 +395,8 @@ double DTrackFitter::GetdEdx(double p,double mass_hyp,double dx,
     delta=4.606*X+C;
   
   // Most probable energy loss from Landau theory (see Leo, pp. 51-52)
-  return mean_dedx*(log(2.*Me*beta2*mean_dedx*density*dx*1e-3
-		    /(1.-beta2)/I/I)-beta2+0.198-delta);
+  return mean_dedx*(log(mean_dedx*dx/1000.)-log((1.-beta2)*I*I/2./Me/beta2)
+		    -beta2+0.198-delta);
 }
 
 

@@ -112,6 +112,9 @@ class DTrackFitter:public jana::JObject{
 		jerror_t GetdEdx(const DReferenceTrajectory *rt, double &dedx,
 				 double &mean_path_length, double &p_avg,
 				 unsigned int &num_hits);
+		double GetdEdxVariance(double p,double mass_hyp,double dx,
+				       DVector3 pos);
+
 
 		//---- The following need to be supplied by the subclass ----
 		virtual string Name(void) const =0;
