@@ -50,13 +50,15 @@ install: xml-xml hddm-schema schema-hddm mkdirs $(BINARIES)
 $(BINDIR)/xml-hddm: xml-hddm.cpp $(OBJDIR)/XString.o $(OBJDIR)/XParsers.o
 	$(CPP) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
 	-I$(HALLD_HOME)/include -o $@ $^ \
-	-L$(HALLD_HOME)/lib/$(BMS_OSNAME) -L$(HALLD_HOME)/src/external/xstream/src -lxstream \
+	-L$(HALLD_MY)/lib/$(BMS_OSNAME) \
+	-L$(HALLD_HOME)/lib/$(BMS_OSNAME) -lxstream \
 	-L$(XERCESCROOT)/lib -lxerces-c $(LIBXDR)
 
 $(BINDIR)/hddm-xml: hddm-xml.cpp $(OBJDIR)/XString.o $(OBJDIR)/XParsers.o
 	$(CPP) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
 	-I$(HALLD_HOME)/include -o $@ $^ \
-	-L$(HALLD_HOME)/lib/$(BMS_OSNAME) -L$(HALLD_HOME)/src/external/xstream/src -lxstream \
+	-L$(HALLD_MY)/lib/$(BMS_OSNAME) \
+	-L$(HALLD_HOME)/lib/$(BMS_OSNAME) -lxstream \
 	-L$(XERCESCROOT)/lib -lxerces-c $(LIBXDR)
 
 $(BINDIR)/hddm-c: hddm-c.cpp $(OBJDIR)/XString.o $(OBJDIR)/XParsers.o
