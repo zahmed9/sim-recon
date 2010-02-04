@@ -19,7 +19,7 @@ libxstream_a_OBJECTS_0 = debug.o common.o xdr.o base64.o \
 libxstream_a_OBJECTS = $(addprefix $(OBJDIR)/,$(libxstream_a_OBJECTS_0))
 lib_LIBRARIES = libxstream.a
 
-all: mkdirs $(LIBDIR)/libxstream.a
+all: mkdirs $(LIBDIR)/$(lib_LIBRARIES)
 
 .SUFFIXES:
 .SUFFIXES: .cpp .o .obj
@@ -34,13 +34,13 @@ $(LIBDIR)/libxstream.a: $(libxstream_a_OBJECTS) $(libxstream_a_DEPENDENCIES)
 	$(AR) cru $@ $(libxstream_a_OBJECTS) $(libxstream_a_LIBADD)
 	$(RANLIB) $@
 
-install: $(lib_LIBRARIES)
-	mkdir -p $(HALLD_HOME)/lib/$(OSNAME)
-	cp $^ $(HALLD_HOME)/lib/$(OSNAME)
+install: all
+	mkdir -p $(HALLD_MY)/lib/$(BMS_OSNAME)
+	cp $(LIBDIR)/$(lib_LIBRARIES) $(HALLD_MY)/lib/$(BMS_OSNAME)
 	cp -r ../include ./tmpinc
 	rm -rf `find ./tmpinc -name ".svn"`
-	mkdir -p $(HALLD_HOME)/include
-	cp -r tmpinc/* $(HALLD_HOME)/include
+	mkdir -p $(HALLD_MY)/include
+	cp -r tmpinc/* $(HALLD_MY)/include
 	rm -rf tmpinc
 
 mostlyclean-compile:
@@ -55,7 +55,7 @@ depclean:
 	@echo "Nothing to do for make depclean in xstream"
 
 clean:
-	rm -f *.o *.a $(HALLD_HOME)/lib/$(OSNAME)/$(lib_LIBRARIES)
+	rm -rf $(OBJDIR) $(LIBDIR)
 
 $(OBJDIR)/%.o: %.cpp
 	g++ $(INCLUDES) -c -o $@ $^
