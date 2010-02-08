@@ -3,6 +3,8 @@
 # $Header$
 #
 
+# Things that platform specific Makefiles may want to modify
+CXXFLAGS += -fPIC
 
 # Things common to both library and executable builds live in Makefile.common
 include $(HALLD_HOME)/src/BMS/Makefile.common
@@ -25,6 +27,9 @@ ifndef SOLIB_NAME
    SOLIB_NAME = $(MODULE_NAME).$(SOLIB_SUFFIX)
 endif
 
+# Remove JANA from the ADDITIONAL_MODULES list for shared objects
+ADDITIONAL_MODULES_FILTERED = $(filter-out JANA,$(ADDITIONAL_MODULES))
+
 # Redefine OBJS to include debug suffixes
 DOBJS = $(addsuffix $(DEBUG_SUFFIX).o,$(basename $(OBJS)))
 
@@ -39,7 +44,7 @@ ifdef HALLD_MY
 endif
 
 LD_DIRS += $(addprefix -L,$(LIB_DIRS))
-LD_LIBS += $(addsuffix $(DEBUG_SUFFIX),$(addprefix -l,$(ADDITIONAL_MODULES)))
+LD_LIBS += $(addsuffix $(DEBUG_SUFFIX),$(addprefix -l,$(ADDITIONAL_MODULES_FILTERED)))
 
 # To avoid errors if there are NO headers in a libraries source directory
 # (this happened with a FORTRAN library) we have to define the command
