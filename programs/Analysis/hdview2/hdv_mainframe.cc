@@ -955,9 +955,9 @@ void hdv_mainframe::DoMyRedraw(void)
 			sA->SetLineColor(iter->color);
 			sB->SetLineColor(iter->color);
 			eA->SetLineColor(iter->color);
-			sA->SetLineWidth(iter->size);
-			sB->SetLineWidth(iter->size);
-			eA->SetLineWidth(iter->size);
+			sA->SetLineWidth((Width_t)iter->size);
+			sB->SetLineWidth((Width_t)iter->size);
+			eA->SetLineWidth((Width_t)iter->size);
 			FillPoly(sA, sB, eA, iter->points); // in hdv_mainframe.h
 			
 			// Axial CDC wires will end up as having zero length in the end view
@@ -1179,7 +1179,7 @@ void hdv_mainframe::DrawDetectorsXY(void)
 						poly->SetLineWidth(1);
 						poly->SetFillColor(28);
 						poly->SetFillStyle(0);
-						int chan = (imod+1)*1000 + (ilay+1+BCAL_LAYS1)*100 + (isec+1)*10;
+						int chan = (int)((imod+1)*1000 + (ilay+1+BCAL_LAYS1)*100 + (isec+1)*10);
 						graphics_endA.push_back(poly);
 						bcalblocks[chan] = poly; // record so we can set the color later
 					}
@@ -1197,7 +1197,7 @@ void hdv_mainframe::DrawDetectorsXY(void)
 
 				TLine *l = new TLine(rmin*cos(phi), rmin*sin(phi), rmax*cos(phi), rmax*sin(phi));
 				l->SetLineColor(isec==0 ? kBlack:12);
-				l->SetLineWidth(isec==0 ? 1.5:1.0);
+				l->SetLineWidth((Width_t)(isec==0 ? 1.5:1.0));
 				graphics_endA.push_back(l);
 			}
 			
@@ -1206,14 +1206,14 @@ void hdv_mainframe::DrawDetectorsXY(void)
 				double r = BCAL_Rmin + (double)ilay*dlayer1;
 				TLine *l = new TLine(r*cos(mod_phi), r*sin(mod_phi), r*cos(mod_phi+dmodule), r*sin(mod_phi+dmodule));
 				l->SetLineColor(ilay==0 ? kBlack:12);
-				l->SetLineWidth(ilay==0 ? 1.0:1.0);
+				l->SetLineWidth((Width_t)(ilay==0 ? 1.0:1.0));
 				graphics_endA.push_back(l);
 			}
 			for(int ilay=0; ilay<=BCAL_LAYS2; ilay++){
 				double r = BCAL_MIDRAD + (double)ilay*dlayer2;
 				TLine *l = new TLine(r*cos(mod_phi), r*sin(mod_phi), r*cos(mod_phi+dmodule), r*sin(mod_phi+dmodule));
 				l->SetLineColor(ilay==BCAL_LAYS2 ? kBlack:12);
-				l->SetLineWidth(ilay==BCAL_LAYS2 ? 1.0:1.0);
+				l->SetLineWidth((Width_t)(ilay==BCAL_LAYS2 ? 1.0:1.0));
 				graphics_endA.push_back(l);
 			}
 		}
@@ -1483,7 +1483,7 @@ void hdv_mainframe::DrawAxes(TCanvas *c, vector<TObject*> &graphics, const char 
 	double ylo = y1+0.04*deltay;
 	double yhi = ylo + 0.075*deltay;
 	TArrow *yarrow = new TArrow(xlo, ylo, xlo, yhi, 0.02, ">");
-	yarrow->SetLineWidth(1.5);
+	yarrow->SetLineWidth((Width_t)1.5);
 	graphics.push_back(yarrow);
 	
 	TLatex *ylabel = new TLatex(xlo, yhi+0.005*deltay, ylab);
@@ -1491,7 +1491,7 @@ void hdv_mainframe::DrawAxes(TCanvas *c, vector<TObject*> &graphics, const char 
 	graphics.push_back(ylabel);
 	
 	TArrow *xarrow = new TArrow(xlo, ylo, xhi, ylo, 0.02, ">");
-	xarrow->SetLineWidth(1.5);
+	xarrow->SetLineWidth((Width_t)1.5);
 	graphics.push_back(xarrow);
 	
 	TLatex *xlabel = new TLatex(xhi+0.005*deltax, ylo, xlab);
@@ -1518,7 +1518,7 @@ void hdv_mainframe::DrawScale(TCanvas *c, vector<TObject*> &graphics)
 	double xhi = xlo + m*pow(10.0, p);
 	double y = y1+0.04*deltay;
 	TArrow *arrow = new TArrow(xlo, y, xhi, y, 0.02, "|-|");
-	arrow->SetLineWidth(1.0);
+	arrow->SetLineWidth((Width_t)1.0);
 	graphics.push_back(arrow);
 	
 	const char *units="<out of range>";

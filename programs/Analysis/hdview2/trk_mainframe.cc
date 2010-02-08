@@ -66,7 +66,7 @@ trk_mainframe::trk_mainframe(hdv_mainframe *hdvmf, const TGWindow *p, UInt_t w, 
 		leftframe->AddFrame(canvasframe, bhints);
 
 		int width=325;
-		canvas = new TRootEmbeddedCanvas("Track Canvas", canvasframe, width, 2.0*width, kSunkenFrame, GetWhitePixel());
+		canvas = new TRootEmbeddedCanvas("Track Canvas", canvasframe, width, (UInt_t)(2.0*width), kSunkenFrame, GetWhitePixel());
 		canvasframe->AddFrame(canvas, lhints);
 		canvas->SetScrolling(TGCanvas::kCanvasScrollBoth);
 		
@@ -78,7 +78,7 @@ trk_mainframe::trk_mainframe(hdv_mainframe *hdvmf, const TGWindow *p, UInt_t w, 
 		canvas->GetCanvas()->cd();
 		canvas->GetCanvas()->Range(resilo, slo, resihi, shi);
 		
-		histocanvas = new TRootEmbeddedCanvas("Histo Canvas", canvasframe, width, width/5.0, kSunkenFrame, GetWhitePixel());
+		histocanvas = new TRootEmbeddedCanvas("Histo Canvas", canvasframe, width, (UInt_t)(width/5.0), kSunkenFrame, GetWhitePixel());
 		canvasframe->AddFrame(histocanvas, lhints);
 		histocanvas->SetScrolling(TGCanvas::kCanvasScrollBoth);
 		
@@ -511,7 +511,7 @@ void trk_mainframe::DrawAxes(TCanvas *c, vector<TObject*> &graphics, const char 
 	double ylo = y1+0.015*deltay;
 	double yhi = ylo + 0.03*deltay;
 	TArrow *yarrow = new TArrow(xlo, ylo, xlo, yhi, 0.02, ">");
-	yarrow->SetLineWidth(1.5);
+	yarrow->SetLineWidth((Width_t)1.5);
 	graphics.push_back(yarrow);
 	
 	TLatex *ylabel = new TLatex(xlo, yhi+0.005*deltay, ylab);
@@ -521,7 +521,7 @@ void trk_mainframe::DrawAxes(TCanvas *c, vector<TObject*> &graphics, const char 
 	graphics.push_back(ylabel);
 	
 	TArrow *xarrow = new TArrow(xlo, ylo, xhi, ylo, 0.02, ">");
-	xarrow->SetLineWidth(1.5);
+	xarrow->SetLineWidth((Width_t)1.5);
 	graphics.push_back(xarrow);
 	
 	TLatex *xlabel = new TLatex(xhi+0.005*deltax, ylo, xlab);
@@ -736,7 +736,7 @@ void trk_mainframe::DrawHitsForOneTrack(
 
 		// Create ellipse for distance from wire
 		TEllipse *e = new TEllipse(sdist, s, dist, dist);
-		e->SetLineWidth(ellipse_width);
+		e->SetLineWidth((Width_t)ellipse_width);
 		e->SetLineColor(ellipse_color);
 		e->SetLineStyle(ellipse_style);
 		e->SetFillColor(19);
