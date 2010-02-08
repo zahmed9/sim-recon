@@ -117,8 +117,8 @@ int DRootGeom::ReadMap(string namepath, int runnumber)
 		vector<float> &a = Mmap[i];
 		float &r = a[0];
 		float &z = a[1];
-		int ir = floor((r - r0)/dr);
-		int iz = floor((z - z0)/dz);
+		int ir = (int)floor((r - r0)/dr);
+		int iz = (int)floor((z - z0)/dz);
 		if(ir<0 || ir>=Nr){_DBG_<<"ir out of range: ir="<<ir<<"  Nr="<<Nr<<endl; continue;}
 		if(iz<0 || iz>=Nz){_DBG_<<"iz out of range: iz="<<iz<<"  Nz="<<Nz<<endl; continue;}
 		VolMat &mat = MatTable[ir][iz];
@@ -288,8 +288,8 @@ jerror_t DRootGeom::FindMatTable(DVector3 pos,double &density, double &A, double
 	// (i.e. no interpolation )
 	double r = pos.Perp();
 	double z = pos.Z();
-	int ir = floor((r-r0)/dr);
-	int iz = floor((z-z0)/dz);
+	int ir = (int)floor((r-r0)/dr);
+	int iz = (int)floor((z-z0)/dz);
 	if(ir<0 || ir>=Nr || iz<0 || iz>=Nz){
 		A = Z = density = RadLen = 0.0;
 		return RESOURCE_UNAVAILABLE;
@@ -316,8 +316,8 @@ jerror_t DRootGeom::FindMatTable(DVector3 pos, double &rhoZ_overA, double &rhoZ_
 	// (i.e. no interpolation )
 	double r = pos.Perp();
 	double z = pos.Z();
-	int ir = floor((r-r0)/dr);
-	int iz = floor((z-z0)/dz);
+	int ir = (int)floor((r-r0)/dr);
+	int iz = (int)floor((z-z0)/dz);
 	if(ir<0 || ir>=Nr || iz<0 || iz>=Nz){
 		rhoZ_overA = rhoZ_overA_logI = RadLen = 0.0;
 		return RESOURCE_UNAVAILABLE;

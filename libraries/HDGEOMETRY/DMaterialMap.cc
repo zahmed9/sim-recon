@@ -88,8 +88,8 @@ DMaterialMap::DMaterialMap(string namepath, JCalibration *jcalib)
 		vector<float> &a = Mmap[i];
 		float &r = a[0];
 		float &z = a[1];
-		int ir = floor((r-this->rmin)/dr);
-		int iz = floor((z-this->zmin)/dz);
+		int ir = (int)floor((r-this->rmin)/dr);
+		int iz = (int)floor((z-this->zmin)/dz);
 		if(ir<0 || ir>=Nr){_DBG_<<"ir out of range: ir="<<ir<<"  Nr="<<Nr<<endl; continue;}
 		if(iz<0 || iz>=Nz){_DBG_<<"iz out of range: iz="<<iz<<"  Nz="<<Nz<<endl; continue;}
 		MaterialNode &node = nodes[ir][iz];
@@ -112,8 +112,8 @@ const DMaterialMap::MaterialNode* DMaterialMap::FindNode(DVector3 &pos) const
 	// (i.e. no interpolation )
 	double r = pos.Perp();
 	double z = pos.Z();
-	int ir = floor((r-rmin)/dr);
-	int iz = floor((z-zmin)/dz);
+	int ir = (int)floor((r-rmin)/dr);
+	int iz = (int)floor((z-zmin)/dz);
 	if(ir<0 || ir>=Nr || iz<0 || iz>=Nz)return NULL;
 	
 	return &nodes[ir][iz];

@@ -351,7 +351,7 @@ void DTrackCandidate_factory_CDC::FindSeeds(vector<DCDCTrkHit*> &hits, vector<DC
 		}
 		
 		// Check if this hit is a neighbor of the last hit added to the subseed
-		if(abs(subseed.hits[subseed.hits.size()-1]->hit->wire->straw - trkhit->hit->wire->straw)>MAX_SUBSEED_STRAW_DIFF){
+		if((unsigned int)abs(subseed.hits[subseed.hits.size()-1]->hit->wire->straw - trkhit->hit->wire->straw)>MAX_SUBSEED_STRAW_DIFF){
 			if(subseed.hits.size()!=0)subseeds.push_back(subseed);
 			if(DEBUG_LEVEL>3)_DBG_<<"  subseed hits:"<<subseed.hits.size()<<endl;
 			subseed.hits.clear();

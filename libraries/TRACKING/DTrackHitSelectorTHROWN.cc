@@ -108,7 +108,7 @@ int DTrackHitSelectorTHROWN::FindTrackNumber(DReferenceTrajectory *rt) const
 	loop->Get(throwns);
 	
 	int myid = 0;
-	int min_chisq=1.0E8;
+	double min_chisq=1.0E8;
 	for(unsigned int i=0; i<throwns.size(); i++){
 		const DMCThrown *thrown = throwns[i];
 		DVector3 mc_mom = thrown->momentum();
