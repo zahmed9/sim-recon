@@ -1,14 +1,9 @@
-ifndef OSNAME
-OSNAME = $(shell uname)-$(shell uname -p)
-endif
-
 AR = ar
 RANLIB = ranlib
 
-top_srcdir = $(HALLD_HOME)/src
 OBJDIR = .obj/$(BMS_OSNAME)
 LIBDIR = .lib/$(BMS_OSNAME)
-INCLUDES = -I$(top_srcdir)/include
+INCLUDES = -I../include
 EXTRA_DIST = debug.h md5_t.pl md5_t.h
 libxstream_a_SOURCES = debug.cpp common.cpp xdr.cpp base64.cpp \
 	digest.cpp tee.cpp md5.cpp bz.cpp dater.cpp fd.cpp \
