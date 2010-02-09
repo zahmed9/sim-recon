@@ -68,7 +68,7 @@ $(DEP_DIR)/%.d : %.c
 	$(DCC) -MM -MT "$(LIBNAME)($(basename $@).o)" $(CFLAGS) $< > $@
 $(DEP_DIR)/%.d : %.F
 	mkdir -p $(DEP_DIR)
-	$(DFC) -MM -MT "$(LIBNAME)($(basename $@).o)" $(FFLAGS) $< > $@
+	$(DFC) -MM -MT "$(LIBNAME)($(basename $@).o)" $(filter-out -fno-automatic,$(FFLAGS)) $< > $@
 
 
 env:
