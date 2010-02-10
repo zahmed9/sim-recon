@@ -14,6 +14,12 @@ libxstream_a_OBJECTS_0 = debug.o common.o xdr.o base64.o \
 libxstream_a_OBJECTS = $(addprefix $(OBJDIR)/,$(libxstream_a_OBJECTS_0))
 lib_LIBRARIES = libxstream.a
 
+ifdef HALLD_MY
+INSTALL_DIR = $(HALLD_MY)
+else
+INSTALL_DIR = $(HALLD_HOME)
+endif
+
 all: mkdirs $(LIBDIR)/$(lib_LIBRARIES)
 
 .SUFFIXES:
@@ -30,12 +36,12 @@ $(LIBDIR)/libxstream.a: $(libxstream_a_OBJECTS) $(libxstream_a_DEPENDENCIES)
 	$(RANLIB) $@
 
 install: all
-	mkdir -p $(HALLD_MY)/lib/$(BMS_OSNAME)
-	cp $(LIBDIR)/$(lib_LIBRARIES) $(HALLD_MY)/lib/$(BMS_OSNAME)
+	mkdir -p $(INSTALL_DIR)/lib/$(BMS_OSNAME)
+	cp $(LIBDIR)/$(lib_LIBRARIES) $(INSTALL_DIR)/lib/$(BMS_OSNAME)
 	cp -r ../include ./tmpinc
 	rm -rf `find ./tmpinc -name ".svn"`
-	mkdir -p $(HALLD_MY)/include
-	cp -r tmpinc/* $(HALLD_MY)/include
+	mkdir -p $(INSTALL_DIR)/include
+	cp -r tmpinc/* $(INSTALL_DIR)/include
 	rm -rf tmpinc
 
 mostlyclean-compile:
