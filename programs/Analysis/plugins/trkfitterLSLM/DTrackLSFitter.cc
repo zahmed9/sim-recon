@@ -18,7 +18,7 @@ Distinquish actions between Monte Carlo and real data.
 
 #include <FDC/DFDCHit.h>
 #include <FDC/DFDCPseudo_factory.h>
-#include <TRACKING/DTrack.h>
+#include <TRACKING/DTrackWireBased.h>
 #include <TRACKING/DMCTrackHit.h>
 #include <TRACKING/DReferenceTrajectory.h>
 #include <DANA/DApplication.h>
