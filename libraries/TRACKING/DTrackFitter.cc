@@ -308,10 +308,11 @@ jerror_t DTrackFitter::CalcdEdxHit(const DVector3 &mom,
   double temp=b*b-4.*a*c;
   if (temp>0){
     double cosl=fabs(cos(lambda));
-    double gas_density=0.0018;
+    //    double gas_density=0.0018;
 
     // arc length and energy deposition
-    dedx.second=gas_density*sqrt(temp)/a/cosl; // g/cm^2
+    //dedx.second=gas_density*sqrt(temp)/a/cosl; // g/cm^2
+    dedx.second=sqrt(temp)/a/cosl;
     dedx.first=1000.*hit->dE; //MeV
 
     return NOERROR;
@@ -348,15 +349,11 @@ double DTrackFitter::GetdEdxVariance(double p,double mass_hyp,double dx,
 double DTrackFitter::GetdEdx(double p,double mass_hyp,double dx,
 			     DVector3 pos){
   if (p<0.001) return 0.;  // try to avoid division by zero errors
-  double betagamma=p/mass_hyp;  
-  double betagamma2=betagamma*betagamma;
-  double beta2=1./(1.+1./betagamma2);
-  
-  // Electron mass and maximum energy transfer
+  double beta2=1./(1.+mass_hyp*mass_hyp/p/p);
+
+  // Electron mass 
   double Me=0.000511; //GeV
-  //  double Wmax=2.*Me*betagamma2
-  //  /(1.+2.*Me/mass_hyp*sqrt(1.+betagamma2)+Me*Me/mass_hyp/mass_hyp);
- 
+  
   // Get material properties
   double A=0.,Z=0.,density=0.,radlen=0.;
   geom->FindMat(pos,density,A,Z,radlen);
@@ -366,15 +363,22 @@ double DTrackFitter::GetdEdx(double p,double mass_hyp,double dx,
   // First (non-logarithmic) term in Bethe-Block formula
   double mean_dedx=0.1535*density*Z/A/beta2;
 
-  // Variable for distinguishing thin absorbers from thick absorbers
-  //  double kappa=mean_dedx*1e-3*dx/Wmax;
+  // density effect
+  double delta=CalcDensityEffect(p,mass_hyp,density,Z/A,I);
+  
+  // Most probable energy loss from Landau theory (see Leo, pp. 51-52)
+  return mean_dedx*(log(mean_dedx*dx/1000.)-log((1.-beta2)*I*I/2./Me/beta2)
+		    -beta2+0.198-delta);
+}
 
-  // Variables for calculating the density effect
+// Calculate the density effect correction to the energy loss formulae
+double DTrackFitter::CalcDensityEffect(double p,double mass,double density,
+				       double Z_over_A,double I){
+  double betagamma=p/mass;
   double X=log10(betagamma);
   double X0,X1;
-  double C=-2.*log(I/28.816/sqrt(density*Z/A))-1.;
+  double C=-2.*log(I/28.816/sqrt(density*Z_over_A))-1.;
   double Cbar=-C; 
-  double delta=0.;
   X1=4.;
   if (Cbar<=9.5) X0=1.6;
   else if (Cbar>9.5 && Cbar<=10.) X0=1.7;
@@ -388,24 +392,19 @@ double DTrackFitter::GetdEdx(double p,double mass_hyp,double dx,
   else {
     X0=0.326*Cbar-2.5;
     X1=5.;
-  }    
+  } 
+  double delta=0;
   if (X>=X0 && X<X1)
     delta=4.606*X+C+(Cbar-4.606*X0)*pow(X1-X,3.)/pow(X1-X0,3.);
   else if (X>=X1)
-    delta=4.606*X+C;
-  
-  // Most probable energy loss from Landau theory (see Leo, pp. 51-52)
-  return mean_dedx*(log(mean_dedx*dx/1000.)-log((1.-beta2)*I*I/2./Me/beta2)
-		    -beta2+0.198-delta);
+    delta= 4.606*X+C;  
+  return delta;
 }
 
-
-
 // Calculate the most probable energy loss per unit length in units of 
-// MeV cm^2/g in the FDC or CDC gas for a particle of momentum p and mass mass_hyp
+// MeV/cm in the FDC or CDC gas for a particle of momentum p and mass mass_hyp
 double DTrackFitter::GetdEdx(double p,double mass_hyp,double mean_path_length){
   if (p<0.001) return 0.;  // try to avoid division by zero errors
-  double betagamma=p/mass_hyp;  
   double beta2=1./(1.+mass_hyp*mass_hyp/p/p);
   
   // Electron mass 
@@ -416,43 +415,40 @@ double DTrackFitter::GetdEdx(double p,double mass_hyp,double mean_path_length){
   double I0=(0.85*188.+0.15*85.)*1e-9;
   double gas_density=0.0018;
 
-  // First (non-logarithmic) term in Bethe-Block formula
-  double mean_dedx=0.1535*Z_over_A/beta2;
+  // First (non-logarithmic) term in Bethe-Bloch formula
+  double mean_dedx=0.1535*gas_density*Z_over_A/beta2;
  
-  // Variables for calculating the density effect
-  double X=log10(betagamma);
-  double X0,X1;
-  double C=-2.*log(I0/28.816/sqrt(gas_density*Z_over_A))-1.;
-  double Cbar=-C; 
-  double delta=0.;
-  X1=4.;
-  if (Cbar<=9.5) X0=1.6;
-  else if (Cbar>9.5 && Cbar<=10.) X0=1.7;
-  else if (Cbar>10 && Cbar<=10.5) X0=1.8;    
-  else if (Cbar>10.5 && Cbar<=11.) X0=1.9;
-  else if (Cbar>11.0 && Cbar<=12.25) X0=2.;
-  else if (Cbar>12.25 && Cbar<=13.804){
-    X0=2.;
-    X1=5.;
-  }
-  else {
-    X0=0.326*Cbar-2.5;
-    X1=5.;
-  }    
-  if (X>=X0 && X<X1)
-    delta=4.606*X+C+(Cbar-4.606*X0)*pow(X1-X,3.)/pow(X1-X0,3.);
-  else if (X>=X1)
-    delta=4.606*X+C;
+  // density effect
+  double delta=CalcDensityEffect(p,mass_hyp,gas_density,Z_over_A,I0);
   
   // Most probable energy loss from Landau theory (see Leo, pp. 51-52)
-  return mean_dedx*(log(2.*Me*beta2*mean_dedx*gas_density*mean_path_length*1e-3
+  return mean_dedx*(log(2.*Me*beta2*mean_dedx*mean_path_length*1e-3
 		    /(1.-beta2)/I0/I0)-beta2+0.198-delta);
 }
 
 // Empirical form for sigma/mean for gaseous detectors with num_dedx samples 
 // and sampling thickness path_length
-double DTrackFitter::GetdEdxSigma(unsigned int num_hits,double mean_path_length){
-  return 0.41*pow(double(num_hits),-0.43)*pow(mean_path_length,-0.32);
+double DTrackFitter::GetdEdxSigma(unsigned int num_hits,double p,double mass,
+				  double mean_path_length){
+  // Material properties for gas
+  double Z_over_A=0.85*0.45059+0.15*0.49989;
+  double I0=(0.85*188.+0.15*85.)*1e-9;
+  double gas_density=0.0018;
+  // kinematic quantities
+  double betagamma=p/mass;
+  double betagamma2=betagamma*betagamma;
+  double beta2=1./(1.+1./betagamma2);
+  double Me=0.000511; //GeV
+  double m_ratio=Me/mass;
+  double Tmax
+    =2.*Me*betagamma2/(1.+2.*sqrt(1.+betagamma2)*m_ratio+m_ratio*m_ratio);
+  
+  //density effect   
+  double delta=CalcDensityEffect(p,mass,gas_density,Z_over_A,I0);
+  
+  double mean_dedx=0.1535*gas_density*Z_over_A/beta2*(log(2.*Me*betagamma2*Tmax/I0/I0)
+						      -2.*beta2-delta);
+  return 0.41*mean_dedx*pow(double(num_hits),-0.43)*pow(mean_path_length,-0.32);
 }
 
 
@@ -474,6 +470,7 @@ jerror_t DTrackFitter::GetdEdx(const DReferenceTrajectory *rt, double &dedx,
 
   // Average measured momentum
   p_avg=0.;
+
   // Initialize other output variables
   dedx=mean_path_length=0.;
   num_hits=0;
@@ -506,9 +503,10 @@ jerror_t DTrackFitter::GetdEdx(const DReferenceTrajectory *rt, double &dedx,
    
     pair<double,double>de_and_dx;
     de_and_dx.first=1000.*fdchits[i]->dE; // MeV
-    double gas_density=0.0018; // g/cm^3
+    //double gas_density=0.0018; // g/cm^3
     double gas_thickness=1.0; // cm
-    de_and_dx.second=gas_density*gas_thickness/cos(mom.Theta());  // g/cm^2  
+    //de_and_dx.second=gas_density*gas_thickness/cos(mom.Theta());// g/cm^2
+    de_and_dx.second=gas_thickness/cos(mom.Theta());
   }
     
   // Sort the dEdx entries from smallest to largest
@@ -516,7 +514,8 @@ jerror_t DTrackFitter::GetdEdx(const DReferenceTrajectory *rt, double &dedx,
 
   // Compute the dEdx in the active volume for the track using a truncated 
   // mean to minimize the effect of the long Landau tail
-  num_hits=(dEdx_list.size()>5)?int(0.6*dEdx_list.size()):dEdx_list.size();
+  //num_hits=(dEdx_list.size()>5)?int(0.6*dEdx_list.size()):dEdx_list.size();
+  num_hits=int(0.5*dEdx_list.size());
   if (num_hits>0){    
     double sum_dE=0.;
     double sum_ds=0.;
@@ -524,7 +523,7 @@ jerror_t DTrackFitter::GetdEdx(const DReferenceTrajectory *rt, double &dedx,
       sum_ds+=dEdx_list[i].second;
       sum_dE+=dEdx_list[i].first; 
     }
-    dedx=sum_dE/sum_ds;// MeV cm^2/g
+    dedx=sum_dE/sum_ds;// MeV/cm
     mean_path_length=sum_ds/double(num_hits);    
     p_avg/=double(dEdx_list.size());
 

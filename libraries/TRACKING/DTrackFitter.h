@@ -105,7 +105,11 @@ class DTrackFitter:public jana::JObject{
 				     const DVector3 &pos,
 				     const DCDCTrackHit *hit,
 				     pair <double,double> &dedx);
-		double GetdEdxSigma(unsigned int num_hits,double mean_path_length);
+		double CalcDensityEffect(double p,double mass,double density,
+					 double Z_over_A,double I);
+	
+		double GetdEdxSigma(unsigned int num_hits,double p, 
+				    double mass,double mean_path_length);
 		double GetdEdx(double p,double mass_hyp,double mean_path_length);
 		double GetdEdx(double p,double mass_hyp,double dx,DVector3 pos);
 
