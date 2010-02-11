@@ -25,10 +25,13 @@ jerror_t DTrackTimeBased_factory::init(void)
 	fitter = NULL;
 
 	DEBUG_LEVEL = 0;
-	MOMENTUM_CUT_FOR_DEDX=0.5;
+	MOMENTUM_CUT_FOR_DEDX=0.5;	
+	MOMENTUM_CUT_FOR_PROTON_ID=2.0;
 
 	gPARMS->SetDefaultParameter("TRKFIT:DEBUG_LEVEL",					DEBUG_LEVEL);
-	gPARMS->SetDefaultParameter("TRKFIT:MOMENTUM_CUT_FOR_DEDX",MOMENTUM_CUT_FOR_DEDX);
+	gPARMS->SetDefaultParameter("TRKFIT:MOMENTUM_CUT_FOR_DEDX",MOMENTUM_CUT_FOR_DEDX);	
+	gPARMS->SetDefaultParameter("TRKFIT:MOMENTUM_CUT_FOR_PROTON_ID",MOMENTUM_CUT_FOR_PROTON_ID);
+
 	return NOERROR;
 }
 
@@ -194,7 +197,8 @@ double DTrackTimeBased_factory::GetFOM(DTrackTimeBased *dtrack,
   // For high momentum, the likelihood that the particle is a proton is small.
   // For now, assign a figure-of-merit of zero for particles with the proton 
   // mass hypothesis that exceed some momentum cut.
-  if (dtrack->mass()>0.9 && dtrack->momentum().Mag()>2.5) return 0.;
+  if (dtrack->mass()>0.9 
+      && dtrack->momentum().Mag()>MOMENTUM_CUT_FOR_PROTON_ID) return 0.;
 
   // First ingredient in the figure-of-merit is the chi2 for the track fit
   double fit_prob=TMath::Prob(dtrack->chisq,dtrack->Ndof);
@@ -205,9 +209,10 @@ double DTrackTimeBased_factory::GetFOM(DTrackTimeBased *dtrack,
   double dedx_prob=1.;
   if (fitter->GetdEdx(dtrack->rt,dedx,mean_path_length,p_avg,num_hits)
       ==NOERROR){
+    double mass=dtrack->rt->GetMass();
     dtrack->setdEdx(dedx);
-    double dedx_sigma=fitter->GetdEdxSigma(num_hits,mean_path_length);
-    double dedx_most_probable=fitter->GetdEdx(p_avg,dtrack->rt->GetMass(),mean_path_length);
+    double dedx_sigma=fitter->GetdEdxSigma(num_hits,p_avg,mass,mean_path_length);
+    double dedx_most_probable=fitter->GetdEdx(p_avg,mass,mean_path_length);
     double dedx_diff=dedx-dedx_most_probable;
     
     //figure of merit    
