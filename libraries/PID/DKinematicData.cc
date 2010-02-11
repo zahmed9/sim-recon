@@ -54,6 +54,7 @@ DKinematicData::DKinematicData() :
   m_pathLength = -999.0;
   m_pathLength_err = -999.0;
   m_dedx=0.;
+  m_use_forward_parameters=false;
   return ;
 }
 
@@ -99,6 +100,7 @@ DKinematicData::DKinematicData( const DKinematicData& aKinematicData) :
   m_pathLength = aKinematicData.m_pathLength;
   m_pathLength_err = aKinematicData.m_pathLength_err;
   m_dedx=aKinematicData.m_dedx;
+  m_use_forward_parameters=aKinematicData.m_use_forward_parameters;
   return ;
 }
 
@@ -132,6 +134,7 @@ DKinematicData::DKinematicData( const DKinematicData& aKinematicData,
   m_pathLength = aKinematicData.m_pathLength;
   m_pathLength_err = aKinematicData.m_pathLength_err;
   m_dedx=aKinematicData.m_dedx;
+  m_use_forward_parameters=aKinematicData.m_use_forward_parameters;
   return ;
 }
 
@@ -208,6 +211,7 @@ DKinematicData::operator=( const DKinematicData& aOtherKinematicData )
     m_pathLength = aOtherKinematicData.m_pathLength;
     m_pathLength_err = aOtherKinematicData.m_pathLength_err;
     m_dedx=aOtherKinematicData.m_dedx;
+    m_use_forward_parameters=aOtherKinematicData.m_use_forward_parameters;
   }
   return ( *this ) ;
 }
@@ -245,6 +249,12 @@ DKinematicData::operator!=( const DKinematicData& rhs ) const
 //
 // member functions
 //
+
+void DKinematicData::setForwardParmFlag(bool aFlag){
+  m_use_forward_parameters=aFlag;
+}
+
+
   void 
 DKinematicData::setMass( const ValueType aMass )
 {
@@ -708,6 +718,11 @@ DKinematicData::lorentzMomentum( void ) const
 {
   return ( DLorentzVector( momentum() , energy() ) ) ;
 }
+
+bool DKinematicData::forwardParmFlag(void) const{
+  return (m_use_forward_parameters);
+}
+
 
 bool 
 DKinematicData::hasFixedMass( void ) const

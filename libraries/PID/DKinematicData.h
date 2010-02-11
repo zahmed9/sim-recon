@@ -198,6 +198,8 @@ public:
     void setErrorMatrix( const DMatrixDSym& aMatrix ) ;
     void setTrackingErrorMatrix(const DMatrixDSym& aMatrix);
 
+    void setForwardParmFlag(bool aFlag);
+
     void setT0(const ValueType at0, const ValueType at0_err, const DetectorSystem_t at0_detector);
     void setT1(const ValueType at1, const ValueType at1_err, const DetectorSystem_t at1_detector);
     void setPathLength(const ValueType apathLength, const ValueType apathLength_err);
@@ -227,6 +229,8 @@ public:
     bool hasFixedMass( void ) const ;
     virtual const DMatrixDSym& errorMatrix( void ) const ;
     const DMatrixDSym &TrackingErrorMatrix(void) const;
+
+    bool forwardParmFlag(void)const;
 
     ValueType t0( void ) const;
     ValueType t0_err( void ) const;
@@ -302,6 +306,9 @@ private:
     // dEdx 
     double m_dedx;
     
+    // Flag indicating the use of the forward parameterization (x,y,tx,ty,q/p)
+    bool m_use_forward_parameters;
+
     //All matricies without a set error matrix can share the same nullMatrix
     static DMatrixDSym* nullMatrix();
     static DMatrixDSym* null5x5Matrix();
