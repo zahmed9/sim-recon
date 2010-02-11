@@ -183,7 +183,6 @@ class DTrackFitterKalman: public DTrackFitter{
   jerror_t CalcDeriv(double z,double dz,const DMatrix &S, double dEdx, 
 		     DMatrix &D);
   jerror_t CalcDeriv(double ds,const DVector3 &pos,DVector3 &dpos,
-		     const DVector3 &B,
 		     const DMatrix &S,double dEdx,DMatrix &D1);
 
   jerror_t StepJacobian(const DVector3 &pos,const DVector3 &wire_pos,
@@ -194,7 +193,7 @@ class DTrackFitterKalman: public DTrackFitter{
 		     double &Bz);
 
   jerror_t CalcDerivAndJacobian(double ds,const DVector3 &pos,DVector3 &dpos,
-				DVector3 &B,const DMatrix &S,double dEdx,
+				const DMatrix &S,double dEdx,
 				DMatrix &J1,DMatrix &D1);
   jerror_t ConvertStateVector(double z,double wire_x,double wire_y,
 			      const DMatrix &S,const DMatrix &C,DMatrix &Sc,
@@ -246,6 +245,9 @@ class DTrackFitterKalman: public DTrackFitter{
   vector<DKalmanCDCHit_t *>my_cdchits;
   vector<DKalmanFDCHit_t *>my_fdchits;
 
+  // Step sizes
+  double mStepSizeZ,mStepSizeS;
+
   // Track parameters for forward region
   double x_,y_,tx_,ty_,q_over_p_;
   // Alternate track parameters for central region
@@ -270,6 +272,10 @@ class DTrackFitterKalman: public DTrackFitter{
   double len;
   // flight time
   double ftime;
+
+  // B-field and gradient
+  double Bx,By,Bz;
+  double dBxdx,dBxdy,dBxdz,dBydx,dBydy,dBydz,dBzdx,dBzdy,dBzdz;
 
   // For dEdx measurements
   double track_dedx;
