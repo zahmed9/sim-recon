@@ -38,6 +38,7 @@ class DTrackTimeBased_factory_Kalman:public jana::JFactory<DTrackTimeBased>{
   
   int DEBUG_LEVEL;
   double MOMENTUM_CUT_FOR_DEDX;
+  double MOMENTUM_CUT_FOR_PROTON_ID;
   DTrackFitter *fitter;
   vector<DReferenceTrajectory*> rtv;
 
@@ -56,6 +57,14 @@ class DTrackTimeBased_factory_Kalman:public jana::JFactory<DTrackTimeBased>{
   
   double mPathLength,mEndTime,mStartTime;
   DetectorSystem_t mDetector, mStartDetector;
+
+  // Geometry
+  const DGeometry *geom;
+  // Start counter geometry 
+  double sc_light_guide_length;
+  double sc_costheta; // cos(theta) of bent part
+  vector<DVector3>sc_pos;
+  vector<DVector3>sc_norm;
   
 };
 
