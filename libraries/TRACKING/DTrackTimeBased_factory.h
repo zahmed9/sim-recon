@@ -36,6 +36,7 @@ class DTrackTimeBased_factory:public jana::JFactory<DTrackTimeBased>{
   
   int DEBUG_LEVEL;
   double MOMENTUM_CUT_FOR_DEDX;
+  double MOMENTUM_CUT_FOR_PROTON_ID;
   DTrackFitter *fitter;
   vector<DReferenceTrajectory*> rtv;
  
