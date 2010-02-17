@@ -377,27 +377,42 @@ double DTrackFitter::CalcDensityEffect(double p,double mass,double density,
   double betagamma=p/mass;
   double X=log10(betagamma);
   double X0,X1;
-  double C=-2.*log(I/28.816/sqrt(density*Z_over_A))-1.;
-  double Cbar=-C; 
-  X1=4.;
-  if (Cbar<=9.5) X0=1.6;
-  else if (Cbar>9.5 && Cbar<=10.) X0=1.7;
-  else if (Cbar>10 && Cbar<=10.5) X0=1.8;    
-  else if (Cbar>10.5 && Cbar<=11.) X0=1.9;
-  else if (Cbar>11.0 && Cbar<=12.25) X0=2.;
-  else if (Cbar>12.25 && Cbar<=13.804){
-    X0=2.;
-    X1=5.;
+  //double C=-2.*log(I/28.816/sqrt(density*Z_over_A))-1.;
+  //double Cbar=-C;
+  double Cbar=2.*log(I/28.816/sqrt(density*Z_over_A))+1.;
+  if (density>0.01){ // not a gas
+    if (I<100){
+      if (Cbar<=3.681) X0=0.2;
+      else X0=0.326*Cbar-1.;
+      X1=2.;
+    }
+    else{
+      if (Cbar<=5.215) X0=0.2;
+      else X0=0.326*Cbar-1.5;
+      X1=3.;
+    }
   }
-  else {
-    X0=0.326*Cbar-2.5;
-    X1=5.;
-  } 
+  else { // gases
+    X1=4.;
+    if (Cbar<=9.5) X0=1.6;
+    else if (Cbar>9.5 && Cbar<=10.) X0=1.7;
+    else if (Cbar>10 && Cbar<=10.5) X0=1.8;    
+    else if (Cbar>10.5 && Cbar<=11.) X0=1.9;
+    else if (Cbar>11.0 && Cbar<=12.25) X0=2.;
+    else if (Cbar>12.25 && Cbar<=13.804){
+      X0=2.;
+      X1=5.;
+    }
+    else {
+      X0=0.326*Cbar-2.5;
+      X1=5.;
+    } 
+  }
   double delta=0;
   if (X>=X0 && X<X1)
-    delta=4.606*X+C+(Cbar-4.606*X0)*pow(X1-X,3.)/pow(X1-X0,3.);
+    delta=4.606*X-Cbar+(Cbar-4.606*X0)*pow(X1-X,3.)/pow(X1-X0,3.);
   else if (X>=X1)
-    delta= 4.606*X+C;  
+    delta= 4.606*X-Cbar;  
   return delta;
 }
 
