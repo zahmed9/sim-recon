@@ -14,6 +14,7 @@ using namespace std;
 #include "DTrackCandidate.h"
 #include "DMagneticFieldStepper.h"
 #include "HDGEOMETRY/DRootGeom.h"
+#define ONE_THIRD 0.33333333333333333
 
 struct StepStruct {DReferenceTrajectory::swim_step_t steps[256];};
 
@@ -253,7 +254,7 @@ void DReferenceTrajectory::Swim(const DVector3 &pos, const DVector3 &mom, double
 		if (swim_step->origin.X()>129.  || swim_step->origin.Y()>129.)
 		  {Nswim_steps++; break;} // left extent of TOF 
 		if(swim_step->origin.Z()>650.0){Nswim_steps++; break;} // ran into FCAL
-		if(swim_step->origin.Z()<-50.0){Nswim_steps++; break;} // ran into UPV
+		if(swim_step->origin.Z()<0.0){Nswim_steps++; break;} // exit upstream
 		if(wire && Nswim_steps>0){ // optionally check if we passed a wire we're supposed to be swimming to
 			swim_step_t *closest_step = FindClosestSwimStep(wire);
 			if(++closest_step!=swim_step){Nswim_steps++; break;}
@@ -669,11 +670,12 @@ if(Nswim_steps<1)_DBG__;
 	double b = (2.0*alpha/Ro2)/3.0;
 	double c = (beta/Ro2)/2.0;
 	double d = sqrt(pow(b,3.0) + pow(c,2.0));
-	double q = pow(d-c, 1.0/3.0);
-	double p = pow(d+c, 1.0/3.0);
+	double q = pow(d-c, ONE_THIRD);
+	double p = pow(d+c, ONE_THIRD);
 	double phi = q - p;
-	
-	double dist2 = Ro2/4.0*pow(phi,4.0) + alpha*pow(phi,2.0) + beta*phi + x0*x0 + y0*y0 + z0*z0;
+	double phi2=phi*phi;
+
+	double dist2 = Ro2/4.0*phi2*phi2 + alpha*phi2 + beta*phi + x0*x0 + y0*y0 + z0*z0;
 
 	return sqrt(dist2);
 }
@@ -1017,8 +1019,8 @@ double DReferenceTrajectory::DistToRT(const DCoordinateSystem *wire, const swim_
 		double c = a0/2.0 - a1*a2/6.0 + a2*a2*a2/27.0;
 
 		double d = sqrt(pow(b, 3.0) + pow(c, 2.0)); // occasionally, this is zero. See below
-		double q = pow(d - c, 1.0/3.0);
-		double p = pow(d + c, 1.0/3.0);
+		double q = pow(d - c, ONE_THIRD);
+		double p = pow(d + c, ONE_THIRD);
 
 		double w0 = q - p;
 		phi = w0 - a2/3.0;
@@ -1310,6 +1312,7 @@ DVector3 DReferenceTrajectory::GetLastDOCAPoint(void) const
 double DReferenceTrajectory::dPdx(double ptot, double A, double Z, double density) const
 {
 	double I = (Z*12.0 + 7.0)*1.0E-9; // From Leo 2nd ed. pg 25.
+	if (Z>=13) I=(9.76*Z+58.8*pow(Z,-0.19))*1.0e-9;
 	double rhoZ_overA = density*Z/A;
 	double rhoZ_overA_logI = rhoZ_overA*log(I);
 
@@ -1328,13 +1331,16 @@ double DReferenceTrajectory::dPdx(double ptot, double rhoZ_overA, double rhoZ_ov
 	if(mass==0.0)return 0.0; // no ionization losses for neutrals
 	
 	double gammabeta = ptot/mass;
+	double gammabeta2=gammabeta*gammabeta;
 	double gamma = sqrt(ptot*ptot + mass*mass)/mass;
 	double beta = gammabeta/gamma;
+	double beta2=beta*beta;
 	double me = 0.511E-3;
+	double m_ratio=me/mass;
 
-	double Tmax = 2.0*me*pow(gammabeta,2.0)/(1.0+2.0*gamma*me/mass+pow(me/mass,2.0));
+	double Tmax = 2.0*me*gammabeta2/(1.0+2.0*gamma*m_ratio+m_ratio*m_ratio);
 	double K = 0.307075E-3; // GeV gm^-1 cm^2
-	double dEdx = K*rhoZ_overA/pow(beta,2.0)*(0.5*log(2.0*me*pow(gammabeta,2.0)*Tmax) - pow(beta,2.0)) - K*rhoZ_overA_logI/pow(beta,2.0);
+	double dEdx = K*rhoZ_overA/beta2*(0.5*log(2.0*me*gammabeta2*Tmax) - beta2) - K*rhoZ_overA_logI/beta2;
 
 	double dP_dx = dEdx/beta;
 	
