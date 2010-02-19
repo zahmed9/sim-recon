@@ -58,10 +58,14 @@ class DRootGeom{
   jerror_t FindMat(DVector3 pos,double &density, double &A, double &Z, double &RadLen) const;
 
   jerror_t FindMatLL(DVector3 pos, double &rhoZ_overA, double &rhoZ_overA_logI, double &RadLen) const;
-  jerror_t FindMatLL(DVector3 pos,double &density, double &A, double &Z, double &RadLen) const;
+  jerror_t FindMatLL(DVector3 pos,double &density, double &A, double &Z, double &RadLen) const; 
+  jerror_t FindMatLL(DVector3 pos,double &density, double &A, double &Z, double &RadLen,double &LnI) const;
 
   jerror_t FindMatTable(DVector3 pos, double &rhoZ_overA, double &rhoZ_overA_logI, double &RadLen) const;
   jerror_t FindMatTable(DVector3 pos,double &density, double &A, double &Z, double &RadLen) const;
+
+  jerror_t FindMat(const char* matname,double &rhoZ_overA,
+		   double &rhoZ_overA_logI, double &RadLen) const;
 
  private:
   

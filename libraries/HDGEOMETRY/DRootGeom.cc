@@ -184,13 +184,12 @@ void DRootGeom::InitTable(void)
 						double my_phi = (double)i_phi*d_phi;
 
 						DVector3 pos(my_r*cos(my_phi), my_r*sin(my_phi), my_z);
-						double A, Z, density, radlen;
+						double A, Z, density, radlen,LnI;
 
-						FindMatLL(pos, density, A, Z, radlen);
+						FindMatLL(pos, density, A, Z, radlen,LnI);
 
 						double rhoZ_overA = density*Z/A;
-						double I = (Z*12.0 + 7.0)*1.0E-9; // From Leo 2nd ed. pg 25.
-						double rhoZ_overA_logI = rhoZ_overA*log(I);
+						double rhoZ_overA_logI = rhoZ_overA*LnI;
 
 						avg_mat.A += A;
 						avg_mat.Z += Z;
@@ -266,7 +265,7 @@ TGeoVolume* DRootGeom::FindVolume(double *x)
 //---------------------------------
 jerror_t DRootGeom::FindMat(DVector3 pos, double &density, double &A, double &Z, double &RadLen) const
 {
-	return FindMatLL(pos, density, A, Z, RadLen);
+  return FindMatLL(pos, density, A, Z, RadLen);
 }
 
 //---------------------------------
@@ -331,6 +330,54 @@ jerror_t DRootGeom::FindMatTable(DVector3 pos, double &rhoZ_overA, double &rhoZ_
 	return NOERROR;
 }
 
+// Find material properties by material name
+jerror_t DRootGeom::FindMat(const char* matname,double &rhoZ_overA,
+			    double &rhoZ_overA_logI, double &RadLen) const{  
+  pthread_mutex_lock(const_cast<pthread_mutex_t*>(&mutex));
+  
+  if(!DRGeom)((DRootGeom*)this)->InitDRGeom(); // cast away constness to ensure DRGeom is set
+  
+  TGeoMaterial *mat=DRGeom->GetMaterial(matname);
+  if (mat==NULL){
+    _DBG_<<"Missing material " << matname <<endl;
+    return RESOURCE_UNAVAILABLE;
+  }
+  double A=mat->GetA();
+  double Z=mat->GetZ();
+  double density=mat->GetDensity();
+  rhoZ_overA=density*Z/A;
+  RadLen=mat->GetRadLen();
+
+  // Get mean excitation energy.  For a mixture this is calculated according 
+  // to Leo 2nd ed p 29 eq 2.42
+  double LnI=0.;
+  if (mat->IsMixture()) {
+    const TGeoMixture * mixt = dynamic_cast <const TGeoMixture*> (mat);
+    for (int i=0;i<mixt->GetNelements();i++){
+      double w_i=mixt->GetWmixt()[i];
+      double Z_i=mixt->GetZmixt()[i];
+      // Mean excitation energy for the element; see Leo 2nd ed., p25
+      double I_i=7.0+12.0*Z_i; //eV
+      if (Z_i>=13) I_i=9.76*Z_i+58.8*pow(Z_i,-0.19);
+      I_i*=1e-9; // convert to GeV
+      LnI+=w_i*Z_i*log(I_i)/Z;
+    }
+  }
+  else{
+    // mean excitation energy for the element
+    double I=7.0+12.0*Z; //eV
+    if (Z>=13) I=9.76*Z+58.8*pow(Z,-0.19);
+    I*=1e-9; // Convert to GeV
+    LnI=log(I);
+  }
+  rhoZ_overA_logI=rhoZ_overA*LnI;
+
+  pthread_mutex_unlock(const_cast<pthread_mutex_t*>(&mutex));
+  
+  return NOERROR;
+}
+
+
 //---------------------------------
 // FindMatLL
 //---------------------------------
@@ -339,13 +386,12 @@ jerror_t DRootGeom::FindMatLL(DVector3 pos, double &rhoZ_overA, double &rhoZ_ove
 	/// This is a wrapper for the other FindMatLL method that returns density, A, and Z.
 	/// It is here to make easy comparisons between the LL and table methods.
 
-	double density, A, Z;
-	FindMatLL(pos, density, A, Z, RadLen);
-	double I = (Z*12.0 + 7.0)*1.0E-9; // From Leo 2nd ed. pg 25.
-	rhoZ_overA = density*Z/A;
-	rhoZ_overA_logI = rhoZ_overA*log(I);
-
-	return NOERROR;
+  double density, A, Z,LnI;
+  FindMatLL(pos, density, A, Z, RadLen,LnI);
+  rhoZ_overA = density*Z/A;
+  rhoZ_overA_logI = rhoZ_overA*LnI;
+  
+  return NOERROR;
 }
 
 //---------------------------------
@@ -378,12 +424,70 @@ jerror_t DRootGeom::FindMatLL(DVector3 pos,double &density, double &A, double &Z
   Z=cmat->GetZ();
   if (A<1.){ // try to prevent division by zero problems
     A=1.;
-  } 
-
+  }
 	pthread_mutex_unlock(const_cast<pthread_mutex_t*>(&mutex));
 
   return NOERROR;
 }
+
+//---------------------------------
+// FindMatLL
+//---------------------------------
+jerror_t DRootGeom::FindMatLL(DVector3 pos,double &density, double &A, double &Z,
+			      double &RadLen, double &LnI
+			      ) const{
+  density=RadLen=A=Z=LnI=0.;
+
+	pthread_mutex_lock(const_cast<pthread_mutex_t*>(&mutex));
+	
+	if(!DRGeom)((DRootGeom*)this)->InitDRGeom(); // cast away constness to ensure DRGeom is set
+
+  TGeoNode *cnode = DRGeom->FindNode(pos.X(),pos.Y(),pos.Z());
+  if (cnode==NULL){
+    _DBG_<<"Missing cnode at position (" <<pos.X()<<","<<pos.Y()<<","
+	 <<pos.Z()<<")"<<endl;
+    return RESOURCE_UNAVAILABLE;
+  }
+  TGeoVolume *cvol = cnode->GetVolume();
+  if (cvol==NULL){
+    _DBG_<<"Missing cvol" <<endl;
+    return RESOURCE_UNAVAILABLE;
+  }
+  TGeoMaterial *cmat = cvol->GetMedium()->GetMaterial();
+  density=cmat->GetDensity();
+  RadLen=cmat->GetRadLen();
+  A=cmat->GetA();
+  Z=cmat->GetZ();
+  if (A<1.){ // try to prevent division by zero problems
+    A=1.;
+  }
+
+  // Get mean excitation energy.  For a mixture this is calculated according 
+  // to Leo 2nd ed p 29 eq 2.42
+  if (cmat->IsMixture()) {
+    const TGeoMixture * mixt = dynamic_cast <const TGeoMixture*> (cmat);
+    LnI=0.;
+    for (int i=0;i<mixt->GetNelements();i++){
+      double w_i=mixt->GetWmixt()[i];
+      double Z_i=mixt->GetZmixt()[i];
+      // Mean excitation energy for the element; see Leo 2nd ed., p25
+      double I_i=7.0+12.0*Z_i; //eV
+      if (Z_i>=13) I_i=9.76*Z_i+58.8*pow(Z_i,-0.19);
+      I_i*=1e-9; // convert to GeV
+      LnI+=w_i*Z_i*log(I_i)/Z;
+    }
+  }
+  else{
+    // mean excitation energy for the element
+    double I=7.0+12.0*Z; //eV
+    if (Z>=13) I=9.76*Z+58.8*pow(Z,-0.19);
+    I*=1e-9; // Convert to GeV
+    LnI=log(I);
+  }
+ 
+  return NOERROR;
+}
+
 
 
 //---------------------------------
