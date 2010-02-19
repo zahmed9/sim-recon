@@ -45,7 +45,7 @@ typedef struct{
   DMatrix *S;
   DMatrix *J,*Q,*C;
   double s,t;
-  double A,Z,density,X0;
+  double Z,rho_Z_over_A,LnI;
 }DKalmanState_t;
 
 typedef struct{
@@ -146,9 +146,9 @@ class DTrackFitterKalman: public DTrackFitter{
   double GetChiSq(void){return chisq_;}
   unsigned int GetNDF(void){return ndf;};
   double GetActivePathLength(void){ return path_length;}
-  double GetdEdx(double q_over_p,double Z,double A, double rho); 
-  double GetEnergyVariance(double ds,double q_over_p,double Z,double A, 
-			   double rho);
+  double GetdEdx(double q_over_p,double rho_Z_over_A,
+		 double rho_Z_over_A_LnI); 
+  double GetEnergyVariance(double ds,double q_over_p,double rho_Z_over_A);
 
  protected:
 
@@ -169,9 +169,7 @@ class DTrackFitterKalman: public DTrackFitter{
     state_z,
   };
   void ResetKalman(void);
-  jerror_t GetProcessNoise(double ds,double z,
-			   double X0,const DMatrix &S,DMatrix &Q);
-  jerror_t GetProcessNoise(double ds,double Z, double A,double density, 
+  jerror_t GetProcessNoise(double ds,double Z, double rho_Z_over_A, 
 			   const DMatrix &S,DMatrix &Q);
 
   double Step(double oldz,double newz, double dEdx,DMatrix &S);
@@ -200,10 +198,7 @@ class DTrackFitterKalman: public DTrackFitter{
 			      DMatrix &Cc);
   jerror_t ConvertStateVector(double z,double wire_x,double wire_y,
 			      const DMatrix &S,DMatrix &Sc);
-
-  jerror_t GetProcessNoiseCentral(double ds,const DVector3 &pos,double X0,
-				  const DMatrix &Sc,DMatrix &Q);
-  jerror_t GetProcessNoiseCentral(double ds,double Z,double A,double density, 
+  jerror_t GetProcessNoiseCentral(double ds,double Z,double rho_Z_over_A, 
 				  const DMatrix &S,DMatrix &Q);
 
   jerror_t SwimToPlane(DMatrix &S);
