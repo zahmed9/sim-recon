@@ -9,6 +9,7 @@ using namespace std;
 #include <HDGEOMETRY/DMagneticFieldMapCalibDB.h>
 #include <HDGEOMETRY/DMagneticFieldMapConst.h>
 #include "HDGEOMETRY/DMagneticFieldMapSpoiled.h"
+#include "HDGEOMETRY/DMagneticFieldMapParameterized.h"
 
 extern "C" {
 #include "calibDB.h"
@@ -52,11 +53,16 @@ void initcalibdb_(char *bfield_type, char *bfield_map)
 			Bmap = new DMagneticFieldMapCalibDB(jcalib);
 	}else if(bfield_type_str=="Const"){
 		Bmap = new DMagneticFieldMapConst(jcalib);
-	}else if(bfield_type=="Spoiled"){
+	}else if(bfield_type_str=="Spoiled"){
 		if(strlen(bfield_map))
 			Bmap = new DMagneticFieldMapSpoiled(jcalib, bfield_map);
 		else
 			Bmap = new DMagneticFieldMapSpoiled(jcalib);
+	}else if(bfield_type_str=="Parameterized"){
+		if(strlen(bfield_map))
+			Bmap = new DMagneticFieldMapParameterized(jcalib, bfield_map);
+		else
+			Bmap = new DMagneticFieldMapParameterized(jcalib);
 	}else{
 		_DBG_<<" Unknown DMagneticFieldMap subclass \"DMagneticFieldMap"<<bfield_type_str<<"\" !!"<<endl;
 		exit(-1);
