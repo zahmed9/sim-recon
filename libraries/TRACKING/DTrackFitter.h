@@ -106,8 +106,10 @@ class DTrackFitter:public jana::JObject{
 				     const DCDCTrackHit *hit,
 				     pair <double,double> &dedx);
 		double CalcDensityEffect(double p,double mass,double density,
-					 double Z_over_A,double I);
-	
+					 double Z_over_A,double I);  
+		double CalcDensityEffect(double p,double mass,
+					 double rho_Z_over_A,double LnI);
+		
 		double GetdEdxSigma(unsigned int num_hits,double p, 
 				    double mass,double mean_path_length);
 		double GetdEdx(double p,double mass_hyp,double mean_path_length);
@@ -152,6 +154,8 @@ class DTrackFitter:public jana::JObject{
 		// Prohibit default constructor
 		DTrackFitter();
 		
+		// gas material properties
+		double mRhoZoverAGas,mLnIGas;
 };
 
 #endif // _DTrackFitter_
