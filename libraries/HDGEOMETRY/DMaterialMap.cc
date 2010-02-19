@@ -99,6 +99,7 @@ DMaterialMap::DMaterialMap(string namepath, JCalibration *jcalib)
 		node.RadLen = a[5];
 		node.rhoZ_overA = a[6];
 		node.rhoZ_overA_logI = a[7];
+		node.LogI=node.rhoZ_overA_logI/node.rhoZ_overA;
 	}
 }
 
@@ -149,6 +150,23 @@ jerror_t DMaterialMap::FindMat(DVector3 &pos, double &density, double &A, double
 
 	return NOERROR;
 }
+
+// The Kalman filter needs a slightly different variant of the material 
+// properties
+jerror_t DMaterialMap::FindMatKalman(DVector3 &pos,double &Z,
+				     double &rho_Z_over_A,
+				     double &LogI) const
+{
+	const MaterialNode *node = FindNode(pos);
+	if(!node)return RESOURCE_UNAVAILABLE;
+	
+	Z = node->Z;
+	rho_Z_over_A = node->rhoZ_overA;
+	LogI = node->LogI;
+
+	return NOERROR;
+}
+
 
 //-----------------
 // IsInMap

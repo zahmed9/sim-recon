@@ -19,6 +19,7 @@ class DMaterialMap{
 				double Z ;
 				double Density ;
 				double RadLen ;
+				double LogI; // log(mean excitation energy
 				double rhoZ_overA;			// density*Z/A
 				double rhoZ_overA_logI;	// density*Z/A * log(mean excitation energy)
 		};
@@ -26,6 +27,8 @@ class DMaterialMap{
 		const MaterialNode* FindNode(DVector3 &pos) const;
 		jerror_t FindMat(DVector3 &pos, double &rhoZ_overA, double &rhoZ_overA_logI, double &RadLen) const;
 		jerror_t FindMat(DVector3 &pos, double &density, double &A, double &Z, double &RadLen) const;
+		jerror_t FindMatKalman(DVector3 &pos,double &Z,
+				       double &rho_Z_over_A,double &LogI) const;
 		bool IsInMap(DVector3 &pos) const;
 
 		string GetNamepath(void) const {return namepath;}
