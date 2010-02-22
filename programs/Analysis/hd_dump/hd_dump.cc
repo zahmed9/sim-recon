@@ -33,6 +33,9 @@ int main(int narg, char *argv[])
 	// Instantiate an event loop object
 	DApplication *app = new DApplication(narg, argv);
 	
+	// Set tag prefix for JANA streams to empty
+	jout.SetTag("");
+	
 	// If LIST_FACTORIES is set, print all factories and exit
 	if(LIST_FACTORIES){
 		PrintFactoryList(app);
