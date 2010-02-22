@@ -212,6 +212,7 @@ void DTrackFitterKalman::ResetKalman(void)
 	 cdc_pulls.clear();
 	 cov.clear();
 	 fcov.clear();
+	 pulls.clear();
 	 
 	 len = 0.0;
 	 ftime=0.0;
@@ -312,7 +313,7 @@ DTrackFitter::fit_status_t DTrackFitterKalman::FitTrack(void)
 //-----------------
 // ChiSq
 //-----------------
-double DTrackFitterKalman::ChiSq(fit_type_t fit_type, DReferenceTrajectory *rt, double *chisq_ptr, int *dof_ptr)
+double DTrackFitterKalman::ChiSq(fit_type_t fit_type, DReferenceTrajectory *rt, double *chisq_ptr, int *dof_ptr, vector<pull_t> *pulls_ptr)
 {
 	// This simply returns whatever was left in for the chisq/NDF from the last fit.
 	// Using a DReferenceTrajectory is not really appropriate here so the base class'
@@ -322,6 +323,7 @@ double DTrackFitterKalman::ChiSq(fit_type_t fit_type, DReferenceTrajectory *rt, 
 	
 	if(chisq_ptr)*chisq_ptr = chisq;
 	if(dof_ptr)*dof_ptr = int(ndf);
+	if(pulls_ptr)*pulls_ptr = pulls;
 	
 	return chisq/double(ndf);
 }
@@ -3346,6 +3348,9 @@ jerror_t DTrackFitterKalman::KalmanForward(double anneal_factor, DMatrix &S,
       
       // Update chi2 for this segment
       chisq+=(R_T*(InvRC*R))(0,0);
+      
+      pulls.push_back(pull_t(R(0,0), sqrt(fabs(RC(0,0)/anneal_factor))));
+      pulls.push_back(pull_t(R(1,0), sqrt(fabs(RC(1,1)/anneal_factor))));
     }
 
   }
@@ -3547,7 +3552,11 @@ jerror_t DTrackFitterKalman::KalmanForwardCDC(double anneal,DMatrix &S,
 	my_cdchits[cdc_index]->residual=res;
 
 	// Update chi2 for this segment
-	chisq+=anneal*res*res/(V-(H*(C*H_T))(0,0));
+	double err2 = (V-(H*(C*H_T))(0,0));
+	chisq+=anneal*res*res/err2;
+	
+	pulls.push_back(pull_t(res, sqrt(fabs(err2/anneal))));
+
 	/*
 	printf("chisq %f res %f chisq contrib %f varpred %f\n",chisq,res,
 	  anneal*res*res/(V-(H*(C*H_T))(0,0)),

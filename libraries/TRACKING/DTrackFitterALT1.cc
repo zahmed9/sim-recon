@@ -427,7 +427,7 @@ DTrackFitter::fit_status_t DTrackFitterALT1::FitTrack(void)
 //------------------
 // ChiSq
 //------------------
-double DTrackFitterALT1::ChiSq(fit_type_t fit_type, DReferenceTrajectory *rt, double *chisq_ptr, int *dof_ptr)
+double DTrackFitterALT1::ChiSq(fit_type_t fit_type, DReferenceTrajectory *rt, double *chisq_ptr, int *dof_ptr, vector<pull_t> *pulls_ptr)
 {
 	/// Calculate the chisq for the given reference trajectory based on the hits
 	/// currently registered through the DTrackFitter base class into the cdchits
@@ -443,7 +443,10 @@ double DTrackFitterALT1::ChiSq(fit_type_t fit_type, DReferenceTrajectory *rt, do
 	vector<resiInfo> residuals;
 	GetResiInfo(rt, hinfo, residuals);
 	
-	return ChiSq(residuals, chisq_ptr, dof_ptr);
+	double my_chisq = ChiSq(residuals, chisq_ptr, dof_ptr);
+	if(pulls_ptr)*pulls_ptr = pulls;
+	
+	return my_chisq;
 }
 
 //------------------
@@ -458,6 +461,7 @@ double DTrackFitterALT1::ChiSq(vector<resiInfo> &residuals, double *chisq_ptr, i
 	resiv.ResizeTo(Nmeasurements, 1);
 	cov_meas.ResizeTo(Nmeasurements, Nmeasurements);
 	cov_muls.ResizeTo(Nmeasurements, Nmeasurements);
+	pulls.clear();
 	
 	// Return "infinite" chisq if an empty residuals vector was passed.
 	if(Nmeasurements<1){
@@ -559,6 +563,12 @@ double DTrackFitterALT1::ChiSq(vector<resiInfo> &residuals, double *chisq_ptr, i
 	int Ndof = (int)residuals.size() - 5; // assume 5 fit parameters
 	weights.ResizeTo(W);
 	weights = W;
+	
+	// Copy pulls into pulls vector
+	for(unsigned int i=0; i<residuals.size(); i++){
+		double err = sqrt(cov_meas[i][i]+cov_muls[i][i]);
+		pulls.push_back(pull_t(resiv[i][0], err));
+	}
 	
 	if(DEBUG_LEVEL>100 || (DEBUG_LEVEL>10 && !finite(chisq)))PrintChisqElements(resiv, cov_meas, cov_muls, weights);
 

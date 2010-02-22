@@ -8,9 +8,10 @@
 #ifndef _DTrackWireBased_
 #define _DTrackWireBased_
 
-#include "JANA/JObject.h"
-#include "JANA/JFactory.h"
-#include "PID/DKinematicData.h"
+#include <JANA/JObject.h>
+#include <JANA/JFactory.h>
+#include <PID/DKinematicData.h>
+#include <TRACKING/DTrackFitter.h>
 
 class DReferenceTrajectory;
 
@@ -21,9 +22,7 @@ class DTrackWireBased:public DKinematicData{
 		oid_t candidateid;	///< which DTrackCandidate this came from
 		float chisq;			///< Chi-squared for the track (not chisq/dof!)
 		int Ndof;				///< Number of degrees of freedom in the fit
-
-		vector<vector<double> > cov;	
-		vector<vector<double> > fcov;
+		vector<DTrackFitter::pull_t> pulls;	///< Holds pulls used in chisq calc. (not including off-diagonals)
 
 		const DReferenceTrajectory *rt; ///< pointer to reference trjectory representing this track
 

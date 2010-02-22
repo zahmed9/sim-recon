@@ -67,6 +67,13 @@ class DTrackFitter:public jana::JObject{
 			kFitNoImprovement
 		};
 		
+		class pull_t{
+			public:
+				pull_t(double resi, double err):resi(resi),err(err){}
+				double resi;	// residual of measurement
+				double err;		// estimated error of measurement
+		};
+		
 		// Constructor and destructor
 		DTrackFitter(JEventLoop *loop);	// require JEventLoop in constructor
 		virtual ~DTrackFitter();
@@ -88,6 +95,7 @@ class DTrackFitter:public jana::JObject{
 		const DKinematicData& GetFitParameters(void) const {return fit_params;}
 		double GetChisq(void) const {return chisq;}
 		int GetNdof(void) const {return Ndof;}
+		vector<pull_t>& GetPulls(void){return pulls;}
 		fit_type_t GetFitType(void) const {return fit_type;}
 		const DMagneticFieldMap* GetDMagneticFieldMap(void) const {return bfield;}
 
@@ -125,7 +133,7 @@ class DTrackFitter:public jana::JObject{
 		//---- The following need to be supplied by the subclass ----
 		virtual string Name(void) const =0;
 		virtual fit_status_t FitTrack(void)=0;
-		virtual double ChiSq(fit_type_t fit_type, DReferenceTrajectory *rt, double *chisq_ptr=NULL, int *dof_ptr=NULL)=0;
+		virtual double ChiSq(fit_type_t fit_type, DReferenceTrajectory *rt, double *chisq_ptr=NULL, int *dof_ptr=NULL, vector<pull_t> *pulls_ptr=NULL)=0;
 
 	protected:
 	
@@ -145,6 +153,7 @@ class DTrackFitter:public jana::JObject{
 		DKinematicData fit_params;									//< Results of last fit
 		double chisq;													//< Chi-sq of final track fit (not the chisq/dof!)
 		int Ndof;														//< Number of degrees of freedom for final track
+		vector<pull_t> pulls;										//< pull_t objects for each contribution to chisq (assuming no correlations)
 		fit_status_t fit_status;									//< Status of values in fit_params (kFitSuccess, kFitFailed, ...)
 		vector<const DCDCTrackHit*> cdchits_used_in_fit;	//< The CDC hits actually used in the fit
 		vector<const DFDCPseudo*> fdchits_used_in_fit;		//< The FDC hits actually used in the fit

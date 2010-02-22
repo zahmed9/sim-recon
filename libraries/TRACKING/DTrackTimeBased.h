@@ -11,6 +11,7 @@
 #include <JANA/JObject.h>
 #include <JANA/JFactory.h>
 #include <PID/DKinematicData.h>
+#include <TRACKING/DTrackFitter.h>
 
 class DReferenceTrajectory;
 
@@ -19,21 +20,19 @@ class DTrackTimeBased:public DKinematicData{
 	public:
 		JOBJECT_PUBLIC(DTrackTimeBased);
 		
-		oid_t trackid;			///< id of DTrack this came from
-		oid_t candidateid;   /// < id of DTrackCandidate corresponding to this track
+		oid_t trackid;			///< id of DTrackWireBased corresponding to this track
+		oid_t candidateid;   ///< id of DTrackCandidate corresponding to this track
 		float chisq;			///< Chi-squared for the track (not chisq/dof!)
 		int Ndof;				///< Number of degrees of freedom in the fit
-		//float dE;				///< Total energy deposited in straws
-		//float ds;				///< Total pathlength through straws contributing to dE
-		//float err_dE;			///< Error on value of dE
-		//float err_ds;			///< Error on value of ds
+		vector<DTrackFitter::pull_t> pulls;	///< Holds pulls used in chisq calc. (not including off-diagonals)
+
 		const DReferenceTrajectory *rt; ///< pointer to reference trjectory representing this track
 
 		double FOM;
 		void toStrings(vector<pair<string,string> > &items)const{
 			DKinematicData::toStrings(items);
-			AddString(items, "trackid", "0x%x", trackid);
-			AddString(items, "candidateid","%d",candidateid);
+			AddString(items, "candidate","%d",candidateid);
+			AddString(items, "wirebased","%d",trackid);
 			AddString(items, "chisq", "%f", chisq);
 			AddString(items, "Ndof", "%d", Ndof);
 			AddString(items, "FOM", "%f",FOM);

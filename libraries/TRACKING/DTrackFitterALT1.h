@@ -80,7 +80,7 @@ class DTrackFitterALT1:public DTrackFitter{
 				const swim_step_t *step;
 		};
 
-		double ChiSq(fit_type_t fit_type, DReferenceTrajectory *rt, double *chisq_ptr=NULL, int *dof_ptr=NULL);
+		double ChiSq(fit_type_t fit_type, DReferenceTrajectory *rt, double *chisq_ptr=NULL, int *dof_ptr=NULL, vector<pull_t> *pulls_ptr=NULL);
 		double ChiSq(vector<resiInfo> &residuals, double *chisq_ptr=NULL, int *dof_ptr=NULL);
 		void GetHits(fit_type_t fit_type, DReferenceTrajectory *rt, hitsInfo &hinfo);
 		vector<bool> GetResiInfo(DMatrix &state, const swim_step_t *start_step, DReferenceTrajectory *rt, hitsInfo &hinfo, vector<resiInfo> &residuals);
