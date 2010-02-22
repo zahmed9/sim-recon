@@ -11,6 +11,12 @@ ifndef OSNAME
 OSNAME = $(OS)-$(ARCH)
 endif
 
+# HALLD_MY is used for installation below but if it is
+# not defined, then we should try installing into HALLD_HOME
+ifndef HALLD_MY
+HALLD_MY = $(HALLD_HOME)
+endif
+
 CPP = g++
 LIBXDR = 
 
