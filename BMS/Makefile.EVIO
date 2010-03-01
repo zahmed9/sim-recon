@@ -1,4 +1,4 @@
 
 CFLAGS		+= -I$(EVIOROOT)/include
 CXXFLAGS	+= -I$(EVIOROOT)/include
-MISC_LIBS 	+= -L$(EVIOROOT)/$(BMS_OSNAME)/lib -levioxx -levio -lexpat
+MISC_LIBS 	+= -L$(EVIOROOT)/lib -levioxx -levio -lexpat
