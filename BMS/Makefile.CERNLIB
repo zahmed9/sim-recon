@@ -11,10 +11,6 @@ CXXFLAGS += -I/usr/include/cernlib/$(CERN_LEVEL)
 
 MISC_LIBS += $(CERNLIBS) $(EXTRA_LIBS)
 
-ifeq "$(OS)" "Darwin"
-  MISC_LIBS += -L/usr/local/lib
-endif
-
 # This seems to be needed to get it to link and run without errors 
 # on 64-bit CentOS 5.3 
 ifeq "$(ARCH)" "x86_64"
