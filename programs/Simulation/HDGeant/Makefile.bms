@@ -2,7 +2,7 @@
 PACKAGES := CERNLIB:JANA:ROOT
 MISC_LIBS = -L/sw/lib -lXm -L/usr/X11R6/lib -lXt -lgelhad -lhitutil
 #FFLAGS = -Wno-globals
-FFLAGS = -DCERNLIB_MOTIF
+FFLAGS += -DCERNLIB_MOTIF
 CFLAGS += -I$(HALLD_MY)/src/libraries/HDDM -I$(HALLD_HOME)/src/libraries/HDDM
 ADDITIONAL_MODULES += HDDM HDGEOMETRY hddsGeant3
 LIB_DIRS += $(HDDS_HOME)/lib/$(BMS_OSNAME)
@@ -22,6 +22,9 @@ LIB_DIRS += $(HDDS_HOME)/lib/$(BMS_OSNAME)
 # applied through BMS core files would supress warnings
 # uneccessarily.
 ifeq ($(BMS_OSNAME), Darwin_macosx10.5-i386-gcc4.0.1)
+   LD_FLAGS += -w
+endif
+ifeq ($(BMS_OSNAME), Darwin_macosx10.6-i386-gcc4.2.1)
    LD_FLAGS += -w
 endif
 
