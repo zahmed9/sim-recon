@@ -22,7 +22,18 @@
 # will never fail.
 #
 
-# This first section sets the uname and release variables
+# This part sets the processor type and GCC version number
+$processor = `uname -p`;
+$gccversion = `gcc -dumpversion`;
+chomp $processor;
+chomp $gccversion;
+
+# If the compiler_version variable is not set, use the gcc version
+if ($compiler_version eq '') {
+	$compiler_version = "gcc${gccversion}";
+}
+
+# This section sets the uname and release variables
 # which hold the "OS" and "_flavor##" parts of the string.
 $uname = `uname`;
 chomp $uname;
@@ -79,6 +90,7 @@ if ($uname eq 'Linux') {
 	$CC_version =  $toks[3];
 	$compiler_version = "CC${CC_version}";
 } elsif ($uname eq 'Darwin') {
+	$processor = $ENV{"MACHTYPE"};  # override uname -p with MACHTYPE for Mac OS X (uname -p is wrong for Snow Leopard)
  	$release_string = `uname -r`;
 	if ($release_string =~ /^6.*/) {
 	    $release = '_macosx10.2';
@@ -98,17 +110,6 @@ if ($uname eq 'Linux') {
 	}
 } else {
     $release = '';
-}
-
-# This part sets the processor type and GCC version number
-$processor = `uname -p`;
-$gccversion = `gcc -dumpversion`;
-chomp $processor;
-chomp $gccversion;
-
-# If the compiler_version variable is not set, use the gcc version
-if ($compiler_version eq '') {
-	$compiler_version = "gcc${gccversion}";
 }
 
 # Finally, form and print the complete string to stdout
