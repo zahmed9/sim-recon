@@ -54,35 +54,35 @@ install: xml-xml hddm-schema schema-hddm mkdirs $(BINARIES)
 	cp -v $(BINARIES) $(HALLD_MY)/bin/$(BMS_OSNAME)
 
 $(BINDIR)/xml-hddm: xml-hddm.cpp $(OBJDIR)/XString.o $(OBJDIR)/XParsers.o
-	$(CPP) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
+	$(CPP) $(LD_FLAGS) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
 	-I$(HALLD_HOME)/include -o $@ $^ \
 	-L$(HALLD_MY)/lib/$(BMS_OSNAME) \
 	-L$(HALLD_HOME)/lib/$(BMS_OSNAME) -lxstream \
 	-L$(XERCESCROOT)/lib -lxerces-c $(LIBXDR)
 
 $(BINDIR)/hddm-xml: hddm-xml.cpp $(OBJDIR)/XString.o $(OBJDIR)/XParsers.o
-	$(CPP) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
+	$(CPP) $(LD_FLAGS) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
 	-I$(HALLD_HOME)/include -o $@ $^ \
 	-L$(HALLD_MY)/lib/$(BMS_OSNAME) \
 	-L$(HALLD_HOME)/lib/$(BMS_OSNAME) -lxstream \
 	-L$(XERCESCROOT)/lib -lxerces-c $(LIBXDR)
 
 $(BINDIR)/hddm-c: hddm-c.cpp $(OBJDIR)/XString.o $(OBJDIR)/XParsers.o
-	$(CPP) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
+	$(CPP) $(LD_FLAGS) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
 	-I$(HALLD_HOME)/include -o $@ $^ \
 	-L$(XERCESCROOT)/lib -lxerces-c
 
 $(BINDIR)/hddm-cpp: hddm-cpp.cpp $(OBJDIR)/XString.o $(OBJDIR)/XParsers.o
-	$(CPP) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
+	$(CPP) $(LD_FLAGS) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
 	-I$(HALLD_HOME)/include -o $@ $^ \
 	-L$(XERCESCROOT)/lib -lxerces-c
 
 $(BINDIR)/hddmcat: hddmcat.cpp
-	$(CPP) -o $@ $^
+	$(CPP) $(LD_FLAGS) -o $@ $^
 
 test: hddm-c hddm-xml test.xml
 	./hddm-c test.xml
-	$(CPP) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
+	$(CPP) $(LD_FLAGS) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
 	-I$(HALLD_HOME)/include -o testhddm \
 	testhddm.cpp hddm_v.c $(LIBXDR)
 	./testhddm
@@ -92,7 +92,7 @@ test: hddm-c hddm-xml test.xml
 	./hddm-schema $< >$@
 
 $(OBJDIR)/%.o: %.cpp
-	$(CPP) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
+	$(CPP) $(CXXFLAGS) -I$(HALLD_HOME)/src/include -I$(XERCESCROOT)/include \
 	-I$(HALLD_HOME)/include -c -o $@ $^ 
 
 clean:

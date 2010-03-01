@@ -59,4 +59,4 @@ clean:
 	rm -rf $(OBJDIR) $(LIBDIR)
 
 $(OBJDIR)/%.o: %.cpp
-	g++ $(INCLUDES) -c -o $@ $^
+	g++ $(CXXFLAGS) $(INCLUDES) -c -o $@ $^
