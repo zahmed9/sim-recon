@@ -56,17 +56,19 @@ ifndef CERN
 	@echo WARNING: CERN not defined!
 	@echo Build proceeding, but hdgeant will not be made
 	@echo ==============================================
-else
-	@echo CERN = $(CERN)
+else  # CERN
 
-	ifndef CERN_LEVEL
-		@echo error: CERN_LEVEL not defined ; exit 1
-	else
-		@echo CERN_LEVEL = $(CERN_LEVEL)
-	endif
-	ifeq ($(strip $(WHICH_CERNLIB)),)
-		@echo error: cernlib not in path ; exit 1
-	else
-		@echo WHICH_CERNLIB = $(WHICH_CERNLIB)
-	endif
+@echo CERN = $(CERN)
+
+ifndef CERN_LEVEL
+ @echo error: CERN_LEVEL not defined ; exit 1
+else
+ @echo CERN_LEVEL = $(CERN_LEVEL)
 endif
+ifeq ($(strip $(WHICH_CERNLIB)),)
+ @echo error: cernlib not in path ; exit 1
+else
+ @echo WHICH_CERNLIB = $(WHICH_CERNLIB)
+endif
+
+endif  # CERN
