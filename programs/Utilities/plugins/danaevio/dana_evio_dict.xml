@@ -91,10 +91,11 @@
   <xmldumpDictEntry name="E"                    tag="10800"    num="7"/>
   <xmldumpDictEntry name="dE"                   tag="10800"    num="8"/>
   <xmldumpDictEntry name="primary_track"        tag="10800"    num="9"/>
-  <xmldumpDictEntry name="part"                 tag="10800"    num="10"/>
-  <xmldumpDictEntry name="radlen"               tag="10800"    num="11"/>
-  <xmldumpDictEntry name="step"                 tag="10800"    num="12"/>
-  <xmldumpDictEntry name="mech"                 tag="10800"    num="13"/>
+  <xmldumpDictEntry name="track"                tag="10800"    num="10"/>
+  <xmldumpDictEntry name="part"                 tag="10800"    num="11"/>
+  <xmldumpDictEntry name="radlen"               tag="10800"    num="12"/>
+  <xmldumpDictEntry name="step"                 tag="10800"    num="13"/>
+  <xmldumpDictEntry name="mech"                 tag="10800"    num="14"/>
 
 
 
