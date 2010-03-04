@@ -1,7 +1,7 @@
 
 SOLIB_NAME = trkfitterLSLM.so
 
-MISC_LIBS += -L$(CLHEP_LIB) -lCLHEP -lgsl -lgslcblas
+MISC_LIBS += -L$(CLHEP_LIB) -lCLHEP -L$(GSL_LIB) -lgsl -lgslcblas
 CXXFLAGS += -I$(GSL_INCLUDE) -I$(CLHEP_INCLUDE) -DGRKUTA
 
 PACKAGES = ROOT:DANA:CERNLIB
