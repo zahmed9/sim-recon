@@ -53,8 +53,8 @@ class DPhoton: public DKinematicData {
 		void toStrings(vector<pair<string,string> > &items)const{
 			AddString(items, "E(GeV)", "%5.2f", energy());
 			AddString(items, "Px(GeV/c)", "%5.2f", momentum().X());
-			AddString(items, "Px(GeV/c)", "%5.2f", momentum().Y());
-			AddString(items, "Px(GeV/c)", "%5.2f", momentum().Z());
+			AddString(items, "Py(GeV/c)", "%5.2f", momentum().Y());
+			AddString(items, "Pz(GeV/c)", "%5.2f", momentum().Z());
 			AddString(items, "X(cm)", "%7.2f", position().X());
 			AddString(items, "Y(cm)", "%7.2f", position().Y());
 			AddString(items, "Z(cm)", "%7.2f", position().Z());
