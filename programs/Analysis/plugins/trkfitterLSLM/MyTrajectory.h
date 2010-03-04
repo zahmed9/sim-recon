@@ -89,6 +89,11 @@ template<class C> double MyTrajectory::doca(C& spaceObject, HepLorentzVector &po
 	     (x1*y2 - x2*y1)
 	     );
     inew = (unsigned int)(xnew + 0.5);
+    if (inew < ilo || inew > ihi) { // jumped out of the bracket
+      cout << "MyTrajectory::doca: jumped out of the miminum bracket: " << ilo << " " << inew << " " << ihi << endl;
+      int ierror = 4;
+      throw ierror;
+    }
     distnew = dist(spaceObject, inew);
     if (debug_level >= 4) cout << "MyTrajectory::doca: xnew = " << xnew << " inew = " << inew << " distnew = " << distnew << endl;
     if (inew == imid) {
