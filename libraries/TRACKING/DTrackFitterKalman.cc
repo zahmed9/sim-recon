@@ -186,18 +186,21 @@ void DTrackFitterKalman::ResetKalman(void)
       for (unsigned int i=0;i<forward_traj.size();i++){
 	delete forward_traj[i].Q;
 	delete forward_traj[i].S;
-	delete forward_traj[i].J;
+	delete forward_traj[i].J;	
+	delete forward_traj[i].JT;
       } 
       for (unsigned int i=0;i<forward_traj_cdc.size();i++){
 	delete forward_traj_cdc[i].Q;
 	delete forward_traj_cdc[i].S;
 	delete forward_traj_cdc[i].J;
+	delete forward_traj_cdc[i].JT;
       }
 
       for (unsigned int i=0;i<central_traj.size();i++){
 	delete central_traj[i].Q;
-      delete central_traj[i].S;
-      delete central_traj[i].J;
+	delete central_traj[i].S;
+	delete central_traj[i].J;
+	delete central_traj[i].JT;
       //      delete central_traj[i].C;
       }
     }
@@ -667,14 +670,13 @@ jerror_t DTrackFitterKalman::SetCDCBackwardReferenceTrajectory(DMatrix &S){
 // trajectory loop
 jerror_t DTrackFitterKalman::PropagateForwardCDC(int length,int &index,double z,
 					    double step,DMatrix &S){
-  DMatrix J(5,5),Q(5,5);    
+  DMatrix J(5,5),Q(5,5),JT(5,5);    
   DKalmanState_t temp;
   int my_i=0;
   double newz=z+step;
 
   // Initialize some variables
   temp.h_id=0;
-  temp.num_hits=0;
   double dEdx=0.;
   double ds=0.;
   double beta2=1.,q_over_p=1.,q_over_p_sq=1.,varE=0.;
@@ -746,8 +748,9 @@ jerror_t DTrackFitterKalman::PropagateForwardCDC(int length,int &index,double z,
       =varE*q_over_p_sq*q_over_p_sq/beta2;
   }	
   
-  // Compute the Jacobian matrix
+  // Compute the Jacobian matrix and its transpose
   StepJacobian(newz,z,S,dEdx,J);
+  JT=DMatrix(DMatrix::kTransposed,J);
   
   // update the trajectory
   if (index<=length){
@@ -755,12 +758,14 @@ jerror_t DTrackFitterKalman::PropagateForwardCDC(int length,int &index,double z,
       for (unsigned int k=0;k<5;k++){
 	forward_traj_cdc[my_i].Q->operator()(j,k)=Q(j,k);
 	forward_traj_cdc[my_i].J->operator()(j,k)=J(j,k);
+	forward_traj_cdc[my_i].JT->operator()(j,k)=JT(j,k);
       }
     }
   }
   else{	
     temp.Q= new DMatrix(Q);
     temp.J= new DMatrix(J);
+    temp.JT=new DMatrix(JT);
     forward_traj_cdc.push_front(temp);    
   }
 
@@ -827,6 +832,7 @@ jerror_t DTrackFitterKalman::SetCDCReferenceTrajectory(DVector3 pos,
 						       DMatrix &Sc){
   DKalmanState_t temp;
   DMatrix J(5,5);  // State vector Jacobian matrix 
+  DMatrix JT(5,5); // ... and its transpose
   DMatrix Q(5,5);  // Process noise covariance matrix
    
   // Position, step, radius, etc. variables
@@ -905,14 +911,17 @@ jerror_t DTrackFitterKalman::SetCDCReferenceTrajectory(DVector3 pos,
 	  *q_over_p_sq;
       }
 
-	// Compute the Jacobian matrix for back-tracking towards target
+      // Compute the Jacobian matrix for back-tracking towards target
       StepJacobian(pos,origin,dir,-mStepSizeS,Sc,dedx,J);
+      // ... and its transpose 
+      JT=DMatrix(DMatrix::kTransposed,J);
     
       // Fill the deque with the Jacobian and Process Noise matrices
       for (unsigned int k=0;k<5;k++){
 	for (unsigned int j=0;j<5;j++){
 	  central_traj[m].J->operator()(k,j)=J(k,j);
-	  central_traj[m].Q->operator()(k,j)=Q(k,j);	  
+	  central_traj[m].Q->operator()(k,j)=Q(k,j);	
+	  central_traj[m].JT->operator()(k,j)=JT(k,j);	  
 	}
       }
     }
@@ -980,15 +989,17 @@ jerror_t DTrackFitterKalman::SetCDCReferenceTrajectory(DVector3 pos,
 	=varE*Sc(state_q_over_pt,0)*Sc(state_q_over_pt,0)/beta2
 	*q_over_p_sq;
     }
-    // Compute the Jacobian matrix
+    // Compute the Jacobian matrix and its transpose
     StepJacobian(pos,origin,dir,-mStepSizeS,Sc,dedx,J);
-    
+    JT=DMatrix(DMatrix::kTransposed,J);
+
     // update the radius relative to the beam line
     r=pos.Perp();
     
     // Update the trajectory info
     temp.Q= new DMatrix(Q);
     temp.J= new DMatrix(J);
+    temp.JT= new DMatrix(JT);
 
     central_traj.push_front(temp);    
   }
@@ -1052,14 +1063,13 @@ jerror_t DTrackFitterKalman::SetCDCReferenceTrajectory(DVector3 pos,
 jerror_t DTrackFitterKalman::PropagateForward(int length,int my_id,int &i,
 					      double &z,
 					      double step,DMatrix &S){
-  DMatrix J(5,5),Q(5,5);    
+  DMatrix J(5,5),Q(5,5),JT(5,5);    
   DKalmanState_t temp;
   double ds=0.; // path length increment
   double newz=z+step; // new z position 
   
   // Initialize some variables
   temp.h_id=my_id; // hit id
-  temp.num_hits=0;
   double dEdx=0.;
   double beta2=1.,q_over_p=1.,q_over_p_sq=1.,varE=0.;
   int my_i=0;
@@ -1124,8 +1134,9 @@ jerror_t DTrackFitterKalman::PropagateForward(int length,int my_id,int &i,
       =varE*q_over_p_sq*q_over_p_sq/beta2;
   }			      
       
-  // Compute the Jacobian matrix
+  // Compute the Jacobian matrix and its transpose
   StepJacobian(newz,z,S,dEdx,J);
+  JT=DMatrix(DMatrix::kTransposed,J);
       
   // update the trajectory data
   if (i<=length){
@@ -1133,12 +1144,14 @@ jerror_t DTrackFitterKalman::PropagateForward(int length,int my_id,int &i,
       for (unsigned int k=0;k<5;k++){
 	forward_traj[my_i].Q->operator()(j,k)=Q(j,k);
 	forward_traj[my_i].J->operator()(j,k)=J(j,k);
+	forward_traj[my_i].JT->operator()(j,k)=JT(j,k);
       }
     }
   }
   else{
     temp.Q=new DMatrix(Q);
     temp.J=new DMatrix(J);
+    temp.JT=new DMatrix(JT);
     forward_traj.push_front(temp);
   }
  
@@ -2845,15 +2858,15 @@ jerror_t DTrackFitterKalman::KalmanCentral(double anneal_factor,
     // from reference trajectory
     S0=(*central_traj[k].S);
     J=(*central_traj[k].J);
+    JT=(*central_traj[k].JT);
     Q=(*central_traj[k].Q);
 
     // State S is perturbation about a seed S0
-    dS=Sc-S0_;
+    //dS=Sc-S0_;
     //dS.Zero();
 
     // Update the actual state vector and covariance matrix
-    Sc=S0+J*dS;  
-    JT=DMatrix(DMatrix::kTransposed,J);
+    Sc=S0+J*(Sc-S0_);  
     Cc=J*(Cc*JT)+Q;   
 
     /*
@@ -3027,9 +3040,9 @@ jerror_t DTrackFitterKalman::KalmanCentral(double anneal_factor,
 	K=InvV*(Cc*H_T);
 	
 	// Update the state vector 
-	dS=dm*K;
+	//dS=dm*K;
 	//dS.Zero();
-	Sc=Sc+dS;
+	Sc=Sc+dm*K;
 	
 	// Update state vector covariance matrix
 	Cc=Cc-(K*(H*Cc));  
@@ -3193,14 +3206,15 @@ jerror_t DTrackFitterKalman::KalmanForward(double anneal_factor, DMatrix &S,
     // from reference trajectory
     S0=(*forward_traj[k].S);
     J=(*forward_traj[k].J);
+    J_T=(*forward_traj[k].JT);
     Q=(*forward_traj[k].Q);
 
     // State S is perturbation about a seed S0
-    dS=S-S0_;
+    //dS=S-S0_;
 
     // Update the actual state vector and covariance matrix
-    S=S0+J*dS;
-    C=J*(C*DMatrix(DMatrix::kTransposed,J))+Q;   
+    S=S0+J*(S-S0_);
+    C=J*(C*J_T)+Q;   
 
     // Save the current state of the reference trajectory
     S0_=S0;
@@ -3414,17 +3428,18 @@ jerror_t DTrackFitterKalman::KalmanForwardCDC(double anneal,DMatrix &S,
     // from reference trajectory
     S0=(*forward_traj_cdc[k].S);
     J=(*forward_traj_cdc[k].J);
+    J_T=(*forward_traj_cdc[k].JT);
     Q=(*forward_traj_cdc[k].Q);
 
     // State S is perturbation about a seed S0
-    dS=S-S0_;
+    //dS=S-S0_;
     /*
     dS.Print();
     J.Print();
     */
     // Update the actual state vector and covariance matrix
-    S=S0+J*dS;
-    C=J*(C*DMatrix(DMatrix::kTransposed,J))+Q;   
+    S=S0+J*(S-S0_);
+    C=J*(C*J_T)+Q;   
 
     // Save the current state of the reference trajectory
     S0_=S0;

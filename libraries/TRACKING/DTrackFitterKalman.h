@@ -40,10 +40,9 @@ typedef struct{
 
 typedef struct{
   unsigned int h_id;
-  unsigned int num_hits;
   DVector3 pos;
   DMatrix *S;
-  DMatrix *J,*Q,*C;
+  DMatrix *J,*JT,*Q,*C;
   double s,t;
   double Z,rho_Z_over_A,LnI;
 }DKalmanState_t;
@@ -74,17 +73,20 @@ class DTrackFitterKalman: public DTrackFitter{
     for (unsigned int i=0;i<forward_traj.size();i++){
       delete forward_traj[i].Q;
       delete forward_traj[i].S;
-      delete forward_traj[i].J;
+      delete forward_traj[i].J; 
+      delete forward_traj[i].JT;
     } 
     for (unsigned int i=0;i<forward_traj_cdc.size();i++){
       delete forward_traj_cdc[i].Q;
       delete forward_traj_cdc[i].S;
-      delete forward_traj_cdc[i].J;
+      delete forward_traj_cdc[i].J; 
+      delete forward_traj_cdc[i].JT;
     }
     for (unsigned int i=0;i<central_traj.size();i++){
       delete central_traj[i].Q;
       delete central_traj[i].S;
       delete central_traj[i].J;
+      delete central_traj[i].JT;
       //      delete central_traj[i].C;
     }
   
