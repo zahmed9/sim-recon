@@ -311,7 +311,7 @@ private:
     evioDOMNodeP pzBank        =  evioDOMNode::createEvioDOMNode<float>(dmcthrownTag,11);    
     evioDOMNodeP energyBank    =  evioDOMNode::createEvioDOMNode<float>(dmcthrownTag,12);
     *mcthrown << typeBank << pdgtypeBank << myidBank << parentidBank << mechBank 
-              << xBank << yBank << zBank << pyBank << pzBank << energyBank;
+              << xBank << yBank << zBank << pxBank << pyBank << pzBank << energyBank;
 
 
     // add track data to banks
