@@ -150,7 +150,7 @@ class DTrackFitterKalman: public DTrackFitter{
   double GetActivePathLength(void){ return path_length;}
   double GetdEdx(double q_over_p,double rho_Z_over_A,
 		 double rho_Z_over_A_LnI); 
-  double GetEnergyVariance(double ds,double q_over_p,double rho_Z_over_A);
+  double GetEnergyVariance(double ds,double beta2,double rho_Z_over_A);
 
  protected:
 
@@ -289,6 +289,8 @@ class DTrackFitterKalman: public DTrackFitter{
 
   // Mass hypothesis
   double MASS,mass2;
+  double m_ratio; // electron mass/MASS
+  double m_ratio_sq; // .. and its square
 	
   bool do_multiple_scattering;
   bool do_energy_loss;

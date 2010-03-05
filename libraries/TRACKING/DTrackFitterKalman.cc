@@ -264,6 +264,9 @@ DTrackFitter::fit_status_t DTrackFitterKalman::FitTrack(void)
   //Set the mass
   this->MASS=input_params.mass();
   this->mass2=MASS*MASS;
+  double Me=0.000511; //GeV
+  m_ratio=Me/MASS;
+  m_ratio_sq=m_ratio*m_ratio;
 
   //  printf("mass %f\n",MASS);
 
@@ -419,20 +422,26 @@ jerror_t DTrackFitterKalman::CalcDeriv(double z,double dz,const DMatrix &S,
   
   // useful combinations of terms
   double qpfactor=qBr2p*q_over_p;
-  double factor=sqrt(1.+tx*tx+ty*ty);
+  double tx2=tx*tx;
+  double ty2=ty*ty;
+  double txty=tx*ty;
+  double factor=sqrt(1.+tx2+ty2);
+  double dtx_Bfac=ty*Bz+txty*Bx-(1.+tx2)*By;
+  double dty_Bfac=Bx*(1.+ty2)-txty*By-tx*Bz;
   double qpfactor2=qpfactor*factor;
   double qpfactor_ds=0.5*dz*qpfactor2;
 
   // Derivative of S with respect to z
-  D(state_x,0)=tx + qpfactor_ds*(ty*Bz+tx*ty*Bx-(1.+tx*tx)*By);
-  D(state_y,0)=ty + qpfactor_ds*(Bx*(1.+ty*ty)-tx*ty*By-tx*Bz);
-  D(state_tx,0)=qpfactor2*(tx*ty*Bx-(1.+tx*tx)*By+ty*Bz);
-  D(state_ty,0)=qpfactor2*((1.+ty*ty)*Bx-tx*ty*By-tx*Bz);
+  D(state_x,0)=tx + qpfactor_ds*dtx_Bfac;
+  D(state_y,0)=ty + qpfactor_ds*dty_Bfac;
+  D(state_tx,0)=qpfactor2*dtx_Bfac;
+  D(state_ty,0)=qpfactor2*dty_Bfac;
 
   D(state_q_over_p,0)=0.;
   if (fabs(dEdx)>0. && fabs(q_over_p)<Q_OVER_P_MAX){
-    double E=sqrt(1./q_over_p/q_over_p+mass2); 
-    D(state_q_over_p,0)=-q_over_p*q_over_p*q_over_p*E*dEdx*factor;
+    double q_over_p_sq=q_over_p*q_over_p;
+    double E=sqrt(1./q_over_p_sq+mass2); 
+    D(state_q_over_p,0)=-q_over_p_sq*q_over_p*E*dEdx*factor;
   }
   return NOERROR;
 }
@@ -679,7 +688,7 @@ jerror_t DTrackFitterKalman::PropagateForwardCDC(int length,int &index,double z,
   temp.h_id=0;
   double dEdx=0.;
   double ds=0.;
-  double beta2=1.,q_over_p=1.,q_over_p_sq=1.,varE=0.;
+  double beta2=1.,q_over_p_sq=1.,varE=0.;
 
   // State at current position 
   temp.pos.SetXYZ(S(state_x,0),S(state_y,0),z);
@@ -730,9 +739,10 @@ jerror_t DTrackFitterKalman::PropagateForwardCDC(int length,int &index,double z,
   ds=Step(z,newz,dEdx,S); 
   len+=fabs(ds);
  
-  q_over_p=S(state_q_over_p,0);
-  q_over_p_sq=q_over_p*q_over_p;
-  ftime+=ds*sqrt(1.+mass2*q_over_p_sq)/SPEED_OF_LIGHT;
+  q_over_p_sq=S(state_q_over_p,0)*S(state_q_over_p,0);
+  beta2=1./(1.+mass2*q_over_p_sq);
+  if (beta2<EPS) beta2=EPS;
+  ftime+=ds/sqrt(beta2)/SPEED_OF_LIGHT;
   
   // Get the contribution to the covariance matrix due to multiple 
   // scattering
@@ -741,11 +751,8 @@ jerror_t DTrackFitterKalman::PropagateForwardCDC(int length,int &index,double z,
   
   // Energy loss straggling
   if (do_energy_loss){
-    beta2=1./(1.+mass2*q_over_p_sq);
-    varE=GetEnergyVariance(ds,q_over_p,temp.rho_Z_over_A);
-    
-    Q(state_q_over_p,state_q_over_p)
-      =varE*q_over_p_sq*q_over_p_sq/beta2;
+    varE=GetEnergyVariance(ds,beta2,temp.rho_Z_over_A);
+    Q(state_q_over_p,state_q_over_p)=varE*q_over_p_sq*q_over_p_sq/beta2;
   }	
   
   // Compute the Jacobian matrix and its transpose
@@ -867,8 +874,8 @@ jerror_t DTrackFitterKalman::SetCDCReferenceTrajectory(DVector3 pos,
       // update path length and flight time
       len+=mStepSizeS;
       q_over_p=Sc(state_q_over_pt,0)*cos(atan(Sc(state_tanl,0)));
-      q_over_p_sq=q_over_p*q_over_p;
-      t+=mStepSizeS*sqrt(1.+mass2*q_over_p_sq)/SPEED_OF_LIGHT;
+      //q_over_p_sq=q_over_p*q_over_p;
+      //      t+=mStepSizeS*sqrt(1.+mass2*q_over_p_sq)/SPEED_OF_LIGHT;
 
       // Check for minimum momentum
       //if(q_over_p>Q_OVER_P_MAX) do_energy_loss=false;
@@ -893,6 +900,13 @@ jerror_t DTrackFitterKalman::SetCDCReferenceTrajectory(DVector3 pos,
       FixedStep(pos,mStepSizeS,Sc,dedx);
       // Break out of the loop if we would swim out of the fiducial volume
       if (pos.Perp()>R_MAX || pos.z()<cdc_origin[2]) break;
+      
+      // update flight time
+      q_over_p=Sc(state_q_over_pt,0)*cos(atan(Sc(state_tanl,0)));
+      q_over_p_sq=q_over_p*q_over_p;
+      beta2=1./(1.+mass2*q_over_p_sq);
+      if (beta2<EPS) beta2=EPS;
+      t+=mStepSizeS/sqrt(beta2)/SPEED_OF_LIGHT;
 
       // Multiple scattering    
       if (do_multiple_scattering)
@@ -900,12 +914,9 @@ jerror_t DTrackFitterKalman::SetCDCReferenceTrajectory(DVector3 pos,
 			       central_traj[m].rho_Z_over_A,Sc,Q);
 
       // Energy loss straggling
-      if (do_energy_loss){
-	// Energy loss straggling in the approximation of thick absorbers
-	beta2=1./(1.+mass2*q_over_p_sq);
-	varE=GetEnergyVariance(mStepSizeS,q_over_p,
-			       central_traj[m].rho_Z_over_A);
-	
+      if (do_energy_loss){	
+	varE=GetEnergyVariance(mStepSizeS,beta2,
+			       central_traj[m].rho_Z_over_A);	
 	Q(state_q_over_pt,state_q_over_pt)
 	  =varE*Sc(state_q_over_pt,0)*Sc(state_q_over_pt,0)/beta2
 	  *q_over_p_sq;
@@ -954,7 +965,7 @@ jerror_t DTrackFitterKalman::SetCDCReferenceTrajectory(DVector3 pos,
     len+=mStepSizeS;
     q_over_p=Sc(state_q_over_pt,0)*cos(atan(Sc(state_tanl,0)));
     q_over_p_sq=q_over_p*q_over_p;
-    t+=mStepSizeS*sqrt(1.+mass2*q_over_p_sq)/SPEED_OF_LIGHT;
+    //t+=mStepSizeS*sqrt(1.+mass2*q_over_p_sq)/SPEED_OF_LIGHT;
 
      // Check for minimum momentum
     //if(q_over_p>Q_OVER_P_MAX) do_energy_loss=false;
@@ -976,15 +987,20 @@ jerror_t DTrackFitterKalman::SetCDCReferenceTrajectory(DVector3 pos,
     // Propagate the state through the field
     FixedStep(pos,mStepSizeS,Sc,dedx);
 
+    // Update flight time
+    q_over_p=Sc(state_q_over_pt,0)*cos(atan(Sc(state_tanl,0)));
+    q_over_p_sq=q_over_p*q_over_p;
+    beta2=1./(1.+mass2*q_over_p_sq);
+    if (beta2<EPS) beta2=EPS;
+    t+=mStepSizeS/sqrt(beta2)/SPEED_OF_LIGHT;
+
     // Multiple scattering    
     if (do_multiple_scattering)
       GetProcessNoiseCentral(mStepSizeS,temp.Z,temp.rho_Z_over_A,Sc,Q);
     
     // Energy loss straggling in the approximation of thick absorbers
-    if (do_energy_loss){ 
-      beta2=1./(1.+mass2*q_over_p_sq);
-      varE=GetEnergyVariance(mStepSizeS,q_over_p,temp.rho_Z_over_A);
-      
+    if (do_energy_loss){    
+      varE=GetEnergyVariance(mStepSizeS,beta2,temp.rho_Z_over_A);    
       Q(state_q_over_pt,state_q_over_pt)
 	=varE*Sc(state_q_over_pt,0)*Sc(state_q_over_pt,0)/beta2
 	*q_over_p_sq;
@@ -1071,7 +1087,7 @@ jerror_t DTrackFitterKalman::PropagateForward(int length,int my_id,int &i,
   // Initialize some variables
   temp.h_id=my_id; // hit id
   double dEdx=0.;
-  double beta2=1.,q_over_p=1.,q_over_p_sq=1.,varE=0.;
+  double beta2=1.,q_over_p_sq=1.,varE=0.;
   int my_i=0;
 
   temp.s=len;
@@ -1116,9 +1132,10 @@ jerror_t DTrackFitterKalman::PropagateForward(int length,int my_id,int &i,
   ds=Step(z,newz,dEdx,S);
   len+=ds;
 
-  q_over_p=S(state_q_over_p,0);
-  q_over_p_sq=q_over_p*q_over_p;
-  ftime+=ds*sqrt(1.+mass2*q_over_p_sq)/SPEED_OF_LIGHT;
+  q_over_p_sq=S(state_q_over_p,0)*S(state_q_over_p,0);
+  beta2=1./(1.+mass2*q_over_p_sq);
+  if (beta2<EPS) beta2=EPS;
+  ftime+=ds/sqrt(beta2)/SPEED_OF_LIGHT;
        
   // Get the contribution to the covariance matrix due to multiple 
   // scattering
@@ -1126,10 +1143,8 @@ jerror_t DTrackFitterKalman::PropagateForward(int length,int my_id,int &i,
     GetProcessNoise(ds,temp.Z,temp.rho_Z_over_A,S,Q);
       
   // Energy loss straggling
-  if (do_energy_loss){
-    beta2=1./(1.+mass2*q_over_p_sq);
-    varE=GetEnergyVariance(ds,q_over_p,temp.rho_Z_over_A);
-	
+  if (do_energy_loss){   
+    varE=GetEnergyVariance(ds,beta2,temp.rho_Z_over_A);	
     Q(state_q_over_p,state_q_over_p)
       =varE*q_over_p_sq*q_over_p_sq/beta2;
   }			      
@@ -1353,9 +1368,10 @@ jerror_t DTrackFitterKalman::CalcDeriv(double ds,const DVector3 &pos,
     =qpfactor*q_over_pt*sinl*temp1;
   if (fabs(dEdx)>0){    
     double p=pt/cosl;
-    double E=sqrt(p*p+mass2);
+    double p_sq=p*p;
+    double E=sqrt(p_sq+mass2);
     if (1./p<Q_OVER_P_MAX)
-      D1(state_q_over_pt,0)+=-q_over_pt*E/p/p*dEdx;
+      D1(state_q_over_pt,0)+=-q_over_pt*E/p_sq*dEdx;
   }
   D1(state_phi,0)
     =qpfactor*(Bx*cosphi*sinl+By*sinphi*sinl-Bz*cosl);
@@ -1679,15 +1695,11 @@ jerror_t DTrackFitterKalman::GetProcessNoiseCentral(double ds,double Z,
     Q(state_q_over_pt,state_tanl)=Q(state_tanl,state_q_over_pt)
       =q_over_pt*tanl*one_plus_tanl2;
     Q(state_D,state_D)=ds*ds/3.;
-    Q(state_D,state_tanl)=Q(state_tanl,state_D)
-      //=-my_ds_2*cos(Sc(state_phi,0))*(one_plus_tanl2);
-      =my_ds_2*one_plus_tanl2;
-    Q(state_D,state_phi)=Q(state_phi,state_D)
-      //my_ds_2*sin(Sc(state_phi,0))*sqrt(one_plus_tanl2);
-      =my_ds_2*sqrt(one_plus_tanl2);
-    Q(state_D,state_q_over_pt)=Q(state_q_over_pt,state_D)
-      //      -my_ds_2*cos(Sc(state_phi,0))*tanl;
-      =my_ds_2*q_over_pt*tanl;
+    Q(state_D,state_phi)=Q(state_phi,state_D)=my_ds_2*sqrt(one_plus_tanl2);
+    Q(state_z,state_tanl)=Q(state_tanl,state_z)=Q(state_phi,state_D);
+    Q(state_z,state_q_over_pt)=Q(state_q_over_pt,state_z)
+      =my_ds_2*q_over_pt*sin(atan(tanl));
+    Q(state_z,state_z)=Q(state_D,state_D)/one_plus_tanl2;
 
     double p2=one_plus_tanl2/q_over_pt/q_over_pt;
     double F=MOLIERE_FRACTION; // Fraction of Moliere distribution to be taken into account
@@ -1731,12 +1743,10 @@ jerror_t DTrackFitterKalman::GetProcessNoise(double ds,double Z,
    Q(state_ty,state_ty)=one_plus_ty2*one_plus_tsquare;
    Q(state_tx,state_ty)=Q(state_ty,state_tx)=tx*ty*one_plus_tsquare;
    Q(state_x,state_x)=ds*ds/3.;
-   Q(state_y,state_y)=ds*ds/3.;
+   Q(state_y,state_y)=Q(state_x,state_x);
    Q(state_y,state_ty)=Q(state_ty,state_y)
-     //      =my_ds_2*tx*(one_plus_tsquare)/sqrt(tsquare);
      = my_ds_2*sqrt(one_plus_tsquare*one_plus_ty2);
    Q(state_x,state_tx)=Q(state_tx,state_x)
-     // =my_ds_2*ty*sqrt((one_plus_tsquare)/(tsquare));
      = my_ds_2*sqrt(one_plus_tsquare*one_plus_tx2);
    
    double F=MOLIERE_FRACTION; // Fraction of Moliere distribution to be taken into account
@@ -1769,15 +1779,15 @@ double DTrackFitterKalman::GetdEdx(double q_over_p,double rho_Z_over_A,
   if (beta2<EPS) beta2=EPS;
 
   double Me=0.000511; //GeV
-  double m_ratio=Me/MASS;
+  double two_Me_betagamma_sq=2.*Me*betagamma2;
   double Tmax
-    =2.*Me*betagamma2/(1.+2.*sqrt(1.+betagamma2)*m_ratio+m_ratio*m_ratio);
+    =two_Me_betagamma_sq/(1.+2.*sqrt(1.+betagamma2)*m_ratio+m_ratio_sq);
 
   // density effect
   double delta=CalcDensityEffect(p,MASS,rho_Z_over_A,LnI);
 
-  return -0.0001535*rho_Z_over_A/beta2*(log(2.*Me*betagamma2*Tmax)
-					-2.*LnI -2.*beta2-delta);
+  return 0.0001535*rho_Z_over_A/beta2*(-log(two_Me_betagamma_sq*Tmax)
+					+2.*LnI +2.*beta2+delta);
 }
 
 // Calculate the variance in the energy loss in a Gaussian approximation.
@@ -1785,17 +1795,12 @@ double DTrackFitterKalman::GetdEdx(double q_over_p,double rho_Z_over_A,
 // approximated by Gamma=4.018 Xi, where
 //      Xi=0.1535*density*(Z/A)*x/beta^2  [MeV]
 // To convert that to the sigma of a Gaussian, use Gamma=2.354*sigma.
-double DTrackFitterKalman::GetEnergyVariance(double ds,double q_over_p,
+double DTrackFitterKalman::GetEnergyVariance(double ds,double beta2,
 					     double rho_Z_over_A){
   if (rho_Z_over_A<=0.) return 0.;
   //return 0;
- 
-  double beta2=1./(1.+mass2*q_over_p*q_over_p);
-  if (beta2<EPS) beta2=EPS;
-
-  const double full_width_half_maximum_scale_factor=4.018;
-  double sigma=0.0001535*full_width_half_maximum_scale_factor/2.354
-    *rho_Z_over_A/beta2;
+  // Scale factor = 4.018/2.354 (Gamma -> sigma)
+  double sigma=0.0001535*1.70688*rho_Z_over_A/beta2;
   return sigma*sigma;
 }
 
@@ -3235,6 +3240,7 @@ jerror_t DTrackFitterKalman::KalmanForward(double anneal_factor, DMatrix &S,
       double ty=S(state_ty,0);
       double du=x*cosa-y*sina-u;
       double tu=tx*cosa-ty*sina;
+      double one_plus_tu2=1.+tu*tu;
       double alpha=atan(tu);
       double cosalpha=cos(alpha);
       double sinalpha=sin(alpha);
@@ -3268,16 +3274,20 @@ jerror_t DTrackFitterKalman::KalmanForward(double anneal_factor, DMatrix &S,
 	V(1,1)=fdc_y_variance(alpha,drift);
 
 	// Variance due to Lorentz correction
+	double x2=x*x;
+	double y2=y*y;
 	double var_alpha
 	  =(C(state_tx,state_tx)*cosa*cosa+C(state_ty,state_ty)*sina*sina
-	    -2.*sina*cosa*C(state_tx,state_ty))/(1.+tu*tu)/(1.+tu*tu);
-	double var_phi=(y*y*C(state_x,state_x)+x*x*C(state_y,state_y)
-			-2*x*y*C(state_x,state_y))/(x*x+y*y)/(x*x+y*y);
+	    -2.*sina*cosa*C(state_tx,state_ty))/one_plus_tu2/one_plus_tu2;
+	double var_phi=(y2*C(state_x,state_x)+x2*C(state_y,state_y)
+			-2*x*y*C(state_x,state_y))/(x2+y2)/(x2+y2);
 	
-	V(1,1)+=dv*dv*V(0,0)/drift/drift
-	  +drift*drift*(nz*cosalpha*cosphi+nr*sinalpha)
-	  *(nz*cosalpha*cosphi+nr*sinalpha)*var_alpha
-	  +drift*drift*nz*nz*sinalpha*sinalpha*sinphi*sinphi*var_phi;
+	double drift2=drift*drift;	
+	double nz_cosa_cosphi_plus_nr_sina=nz*cosalpha*cosphi+nr*sinalpha;
+	V(1,1)+=dv*dv*V(0,0)/drift2
+	  +drift2*nz_cosa_cosphi_plus_nr_sina*nz_cosa_cosphi_plus_nr_sina
+	  *var_alpha
+	  +drift2*nz*nz*sinalpha*sinalpha*sinphi*sinphi*var_phi;
 	
 	V(1,1)*=anneal_factor;
 	
@@ -3290,9 +3300,7 @@ jerror_t DTrackFitterKalman::KalmanForward(double anneal_factor, DMatrix &S,
       H(1,state_x)=H_T(state_x,1)=sina;
       H(0,state_y)=H_T(state_y,0)=-sina*cosalpha;
       H(1,state_y)=H_T(state_y,1)=cosa;
-      double temp=tx*cosa-ty*sina;
-      double one_plus_temp2=1.+temp*temp;
-      double factor=du*temp/sqrt(one_plus_temp2)/one_plus_temp2;
+      double factor=du*tu/sqrt(one_plus_tu2)/one_plus_tu2;
       H(0,state_ty)=H_T(state_ty,0)=sina*factor;
       H(0,state_tx)=H_T(state_tx,0)=-cosa*factor;
 
