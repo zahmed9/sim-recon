@@ -16,6 +16,7 @@
 #include <HDGEOMETRY/DMagneticFieldMap.h>
 #include <HDGEOMETRY/DRootGeom.h>
 #include <HDGEOMETRY/DGeometry.h>
+#include <PID/DPhoton.h>
 #include <PID/DKinematicData.h>
 #include <DCoordinateSystem.h>
 #include <TRACKING/DReferenceTrajectory.h>
@@ -69,11 +70,12 @@ class MyProcessor:public JEventProcessor
 		
 		class DGraphicSet{
 			public:
-				DGraphicSet(Color_t c, poly_type t, double s):color(c),type(t),size(s){}
+				DGraphicSet(Color_t c, poly_type t, double s):color(c),type(t),size(s),marker_style(8){}
 				vector<TVector3> points;
 				Color_t color;
 				poly_type type; // 0=markers, 1=lines
 				double size;
+				int marker_style;
 		};
 		vector<DGraphicSet> graphics;
 		void FillGraphics(void);
@@ -101,6 +103,7 @@ class MyProcessor:public JEventProcessor
 		string MATERIAL_MAP_MODEL;
 		
 		void AddKinematicDataTrack(const DKinematicData* kd, int color, double size);
+		void GetIntersectionWithCalorimeter(const DKinematicData* kd, DVector3 &pos, DPhoton::PhotonTag &who);
 		
 		//DTrackCandidate_factory* factory;
 		//void DrawTrackXY(const DKinematicData *, int color, float size);

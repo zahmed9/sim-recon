@@ -197,7 +197,7 @@ trk_mainframe::trk_mainframe(hdv_mainframe *hdvmf, const TGWindow *p, UInt_t w, 
 				this->datatype.push_back(datatype);
 				datatype->Resize(120,20);
 				datatype->SetUniqueID(i);
-				FillDataTypeComboBox(datatype, i==0 ? "DParticle":"<none>");
+				FillDataTypeComboBox(datatype, i==0 ? "DTrackTimeBased":"<none>");
 
 				datatype->Connect("Selected(Int_t, Int_t)","trk_mainframe", this, "DoTagMenuUpdate(Int_t, Int_t)");
 				datatype->Connect("Selected(Int_t)","trk_mainframe", this, "DoRequestFocus(Int_t)");
@@ -378,13 +378,13 @@ void trk_mainframe::FillDataTypeComboBox(TGComboBox* cb, const string &def)
 	/// Ideally, this would feel out the factories whose
 	/// data types are based on DKinematicData. This is
 	/// not currently possbile with JANA though so we have
-	/// to simply add DTrack, DTrackCandidate, and DMCThrown
+	/// to simply add DTrackTimeBased, DTrackWireBased, DTrackCandidate, and DMCThrown
 	/// explicitly.
 
 	vector<string> facnames;
 	if(def=="<none>")facnames.push_back(def);
-	facnames.push_back("DParticle");
-	facnames.push_back("DTrack");
+	facnames.push_back("DTrackTimeBased");
+	facnames.push_back("DTrackWireBased");
 	facnames.push_back("DTrackCandidate");
 	facnames.push_back("DMCThrown");
 	

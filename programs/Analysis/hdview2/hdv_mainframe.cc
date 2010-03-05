@@ -345,6 +345,8 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 				hitdrawopts->AddFrame(checkbuttons["bcal"], lhints);
 				hitdrawopts->AddFrame(checkbuttons["bcaltruth"], lhints);
 				
+				TGTextButton *moreOptions	= new TGTextButton(hitdrawopts,	"More options");
+				hitdrawopts->AddFrame(moreOptions, lhints);
 
 	//========== BOT FRAME ============
 	TGGroupFrame *trackinfo = new TGGroupFrame(botframe, "Track Info", kHorizontalFrame);
@@ -440,6 +442,7 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 	delay->Connect("Selected(Int_t)","hdv_mainframe", this, "DoSetDelay(Int_t)");
 	
 	trackinspector->Connect("Clicked()","hdv_mainframe", this, "DoOpenTrackInspector()");
+	moreOptions->Connect("Clicked()","hdv_mainframe", this, "DoOpenOptionsWindow()");
 	tofinspector->Connect("Clicked()","hdv_mainframe", this, "DoOpenTOFInspector()");
 	fcalinspector->Connect("Clicked()","hdv_mainframe", this, "DoOpenFCALInspector()");
 	bcalinspector->Connect("Clicked()","hdv_mainframe", this, "DoOpenBCALInspector()");
@@ -472,6 +475,7 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 
 	// Pointers to optional daughter windows
 	trkmf = NULL;
+	optionsmf = new hdv_optionsframe(this, NULL, 100, 100);
 
 	// Set up timer to call the DoTimer() method repeatedly
 	// so events can be automatically advanced.
@@ -750,6 +754,19 @@ void hdv_mainframe::DoOpenTrackInspector(void)
 }
 
 //-------------------
+// DoOpenOptionsWindow
+//-------------------
+void hdv_mainframe::DoOpenOptionsWindow(void)
+{
+	if(optionsmf==NULL){
+		optionsmf = new hdv_optionsframe(this, NULL, 100, 100);
+	}else{
+		optionsmf->RaiseWindow();
+		optionsmf->RequestFocus();
+	}
+}
+
+//-------------------
 // DoOpenTOFInspector
 //-------------------
 void hdv_mainframe::DoOpenTOFInspector(void)
@@ -779,6 +796,14 @@ void hdv_mainframe::DoOpenBCALInspector(void)
 void hdv_mainframe::DoClearTrackInspectorPointer(void)
 {
 	trkmf = NULL;
+}
+
+//-------------------
+// DoClearOptionsWindowPointer
+//-------------------
+void hdv_mainframe::DoClearOptionsWindowPointer(void)
+{
+	optionsmf = NULL;
 }
 
 //-------------------
@@ -943,9 +968,9 @@ void hdv_mainframe::DoMyRedraw(void)
 			sA->SetMarkerSize(iter->size);
 			sB->SetMarkerSize(iter->size);
 			eA->SetMarkerSize(iter->size);
-			sA->SetMarkerStyle(8);
-			sB->SetMarkerStyle(8);
-			eA->SetMarkerStyle(8);
+			sA->SetMarkerStyle(iter->marker_style);
+			sB->SetMarkerStyle(iter->marker_style);
+			eA->SetMarkerStyle(iter->marker_style);
 			FillPoly(sA, sB, eA, iter->points); // in hdv_mainframe.h
 		}else{
 			// Lines
@@ -979,6 +1004,9 @@ void hdv_mainframe::DoMyRedraw(void)
 	if(coordinatetype == COORD_XY){
 		for(unsigned int i=0; i<gMYPROC->graphics_xyA.size(); i++){
 			graphics_endA.push_back(gMYPROC->graphics_xyA[i]);
+		}
+		for(unsigned int i=0; i<gMYPROC->graphics_xyB.size(); i++){
+			graphics_endB.push_back(gMYPROC->graphics_xyB[i]);
 		}
 	}
 
@@ -1809,6 +1837,14 @@ bool hdv_mainframe::GetCheckButton(string who)
 	map<string, TGCheckButton*>::iterator iter = checkbuttons.find(who);
 	if(iter==checkbuttons.end())return false;
 	return iter->second->GetState()==kButtonDown;
+}
+
+//-------------------
+// AddCheckButtons
+//-------------------
+void hdv_mainframe::AddCheckButtons(map<string, TGCheckButton*> &checkbuttons)
+{
+	this->checkbuttons.insert(checkbuttons.begin(), checkbuttons.end());
 }
 
 //-------------------

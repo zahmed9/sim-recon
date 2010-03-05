@@ -29,8 +29,10 @@
 #include <TTimer.h>
 
 class trk_mainframe;
+class hdv_optionsframe;
 #ifndef __CINT__
 #include "trk_mainframe.h"
+#include "hdv_optionsframe.h"
 #endif
 
 class hdv_mainframe:public TGMainFrame {
@@ -57,11 +59,13 @@ class hdv_mainframe:public TGMainFrame {
 		void DoTimer(void);
 		
 		void DoOpenTrackInspector(void);
+		void DoOpenOptionsWindow(void);
 		void DoOpenTOFInspector(void);
 		void DoOpenFCALInspector(void);
 		void DoOpenBCALInspector(void);
 		
 		void DoClearTrackInspectorPointer(void);
+		void DoClearOptionsWindowPointer(void);
 		void DoClearTOFInspectorPointer(void);
 		void DoClearFCALInspectorPointer(void);
 		void DoClearBCALInspectorPointer(void);
@@ -103,6 +107,7 @@ class hdv_mainframe:public TGMainFrame {
 		void SetChargedTrackFactories(vector<string> &facnames);
 		
 		bool GetCheckButton(string who);
+		void AddCheckButtons(map<string, TGCheckButton*> &checkbuttons);
 		const char* GetFactoryTag(string who);
 		void GetReconFactory(string &name, string &tag);
 		TPolyLine* GetFCALPolyLine(int channel);
@@ -117,6 +122,7 @@ class hdv_mainframe:public TGMainFrame {
 	private:
 	
 		trk_mainframe *trkmf;
+		hdv_optionsframe *optionsmf;
 	
 		TRootEmbeddedCanvas *sideviewA;
 		TRootEmbeddedCanvas *sideviewB;
@@ -166,6 +172,12 @@ class hdv_mainframe:public TGMainFrame {
 		
 	ClassDef(hdv_mainframe,1)
 };
+
+// The following line is supposed to avoid the warning messages about:
+// "dereferencing type-punned pointer will break strict-aliasing rules"
+#ifdef __CINT__
+#pragma link C++ class hdv_mainframe+;
+#endif
 
 //---------------
 // FillPoly
