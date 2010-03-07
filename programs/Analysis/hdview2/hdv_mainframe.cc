@@ -414,7 +414,10 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 			for(int i=0; i<100; i++)reconfactory->AddEntry("a",i); // For some reason, this is needed for ROOT >5.14 (??!!!) real entries are filled in later
 			reconinfo->AddFrame(reconfactory, lhints);
 
-
+	// Pointers to optional daughter windows (these must be done before ReadPreferences in
+	// order for the options they implement to be filled into checkbuttons)
+	trkmf = NULL;
+	optionsmf = new hdv_optionsframe(this, NULL, 100, 100);
 
 	//&&&&&&&&&&&&&&&& Defaults
 	ReadPreferences();
@@ -472,10 +475,6 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 	timetracksfactory->Connect("Selected(Int_t)","hdv_mainframe", this, "DoMyRedraw()");	
 	chargedtracksfactory->Connect("Selected(Int_t)","hdv_mainframe", this, "DoMyRedraw()");
 	reconfactory->Connect("Selected(Int_t)","hdv_mainframe", this, "DoUpdateTrackLabels()");
-
-	// Pointers to optional daughter windows
-	trkmf = NULL;
-	optionsmf = new hdv_optionsframe(this, NULL, 100, 100);
 
 	// Set up timer to call the DoTimer() method repeatedly
 	// so events can be automatically advanced.
