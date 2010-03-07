@@ -21,8 +21,10 @@ class DFCALPhoton_factory:public JFactory<DFCALPhoton>{
 	
 	private:
 		jerror_t evnt(JEventLoop *eventLoop, int eventnumber);	///< Invoked via JEventProcessor virtual method
+		jerror_t brun(JEventLoop *loop, int runnumber);
 
-                DFCALPhoton* makePhoton(const DFCALCluster* cluster); 
+		DFCALPhoton* makePhoton(vector<const DFCALCluster*> &clusters);
+		void GetCorrectedEnergyAndPosition(const DFCALCluster* cluster, double &Ecorrected, DVector3 &pos_corrected, double &errZ);
 
 		double VERTEX_X;
 		double VERTEX_Y;
@@ -46,7 +48,8 @@ class DFCALPhoton_factory:public JFactory<DFCALPhoton>{
 		double FCAL_CRITICAL_ENERGY;
 		double FCAL_SHOWER_OFFSET;
 
-
+		// Calibration constants
+		double MIN_CLUSTER_SEPARATION; // minimum separation between 2 clusters for them NOT to be merged
 };
 
 

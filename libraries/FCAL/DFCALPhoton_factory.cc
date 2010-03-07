@@ -15,6 +15,7 @@ using namespace std;
 //#include "DFCALCluster.h"
 #include "DFCALHit.h"
 #include <JANA/JEvent.h>
+#include <JANA/JApplication.h>
 using namespace jana;
 
 //----------------
@@ -74,50 +75,181 @@ DFCALPhoton_factory::DFCALPhoton_factory()
 	
 }
 
+//------------------
+// brun
+//------------------
+jerror_t DFCALPhoton_factory::brun(JEventLoop *loop, int runnumber)
+{
+	// Get calibration constants
+	map<string, double> cluster_merging;
+	loop->GetCalib("FCAL/cluster_merging", cluster_merging);
+	if(cluster_merging.find("MIN_CLUSTER_SEPARATION")!=cluster_merging.end()){
+		MIN_CLUSTER_SEPARATION = cluster_merging["MIN_CLUSTER_SEPARATION"];
+		if(debug_level>0)jout<<"MIN_CLUSTER_SEPARATION = "<<MIN_CLUSTER_SEPARATION<<endl;
+	}else{
+		jerr<<"Unable to get from MIN_CLUSTER_SEPARATION FCAL/cluster_merging in Calib database!"<<endl;
+		loop->GetJApplication()->Quit();
+	}
+
+	return NOERROR;
+}
 
 //------------------
 // evnt
-//    Trivial calorimeter reconstruction. (D. Lawrence)
 //------------------
 jerror_t DFCALPhoton_factory::evnt(JEventLoop *eventLoop, int eventnumber)
 {
 	vector<const DFCALCluster*> fcalClusters;
 	eventLoop->Get(fcalClusters);
 
-        for ( unsigned int i = 0; i < fcalClusters.size(); i++ ) {
+	// Return immediately if there isn't even one cluster
+	if(fcalClusters.size()<1)return NOERROR;
+	
+	// Here we try and merge FCAL clusters simply by looking to see if they are
+	// within a certain distance of one another. We do this by first looping
+	// through the list of clusters as many times as is needed until we get
+	// a set of lists for which all clusters are at least MIN_CLUSTER_SEPARATION
+	// from all clusters in all other lists.
+	
+	// Start by filling out out lists with one cluster each
+	vector<vector<const DFCALCluster*> > merge_lists;
+	for ( unsigned int i = 0; i < fcalClusters.size(); i++ ) {
+		vector<const DFCALCluster*> merge_list;
+		merge_list.push_back(fcalClusters[i]);
+		merge_lists.push_back(merge_list);
+	}
+	
+	// Loop until we find no more lists to merge
+	bool clusters_were_merged;
+	do{
+		clusters_were_merged = false;
+		
+		// Loop over all pairs of cluster lists
+		for(unsigned int i=0; i<merge_lists.size(); i++){
+			vector<const DFCALCluster*> &merge_list1 = merge_lists[i];
+			for(unsigned int j=i+1; j<merge_lists.size(); j++){
+				vector<const DFCALCluster*> &merge_list2 = merge_lists[j];
+				
+				// Loop over all elements of both lists to see if any are
+				// within MIN_CLUSTER_SEPARATION.
+				for(unsigned int k=0; k<merge_list1.size(); k++){
+					DVector3 pos1 = merge_list1[k]->getCentroid();
+					for(unsigned int m=0; m<merge_list2.size(); m++){
+						DVector3 pos2 = merge_list2[m]->getCentroid();
+						
+						double separation_xy = (pos1-pos2).Perp();
+						if(separation_xy<MIN_CLUSTER_SEPARATION){
+							// Phew! if we got here then we need to merge the 2 clusters
+							// The easiest way to do this is to just add all clusters
+							// from merge_list2 to merge_list1 and clear merge_list2.
+							// Then, we ignore empty lists below.
+							merge_list1.insert(merge_list1.end(), merge_list2.begin(), merge_list2.end());
+							merge_list2.clear();
+							clusters_were_merged = true;
+						}
+					}
+					if(clusters_were_merged)break; // we'll need to do the outer "do" loop again anyway so bail now
+				}
+				if(clusters_were_merged)break; // we'll need to do the outer "do" loop again anyway so bail now
+			}
+			if(clusters_were_merged)break; // we'll need to do the outer "do" loop again anyway so bail now
+		}
+	
+	}while(clusters_were_merged);
 
-                DFCALPhoton* fcalPhoton = makePhoton( fcalClusters[i] );
+	// Now we loop over the lists of clusters to merge and make a
+	// DFCALPhoton from the list. Note that it may well be that each
+	// list is still only 1 element long!
+	for ( unsigned int i = 0; i < merge_lists.size(); i++ ) {
+		vector<const DFCALCluster*> &merge_list = merge_lists[i];
+		if(merge_list.size()<1)continue; // ignore empty lists (see comment above)
+	
+		DFCALPhoton* fcalPhoton = makePhoton( merge_list );
 
-                if ( fcalPhoton->getEnergy() <= 0  ) {
-                    cout << "Deleting fcalPhoton " << endl;
-                    delete fcalPhoton; 
-                    continue;
-                }
-                else {
-
-                	_data.push_back(fcalPhoton);
-
-                }
-                  
-
-       } 
+		if ( fcalPhoton->getEnergy() <= 0  ) {
+		  cout << "Deleting fcalPhoton " << endl;
+		  delete fcalPhoton; 
+		  continue;
+		}else {
+			_data.push_back(fcalPhoton);
+		}
+	} 
 
 	return NOERROR;
 }
 
 
-// Non-linear and depth corrections should be fixed within DFCALPhoton member functions
-DFCALPhoton* DFCALPhoton_factory::makePhoton(const DFCALCluster* cluster) 
+//--------------------------------
+// makePhoton
+//--------------------------------
+DFCALPhoton* DFCALPhoton_factory::makePhoton(vector<const DFCALCluster*> &clusters) 
 {
 
-// copy cluster time 
-       double cTime = cluster->getTime();
-       
+	// Loop over list of DFCALCluster objects and calculate the "Non-linear" corrected
+	// energy and position for each. We'll use a logarithmic energy-weighting to 
+	// find the final position and error.
+	double earliest_time = 1.0E6; // initialize to something large
+	double Ecorrected_total = 0.0;
+	DVector3 posInCal(0.0, 0.0, 0.0);
+	DVector3 posErr2(0.0, 0.0, 0.0);
+	double weight_sum = 0.0;
+	vector<const DFCALCluster*> clusters_used; // we may exclude some clusters with very small weights
+	for(unsigned int i=0; i<clusters.size(); i++){
+	
+		// Get earliest time (is this the right thing to do?)
+		double cTime = clusters[i]->getTime();
+		if(cTime<earliest_time)earliest_time=cTime;
+ 		
+		// Add errors in quadrature using weight
+		double errX = clusters[i]->getRMS_x();
+		double errY = clusters[i]->getRMS_y();
+		double errZ;  // will be filled by call to GetCorrectedEnergyAndPosition()
+		
+		// Get corrected energy, position, and errZ
+		double Ecorrected;
+		DVector3 pos_corrected;
+		GetCorrectedEnergyAndPosition(clusters[i], Ecorrected, pos_corrected, errZ);
+		
+		double weight = log(Ecorrected/0.001);
+		if(weight<0.0)continue; // ignore clusters with less than 1MeV
+		
+		Ecorrected_total += Ecorrected;
+		posInCal += weight*pos_corrected;
+		posErr2 += weight*DVector3(errX*errX, errY*errY, errZ*errZ);
+		weight_sum += weight;
+		clusters_used.push_back(clusters[i]);
+	}
+	
+	posInCal *= (1.0/weight_sum);
+	posErr2 *= (1.0/weight_sum);
+	
+	// posErr2 contains errors squared, convert to errors using sqrt
+	DVector3 posErr(sqrt(posErr2.X()), sqrt(posErr2.Z()), sqrt(posErr2.Z()));
+	
+	// Make the DFCALPhoton object
+	DFCALPhoton* photon = new DFCALPhoton;
+
+	photon->setEnergy( Ecorrected_total );
+	photon->setMom3( Ecorrected_total, posInCal - DVector3(VERTEX_X, VERTEX_Y, VERTEX_Z) );
+	photon->setMom4();
+	photon->setPosition( posInCal );   
+	photon->setPosError(posErr.X(), posErr.Y(), posErr.Z() );
+	photon->setTime ( earliest_time );
+
+	return photon;
+}
+
+//--------------------------------
+// GetCorrectedEnergyAndPosition
+//
+// Non-linear and depth corrections should be fixed within DFCALPhoton member functions
+//--------------------------------
+void DFCALPhoton_factory::GetCorrectedEnergyAndPosition(const DFCALCluster* cluster, double &Ecorrected, DVector3 &pos_corrected, double &errZ)
+{
 // Non-linar energy correction are done here
        int MAXITER = 1000;
 
-       DVector3  vertex( VERTEX_X, VERTEX_Y, VERTEX_Z) ;
-       DVector3  posInCal = cluster->getCentroid();
+        DVector3  posInCal = cluster->getCentroid();
        float x0 = posInCal.Px();
        float y0 = posInCal.Py();
        float hrad = sqrt(x0*x0+y0*y0);
@@ -228,16 +360,14 @@ DFCALPhoton* DFCALPhoton_factory::makePhoton(const DFCALCluster* cluster)
           cout << "Warning: DFCALPhoton : parameter A" << A << " is not valid" << endl; 
        }
 
-       DFCALPhoton* photon = new DFCALPhoton;
-       photon->setEnergy( Egamma );
 
 // then depth corrections 
 
        if ( Egamma > 0 ) { 
 
-           float xV = vertex.X();
-           float yV = vertex.Y();
-           float zV = vertex.Z();
+           float xV = VERTEX_X;
+           float yV = VERTEX_Y;
+           float zV = VERTEX_Z;
            double z0 = DFCALGeometry::fcalFaceZ() - zV;
            double zMax = (FCAL_RADIATION_LENGTH*(
                        FCAL_SHOWER_OFFSET + log(Egamma/FCAL_CRITICAL_ENERGY)));
@@ -258,20 +388,11 @@ DFCALPhoton* DFCALPhoton_factory::makePhoton(const DFCALCluster* cluster)
            }
     
            posInCal.SetZ( zed + zV );
+			  errZ = zed - zed1;
+		}
 
-// Set momentum, in GeV.
-           photon->setMom3( Egamma, posInCal - vertex );
-           photon->setMom4();
-
-	   photon->setPosition( posInCal );   
-           photon->setPosError(cluster->getRMS_x(), cluster->getRMS_y(), fabs( zed-zed1 ) );
-
-           photon->setTime ( cTime );
-
-        }
-
-        return photon;
-
+		Ecorrected = Egamma;
+		pos_corrected = posInCal;
 }
 
 
