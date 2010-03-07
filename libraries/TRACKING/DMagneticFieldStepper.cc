@@ -384,6 +384,7 @@ bool DMagneticFieldStepper::SwimToPlane(DVector3 &mypos, DVector3 &mymom, const 
 	// a large or non-finite number. Check for this here. If that
 	// is the case, switch to using a linear approximation between
 	// the current and last positions
+	bool use_straight_track_projection = false; // used if our quadratic approx. fails
 	if(finite(dz_dphi) && fabs(dz_dphi)<1.0E8){
 
 		DVector3 pos_diff = mypos - origin;
@@ -393,25 +394,37 @@ bool DMagneticFieldStepper::SwimToPlane(DVector3 &mypos, DVector3 &mymom, const 
 		double D = pos_diff.Dot(norm);
 
 		double alpha = -A*Ro/2.0;
-		double beta = B*Ro + C*dz_dphi;
 		
-		// now we solve the quadratic equation for phi. It's not obvious
-		// a priori which root will be correct so we calculate both and
-		// choose the one closer to phi=0
-		double d = sqrt(beta*beta - 4.0*alpha*D);
-		double phi1 = (-beta + d)/(2.0*alpha);
-		double phi2 = (-beta - d)/(2.0*alpha);
-		double phi = fabs(phi1)<fabs(phi2) ? phi1:phi2;
-		
-		// Calculate position in plane
-		mypos += -Ro*phi*phi/2.0*xdir + Ro*phi*ydir + dz_dphi*phi*zdir;
+		// If alpha is zero here (which it is if "norm" happens to be perpendicular
+		// to "xdir") then we will need to fall back to a linear projection
+		if(alpha!=0.0 && finite(alpha)){
 
-		// Calculate momentum in plane
-		mom.Rotate(phi, zdir);
-		
-		double delta =  sqrt(pow(Ro*phi*phi/2.0, 2.0) + pow(Ro*phi, 2.0) + pow(dz_dphi*phi, 2.0));
-		s += (phi<0 ? -delta:+delta);
+			double beta = B*Ro + C*dz_dphi;
+			
+			// now we solve the quadratic equation for phi. It's not obvious
+			// a priori which root will be correct so we calculate both and
+			// choose the one closer to phi=0
+			double d = sqrt(beta*beta - 4.0*alpha*D);
+			double phi1 = (-beta + d)/(2.0*alpha);
+			double phi2 = (-beta - d)/(2.0*alpha);
+			double phi = fabs(phi1)<fabs(phi2) ? phi1:phi2;
+			
+			// Calculate position in plane
+			mypos += -Ro*phi*phi/2.0*xdir + Ro*phi*ydir + dz_dphi*phi*zdir;
+
+			// Calculate momentum in plane
+			mom.Rotate(phi, zdir);
+			
+			double delta =  sqrt(pow(Ro*phi*phi/2.0, 2.0) + pow(Ro*phi, 2.0) + pow(dz_dphi*phi, 2.0));
+			s += (phi<0 ? -delta:+delta);
+		}else{
+			use_straight_track_projection = true;
+		}
 	}else{
+		use_straight_track_projection = true;
+	}
+	
+	if(use_straight_track_projection){
 		// Treat as straight track.
 		double num = norm.Dot(origin - last_pos);
 		double den = norm.Dot( mypos   - last_pos);
