@@ -140,11 +140,14 @@ void DGeometry::FindNodes(string xpath, vector<xpathparsed_t> &matched_xpaths) c
 //---------------------------------
 // FindMatKalman - Kalman filter needs slightly different set of parms.
 //---------------------------------
-jerror_t DGeometry::FindMatKalman(DVector3 &pos, double &Z,double &rhoZ_overA, 
+jerror_t DGeometry::FindMatKalman(DVector3 &pos, double &Z,
+				  double &KrhoZ_overA, 
+				  double &rhoZ_overA, 
 				  double &LnI) const
 {
 	for(unsigned int i=0; i<materialmaps.size(); i++){
-	  jerror_t err = materialmaps[i]->FindMatKalman(pos,Z,rhoZ_overA,LnI);
+	  jerror_t err = materialmaps[i]->FindMatKalman(pos,Z,KrhoZ_overA,
+							rhoZ_overA,LnI);
 	  if(err==NOERROR)return NOERROR;
 	}
 	return RESOURCE_UNAVAILABLE;

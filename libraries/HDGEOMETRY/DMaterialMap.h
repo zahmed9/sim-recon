@@ -20,7 +20,8 @@ class DMaterialMap{
 				double Density ;
 				double RadLen ;
 				double LogI; // log(mean excitation energy
-				double rhoZ_overA;			// density*Z/A
+				double rhoZ_overA; // density*Z/A
+				double KrhoZ_overA; // 0.1535*density*Z/A
 				double rhoZ_overA_logI;	// density*Z/A * log(mean excitation energy)
 		};
 		
@@ -28,6 +29,7 @@ class DMaterialMap{
 		jerror_t FindMat(DVector3 &pos, double &rhoZ_overA, double &rhoZ_overA_logI, double &RadLen) const;
 		jerror_t FindMat(DVector3 &pos, double &density, double &A, double &Z, double &RadLen) const;
 		jerror_t FindMatKalman(DVector3 &pos,double &Z,
+				       double &K_rho_Z_over_A,
 				       double &rho_Z_over_A,double &LogI) const;
 		bool IsInMap(DVector3 &pos) const;
 
