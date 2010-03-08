@@ -109,6 +109,7 @@ class DTrackCandidate_factory_CDC:public JFactory<DTrackCandidate>{
 
 		vector<int> superlayer_boundaries;
 
+		unsigned int MAX_ALLOWED_CDC_HITS;
 		unsigned int MAX_SUBSEED_STRAW_DIFF;
 		unsigned int MIN_SEED_HITS;
 		unsigned int MAX_SUBSEED_LINKED_HITS;

@@ -51,6 +51,7 @@ bool CDCSortByStereoPhiincreasing(DTrackCandidate_factory_CDC::DCDCTrkHit* const
 //------------------
 jerror_t DTrackCandidate_factory_CDC::init(void)
 {
+	MAX_ALLOWED_CDC_HITS = 200;
 	MAX_SUBSEED_STRAW_DIFF = 1;
 	MIN_SEED_HITS  = 2;
 	MAX_SUBSEED_LINKED_HITS = 12;
@@ -83,6 +84,7 @@ jerror_t DTrackCandidate_factory_CDC::init(void)
 //------------------
 jerror_t DTrackCandidate_factory_CDC::brun(JEventLoop *eventLoop, int runnumber)
 {
+	gPARMS->SetDefaultParameter("TRKFIND:MAX_ALLOWED_CDC_HITS", MAX_ALLOWED_CDC_HITS);
 	gPARMS->SetDefaultParameter("TRKFIND:MAX_SUBSEED_STRAW_DIFF", MAX_SUBSEED_STRAW_DIFF);
 	gPARMS->SetDefaultParameter("TRKFIND:MIN_SEED_HITS", MIN_SEED_HITS);
 	gPARMS->SetDefaultParameter("TRKFIND:MAX_SUBSEED_LINKED_HITS", MAX_SUBSEED_LINKED_HITS);
@@ -259,7 +261,7 @@ void DTrackCandidate_factory_CDC::GetCDCHits(JEventLoop *loop)
 	if(cdctrackhits.size()==0)return;
 	
 	// If there are too many hits, bail with a warning message
-	if(cdctrackhits.size()>200){
+	if(cdctrackhits.size()>MAX_ALLOWED_CDC_HITS){
 		_DBG_<<"Too many hits in CDC! Track finding in CDC bypassed for event "<<loop->GetJEvent().GetEventNumber()<<endl;
 		cdctrackhits.clear();
 		return;
