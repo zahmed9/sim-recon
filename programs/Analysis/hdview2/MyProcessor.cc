@@ -252,11 +252,13 @@ void MyProcessor::FillGraphics(void)
 				double dist1 = cdctrackhits[i]->dist;
 				TEllipse *e = new TEllipse(x, y, dist1, dist1);
 				e->SetLineColor(38);
+				e->SetFillStyle(0);
 				graphics_xyA.push_back(e);
 
 				double dist2 = dist1 - 4.0*55.0E-4; // what if our TOF was 4ns?
 				e = new TEllipse(x, y, dist2, dist2);
 				e->SetLineColor(38);
+				e->SetFillStyle(0);
 				graphics_xyA.push_back(e);
 			}
 		}
@@ -596,6 +598,8 @@ void MyProcessor::FillGraphics(void)
 			gset.points.push_back(pos);
 			graphics.push_back(gset);
 			
+			if(who==DPhoton::kBcal)continue; // Don't draw tracks hitting BCAL on FCAL pane
+			
 			double dist2 = 6.0 + 2.0*track->momentum().Mag();
 			TEllipse *e = new TEllipse(pos.X(), pos.Y(), dist2, dist2);
 			e->SetLineColor(track->charge()>0.0 ? kBlue:kRed);
@@ -664,6 +668,7 @@ void MyProcessor::FillGraphics(void)
 			AddKinematicDataTrack(timetracks[i], (timetracks[i]->charge()>0.0 ? kBlue:kRed)+0, 1.00);
 		}
 	}
+
 	// DChargedTrack
 	if(hdvmf->GetCheckButton("chargedtracks")){
 	  vector<const DChargedTrack*> chargedtracks;
@@ -675,6 +680,19 @@ void MyProcessor::FillGraphics(void)
 		
 		  if (chargedtracks[i]->hypotheses[0]->mass()>0.9) size=2.5;
 		  AddKinematicDataTrack(chargedtracks[i]->hypotheses[0],color,size);
+		}
+	}
+
+	// DPhoton
+	if(hdvmf->GetCheckButton("photon")){
+		vector<const DPhoton*> photons;
+		loop->Get(photons, hdvmf->GetFactoryTag("DPhoton"));
+		for(unsigned int i=0; i<photons.size(); i++){
+			int color = kBlack;
+			if(photons[i]->getTag()==DPhoton::kFcal)color = kOrange;
+			if(photons[i]->getTag()==DPhoton::kBcal)color = kYellow+2;
+			if(photons[i]->getTag()==DPhoton::kCharge)color = kRed;
+			AddKinematicDataTrack(photons[i], color, 1.00);
 		}
 	}
 }

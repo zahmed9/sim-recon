@@ -301,7 +301,7 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 					for(int i=0; i<100; i++)timetracksfactory->AddEntry("a",i); // For some reason, this is needed for ROOT >5.14 (??!!!) real entries are filled in later
 					timetracksf->AddFrame(timetracksfactory, lhints);
 				trkdrawopts->AddFrame(timetracksf, lhints);
-	TGHorizontalFrame *chargedtracksf		= new TGHorizontalFrame(trkdrawopts);
+				TGHorizontalFrame *chargedtracksf		= new TGHorizontalFrame(trkdrawopts);
 					checkbuttons["chargedtracks"]		= new TGCheckButton(chargedtracksf,	"DChargedTrack:");
 					chargedtracksfactory	= new TGComboBox(chargedtracksf, "<default>", 0);
 					chargedtracksfactory->Resize(80,20);
@@ -312,8 +312,10 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 				
 
 
+				checkbuttons["photon"]			= new TGCheckButton(trkdrawopts,	"DPhoton");
 				checkbuttons["thrown"]			= new TGCheckButton(trkdrawopts,	"DMCThrown");
 				checkbuttons["trajectories"]	= new TGCheckButton(trkdrawopts,	"DMCTrajectoryPoint");
+				trkdrawopts->AddFrame(checkbuttons["photon"], lhints);
 				trkdrawopts->AddFrame(checkbuttons["thrown"], lhints);
 				trkdrawopts->AddFrame(checkbuttons["trajectories"], lhints);
 
@@ -323,27 +325,21 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 				checkbuttons["cdctruth"]			= new TGCheckButton(hitdrawopts,	"CDCTruth");
 				checkbuttons["fdcwire"]				= new TGCheckButton(hitdrawopts,	"FDC Wire");
 				checkbuttons["fdcpseudo"]			= new TGCheckButton(hitdrawopts,	"FDC Pseudo");
-				checkbuttons["fdcintersection"]	= new TGCheckButton(hitdrawopts,	"FDC Intersection");
 				checkbuttons["fdctruth"]			= new TGCheckButton(hitdrawopts,	"FDCTruth");
 				checkbuttons["tof"]					= new TGCheckButton(hitdrawopts,	"TOF");
 				checkbuttons["toftruth"]			= new TGCheckButton(hitdrawopts,	"TOFTruth");
 				checkbuttons["fcal"]					= new TGCheckButton(hitdrawopts,	"FCAL");
-				checkbuttons["fcaltruth"]			= new TGCheckButton(hitdrawopts,	"FCALTruth");
 				checkbuttons["bcal"]					= new TGCheckButton(hitdrawopts,	"BCAL");
-				checkbuttons["bcaltruth"]			= new TGCheckButton(hitdrawopts,	"BCALTruth");
 				hitdrawopts->AddFrame(checkbuttons["cdc"], lhints);
 				hitdrawopts->AddFrame(checkbuttons["cdcdrift"], lhints);
 				hitdrawopts->AddFrame(checkbuttons["cdctruth"], lhints);
 				hitdrawopts->AddFrame(checkbuttons["fdcwire"], lhints);
 				hitdrawopts->AddFrame(checkbuttons["fdcpseudo"], lhints);
-				hitdrawopts->AddFrame(checkbuttons["fdcintersection"], lhints);
 				hitdrawopts->AddFrame(checkbuttons["fdctruth"], lhints);
 				hitdrawopts->AddFrame(checkbuttons["tof"], lhints);
 				hitdrawopts->AddFrame(checkbuttons["toftruth"], lhints);
 				hitdrawopts->AddFrame(checkbuttons["fcal"], lhints);
-				hitdrawopts->AddFrame(checkbuttons["fcaltruth"], lhints);
 				hitdrawopts->AddFrame(checkbuttons["bcal"], lhints);
-				hitdrawopts->AddFrame(checkbuttons["bcaltruth"], lhints);
 				
 				TGTextButton *moreOptions	= new TGTextButton(hitdrawopts,	"More options");
 				hitdrawopts->AddFrame(moreOptions, lhints);
@@ -454,6 +450,7 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 	checkbuttons["wiretracks"]->Connect("Clicked()","hdv_mainframe", this, "DoMyRedraw()");
 	checkbuttons["timetracks"]->Connect("Clicked()","hdv_mainframe", this, "DoMyRedraw()");	
 	checkbuttons["chargedtracks"]->Connect("Clicked()","hdv_mainframe", this, "DoMyRedraw()");
+	checkbuttons["photon"]->Connect("Clicked()","hdv_mainframe", this, "DoMyRedraw()");
 	checkbuttons["thrown"]->Connect("Clicked()","hdv_mainframe", this, "DoMyRedraw()");
 
 	checkbuttons["cdc"]->Connect("Clicked()","hdv_mainframe", this, "DoMyRedraw()");
@@ -461,7 +458,6 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 	checkbuttons["cdctruth"]->Connect("Clicked()","hdv_mainframe", this, "DoMyRedraw()");
 	checkbuttons["fdcwire"]->Connect("Clicked()","hdv_mainframe", this, "DoMyRedraw()");
 	checkbuttons["fdcpseudo"]->Connect("Clicked()","hdv_mainframe", this, "DoMyRedraw()");
-	checkbuttons["fdcintersection"]->Connect("Clicked()","hdv_mainframe", this, "DoMyRedraw()");
 	checkbuttons["fdctruth"]->Connect("Clicked()","hdv_mainframe", this, "DoMyRedraw()");
 	checkbuttons["tof"]->Connect("Clicked()","hdv_mainframe", this, "DoMyRedraw()");
 	checkbuttons["toftruth"]->Connect("Clicked()","hdv_mainframe", this, "DoMyRedraw()");

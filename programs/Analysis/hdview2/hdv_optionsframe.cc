@@ -73,11 +73,15 @@ hdv_optionsframe::hdv_optionsframe(hdv_mainframe *hdvmf, const TGWindow *p, UInt
 	TGGroupFrame *hitdrawopts = new TGGroupFrame(topframe, "Extra Drawing Options", kVerticalFrame);
 	topframe->AddFrame(hitdrawopts, lhints);
 
+	checkbuttons["fdcintersection"]				= new TGCheckButton(hitdrawopts,	"FDC Intersection");
+	TGHorizontal3DLine *separator0				= new TGHorizontal3DLine(hitdrawopts, 250);
+	checkbuttons["bcaltruth"]						= new TGCheckButton(hitdrawopts,	"BCALTruth");
 	checkbuttons["thrown_charged_bcal"]			= new TGCheckButton(hitdrawopts,	"Draw thrown charged track projections on BCAL");
 	checkbuttons["recon_charged_bcal"]			= new TGCheckButton(hitdrawopts,	"Draw reconstructed charged track projections on BCAL");
 	checkbuttons["thrown_photons_bcal"]			= new TGCheckButton(hitdrawopts,	"Draw thrown photon projections on BCAL");
 	checkbuttons["recon_photons_bcal"]			= new TGCheckButton(hitdrawopts,	"Draw reconstructed photon projections on BCAL");
 	TGHorizontal3DLine *separator1				= new TGHorizontal3DLine(hitdrawopts, 250);
+	checkbuttons["fcaltruth"]						= new TGCheckButton(hitdrawopts,	"FCALTruth");
 	checkbuttons["thrown_charged_fcal"]			= new TGCheckButton(hitdrawopts,	"Draw thrown charged track projections on FCAL");
 	checkbuttons["recon_charged_fcal"]			= new TGCheckButton(hitdrawopts,	"Draw reconstructed charged track projections on FCAL");
 	checkbuttons["thrown_photons_fcal"]			= new TGCheckButton(hitdrawopts,	"Draw thrown photon projections on FCAL");
@@ -85,11 +89,15 @@ hdv_optionsframe::hdv_optionsframe(hdv_mainframe *hdvmf, const TGWindow *p, UInt
 	TGHorizontal3DLine *separator2				= new TGHorizontal3DLine(hitdrawopts, 250);
 	checkbuttons["recon_photons_track_match"]	= new TGCheckButton(hitdrawopts,	"Draw reconstructed photons matched to charged tracks");
 
+	hitdrawopts->AddFrame(checkbuttons["fdcintersection"], lhints);
+	hitdrawopts->AddFrame(separator0, chints);
+	hitdrawopts->AddFrame(checkbuttons["bcaltruth"], lhints);
 	hitdrawopts->AddFrame(checkbuttons["thrown_charged_bcal"], lhints);
 	hitdrawopts->AddFrame(checkbuttons["recon_charged_bcal"], lhints);
 	hitdrawopts->AddFrame(checkbuttons["thrown_photons_bcal"], lhints);
 	hitdrawopts->AddFrame(checkbuttons["recon_photons_bcal"], lhints);
 	hitdrawopts->AddFrame(separator1, chints);
+	hitdrawopts->AddFrame(checkbuttons["fcaltruth"], lhints);
 	hitdrawopts->AddFrame(checkbuttons["thrown_charged_fcal"], lhints);
 	hitdrawopts->AddFrame(checkbuttons["recon_charged_fcal"], lhints);
 	hitdrawopts->AddFrame(checkbuttons["thrown_photons_fcal"], lhints);
