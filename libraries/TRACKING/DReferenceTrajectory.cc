@@ -15,6 +15,7 @@ using namespace std;
 #include "DMagneticFieldStepper.h"
 #include "HDGEOMETRY/DRootGeom.h"
 #define ONE_THIRD 0.33333333333333333
+#define EPS 1e-8
 
 struct StepStruct {DReferenceTrajectory::swim_step_t steps[256];};
 
@@ -164,12 +165,18 @@ void DReferenceTrajectory::Swim(const DVector3 &pos, const DVector3 &mom, double
 
 	// Step until we hit a boundary (don't track more than 20 meters)
 	swim_step_t *swim_step = this->swim_steps;
+	double t=0.;
 	Nswim_steps = 0;
 	double itheta02 = 0.0;
 	double itheta02s = 0.0;
 	double itheta02s2 = 0.0;
 	swim_step_t *last_step=NULL;
-
+	// Magnetic field
+	double Bx=0,By=0,Bz=0.,Bz_old=0.;
+	bfield->GetField(swim_step->origin.x(),swim_step->origin.y(),
+			swim_step->origin.z(),Bx,By,Bz);
+	Bz_old=Bz;
+	
 	for(double s=0; fabs(s)<smax; Nswim_steps++, swim_step++){
 
 		if(Nswim_steps>=this->max_swim_steps){
@@ -182,6 +189,15 @@ void DReferenceTrajectory::Swim(const DVector3 &pos, const DVector3 &mom, double
 		stepper.GetMomentum(swim_step->mom);
 		swim_step->Ro = stepper.GetRo();
 		swim_step->s = s;
+		swim_step->t = t;
+		
+		// B-field
+		bfield->GetField(swim_step->origin.x(),swim_step->origin.y(),
+				swim_step->origin.z(),Bx,By,Bz);
+
+		//magnitude of momentum and beta
+		double p=swim_step->mom.Mag();
+		double beta=1./sqrt(1.+mass*mass/p/p);
 
 		// Add material if geom or RootGeom is not NULL
 		// If both are non-NULL, then use RootGeom
@@ -204,8 +220,7 @@ void DReferenceTrajectory::Swim(const DVector3 &pos, const DVector3 &mom, double
 					double radlen = delta_s/X0;
 
 					if(radlen>1.0E-5){ // PDG 2008 pg 271, second to last paragraph
-						double p = swim_step->mom.Mag();
-						double beta = p/sqrt(p*p + mass*mass); // assume pion mass
+					
 						double theta0 = 0.0136/(p*beta)*sqrt(radlen)*(1.0+0.038*log(radlen)); // From PDG 2008 eq 27.12
 						double theta02 = theta0*theta0;
 						itheta02 += theta02;
@@ -236,18 +251,36 @@ void DReferenceTrajectory::Swim(const DVector3 &pos, const DVector3 &mom, double
 			stepper.SetStartingParams(q, &swim_step->origin, &swim_step->mom);
 		}
 		
-		// Adjust step size to take smaller steps in regions of high momentum loss
+		// Adjust step size to take smaller steps in regions of high momentum loss or field gradient
 		if(step_size<0.0){ // step_size<0 indicates auto-calculated step size
 			// Take step so as to change momentum by no more than 1%
 			double my_step_size=swim_step->mom.Mag()/fabs(dP_dx)*0.01;
+
 			if(my_step_size>2.0)my_step_size=2.0; // maximum step size is 2 cm
+		
+
+			// Now check the field gradient
+			if (fabs(Bz-Bz_old)>EPS){
+			  double my_step_size_B=0.01*my_step_size
+			    *fabs(Bz/(Bz_old-Bz));
+			  if (my_step_size_B<my_step_size) 
+			    my_step_size=my_step_size_B;
+			}
 			if(my_step_size<0.1)my_step_size=0.1; // minimum step size is 1 mm
+			
 			stepper.SetStepSize(my_step_size);
 		}
 
 		// Swim to next
-		s += stepper.Step(NULL);
+		double ds=stepper.Step(NULL);
 
+		// update flight time
+		t+=ds/beta/SPEED_OF_LIGHT;
+		s += ds;
+	
+		// Save old z-component of B-field
+		Bz_old=Bz;
+		
 		// Exit loop if we leave the tracking volume
 		if(swim_step->origin.Perp()>88.0 
 		   && swim_step->origin.Z()<407.0){Nswim_steps++; break;} // ran into BCAL
@@ -270,8 +303,10 @@ void DReferenceTrajectory::Swim(const DVector3 &pos, const DVector3 &mom, double
 
 // Routine to find position on the trajectory where the track crosses a radial
 // position R.  Also returns the path length to this position.
-jerror_t DReferenceTrajectory::GetIntersectionWithRadius(double R,DVector3 &mypos,
-						     double *s) const{
+jerror_t DReferenceTrajectory::GetIntersectionWithRadius(double R,
+							 DVector3 &mypos,
+							 double *s,
+							 double *t) const{
   if(Nswim_steps<1){
     _DBG_<<"No swim steps! You must \"Swim\" the track before calling GetIntersectionWithRadius(...)"<<endl;
   }
@@ -318,17 +353,22 @@ jerror_t DReferenceTrajectory::GetIntersectionWithRadius(double R,DVector3 &mypo
   // intersection point (approximately).
   if (s) *s = step->s-(1.0-alpha)*delta.Mag();
 
+  // flight time
+  if (t){
+    *t = step->t;
+  }
+
   return NOERROR;
 }
 
 //---------------------------------
 // GetIntersectionWithPlane
 //---------------------------------
-void DReferenceTrajectory::GetIntersectionWithPlane(const DVector3 &origin, const DVector3 &norm, DVector3 &pos, double *s) const{
+void DReferenceTrajectory::GetIntersectionWithPlane(const DVector3 &origin, const DVector3 &norm, DVector3 &pos, double *s,double *t) const{
   DVector3 dir;
-  GetIntersectionWithPlane(origin,norm,pos,dir,s);
+  GetIntersectionWithPlane(origin,norm,pos,dir,s,t);
 }
-void DReferenceTrajectory::GetIntersectionWithPlane(const DVector3 &origin, const DVector3 &norm, DVector3 &pos, DVector3 &dir, double *s) const
+void DReferenceTrajectory::GetIntersectionWithPlane(const DVector3 &origin, const DVector3 &norm, DVector3 &pos, DVector3 &dir, double *s,double *t) const
 {
 	/// Get the intersection point of this trajectory with a plane.
 	/// The plane is specified by <i>origin</i> and <i>norm</i>. The
@@ -361,7 +401,12 @@ void DReferenceTrajectory::GetIntersectionWithPlane(const DVector3 &origin, cons
 	  dir.SetMag(1.0);
 	  if (s){
 	    *s=step->s+ds;
+	  } 
+	  // flight time
+	  if (t){
+	    *t = step->t;
 	  }
+	  
 	  return;
 	}
 
@@ -470,6 +515,10 @@ void DReferenceTrajectory::GetIntersectionWithPlane(const DVector3 &origin, cons
 	if(s){
 		double delta_s = alpha*step->mom.Mag();
 		*s = step->s + delta_s;
+	}
+	// flight time
+	if (t){
+	  *t = step->t;
 	}
 }
 
@@ -1332,7 +1381,7 @@ double DReferenceTrajectory::dPdx(double ptot, double rhoZ_overA, double rhoZ_ov
 	
 	double gammabeta = ptot/mass;
 	double gammabeta2=gammabeta*gammabeta;
-	double gamma = sqrt(ptot*ptot + mass*mass)/mass;
+	double gamma = sqrt(gammabeta2+1);
 	double beta = gammabeta/gamma;
 	double beta2=beta*beta;
 	double me = 0.511E-3;
