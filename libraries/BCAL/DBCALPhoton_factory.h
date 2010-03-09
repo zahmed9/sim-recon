@@ -14,8 +14,8 @@
 using namespace jana;
 
 
-#include "BCAL/DBCALShower.h"
-#include "BCAL/DBCALPhoton.h"
+#include <BCAL/DBCALShower.h>
+#include <BCAL/DBCALPhoton.h>
 
 class DBCALPhoton_factory : public JFactory< DBCALPhoton > { 
     
@@ -29,7 +29,12 @@ private:
 
     jerror_t brun(JEventLoop *loop, int runnumber);
     jerror_t evnt( JEventLoop *loop, int eventnumber );
+	 DBCALPhoton* MakeDBCALPhoton(const DBCALShower* shower);
+	 DBCALPhoton* MergeDBCALPhotons(vector<DBCALPhoton*> &showers);
     
+	 double MIN_CLUSTER_SEPARATION_XY;
+	 double MIN_CLUSTER_SEPARATION_Z;
+	 
     double m_scaleZ_p0LT;
     double m_scaleZ_p1LT;
     double m_scaleZ_p2LT;
