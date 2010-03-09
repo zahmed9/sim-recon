@@ -304,8 +304,8 @@ void hitForwardDC (float xin[4], float xout[4],
   if (dEsum > 0)
   {
     int nhit;
-    s_FdcAnodeHits_t* ahits;    
-    s_FdcCathodeHits_t* chits;    
+    s_FdcAnodeTruthHits_t* ahits;    
+    s_FdcCathodeTruthHits_t* chits;    
     float tdrift;    
 
     for (wire=wire1; wire-dwire != wire2; wire+=dwire)
@@ -423,7 +423,7 @@ void hitForwardDC (float xin[4], float xout[4],
           s_FdcAnodeWires_t* wires = make_s_FdcAnodeWires(1);
           wires->mult = 1;
           wires->in[0].wire = wire;
-          wires->in[0].fdcAnodeHits = ahits = make_s_FdcAnodeHits(MAX_HITS);
+          wires->in[0].fdcAnodeTruthHits = ahits = make_s_FdcAnodeTruthHits(MAX_HITS);
           chambers->mult = 1;
 	  chambers->in[0].module = module;
           chambers->in[0].layer = layer;
@@ -434,7 +434,7 @@ void hitForwardDC (float xin[4], float xout[4],
         else
         {
            s_ForwardDC_t* fdc = *twig;
-           ahits = fdc->fdcChambers->in[0].fdcAnodeWires->in[0].fdcAnodeHits;
+           ahits = fdc->fdcChambers->in[0].fdcAnodeWires->in[0].fdcAnodeTruthHits;
         }
 
         for (nhit = 0; nhit < ahits->mult; nhit++)
@@ -558,8 +558,8 @@ void hitForwardDC (float xin[4], float xout[4],
                 strips->mult = 1;
                 strips->in[0].plane = plane;
                 strips->in[0].strip = strip;
-                strips->in[0].fdcCathodeHits = chits
-                                             = make_s_FdcCathodeHits(MAX_HITS);
+                strips->in[0].fdcCathodeTruthHits = chits
+                                             = make_s_FdcCathodeTruthHits(MAX_HITS);
                 chambers->mult = 1;
                 chambers->in[0].module = module;
                 chambers->in[0].layer = layer;
@@ -571,7 +571,7 @@ void hitForwardDC (float xin[4], float xout[4],
               {
                 s_ForwardDC_t* fdc = *twig;
                 chits = fdc->fdcChambers->in[0].fdcCathodeStrips
-                                        ->in[0].fdcCathodeHits;
+                                        ->in[0].fdcCathodeTruthHits;
               }
           
               for (nhit = 0; nhit < chits->mult; nhit++)
@@ -656,7 +656,7 @@ s_ForwardDC_t* pickForwardDC ()
       int mok=0;
       for (wire=0; wire < wires->mult; wire++)
       {
-         s_FdcAnodeHits_t* ahits = wires->in[wire].fdcAnodeHits;
+         s_FdcAnodeTruthHits_t* ahits = wires->in[wire].fdcAnodeTruthHits;
 
          int i,iok;
          for (iok=i=0; i < ahits->mult; i++)
@@ -689,7 +689,7 @@ s_ForwardDC_t* pickForwardDC ()
       mok = 0;
       for (strip=0; strip < strips->mult; strip++)
       {
-         s_FdcCathodeHits_t* chits = strips->in[strip].fdcCathodeHits;
+         s_FdcCathodeTruthHits_t* chits = strips->in[strip].fdcCathodeTruthHits;
          int i,iok;
          for (iok=i=0; i < chits->mult; i++)
          {

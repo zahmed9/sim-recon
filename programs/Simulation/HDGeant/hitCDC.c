@@ -248,7 +248,7 @@ void hitCentralDC (float xin[4], float xout[4],
    if (dEsum > 0)
    {
       int nhit;
-      s_CdcStrawHits_t* hits;
+      s_CdcStrawTruthHits_t* hits;
 #if CATHODE_STRIPS_IN_CDC
       s_CdcCathodeStrips_t* chits;
       int cell = getcell_();
@@ -268,14 +268,14 @@ void hitCentralDC (float xin[4], float xout[4],
             straws->mult = 1;
             straws->in[0].ring = ring;
             straws->in[0].straw = sector;
-            straws->in[0].cdcStrawHits = hits = make_s_CdcStrawHits(MAX_HITS);
+            straws->in[0].cdcStrawTruthHits = hits = make_s_CdcStrawTruthHits(MAX_HITS);
             cdc->cdcStraws = straws;
             strawCount++;
          }
          else
          {
             s_CentralDC_t* cdc = (s_CentralDC_t*) *twig;
-            hits = cdc->cdcStraws->in[0].cdcStrawHits;
+            hits = cdc->cdcStraws->in[0].cdcStrawTruthHits;
          }
 
          for (nhit = 0; nhit < hits->mult; nhit++)
@@ -407,7 +407,7 @@ s_CentralDC_t* pickCentralDC ()
       {
          int m = box->cdcStraws->mult;
 
-         s_CdcStrawHits_t* hits = straws->in[straw].cdcStrawHits;
+         s_CdcStrawTruthHits_t* hits = straws->in[straw].cdcStrawTruthHits;
 
          /* compress out the hits below threshold */
          int i,iok;
