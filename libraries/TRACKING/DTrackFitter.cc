@@ -12,6 +12,8 @@
 #include "HDGEOMETRY/DRootGeom.h"
 using namespace jana;
 
+#define TCUT 10.e-6 // energy cut for bethe-bloch 
+
 extern bool FDCSortByZincreasing(const DFDCPseudo* const &hit1, const DFDCPseudo* const &hit2);
 extern bool CDCSortByRincreasing(const DCDCTrackHit* const &hit1, const DCDCTrackHit* const &hit2);
 
@@ -47,6 +49,7 @@ DTrackFitter::DTrackFitter(JEventLoop *loop)
 	RootGeom->FindMat("CDchamberGas",mRhoZoverAGas,rho_Z_over_A_LnI,
 			  radlen);
 	mLnIGas=rho_Z_over_A_LnI/mRhoZoverAGas;
+	mKRhoZoverAGas=0.1535*mRhoZoverAGas;
 }
 
 //-------------------
@@ -356,16 +359,17 @@ double DTrackFitter::GetdEdxVariance(double p,double mass_hyp,double dx,
 double DTrackFitter::GetdEdx(double p,double mass_hyp,double dx,
 			     DVector3 pos){
   if (p<0.001) return 0.;  // try to avoid division by zero errors
-  double beta2=1./(1.+mass_hyp*mass_hyp/p/p);
+  double betagamma=p/mass_hyp;
+  double beta2=1./(1.+1./betagamma/betagamma);
 
   // Electron mass 
   double Me=0.000511; //GeV
   
   // First (non-logarithmic) term in Bethe-Bloch formula
-  double mean_dedx=0.1535*mRhoZoverAGas/beta2;
+  double mean_dedx=mKRhoZoverAGas/beta2;
 
   // density effect
-  double delta=CalcDensityEffect(p,mass_hyp,mRhoZoverAGas,mLnIGas);
+  double delta=CalcDensityEffect(betagamma,mRhoZoverAGas,mLnIGas);
   
   // Most probable energy loss from Landau theory (see Leo, pp. 51-52)
   return mean_dedx*(log(mean_dedx*dx/1000.)-log((1.-beta2)/2./Me/beta2)
@@ -381,11 +385,19 @@ double DTrackFitter::CalcDensityEffect(double p,double mass,double density,
   return CalcDensityEffect(p,mass,rho_Z_over_A,LnI);
 }
 
-  // Calculate the density effect correction to the energy loss formulae
+
+
+// Calculate the density effect correction to the energy loss formulae
 double DTrackFitter::CalcDensityEffect(double p,double mass,
 				       double rho_Z_over_A,double LnI){
 
   double betagamma=p/mass;
+  return CalcDensityEffect(betagamma,rho_Z_over_A,LnI);
+}
+
+// Calculate the density effect correction to the energy loss formulae
+double DTrackFitter::CalcDensityEffect(double betagamma,
+				       double rho_Z_over_A,double LnI){
   double X=log10(betagamma);
   double X0,X1;
   double Cbar=2.*(LnI-log(28.816e-9*sqrt(rho_Z_over_A)))+1.;
@@ -428,17 +440,18 @@ double DTrackFitter::CalcDensityEffect(double p,double mass,
 // Calculate the most probable energy loss per unit length in units of 
 // MeV/cm in the FDC or CDC gas for a particle of momentum p and mass mass_hyp
 double DTrackFitter::GetdEdx(double p,double mass_hyp,double mean_path_length){
-  if (p<0.001) return 0.;  // try to avoid division by zero errors
-  double beta2=1./(1.+mass_hyp*mass_hyp/p/p);
+  double betagamma=p/mass_hyp;
+  double beta2=1./(1.+1./betagamma/betagamma);
+  if (beta2<1e-6) beta2=1e-6;
   
   // Electron mass 
   double Me=0.000511; //GeV
 
   // First (non-logarithmic) term in Bethe-Bloch formula
-  double mean_dedx=0.1535*mRhoZoverAGas/beta2;
+  double mean_dedx=mKRhoZoverAGas/beta2;
  
   // density effect
-  double delta=CalcDensityEffect(p,mass_hyp,mRhoZoverAGas,mLnIGas);
+  double delta=CalcDensityEffect(betagamma,mRhoZoverAGas,mLnIGas);
 
   // Most probable energy loss from Landau theory (see Leo, pp. 51-52)
   return mean_dedx*(log(mean_dedx*mean_path_length/1000.)
@@ -454,19 +467,63 @@ double DTrackFitter::GetdEdxSigma(unsigned int num_hits,double p,double mass,
   double betagamma=p/mass;
   double betagamma2=betagamma*betagamma;
   double beta2=1./(1.+1./betagamma2);
+  if (beta2<1e-6) beta2=1e-6;
+
   double Me=0.000511; //GeV
   double m_ratio=Me/mass;
+  double two_Me_betagamma_sq=2.*Me*betagamma2;
   double Tmax
-    =2.*Me*betagamma2/(1.+2.*sqrt(1.+betagamma2)*m_ratio+m_ratio*m_ratio);
-  
+    =two_Me_betagamma_sq/(1.+2.*sqrt(1.+betagamma2)*m_ratio+m_ratio*m_ratio);
+  // Energy truncation for knock-on electrons
+  double T0=(Tmax>TCUT)?TCUT:Tmax;
+
   //density effect   
   double delta=CalcDensityEffect(p,mass,mRhoZoverAGas,mLnIGas); 
   
   // Bethe-Bloch
-  double mean_dedx=0.1535*mRhoZoverAGas/beta2
-    *(log(2.*Me*betagamma2*Tmax)-2.*mLnIGas-2.*beta2-delta);
-
+  double mean_dedx=mKRhoZoverAGas/beta2
+    *(log(two_Me_betagamma_sq*T0)-2.*mLnIGas-beta2*(1.+T0/Tmax)-delta);
+  
   return 0.41*mean_dedx*pow(double(num_hits),-0.43)*pow(mean_path_length,-0.32);
+  //return 0.41*mean_dedx*pow(double(num_hits),-0.5)*pow(mean_path_length,-0.32);
+}
+
+// Get the most probable value and the standard deviation of the energy loss
+jerror_t DTrackFitter::GetdEdxMPandSigma(unsigned int num_hits,double p,
+					 double mass,double mean_path_length,
+					 double &dedx_mp,double &dedx_sigma){
+   // kinematic quantities
+  double betagamma=p/mass;
+  double betagamma2=betagamma*betagamma;
+  double beta2=1./(1.+1./betagamma2);
+  if (beta2<1e-6) beta2=1e-6;
+
+  double Me=0.000511; //GeV
+  double m_ratio=Me/mass;
+  double two_Me_betagamma_sq=2.*Me*betagamma2;
+  double Tmax
+    =two_Me_betagamma_sq/(1.+2.*sqrt(1.+betagamma2)*m_ratio+m_ratio*m_ratio);
+  // Energy truncation for knock-on electrons
+  double T0=(Tmax>TCUT)?TCUT:Tmax;
+
+  //density effect   
+  double delta=CalcDensityEffect(betagamma,mRhoZoverAGas,mLnIGas); 
+  
+  // First (non-logarithmic) term in Bethe-Bloch formula
+  double Xi=mKRhoZoverAGas/beta2;
+
+  // Most probable energy loss from Landau theory (see Leo, pp. 51-52)
+  dedx_mp=Xi*(log(Xi*mean_path_length/1000.)-log((1.-beta2)/2./Me/beta2)
+	      -2.*mLnIGas-beta2+0.198-delta);
+
+  // Bethe-Bloch: mean energy loss
+  double mean_dedx
+    =Xi*(log(two_Me_betagamma_sq*T0)-2.*mLnIGas-beta2*(1.+T0/Tmax)-delta);
+  
+  dedx_sigma=0.41*mean_dedx*pow(double(num_hits),-0.43)
+    *pow(mean_path_length,-0.32);
+  
+  return NOERROR;
 }
 
 

@@ -117,12 +117,18 @@ class DTrackFitter:public jana::JObject{
 					 double Z_over_A,double I);  
 		double CalcDensityEffect(double p,double mass,
 					 double rho_Z_over_A,double LnI);
+		double CalcDensityEffect(double betagamma,
+					 double rho_Z_over_A,double LnI);
 		
 		double GetdEdxSigma(unsigned int num_hits,double p, 
 				    double mass,double mean_path_length);
 		double GetdEdx(double p,double mass_hyp,double mean_path_length);
 		double GetdEdx(double p,double mass_hyp,double dx,DVector3 pos);
-
+		jerror_t GetdEdxMPandSigma(unsigned int num_hits,double p,
+					   double mass,
+					   double mean_path_length,
+					   double &dedx_mp,
+					   double &dedx_sigma);
 		jerror_t GetdEdx(const DReferenceTrajectory *rt, double &dedx,
 				 double &mean_path_length, double &p_avg,
 				 unsigned int &num_hits);
@@ -164,7 +170,7 @@ class DTrackFitter:public jana::JObject{
 		DTrackFitter();
 		
 		// gas material properties
-		double mRhoZoverAGas,mLnIGas;
+		double mKRhoZoverAGas,mRhoZoverAGas,mLnIGas;
 };
 
 #endif // _DTrackFitter_
