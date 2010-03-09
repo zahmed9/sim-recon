@@ -119,7 +119,7 @@ jerror_t MyProcessor::evnt(JEventLoop *eventLoop, int eventnumber)
 			try{
 				if(factory->GetNrows()>0){
 					event_is_boring=0;
-					break;
+					if(PRINT_SUMMARY_HEADER)break;
 				}
 			}catch(...){
 				// someone threw an exception
