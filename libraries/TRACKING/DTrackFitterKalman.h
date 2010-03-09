@@ -44,7 +44,7 @@ typedef struct{
   DMatrix *S;
   DMatrix *J,*JT,*Q,*C;
   double s,t;
-  double Z,rho_Z_over_A,LnI;
+  double Z,rho_Z_over_A,K_rho_Z_over_A,LnI;
 }DKalmanState_t;
 
 typedef struct{
@@ -148,9 +148,9 @@ class DTrackFitterKalman: public DTrackFitter{
   double GetChiSq(void){return chisq_;}
   unsigned int GetNDF(void){return ndf;};
   double GetActivePathLength(void){ return path_length;}
-  double GetdEdx(double q_over_p,double rho_Z_over_A,
+  double GetdEdx(double q_over_p,double K_rho_Z_over_A,double rho_Z_over_A,
 		 double rho_Z_over_A_LnI); 
-  double GetEnergyVariance(double ds,double beta2,double rho_Z_over_A);
+  double GetEnergyVariance(double ds,double beta2,double K_rho_Z_over_A);
 
  protected:
 
