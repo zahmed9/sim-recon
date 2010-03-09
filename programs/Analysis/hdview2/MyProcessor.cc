@@ -129,6 +129,9 @@ jerror_t MyProcessor::brun(JEventLoop *eventloop, int runnumber)
 	MATERIAL_MAP_MODEL="DGeometry";
 	gPARMS->SetDefaultParameter("TRKFIT:MATERIAL_MAP_MODEL",			MATERIAL_MAP_MODEL);
 
+	eventloop->GetCalib("PID/photon_track_matching", photon_track_matching);
+	DELTA_R_FCAL = photon_track_matching["DELTA_R_FCAL"];
+
 	return NOERROR;
 }
 
@@ -562,7 +565,8 @@ void MyProcessor::FillGraphics(void)
 			gset.points.push_back(pos);
 			graphics.push_back(gset);
 			
-			double dist2 = 6.0 + 2.0*thrown->momentum().Mag();
+			//double dist2 = 6.0 + 2.0*thrown->momentum().Mag();
+			double dist2 = DELTA_R_FCAL;
 			TEllipse *e = new TEllipse(pos.X(), pos.Y(), dist2, dist2);
 			e->SetLineColor(thrown->charge()>0.0 ? kBlue:kRed);
 			e->SetFillStyle(0);
@@ -600,7 +604,8 @@ void MyProcessor::FillGraphics(void)
 			
 			if(who==DPhoton::kBcal)continue; // Don't draw tracks hitting BCAL on FCAL pane
 			
-			double dist2 = 6.0 + 2.0*track->momentum().Mag();
+			//double dist2 = 6.0 + 2.0*track->momentum().Mag();
+			double dist2 = DELTA_R_FCAL;
 			TEllipse *e = new TEllipse(pos.X(), pos.Y(), dist2, dist2);
 			e->SetLineColor(track->charge()>0.0 ? kBlue:kRed);
 			e->SetFillStyle(0);

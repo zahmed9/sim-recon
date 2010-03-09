@@ -102,6 +102,9 @@ class MyProcessor:public JEventProcessor
 		DGeometry *geom;
 		string MATERIAL_MAP_MODEL;
 		
+		map<string, double> photon_track_matching;
+		double DELTA_R_FCAL;
+		
 		void AddKinematicDataTrack(const DKinematicData* kd, int color, double size);
 		void GetIntersectionWithCalorimeter(const DKinematicData* kd, DVector3 &pos, DPhoton::PhotonTag &who);
 		
