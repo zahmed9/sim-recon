@@ -46,7 +46,7 @@ double SampleGaussian(double sigma);
 double SampleRange(double x1, double x2);
 
 // Do we or do we not add noise hits
-bool ADD_NOISE = true;
+bool ADD_NOISE = false;
 
 // Do we or do we not smear real hits
 bool SMEAR_HITS = true;

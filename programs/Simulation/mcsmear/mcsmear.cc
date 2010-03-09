@@ -97,6 +97,7 @@ int main(int narg,char* argv[])
 //-----------
 void ParseCommandLineArguments(int narg, char* argv[])
 {
+	bool warn_obsolete = false;
 
   for(int i=1; i<narg; i++){
     char *ptr = argv[i];
@@ -104,7 +105,8 @@ void ParseCommandLineArguments(int narg, char* argv[])
     if(ptr[0] == '-'){
       switch(ptr[1]){
       case 'h': Usage();													break;
-      case 'n': ADD_NOISE=false;											break;
+      case 'n': warn_obsolete=true;										break;
+      case 'N': ADD_NOISE=true;											break;
       case 's': SMEAR_HITS=false;										break;
       case 'u': CDC_TDRIFT_SIGMA=atof(&ptr[2])*1.0E-9;			break;
       case 'y': CDC_USE_PARAMETERIZED_SIGMA=false;					break;
@@ -125,6 +127,14 @@ void ParseCommandLineArguments(int narg, char* argv[])
 	if(!INFILENAME){
 		cout<<endl<<"You must enter a filename!"<<endl<<endl;
 		Usage();
+	}
+	
+	if(warn_obsolete){
+		cout<<endl;
+		cout<<"WARNING: Use of the \"-n\" option is obsolete. Random noise"<<endl;
+		cout<<"         hits are disabled by default now. To turn them back"<<endl;
+		cout<<"         on use the \"-N\" option."<<endl;
+		cout<<endl;
 	}
 	
 	// Generate output filename based on input filename
@@ -155,16 +165,18 @@ void Usage(void)
 	cout<<"sigmas configurable with the options below."<<endl;
 	cout<<endl;
 	cout<<"  options:"<<endl;
-	cout<<"    -n       Don't add background hits to CDC and FDC (default is to add)"<<endl;
+	cout<<"    -N       Add random background hits to CDC and FDC (default is not to add)"<<endl;
 	cout<<"    -s       Don't smear real hits (default is to smear)"<<endl;
 	cout<<"    -u#      Sigma CDC anode drift time in ns (def:"<<CDC_TDRIFT_SIGMA*1.0E9<<"ns)"<<endl;
 	cout<<"             (NOTE: this is only used if -y is also specified!)"<<endl;
-	cout<<"    -y       Do NOT apply drift distance dependence error to CDC (default is to apply)"<<endl;
+	cout<<"    -y       Do NOT apply drift distance dependence error to"<<endl;
+	cout<<"             CDC (default is to apply)"<<endl;
 	cout<<"    -t#      CDC time window for background hits in ns (def:"<<CDC_TIME_WINDOW*1.0E9<<"ns)"<<endl;
 	cout<<"    -U#      Sigma FDC anode drift time in ns (def:"<<FDC_TDRIFT_SIGMA*1.0E9<<"ns)"<<endl;
 	cout<<"    -C#      Sigma FDC cathode strips in microns (def:"<<FDC_TDRIFT_SIGMA<<"ns)"<<endl;
 	cout<<"    -t#      FDC time window for background hits in ns (def:"<<FDC_TIME_WINDOW*1.0E9<<"ns)"<<endl;
-	cout<<"    -e       hdgeant was run with LOSS=0 so scale the FDC cathode ped. noise (def:false)"<<endl;
+	cout<<"    -e       hdgeant was run with LOSS=0 so scale the FDC cathode"<<endl;
+	cout<<"             pedestal noise (def:false)"<<endl;
 	cout<<"    -p#      FCAL photo-statistics smearing factor in GeV^3/2 (def:"<<FCAL_PHOT_STAT_COEF<<")"<<endl;
 	cout<<"    -b#      FCAL single block threshold in MeV (def:"<<FCAL_BLOCK_THRESHOLD/k_MeV<<")"<<endl;
 	cout<<"    -f#      TOF sigma in psec (def: "<< TOF_SIGMA/k_psec<<")"<<endl;
