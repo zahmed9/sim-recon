@@ -31,7 +31,10 @@ NON_MAIN_OBJS = $(filter-out $(MAIN_OBJS),$(DOBJS))
 
 OBJ_DIR = .obj/$(BMS_OSNAME)
 OUTPUT_OPTION = -o $(OBJ_DIR)/$@
-VPATH = $(OBJ_DIR):$(BIN_DIR)
+empty:=
+space:= $(empty) $(empty)
+LIB_PATH = $(subst $(space),:,$(strip $(LIB_DIRS)))
+VPATH = $(OBJ_DIR):$(BIN_DIR):$(LIB_PATH)
 LINK_OBJS += $(addprefix $(OBJ_DIR)/,$(NON_MAIN_OBJS))
 
 LIB_DIRS += $(INSTALL_DIR)/lib/$(BMS_OSNAME)
@@ -50,7 +53,7 @@ all: mkdirs $(EXE_NAMES)
 	@rm -f $(DICT_FILES)
 
 
-$(EXE_NAMES): $(DOBJS)
+$(EXE_NAMES): $(DOBJS) $(LD_LIBS)
 	$(LD) $(LD_FLAGS) $(LD_DIRS) \
 	   $(OBJ_DIR)/$@.o $(LINK_OBJS) \
 	   $(LD_LIBS) $(MISC_LIBS) \
