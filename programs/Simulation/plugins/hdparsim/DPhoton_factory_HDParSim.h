@@ -26,6 +26,8 @@ class DPhoton_factory_HDParSim:public jana::JFactory<DPhoton>{
 		jerror_t erun(void);						///< Called everytime run number changes, provided brun has been called.
 		jerror_t fini(void);						///< Called after last event of last event source has been processed.
 
+		bool APPLY_EFFICIENCY_PHOTON;
+
 		DTrackingResolution *res;
 };
 

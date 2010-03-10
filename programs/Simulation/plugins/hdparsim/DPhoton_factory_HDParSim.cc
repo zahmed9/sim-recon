@@ -30,6 +30,11 @@ DPhoton_factory_HDParSim::DPhoton_factory_HDParSim(void)
 jerror_t DPhoton_factory_HDParSim::init(void)
 {
 
+	// Allow user to specify that the efficiency cut should not be applied
+	APPLY_EFFICIENCY_PHOTON = true; // do apply efficiency cut by default
+	
+	gPARMS->SetDefaultParameter("HDPARSIM:APPLY_EFFICIENCY_PHOTON", APPLY_EFFICIENCY_PHOTON);
+
 	return NOERROR;
 }
 
@@ -69,7 +74,8 @@ jerror_t DPhoton_factory_HDParSim::evnt(JEventLoop *loop, int eventnumber)
 		// Simultaneously smear the momentum of the particle and test whether
 		// it passes the efficiency/acceptance cut.
 		DVector3 mom = photon->momentum();
-		if(res->Smear(thrown->type, mom)){
+		bool keep = res->Smear(thrown->type, mom);
+		if(keep || !APPLY_EFFICIENCY_PHOTON){
 			photon->setMomentum(mom);
 			_data.push_back(photon);
 		}else{

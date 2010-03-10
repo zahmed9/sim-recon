@@ -53,6 +53,11 @@ jerror_t DTrackTimeBased_factory_HDParSim::init(void)
 	// Copy config parameter values back into DTrackingResolution object
 	res->SetErrorScaleFactors(scale_err_pt, scale_err_theta, scale_err_phi);
 
+	// Allow user to specify that the efficiency cut should not be applied
+	APPLY_EFFICIENCY_CHARGED = true; // do apply efficiency cut by default
+	
+	gPARMS->SetDefaultParameter("HDPARSIM:APPLY_EFFICIENCY_CHARGED", APPLY_EFFICIENCY_CHARGED);
+
 	return NOERROR;
 }
 
@@ -114,7 +119,8 @@ jerror_t DTrackTimeBased_factory_HDParSim::evnt(JEventLoop *loop, int eventnumbe
 		// Simultaneously smear the momentum of the particle and test whether
 		// it passes the efficiency/acceptance cut.
 		DVector3 mom = part->momentum();
-		if(res->Smear(thrown->type, mom)){
+		bool keep = res->Smear(thrown->type, mom);
+		if(keep || !APPLY_EFFICIENCY_CHARGED){
 			part->setMomentum(mom);
 			_data.push_back(part);
 		}else{
