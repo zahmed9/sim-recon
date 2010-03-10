@@ -84,6 +84,15 @@ jerror_t DTrackTimeBased_factory_HDParSim::evnt(JEventLoop *loop, int eventnumbe
 		DTrackTimeBased *part = new DTrackTimeBased;
 		*part = *(particles_thrn[i]);
 		
+		// For this to work properly with DChargedTrack, we need to put something
+		// in for the candidateid and the FOM (figure of merit) used to decide if
+		// this is the right mass hypothesis for the candidate. Since there is no
+		// candidate and we *know* it's the right hypothesis, we set the candidateid
+		// to the thrown object's oid and set the FOM to 1.
+		part->candidateid = particles_thrn[i]->id;
+		part->trackid = particles_thrn[i]->id;
+		part->FOM = 1.0;
+
 		// Associated objects are not copied by default so we do them "by hand"
 		vector<const JObject*> assoc_objs;
 		particles_thrn[i]->GetT(assoc_objs);
