@@ -46,6 +46,7 @@
 
 #include "TRACKING/DMCThrown.h"
 #include "TRACKING/DMCTrackHit.h"
+#include "TRACKING/DTrackTimeBased.h"
 #include "TRACKING/DMCTrajectoryPoint.h"
 
 #include "FCAL/DFCALTruthShower.h"
@@ -62,6 +63,8 @@
 #include "FDC/DFDCHit.h"
 
 #include "PID/DBeamPhoton.h"
+#include "PID/DPhoton.h"
+#include "PID/DChargedTrack.h"
 
 #include "START_COUNTER/DSCHit.h"
 #include "START_COUNTER/DSCTruthHit.h"
@@ -84,7 +87,7 @@ static string evioFileName = "dana_events.evio";
 
 
 // internal evio buffer size, use EVIOBUFSIZE command-line parameter to override
-static int evioBufSize=100000;
+static int evioBufSize=200000;
 
 
 // dana objects that can be written out in evio format and default output flag
@@ -100,13 +103,20 @@ static pair<string,bool> danaObs[] =  {
   pair<string,bool> ("dsctruthhit",          true),
   pair<string,bool> ("dmctrajectorypoint",   false),
   pair<string,bool> ("dcdchit",              true),
-  pair<string,bool> ("dfdchit",              true),   
-  pair<string,bool> ("dfcalhit",             true),   
-  pair<string,bool> ("dhddmbcalhit",         true),   
-  pair<string,bool> ("dhddmtofhit",          true),   
-  pair<string,bool> ("dschit",               true),   
+  pair<string,bool> ("dfdchit",              true),
+  pair<string,bool> ("dfcalhit",             true),
+  pair<string,bool> ("dhddmbcalhit",         true),
+  pair<string,bool> ("dhddmtofhit",          true),
+  pair<string,bool> ("dschit",               true),
+  pair<string,bool> ("dtracktimebased",      true),
+  pair<string,bool> ("dchargedtrack",        true),
+  pair<string,bool> ("dphoton",              true),
 };
 static map<string,bool> evioMap(danaObs,danaObs+sizeof(danaObs)/sizeof(danaObs[0]));
+
+
+// to allow DChargedTrack to cross-index DTrackTimeBased
+map<int,int> DTrackTimeBasedMap;
 
 
 // evio bank tag definitions (totally arbitrary at the moment)
@@ -127,6 +137,9 @@ static const int dfcalhitTag             = 11100;
 static const int dhddmbcalhitTag         = 11200;
 static const int dhddmtofhitTag          = 11300;
 static const int dschitTag               = 11400;
+static const int dtracktimebasedTag      = 11500;
+static const int dchargedtrackTag        = 11600;
+static const int dphotonTag              = 11700;
 
 
 // mutex needed to protect serialization and writing to file
@@ -261,6 +274,10 @@ private:
     if(evioMap["dhddmtofhit"           ])  addDHDDMTOFHit(eventLoop,tree);
     if(evioMap["dschit"                ])  addDSCHit(eventLoop,tree);
   
+    if(evioMap["dtracktimebased"       ])  addDTrackTimeBased(eventLoop,tree);
+    if(evioMap["dchargedtrack"         ])  addDChargedTrack(eventLoop,tree);
+    if(evioMap["dphoton"               ])  addDPhoton(eventLoop,tree);
+
   
     // get lock, write out evio tree, unlock
     pthread_mutex_lock(&evioMutex);
@@ -926,12 +943,141 @@ private:
 //------------------------------------------------------------------------------
 
 
+  void addDTrackTimeBased(JEventLoop *eventLoop, evioDOMTree &tree) {
+
+
+    // is there any data
+    vector<const DTrackTimeBased*> timebasedtracks;
+    eventLoop->Get(timebasedtracks); 
+    if(timebasedtracks.size()<=0)return;
+
+
+    // create timebasedtrack bank and add to event tree
+    evioDOMNodeP timebasedtrack = evioDOMNode::createEvioDOMNode(dtracktimebasedTag,0);
+    tree << timebasedtrack;
+
+
+    // create data banks and add to cdchit bank
+    evioDOMNodeP chisq = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,1);
+    evioDOMNodeP Ndof  = evioDOMNode::createEvioDOMNode<int>    (dtracktimebasedTag,2);
+    evioDOMNodeP FOM   = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,3);
+    evioDOMNodeP x     = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,4);
+    evioDOMNodeP y     = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,5);
+    evioDOMNodeP z     = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,6);
+    evioDOMNodeP px    = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,7);
+    evioDOMNodeP py    = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,8);
+    evioDOMNodeP pz    = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,9);
+    evioDOMNodeP q     = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,10);
+    evioDOMNodeP E     = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,11);
+    evioDOMNodeP mass  = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,12);
+    evioDOMNodeP t0    = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,13);
+    *timebasedtrack << chisq << Ndof << FOM << x << y << z << px << py << pz 
+                    << q << E << mass << t0;
+
+
+    // add track data to banks
+    // also create map if DChargedTrack is requested
+    if(evioMap["dtracktimebased"])DTrackTimeBasedMap.clear();
+    for(unsigned int i=0; i<timebasedtracks.size(); i++) {
+      *chisq      << timebasedtracks[i]->chisq;
+      *Ndof       << timebasedtracks[i]->Ndof;
+      *FOM        << timebasedtracks[i]->FOM;
+      *x          << timebasedtracks[i]->x();
+      *y          << timebasedtracks[i]->y();
+      *z          << timebasedtracks[i]->z();
+      *px         << timebasedtracks[i]->px();
+      *py         << timebasedtracks[i]->py();
+      *pz         << timebasedtracks[i]->pz();
+      *q          << timebasedtracks[i]->charge();
+      *E          << timebasedtracks[i]->energy();
+      *mass       << timebasedtracks[i]->mass();
+      *t0         << timebasedtracks[i]->t0();
+      DTrackTimeBasedMap[timebasedtracks[i]->id]=i;
+    }
+  }
+
+
+//------------------------------------------------------------------------------
+
+
+  void addDChargedTrack(JEventLoop *eventLoop, evioDOMTree &tree) {
+
+
+    // is there any data
+    vector<const DChargedTrack*> chargedtracks;
+    eventLoop->Get(chargedtracks); 
+    if(chargedtracks.size()<=0)return;
+
+
+    // create chargedtrack bank and add to event tree
+    evioDOMNodeP chargedtrack = evioDOMNode::createEvioDOMNode(dchargedtrackTag,0);
+    tree << chargedtrack;
+
+    // create index bank for each charged track and add to chargedtrack bank
+    for(unsigned int i=0; i<chargedtracks.size(); i++) {
+      evioDOMNodeP hypotheses = evioDOMNode::createEvioDOMNode<int> (dchargedtrackTag,1);
+      *chargedtrack << hypotheses;
+      for(unsigned int j=0; j<chargedtracks[i]->hypotheses.size(); j++) {
+        *hypotheses<< DTrackTimeBasedMap[chargedtracks[i]->hypotheses[j]->id];
+      }
+    }
+  }
+
+
+//------------------------------------------------------------------------------
+
+
+  void addDPhoton(JEventLoop *eventLoop, evioDOMTree &tree) {
+
+
+    // is there any data
+    vector<const DPhoton*> photons;
+    eventLoop->Get(photons); 
+    if(photons.size()<=0)return;
+
+
+    // create photon bank and add to event tree
+    evioDOMNodeP photon = evioDOMNode::createEvioDOMNode(dphotonTag,0);
+    tree << photon;
+
+
+    // create data banks and add to photon bank
+    evioDOMNodeP E     = evioDOMNode::createEvioDOMNode<float>  (dphotonTag,1);
+    evioDOMNodeP px    = evioDOMNode::createEvioDOMNode<float>  (dphotonTag,2);
+    evioDOMNodeP py    = evioDOMNode::createEvioDOMNode<float>  (dphotonTag,3);
+    evioDOMNodeP pz    = evioDOMNode::createEvioDOMNode<float>  (dphotonTag,4);
+    evioDOMNodeP x     = evioDOMNode::createEvioDOMNode<float>  (dphotonTag,5);
+    evioDOMNodeP y     = evioDOMNode::createEvioDOMNode<float>  (dphotonTag,6);
+    evioDOMNodeP z     = evioDOMNode::createEvioDOMNode<float>  (dphotonTag,7);
+    evioDOMNodeP t     = evioDOMNode::createEvioDOMNode<float>  (dphotonTag,8);
+    evioDOMNodeP Tag   = evioDOMNode::createEvioDOMNode<int>    (dphotonTag,9);
+    *photon << E << px << py << pz << x << y << z << t << Tag;
+
+
+    // add track data to banks
+    for(unsigned int i=0; i<photons.size(); i++) {
+      *E          << photons[i]->energy();
+      *px         << photons[i]->px();
+      *py         << photons[i]->py();
+      *pz         << photons[i]->pz();
+      *x          << photons[i]->x();
+      *y          << photons[i]->y();
+      *z          << photons[i]->z();
+      *t          << photons[i]->getTime();
+      *Tag        << photons[i]->getTag();
+    }
+  }
+
+
+//------------------------------------------------------------------------------
+
+
   void decode_object_parameters(void) {
     
     // params are comma-separated and case-insensitive
     // "-" means invert
     // "+" is ignored
-    // "all", "none", "truth" and "hits" supported
+    // also supported: "all", "none", "truth" "hits", "tracks"
     // otherwise parameter must be the name of a DANA object that is processed by this program
     
 
@@ -940,7 +1086,9 @@ private:
     string danaevio= "";
     gPARMS->SetDefaultParameter("DANAEVIO",danaevio);
     if(danaevio=="") gPARMS->SetDefaultParameter("WRITEOUT",danaevio);
+
     if(danaevio!="") {
+
       vector<string> params;
       SplitString<string>(danaevio,params,",");
       for(unsigned int i=0; i<params.size(); i++) {
@@ -951,17 +1099,26 @@ private:
 
         if(value=="all") {
           for(iter=evioMap.begin(); iter!=evioMap.end(); iter++) iter->second=!minus;
+
         } else if(value=="none") {
           for(iter=evioMap.begin(); iter!=evioMap.end(); iter++) iter->second=minus;
+
         } else if(value=="truth") {
           evioMap["dmcthrown"]=!minus;
           evioMap["dtoftruth"]=!minus;
           evioMap["dfcaltruthshower"]=!minus;
           evioMap["dbcaltruthshower"]=!minus;
+
         } else if(value=="hits") {
           evioMap["dcdchit"]=!minus;
           evioMap["dfdchit"]=!minus;
           evioMap["dmctrackhit"]=!minus;
+
+        } else if(value=="tracks") {
+          evioMap["dtracktimebased"]=!minus;
+          evioMap["dchargedtrack"]=!minus;
+          evioMap["dphoton"]=!minus;
+
         } else {
           map<string,bool>::iterator found = evioMap.find(value);
           if(found!=evioMap.end()) {
@@ -969,9 +1126,15 @@ private:
           } else {
             jerr << endl << "  ?unknown DANAEVIO or WRITEOUT parameter: " << params[i] << endl;
           }
+
         }
       }
     }
+
+
+    // if DChargedTrack requested then DTrackTimeBased must be also be present
+    if(evioMap["dchargedtrack"])evioMap["dtracktimebased"]=true;
+    
   }
 
 

@@ -156,4 +156,37 @@
   <xmldumpDictEntry name="t"                    tag="11400"    num="2"/>
   <xmldumpDictEntry name="sector"               tag="11400"    num="3"/>
 
+
+<!-- Tracking info -->
+  <xmldumpDictEntry name="DTrackTimeBased"      tag="11500"    num="0"/>
+  <xmldumpDictEntry name="chisq"                tag="11500"    num="1"/>
+  <xmldumpDictEntry name="Ndof"                 tag="11500"    num="2"/>
+  <xmldumpDictEntry name="FOM"                  tag="11500"    num="3"/>
+  <xmldumpDictEntry name="x"                    tag="11500"    num="4"/>
+  <xmldumpDictEntry name="y"                    tag="11500"    num="5"/>
+  <xmldumpDictEntry name="z"                    tag="11500"    num="6"/>
+  <xmldumpDictEntry name="px"                   tag="11500"    num="7"/>
+  <xmldumpDictEntry name="py"                   tag="11500"    num="8"/>
+  <xmldumpDictEntry name="pz"                   tag="11500"    num="9"/>
+  <xmldumpDictEntry name="q"                    tag="11500"    num="10"/>
+  <xmldumpDictEntry name="E"                    tag="11500"    num="11"/>
+  <xmldumpDictEntry name="mass"                 tag="11500"    num="12"/>
+  <xmldumpDictEntry name="t0"                   tag="11500"    num="13"/>
+
+  <xmldumpDictEntry name="DChargedTrack"        tag="11600"    num="0"/>
+  <xmldumpDictEntry name="hypotheses"           tag="11600"    num="1"/>
+
+  <xmldumpDictEntry name="DPhoton"              tag="11700"    num="0"/>
+  <xmldumpDictEntry name="E"                    tag="11700"    num="1"/>
+  <xmldumpDictEntry name="px"                   tag="11700"    num="2"/>
+  <xmldumpDictEntry name="py"                   tag="11700"    num="3"/>
+  <xmldumpDictEntry name="pz"                   tag="11700"    num="4"/>
+  <xmldumpDictEntry name="x"                    tag="11700"    num="5"/>
+  <xmldumpDictEntry name="y"                    tag="11700"    num="6"/>
+  <xmldumpDictEntry name="z"                    tag="11700"    num="7"/>
+  <xmldumpDictEntry name="t"                    tag="11700"    num="8"/>
+  <xmldumpDictEntry name="Tag"                  tag="11700"    num="9"/>
+
+
+
 </xmlDict>
