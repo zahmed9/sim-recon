@@ -421,6 +421,7 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 	trkmf = NULL;
 	optionsmf = new hdv_optionsframe(this, NULL, 100, 100);
 	fulllistmf = new hdv_fulllistframe(this, NULL, 100, 100);
+	endviewBmf = new hdv_endviewBframe(this, NULL, 600, 600);
 
 	//&&&&&&&&&&&&&&&& Defaults
 	ReadPreferences();
@@ -652,6 +653,8 @@ void hdv_mainframe::SetRange(void)
 		endviewA->GetCanvas()->Range(xlo, ylo, xhi, yhi);
 		endviewB->GetCanvas()->cd();
 		endviewB->GetCanvas()->Range(xlo*1.3, ylo*1.3, xhi*1.3, yhi*1.3);
+		endviewBmf->SetRange(xlo*1.3, ylo*1.3, xhi*1.3, yhi*1.3);
+		
 
 	}else{
 		// define range in each direction in cm, radians
@@ -678,6 +681,7 @@ void hdv_mainframe::SetRange(void)
 		endviewA->GetCanvas()->Range(philo, rlo/2.5, phihi,  rhi/2.5);
 		endviewB->GetCanvas()->cd();
 		endviewB->GetCanvas()->Range(philo, rlo/10.0, phihi,  rhi/1.9);
+		endviewBmf->SetRange(philo, rlo/10.0, phihi,  rhi/1.9);
 	}
 }
 
@@ -861,11 +865,16 @@ void hdv_mainframe::DoClearBCALInspectorPointer(void)
 //-------------------
 void hdv_mainframe::DoEndViewBEvent(TVirtualPad* pad, TObject* obj, Int_t event)
 {
-	itimerval itv;
-	getitimer(ITIMER_REAL, &itv);
-	double mytime = (double)itv.it_value.tv_sec + 1.0E-6*(double)itv.it_value.tv_usec;
-	
-	_DBG_"Got event type: "<<event<<" time="<<mytime<<endl;
+	// event is the mouse button pushed (1=left, 2=center, 3=right)
+	// It seems we can't detect double clicks here.
+	if(endviewBmf==NULL){
+		endviewBmf = new hdv_endviewBframe(this, NULL, 100, 100);
+	}else{
+		endviewBmf->MapWindow();
+		endviewBmf->RaiseWindow();
+		endviewBmf->RequestFocus();
+		DoMyRedraw();
+	}
 }
 
 //-------------------
@@ -1063,6 +1072,7 @@ void hdv_mainframe::DoMyRedraw(void)
 	for(unsigned int i=0; i<graphics_endB.size(); i++)graphics_endB[i]->Draw("f");
 	for(unsigned int i=0; i<graphics_endB.size(); i++)graphics_endB[i]->Draw();
 	endviewB->GetCanvas()->Update();
+	endviewBmf->DrawObjects(graphics_endB); // duplicate drawing of objects in big window
 
 	sideviewA->GetCanvas()->cd(0);
 	for(unsigned int i=0; i<graphics_sideA.size(); i++)graphics_sideA[i]->Draw();

@@ -31,10 +31,12 @@
 class trk_mainframe;
 class hdv_optionsframe;
 class hdv_fulllistframe;
+class hdv_endviewBframe;
 #ifndef __CINT__
 #include "trk_mainframe.h"
 #include "hdv_optionsframe.h"
 #include "hdv_fulllistframe.h"
+#include "hdv_endviewBframe.h"
 #endif
 
 class hdv_mainframe:public TGMainFrame {
@@ -129,6 +131,7 @@ class hdv_mainframe:public TGMainFrame {
 		trk_mainframe *trkmf;
 		hdv_optionsframe *optionsmf;
 		hdv_fulllistframe *fulllistmf;
+		hdv_endviewBframe *endviewBmf;
 	
 		TRootEmbeddedCanvas *sideviewA;
 		TRootEmbeddedCanvas *sideviewB;
