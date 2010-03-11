@@ -115,8 +115,28 @@ static pair<string,bool> danaObs[] =  {
 static map<string,bool> evioMap(danaObs,danaObs+sizeof(danaObs)/sizeof(danaObs[0]));
 
 
-// to allow DChargedTrack to cross-index DTrackTimeBased
-map<int,int> DTrackTimeBasedMap;
+// id maps for all banks needed to create indices to associated objects
+static map<int,int> emptyMap;
+static  pair<string, map<int,int> > idPairs[] = {
+  pair<string, map<int,int> > ("dmctrackhit",        emptyMap),
+  pair<string, map<int,int> > ("dbeamphoton",        emptyMap),
+  pair<string, map<int,int> > ("dmcthrown",          emptyMap),
+  pair<string, map<int,int> > ("dfcalthruthshower",  emptyMap),
+  pair<string, map<int,int> > ("dbcalthruthshower",  emptyMap),
+  pair<string, map<int,int> > ("dtoftruth",          emptyMap),
+  pair<string, map<int,int> > ("dsctruthhit",        emptyMap),
+  pair<string, map<int,int> > ("dmctrajectorypoint", emptyMap),
+  pair<string, map<int,int> > ("dcdchit",            emptyMap),
+  pair<string, map<int,int> > ("dfdclhit",           emptyMap),
+  pair<string, map<int,int> > ("dfcalhit",           emptyMap),
+  pair<string, map<int,int> > ("dhddmbcalhit",       emptyMap),
+  pair<string, map<int,int> > ("dhddmtofhit",        emptyMap),
+  pair<string, map<int,int> > ("dschit",             emptyMap),
+  pair<string, map<int,int> > ("dtracktimebased",    emptyMap),
+  pair<string, map<int,int> > ("dchargedtrack",      emptyMap),
+  pair<string, map<int,int> > ("dphoton",            emptyMap),
+};
+static map<string, map<int,int> > idMap(idPairs,idPairs+sizeof(idPairs)/sizeof(idPairs[0]));
 
 
 // evio bank tag definitions (totally arbitrary at the moment)
@@ -332,6 +352,7 @@ private:
 
 
     // add track data to banks
+    idMap["dmcthrown"].clear();
     for(unsigned int i=0; i<mcthrowns.size(); i++) {
       *typeBank     << mcthrowns[i]->type;
       *pdgtypeBank  << mcthrowns[i]->pdgtype;
@@ -350,6 +371,8 @@ private:
       *pzBank       << mom.Z();
       
       *energyBank   << mcthrowns[i]->energy();
+
+      idMap["dmcthrown"][mcthrowns[i]->id]=i;
     }
   }
 
@@ -384,6 +407,7 @@ private:
 
 
     // add track data to banks
+    idMap["dmctrackhit"].clear();
     for(unsigned int i=0; i<mctrackhits.size(); i++) {
       *rBank        << mctrackhits[i]->r;
       *phiBank      << mctrackhits[i]->phi;
@@ -392,6 +416,8 @@ private:
       *primaryBank  << mctrackhits[i]->primary;
       *ptypeBank    << mctrackhits[i]->ptype;
       *systemBank   << mctrackhits[i]->system;
+
+      idMap["dmctrackhit"][mctrackhits[i]->id]=i;
     }
 
   }
@@ -431,6 +457,7 @@ private:
 
     
     // add track data to banks
+    idMap["dtoftruth"].clear();
     for(unsigned int i=0; i<toftruths.size(); i++) {
 
       *trackBank   << toftruths[i]->track;
@@ -444,8 +471,9 @@ private:
       *tBank       << toftruths[i]->t;
       *EBank       << toftruths[i]->E;
       *ptypeBank   << toftruths[i]->ptype;
-    }
 
+      idMap["dtoftruth"][toftruths[i]->id]=i;
+    }
 
   }
 
@@ -485,6 +513,7 @@ private:
 
 
     // add track data to banks
+    idMap["dfcaltruthshower"].clear();
     for(unsigned int i=0; i<fcaltruthshowers.size(); i++) {
       *xBank       << fcaltruthshowers[i]->x();
       *yBank       << fcaltruthshowers[i]->y();
@@ -497,6 +526,8 @@ private:
       *primaryBank << fcaltruthshowers[i]->primary();
       *trackBank   << fcaltruthshowers[i]->track();
       *typeBank    << fcaltruthshowers[i]->type();
+
+      idMap["dfcaltruthshower"][fcaltruthshowers[i]->id]=i;
     }
   }
 
@@ -530,6 +561,7 @@ private:
 
 
     // add track data to banks
+    idMap["dbcaltruthshower"].clear();
     for(unsigned int i=0; i<bcaltruthshowers.size(); i++) {
       *trackBank   << bcaltruthshowers[i]->track;
       *primaryBank << bcaltruthshowers[i]->primary;
@@ -538,6 +570,8 @@ private:
       *zBank       << bcaltruthshowers[i]->z;
       *tBank       << bcaltruthshowers[i]->t;
       *EBank       << bcaltruthshowers[i]->E;
+      
+      idMap["dbcaltruthshower"][bcaltruthshowers[i]->id]=i;
     }
   }
 
@@ -568,11 +602,14 @@ private:
 
 
     // add track data to banks
+    idMap["dcdchit"].clear();
     for(unsigned int i=0; i<cdchits.size(); i++) {
       *ringBank  << cdchits[i]->ring;
       *strawBank << cdchits[i]->straw;
       *dEBank    << cdchits[i]->dE;
       *tBank     << cdchits[i]->t;
+
+      idMap["dcdchit"][cdchits[i]->id]=i;
     }
   }
 
@@ -614,6 +651,7 @@ private:
 
 
     // add track data to banks
+    idMap["dmctrajectorypoint"].clear();
     for(unsigned int i=0; i<mctrajectorypoints.size(); i++) {
       *xBank              << mctrajectorypoints[i]->x;
       *yBank              << mctrajectorypoints[i]->y;
@@ -629,6 +667,8 @@ private:
       *radlenBank         << mctrajectorypoints[i]->radlen;
       *stepBank           << mctrajectorypoints[i]->step;
       *mechBank           << mctrajectorypoints[i]->mech;
+
+      idMap["dmctrajectorypoint"][mctrajectorypoints[i]->id]=i;
     }
   }
 
@@ -666,6 +706,7 @@ private:
 
 
     // add track data to banks
+    idMap["dfdchit"].clear();
     for(unsigned int i=0; i<fdchits.size(); i++) {
       *layerBank    << fdchits[i]->layer;
       *moduleBank   << fdchits[i]->module;
@@ -677,6 +718,8 @@ private:
       *tBank        << fdchits[i]->t;
       *rBank        << fdchits[i]->r;
       *typeBank     << fdchits[i]->type;
+
+      idMap["dfdchit"][fdchits[i]->id]=i;
     }
   }
 
@@ -710,6 +753,7 @@ private:
 
 
     // add track data to banks
+    idMap["dbeamphoton"].clear();
     for(unsigned int i=0; i<beamphotons.size(); i++) {
       DVector3 pos = beamphotons[i]->position();
       *xBank   <<  pos.X();
@@ -722,6 +766,8 @@ private:
       *pzBank  <<  mom.Z();
 
       *tBank  << beamphotons[i]->t;
+
+      idMap["dbeamphoton"][beamphotons[i]->id]=i;
     }
   }
 
@@ -758,6 +804,7 @@ private:
 
 
     // add track data to banks
+    idMap["dsctruthhit"].clear();
     for(unsigned int i=0; i<sctruthhits.size(); i++) {
       *dEdxBank     << sctruthhits[i]->dEdx;
       *primaryBank  << (int8_t)sctruthhits[i]->primary;
@@ -768,6 +815,8 @@ private:
       *zBank        << sctruthhits[i]->z;
       *tBank        << sctruthhits[i]->t;
       *sectorBank   << sctruthhits[i]->sector;
+
+      idMap["dsctruthhit"][sctruthhits[i]->id]=i;
     }
   }
 
@@ -800,6 +849,7 @@ private:
 
 
     // add track data to banks
+    idMap["dfcalhit"].clear();
     for(unsigned int i=0; i<fcalhits.size(); i++) {
       *rowBank     << fcalhits[i]->row;
       *columnBank  << fcalhits[i]->column;
@@ -807,6 +857,8 @@ private:
       *yBank       << fcalhits[i]->y;
       *EBank       << fcalhits[i]->E;
       *tBank       << fcalhits[i]->t;
+
+      idMap["dfcalhit"][fcalhits[i]->id]=i;
     }
   }
 
@@ -839,6 +891,7 @@ private:
 
 
     // add track data to banks
+    idMap["dhddmbcalhit"].clear();
     for(unsigned int i=0; i<hddmbcalhits.size(); i++) {
       *moduleBank  << hddmbcalhits[i]->module;
       *layerBank   << hddmbcalhits[i]->layer;
@@ -846,6 +899,8 @@ private:
       *EBank       << hddmbcalhits[i]->E;
       *tBank       << hddmbcalhits[i]->t;
       *zLocalBank  << hddmbcalhits[i]->zLocal;
+
+      idMap["dhddmbcalhit"][hddmbcalhits[i]->id]=i;
     }
   }
 
@@ -888,6 +943,7 @@ private:
 
 
     // add track data to banks
+    idMap["dhddmtofhit"].clear();
     for(unsigned int i=0; i<hddmtofhits.size(); i++) {
       *planeBank    << hddmtofhits[i]->plane;
       *barBank      << hddmtofhits[i]->bar;
@@ -903,6 +959,8 @@ private:
       *pyBank       << hddmtofhits[i]->py;
       *pzBank       << hddmtofhits[i]->pz;
       *EBank        << hddmtofhits[i]->E;
+
+      idMap["dhddmtofhit"][hddmtofhits[i]->id]=i;
     }
   }
 
@@ -932,10 +990,13 @@ private:
 
 
     // add track data to banks
+    idMap["dschit"].clear();
     for(unsigned int i=0; i<schits.size(); i++) {
       *dEBank      << schits[i]->dE;
       *tBank       << schits[i]->t;
       *sectorBank  << schits[i]->sector;
+
+      idMap["dschit"][schits[i]->id]=i;
     }
   }
 
@@ -976,8 +1037,7 @@ private:
 
 
     // add track data to banks
-    // also create map if DChargedTrack is requested
-    if(evioMap["dtracktimebased"])DTrackTimeBasedMap.clear();
+    idMap["dtracktimebased"].clear();
     for(unsigned int i=0; i<timebasedtracks.size(); i++) {
       *chisq      << timebasedtracks[i]->chisq;
       *Ndof       << timebasedtracks[i]->Ndof;
@@ -992,7 +1052,7 @@ private:
       *E          << timebasedtracks[i]->energy();
       *mass       << timebasedtracks[i]->mass();
       *t0         << timebasedtracks[i]->t0();
-      DTrackTimeBasedMap[timebasedtracks[i]->id]=i;
+      idMap["dtracktimebased"][timebasedtracks[i]->id]=i;
     }
   }
 
@@ -1014,12 +1074,14 @@ private:
     tree << chargedtrack;
 
     // create index bank for each charged track and add to chargedtrack bank
+    idMap["dchargedtrack"].clear();
     for(unsigned int i=0; i<chargedtracks.size(); i++) {
       evioDOMNodeP hypotheses = evioDOMNode::createEvioDOMNode<int> (dchargedtrackTag,1);
       *chargedtrack << hypotheses;
       for(unsigned int j=0; j<chargedtracks[i]->hypotheses.size(); j++) {
-        *hypotheses<< DTrackTimeBasedMap[chargedtracks[i]->hypotheses[j]->id];
+        *hypotheses<< idMap["dtracktimebased"][chargedtracks[i]->hypotheses[j]->id];
       }
+      idMap["dchargedtrack"][chargedtracks[i]->id]=i;
     }
   }
 
@@ -1055,6 +1117,7 @@ private:
 
 
     // add track data to banks
+    idMap["dphoton"].clear();
     for(unsigned int i=0; i<photons.size(); i++) {
       *E          << photons[i]->energy();
       *px         << photons[i]->px();
@@ -1065,6 +1128,8 @@ private:
       *z          << photons[i]->z();
       *t          << photons[i]->getTime();
       *Tag        << photons[i]->getTag();
+
+      idMap["dphoton"][photons[i]->id]=i;
     }
   }
 
