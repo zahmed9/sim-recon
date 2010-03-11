@@ -30,9 +30,11 @@
 
 class trk_mainframe;
 class hdv_optionsframe;
+class hdv_fulllistframe;
 #ifndef __CINT__
 #include "trk_mainframe.h"
 #include "hdv_optionsframe.h"
+#include "hdv_fulllistframe.h"
 #endif
 
 class hdv_mainframe:public TGMainFrame {
@@ -60,6 +62,7 @@ class hdv_mainframe:public TGMainFrame {
 		
 		void DoOpenTrackInspector(void);
 		void DoOpenOptionsWindow(void);
+		void DoOpenFullListWindow(void);
 		void DoOpenTOFInspector(void);
 		void DoOpenFCALInspector(void);
 		void DoOpenBCALInspector(void);
@@ -69,6 +72,8 @@ class hdv_mainframe:public TGMainFrame {
 		void DoClearTOFInspectorPointer(void);
 		void DoClearFCALInspectorPointer(void);
 		void DoClearBCALInspectorPointer(void);
+		
+		void DoEndViewBEvent(TVirtualPad* pad, TObject* obj, Int_t event);
 
 		void DoPanXpos(void);
 		void DoPanXneg(void);
@@ -123,6 +128,7 @@ class hdv_mainframe:public TGMainFrame {
 	
 		trk_mainframe *trkmf;
 		hdv_optionsframe *optionsmf;
+		hdv_fulllistframe *fulllistmf;
 	
 		TRootEmbeddedCanvas *sideviewA;
 		TRootEmbeddedCanvas *sideviewB;
@@ -139,6 +145,9 @@ class hdv_mainframe:public TGMainFrame {
 		TGComboBox *delay;
 		
 		TGTextButton *next, *prev;
+		
+		TGGroupFrame *throwninfo;
+		TGGroupFrame *reconinfo;
 		
 		string default_candidate;
 		string default_track;

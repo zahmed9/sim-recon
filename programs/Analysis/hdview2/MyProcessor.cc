@@ -45,6 +45,7 @@ using namespace std;
 #include "FCAL/DFCALGeometry.h"
 #include "FCAL/DFCALHit.h"
 #include "PID/DPhoton.h"
+#include "PID/DTwoGammaFit.h"
 #include "BCAL/DHDDMBCALHit.h"
 
 extern hdv_mainframe *hdvmf;
@@ -746,6 +747,11 @@ void MyProcessor::UpdateTrackLabels(void)
 		if(loop)loop->Get(photons, tag.c_str());
 		for(unsigned int i=0; i<photons.size(); i++)trks.push_back(photons[i]);
 	}
+	if(name=="DTwoGammaFit"){
+		vector<const DTwoGammaFit*> twogammafits;
+		if(loop)loop->Get(twogammafits, tag.c_str());
+		for(unsigned int i=0; i<twogammafits.size(); i++)trks.push_back(twogammafits[i]);
+	}
 	
 	// Clear all labels (i.e. draw ---- in them)
 	map<string, vector<TGLabel*> >::iterator iter;
@@ -831,6 +837,7 @@ void MyProcessor::UpdateTrackLabels(void)
 		// Get chisq and Ndof for DTrackTimeBased or DTrackWireBased objects
 		const DTrackTimeBased *timetrack=dynamic_cast<const DTrackTimeBased*>(trk);
 		const DTrackWireBased *track=dynamic_cast<const DTrackWireBased*>(trk);	
+		const DTwoGammaFit *twogammafit=dynamic_cast<const DTwoGammaFit*>(trk);	
 	
 		if(timetrack){
 			chisq_per_dof<<setprecision(4)<<timetrack->chisq/timetrack->Ndof;
@@ -840,8 +847,11 @@ void MyProcessor::UpdateTrackLabels(void)
 			chisq_per_dof<<setprecision(4)<<track->chisq/track->Ndof;
 			Ndof<<track->Ndof;
 			fom << "N/A";
-		}
-		else{
+		}else if(twogammafit){
+			chisq_per_dof<<setprecision(4)<<twogammafit->getChi2();
+			Ndof<<twogammafit->getNdf();
+			fom << twogammafit->getProb();
+		}else{
 			chisq_per_dof<<"N/A";
 			Ndof<<"N/A";
 			fom << "N/A";

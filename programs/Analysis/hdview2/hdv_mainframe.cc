@@ -7,6 +7,7 @@
 using namespace std;
 
 #include <pthread.h>
+#include <sys/time.h>
 
 #include <TRACKING/DMCThrown.h>
 #include "hdv_mainframe.h"
@@ -220,20 +221,20 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 			
 		//----------------- Inspectors
 		TGTextButton *trackinspector	= new TGTextButton(inspectors,	"Track Inspector");
-		TGTextButton *tofinspector	= new TGTextButton(inspectors,	"TOF Inspector");
-		TGTextButton *bcalinspector	= new TGTextButton(inspectors,	"BCAL Inspector");
-		TGTextButton *fcalinspector	= new TGTextButton(inspectors,	"FCAL Inspector");
+		//TGTextButton *tofinspector	= new TGTextButton(inspectors,	"TOF Inspector");
+		//TGTextButton *bcalinspector	= new TGTextButton(inspectors,	"BCAL Inspector");
+		//TGTextButton *fcalinspector	= new TGTextButton(inspectors,	"FCAL Inspector");
 		inspectors->AddFrame(trackinspector, xhints);
-		inspectors->AddFrame(tofinspector, xhints);
-		inspectors->AddFrame(bcalinspector, xhints);
-		inspectors->AddFrame(fcalinspector, xhints);
-		tofinspector->SetEnabled(kFALSE);
-		bcalinspector->SetEnabled(kFALSE);
-		fcalinspector->SetEnabled(kFALSE);
+		//inspectors->AddFrame(tofinspector, xhints);
+		//inspectors->AddFrame(bcalinspector, xhints);
+		//inspectors->AddFrame(fcalinspector, xhints);
+		//tofinspector->SetEnabled(kFALSE);
+		//bcalinspector->SetEnabled(kFALSE);
+		//fcalinspector->SetEnabled(kFALSE);
 
 		//-------------- Program Controls
 		TGTextButton *quit	= new TGTextButton(programcontrols,	"&Quit");
-		programcontrols->AddFrame(quit, rhints);
+		programcontrols->AddFrame(quit, new TGLayoutHints(kLHintsTop|kLHintsRight|kLHintsExpandX, 2,2,2,2));
 	
 	//========== MID FRAME ============
 	TGHorizontalFrame *detectorframe = new TGHorizontalFrame(midframe);
@@ -349,8 +350,8 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 	botframe->AddFrame(trackinfo, xhints);
 	
 		//------ Track Info ------
-		TGGroupFrame *throwninfo = new TGGroupFrame(trackinfo, "Thrown", kHorizontalFrame);
-		TGGroupFrame *reconinfo = new TGGroupFrame(trackinfo, "Reconstructed", kHorizontalFrame);
+		throwninfo = new TGGroupFrame(trackinfo, "Thrown", kHorizontalFrame);
+		reconinfo = new TGGroupFrame(trackinfo, "Reconstructed", kHorizontalFrame);
 		trackinfo->AddFrame(throwninfo, lhints);
 		trackinfo->AddFrame(reconinfo, lhints);
 			
@@ -404,16 +405,22 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 				reconlabs[colnames[i]] = rv;
 			}
 
-			// Reconstruction factory
-			reconfactory = new TGComboBox(reconinfo, "DTrackCandidate:", 0);
+			// Reconstruction factory and full list button
+			TGVerticalFrame *vf = new TGVerticalFrame(reconinfo);
+			reconinfo->AddFrame(vf, yhints);
+			reconfactory = new TGComboBox(vf, "DTrackCandidate:", 0);
 			reconfactory->Resize(160,20);
 			for(int i=0; i<100; i++)reconfactory->AddEntry("a",i); // For some reason, this is needed for ROOT >5.14 (??!!!) real entries are filled in later
-			reconinfo->AddFrame(reconfactory, lhints);
+			vf->AddFrame(reconfactory, thints);
+			
+			TGTextButton *listall	= new TGTextButton(vf,	"Full List");
+			vf->AddFrame(listall, new TGLayoutHints(kLHintsBottom|kLHintsExpandX, 2,2,2,2));
 
 	// Pointers to optional daughter windows (these must be done before ReadPreferences in
 	// order for the options they implement to be filled into checkbuttons)
 	trkmf = NULL;
 	optionsmf = new hdv_optionsframe(this, NULL, 100, 100);
+	fulllistmf = new hdv_fulllistframe(this, NULL, 100, 100);
 
 	//&&&&&&&&&&&&&&&& Defaults
 	ReadPreferences();
@@ -442,9 +449,10 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 	
 	trackinspector->Connect("Clicked()","hdv_mainframe", this, "DoOpenTrackInspector()");
 	moreOptions->Connect("Clicked()","hdv_mainframe", this, "DoOpenOptionsWindow()");
-	tofinspector->Connect("Clicked()","hdv_mainframe", this, "DoOpenTOFInspector()");
-	fcalinspector->Connect("Clicked()","hdv_mainframe", this, "DoOpenFCALInspector()");
-	bcalinspector->Connect("Clicked()","hdv_mainframe", this, "DoOpenBCALInspector()");
+	listall->Connect("Clicked()","hdv_mainframe", this, "DoOpenFullListWindow()");
+	//tofinspector->Connect("Clicked()","hdv_mainframe", this, "DoOpenTOFInspector()");
+	//fcalinspector->Connect("Clicked()","hdv_mainframe", this, "DoOpenFCALInspector()");
+	//bcalinspector->Connect("Clicked()","hdv_mainframe", this, "DoOpenBCALInspector()");
 	
 	checkbuttons["candidates"]->Connect("Clicked()","hdv_mainframe", this, "DoMyRedraw()");
 	checkbuttons["wiretracks"]->Connect("Clicked()","hdv_mainframe", this, "DoMyRedraw()");
@@ -471,6 +479,8 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 	timetracksfactory->Connect("Selected(Int_t)","hdv_mainframe", this, "DoMyRedraw()");	
 	chargedtracksfactory->Connect("Selected(Int_t)","hdv_mainframe", this, "DoMyRedraw()");
 	reconfactory->Connect("Selected(Int_t)","hdv_mainframe", this, "DoUpdateTrackLabels()");
+	
+	endviewB->GetCanvas()->Connect("Selected(TVirtualPad*, TObject*, Int_t)", "hdv_mainframe", this, "DoEndViewBEvent(TVirtualPad*, TObject*, Int_t)");
 
 	// Set up timer to call the DoTimer() method repeatedly
 	// so events can be automatically advanced.
@@ -485,6 +495,12 @@ hdv_mainframe::hdv_mainframe(const TGWindow *p, UInt_t w, UInt_t h):TGMainFrame(
 	MapSubwindows();
 	Resize(GetDefaultSize());
 	MapWindow();
+	
+	// Call Resize method of some group frames to get them to shrink down to smallest size
+	viewcontrols->Resize();
+	eventinfo->Resize();
+	eventcontrols->Resize();
+	inspectors->Resize();
 }
 
 //-------------------
@@ -756,8 +772,23 @@ void hdv_mainframe::DoOpenOptionsWindow(void)
 	if(optionsmf==NULL){
 		optionsmf = new hdv_optionsframe(this, NULL, 100, 100);
 	}else{
+		optionsmf->MapWindow();
 		optionsmf->RaiseWindow();
 		optionsmf->RequestFocus();
+	}
+}
+
+//-------------------
+// DoOpenFullListWindow
+//-------------------
+void hdv_mainframe::DoOpenFullListWindow(void)
+{
+	if(fulllistmf==NULL){
+		fulllistmf = new hdv_fulllistframe(this, NULL, 100, 100);
+	}else{
+		fulllistmf->MapWindow();
+		fulllistmf->RaiseWindow();
+		fulllistmf->RequestFocus();
 	}
 }
 
@@ -823,6 +854,18 @@ void hdv_mainframe::DoClearFCALInspectorPointer(void)
 void hdv_mainframe::DoClearBCALInspectorPointer(void)
 {
 
+}
+
+//-------------------
+// DoEndViewBEvent
+//-------------------
+void hdv_mainframe::DoEndViewBEvent(TVirtualPad* pad, TObject* obj, Int_t event)
+{
+	itimerval itv;
+	getitimer(ITIMER_REAL, &itv);
+	double mytime = (double)itv.it_value.tv_sec + 1.0E-6*(double)itv.it_value.tv_usec;
+	
+	_DBG_"Got event type: "<<event<<" time="<<mytime<<endl;
 }
 
 //-------------------
@@ -1059,6 +1102,9 @@ void hdv_mainframe::DoSetCoordinates(Int_t id)
 void hdv_mainframe::DoUpdateTrackLabels(void)
 {
 	gMYPROC->UpdateTrackLabels();
+
+	throwninfo->Resize();
+	reconinfo->Resize();
 }
 
 //-------------------
@@ -1797,6 +1843,19 @@ void hdv_mainframe::SetReconstructedFactories(vector<string> &facnames)
 	reconfactory->AddEntry("DPhoton:", id++);
 	for(unsigned int i=0; i< facnames.size(); i++){
 		string name = "DPhoton:";
+		string::size_type pos = facnames[i].find(name);
+		if(pos==string::npos)continue;
+		string tag = facnames[i].substr(name.size(), facnames[i].size()-name.size());
+		reconfactory->AddEntry(facnames[i].c_str(), id++);
+		if(facnames[i]==default_reconstructed){
+			reconfactory->Select(id-1, kTRUE);
+			reconfactory->GetTextEntry()->SetText(facnames[i].c_str());
+		}
+	}
+
+	// Add DTwoGammaFit factories
+	for(unsigned int i=0; i< facnames.size(); i++){
+		string name = "DTwoGammaFit:";
 		string::size_type pos = facnames[i].find(name);
 		if(pos==string::npos)continue;
 		string tag = facnames[i].substr(name.size(), facnames[i].size()-name.size());

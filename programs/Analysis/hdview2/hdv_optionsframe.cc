@@ -126,8 +126,8 @@ hdv_optionsframe::hdv_optionsframe(hdv_mainframe *hdvmf, const TGWindow *p, UInt
 
 	MapSubwindows();
 	Resize(GetDefaultSize());
-	MapWindow();
-	LowerWindow();
+	//MapWindow();
+	//LowerWindow();
 }
 
 //-------------------
@@ -135,7 +135,8 @@ hdv_optionsframe::hdv_optionsframe(hdv_mainframe *hdvmf, const TGWindow *p, UInt
 //-------------------
 void hdv_optionsframe::DoDone(void)
 {
-	LowerWindow();
+	//LowerWindow();
+	UnmapWindow();
 }
 
 
