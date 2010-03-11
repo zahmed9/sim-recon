@@ -108,16 +108,16 @@ static pair<string,bool> danaObs[] =  {
   pair<string,bool> ("dhddmbcalhit",         true),
   pair<string,bool> ("dhddmtofhit",          true),
   pair<string,bool> ("dschit",               true),
-  pair<string,bool> ("dtracktimebased",      true),
-  pair<string,bool> ("dchargedtrack",        true),
-  pair<string,bool> ("dphoton",              true),
+  pair<string,bool> ("dtracktimebased",      false),
+  pair<string,bool> ("dchargedtrack",        false),
+  pair<string,bool> ("dphoton",              false),
 };
 static map<string,bool> evioMap(danaObs,danaObs+sizeof(danaObs)/sizeof(danaObs[0]));
 
 
 // id maps for all banks needed to create indices to associated objects
 static map<int,int> emptyMap;
-static  pair<string, map<int,int> > idPairs[] = {
+static pair<string, map<int,int> > idPairs[] = {
   pair<string, map<int,int> > ("dmctrackhit",        emptyMap),
   pair<string, map<int,int> > ("dbeamphoton",        emptyMap),
   pair<string, map<int,int> > ("dmcthrown",          emptyMap),
@@ -127,7 +127,7 @@ static  pair<string, map<int,int> > idPairs[] = {
   pair<string, map<int,int> > ("dsctruthhit",        emptyMap),
   pair<string, map<int,int> > ("dmctrajectorypoint", emptyMap),
   pair<string, map<int,int> > ("dcdchit",            emptyMap),
-  pair<string, map<int,int> > ("dfdclhit",           emptyMap),
+  pair<string, map<int,int> > ("dfdchit",            emptyMap),
   pair<string, map<int,int> > ("dfcalhit",           emptyMap),
   pair<string, map<int,int> > ("dhddmbcalhit",       emptyMap),
   pair<string, map<int,int> > ("dhddmtofhit",        emptyMap),
@@ -140,26 +140,27 @@ static map<string, map<int,int> > idMap(idPairs,idPairs+sizeof(idPairs)/sizeof(i
 
 
 // evio bank tag definitions (totally arbitrary at the moment)
-static const int danaeventTag            = 10000;
-
-static const int dmctrackhitTag          = 10100;
-static const int dbeamphotonTag          = 10200;
-static const int dmcthrownTag            = 10300;
-static const int dfcaltruthshowerTag     = 10400;
-static const int dbcaltruthshowerTag     = 10500;
-static const int dtoftruthTag            = 10600;
-static const int dsctruthhitTag          = 10700;
-static const int dmctrajectorypointTag   = 10800;
-
-static const int dcdchitTag              = 10900;
-static const int dfdchitTag              = 11000;
-static const int dfcalhitTag             = 11100;
-static const int dhddmbcalhitTag         = 11200;
-static const int dhddmtofhitTag          = 11300;
-static const int dschitTag               = 11400;
-static const int dtracktimebasedTag      = 11500;
-static const int dchargedtrackTag        = 11600;
-static const int dphotonTag              = 11700;
+static pair<string,int> tagPairs[] = {
+  pair<string,int> ("danaevent",            10000),
+  pair<string,int> ("dmctrackhit",          10100),
+  pair<string,int> ("dbeamphoton",          10200),
+  pair<string,int> ("dmcthrown",            10300),
+  pair<string,int> ("dfcaltruthshower",     10400),
+  pair<string,int> ("dbcaltruthshower",     10500),
+  pair<string,int> ("dtoftruth",            10600),
+  pair<string,int> ("dsctruthhit",          10700),
+  pair<string,int> ("dmctrajectorypoint",   10800),
+  pair<string,int> ("dcdchit",              10900),
+  pair<string,int> ("dfdchit",              11000),
+  pair<string,int> ("dfcalhit",             11100),
+  pair<string,int> ("dhddmbcalhit",         11200),
+  pair<string,int> ("dhddmtofhit",          11300),
+  pair<string,int> ("dschit",               11400),
+  pair<string,int> ("dtracktimebased",      11500),
+  pair<string,int> ("dchargedtrack",        11600),
+  pair<string,int> ("dphoton",              11700),
+};
+static map<string,int> tagMap(tagPairs,tagPairs+sizeof(tagPairs)/sizeof(tagPairs[0]));
 
 
 // mutex needed to protect serialization and writing to file
@@ -274,7 +275,7 @@ private:
 
   
     // create evio DOM tree
-    evioDOMTree tree(danaeventTag,0);
+    evioDOMTree tree(tagMap["danaevent"],0);
   
 
     // add various banks to tree
@@ -330,23 +331,23 @@ private:
 
 
     // create mcthrown bank and add to event tree
-    evioDOMNodeP mcthrown = evioDOMNode::createEvioDOMNode(dmcthrownTag,0);
+    evioDOMNodeP mcthrown = evioDOMNode::createEvioDOMNode(tagMap["dmcthrown"],0);
     tree << mcthrown;
 
 
     // create data banks and add to mcthrown
-    evioDOMNodeP typeBank      =  evioDOMNode::createEvioDOMNode<int>  (dmcthrownTag,1);   
-    evioDOMNodeP pdgtypeBank   =  evioDOMNode::createEvioDOMNode<int>  (dmcthrownTag,2);
-    evioDOMNodeP myidBank      =  evioDOMNode::createEvioDOMNode<int>  (dmcthrownTag,3);   
-    evioDOMNodeP parentidBank  =  evioDOMNode::createEvioDOMNode<int>  (dmcthrownTag,4);
-    evioDOMNodeP mechBank      =  evioDOMNode::createEvioDOMNode<int>  (dmcthrownTag,5);   
-    evioDOMNodeP xBank         =  evioDOMNode::createEvioDOMNode<float>(dmcthrownTag,6);      
-    evioDOMNodeP yBank         =  evioDOMNode::createEvioDOMNode<float>(dmcthrownTag,7);      
-    evioDOMNodeP zBank         =  evioDOMNode::createEvioDOMNode<float>(dmcthrownTag,8);      
-    evioDOMNodeP pxBank        =  evioDOMNode::createEvioDOMNode<float>(dmcthrownTag,9);     
-    evioDOMNodeP pyBank        =  evioDOMNode::createEvioDOMNode<float>(dmcthrownTag,10);    
-    evioDOMNodeP pzBank        =  evioDOMNode::createEvioDOMNode<float>(dmcthrownTag,11);    
-    evioDOMNodeP energyBank    =  evioDOMNode::createEvioDOMNode<float>(dmcthrownTag,12);
+    evioDOMNodeP typeBank      =  evioDOMNode::createEvioDOMNode<int>  (tagMap["dmcthrown"],1);   
+    evioDOMNodeP pdgtypeBank   =  evioDOMNode::createEvioDOMNode<int>  (tagMap["dmcthrown"],2);
+    evioDOMNodeP myidBank      =  evioDOMNode::createEvioDOMNode<int>  (tagMap["dmcthrown"],3);   
+    evioDOMNodeP parentidBank  =  evioDOMNode::createEvioDOMNode<int>  (tagMap["dmcthrown"],4);
+    evioDOMNodeP mechBank      =  evioDOMNode::createEvioDOMNode<int>  (tagMap["dmcthrown"],5);   
+    evioDOMNodeP xBank         =  evioDOMNode::createEvioDOMNode<float>(tagMap["dmcthrown"],6);      
+    evioDOMNodeP yBank         =  evioDOMNode::createEvioDOMNode<float>(tagMap["dmcthrown"],7);      
+    evioDOMNodeP zBank         =  evioDOMNode::createEvioDOMNode<float>(tagMap["dmcthrown"],8);      
+    evioDOMNodeP pxBank        =  evioDOMNode::createEvioDOMNode<float>(tagMap["dmcthrown"],9);     
+    evioDOMNodeP pyBank        =  evioDOMNode::createEvioDOMNode<float>(tagMap["dmcthrown"],10);    
+    evioDOMNodeP pzBank        =  evioDOMNode::createEvioDOMNode<float>(tagMap["dmcthrown"],11);    
+    evioDOMNodeP energyBank    =  evioDOMNode::createEvioDOMNode<float>(tagMap["dmcthrown"],12);
     *mcthrown << typeBank << pdgtypeBank << myidBank << parentidBank << mechBank 
               << xBank << yBank << zBank << pxBank << pyBank << pzBank << energyBank;
 
@@ -391,18 +392,18 @@ private:
 
 
     // create mctrackhit bank and add to event tree
-    evioDOMNodeP mctrackhit = evioDOMNode::createEvioDOMNode(dmctrackhitTag,0);
+    evioDOMNodeP mctrackhit = evioDOMNode::createEvioDOMNode(tagMap["dmctrackhit"],0);
     tree << mctrackhit;
 
 
     // create data banks and add to mctrackhit bank
-    evioDOMNodeP rBank       = evioDOMNode::createEvioDOMNode<float>(dmctrackhitTag,1);
-    evioDOMNodeP phiBank     = evioDOMNode::createEvioDOMNode<float>(dmctrackhitTag,2);
-    evioDOMNodeP zBank       = evioDOMNode::createEvioDOMNode<float>(dmctrackhitTag,3);
-    evioDOMNodeP trackBank   = evioDOMNode::createEvioDOMNode  <int>(dmctrackhitTag,4);
-    evioDOMNodeP primaryBank = evioDOMNode::createEvioDOMNode  <int>(dmctrackhitTag,5);
-    evioDOMNodeP ptypeBank   = evioDOMNode::createEvioDOMNode  <int>(dmctrackhitTag,6);
-    evioDOMNodeP systemBank  = evioDOMNode::createEvioDOMNode  <int>(dmctrackhitTag,7);
+    evioDOMNodeP rBank       = evioDOMNode::createEvioDOMNode<float>(tagMap["dmctrackhit"],1);
+    evioDOMNodeP phiBank     = evioDOMNode::createEvioDOMNode<float>(tagMap["dmctrackhit"],2);
+    evioDOMNodeP zBank       = evioDOMNode::createEvioDOMNode<float>(tagMap["dmctrackhit"],3);
+    evioDOMNodeP trackBank   = evioDOMNode::createEvioDOMNode  <int>(tagMap["dmctrackhit"],4);
+    evioDOMNodeP primaryBank = evioDOMNode::createEvioDOMNode  <int>(tagMap["dmctrackhit"],5);
+    evioDOMNodeP ptypeBank   = evioDOMNode::createEvioDOMNode  <int>(tagMap["dmctrackhit"],6);
+    evioDOMNodeP systemBank  = evioDOMNode::createEvioDOMNode  <int>(tagMap["dmctrackhit"],7);
     *mctrackhit << rBank << phiBank << zBank << trackBank << primaryBank << ptypeBank << systemBank;
 
 
@@ -436,22 +437,22 @@ private:
 
 
     // create toftruth bank and add to event tree
-    evioDOMNodeP toftruth = evioDOMNode::createEvioDOMNode(dtoftruthTag,0);
+    evioDOMNodeP toftruth = evioDOMNode::createEvioDOMNode(tagMap["dtoftruth"],0);
     tree << toftruth;
 
 
     // create data banks and add to toftruth bank
-    evioDOMNodeP trackBank   =  evioDOMNode::createEvioDOMNode<int>  (dtoftruthTag,1);
-    evioDOMNodeP primaryBank =  evioDOMNode::createEvioDOMNode<int>  (dtoftruthTag,2);
-    evioDOMNodeP xBank       =  evioDOMNode::createEvioDOMNode<float>(dtoftruthTag,3);
-    evioDOMNodeP yBank       =  evioDOMNode::createEvioDOMNode<float>(dtoftruthTag,4);
-    evioDOMNodeP zBank       =  evioDOMNode::createEvioDOMNode<float>(dtoftruthTag,5);
-    evioDOMNodeP pxBank      =  evioDOMNode::createEvioDOMNode<float>(dtoftruthTag,6);
-    evioDOMNodeP pyBank      =  evioDOMNode::createEvioDOMNode<float>(dtoftruthTag,7);
-    evioDOMNodeP pzBank      =  evioDOMNode::createEvioDOMNode<float>(dtoftruthTag,8);
-    evioDOMNodeP tBank       =  evioDOMNode::createEvioDOMNode<float>(dtoftruthTag,9);
-    evioDOMNodeP EBank       =  evioDOMNode::createEvioDOMNode<float>(dtoftruthTag,10);
-    evioDOMNodeP ptypeBank   =  evioDOMNode::createEvioDOMNode<int>  (dtoftruthTag,11);
+    evioDOMNodeP trackBank   =  evioDOMNode::createEvioDOMNode<int>  (tagMap["dtoftruth"],1);
+    evioDOMNodeP primaryBank =  evioDOMNode::createEvioDOMNode<int>  (tagMap["dtoftruth"],2);
+    evioDOMNodeP xBank       =  evioDOMNode::createEvioDOMNode<float>(tagMap["dtoftruth"],3);
+    evioDOMNodeP yBank       =  evioDOMNode::createEvioDOMNode<float>(tagMap["dtoftruth"],4);
+    evioDOMNodeP zBank       =  evioDOMNode::createEvioDOMNode<float>(tagMap["dtoftruth"],5);
+    evioDOMNodeP pxBank      =  evioDOMNode::createEvioDOMNode<float>(tagMap["dtoftruth"],6);
+    evioDOMNodeP pyBank      =  evioDOMNode::createEvioDOMNode<float>(tagMap["dtoftruth"],7);
+    evioDOMNodeP pzBank      =  evioDOMNode::createEvioDOMNode<float>(tagMap["dtoftruth"],8);
+    evioDOMNodeP tBank       =  evioDOMNode::createEvioDOMNode<float>(tagMap["dtoftruth"],9);
+    evioDOMNodeP EBank       =  evioDOMNode::createEvioDOMNode<float>(tagMap["dtoftruth"],10);
+    evioDOMNodeP ptypeBank   =  evioDOMNode::createEvioDOMNode<int>  (tagMap["dtoftruth"],11);
     *toftruth << trackBank << primaryBank << xBank << yBank << zBank << pxBank << pyBank << pzBank
               << tBank << EBank << ptypeBank;
 
@@ -492,22 +493,22 @@ private:
 
 
     // create fcaltruthshower bank and add to event tree
-    evioDOMNodeP fcaltruthshower = evioDOMNode::createEvioDOMNode(dfcaltruthshowerTag,0);
+    evioDOMNodeP fcaltruthshower = evioDOMNode::createEvioDOMNode(tagMap["dfcaltruthshower"],0);
     tree << fcaltruthshower;
 
 
     // create data banks and add to fcaltruthshower
-    evioDOMNodeP xBank       = evioDOMNode::createEvioDOMNode<float>(dfcaltruthshowerTag,1);
-    evioDOMNodeP yBank       = evioDOMNode::createEvioDOMNode<float>(dfcaltruthshowerTag,2);
-    evioDOMNodeP zBank       = evioDOMNode::createEvioDOMNode<float>(dfcaltruthshowerTag,3);
-    evioDOMNodeP tBank       = evioDOMNode::createEvioDOMNode<float>(dfcaltruthshowerTag,4);
-    evioDOMNodeP pxBank      = evioDOMNode::createEvioDOMNode<float>(dfcaltruthshowerTag,5);
-    evioDOMNodeP pyBank      = evioDOMNode::createEvioDOMNode<float>(dfcaltruthshowerTag,6);
-    evioDOMNodeP pzBank      = evioDOMNode::createEvioDOMNode<float>(dfcaltruthshowerTag,7);
-    evioDOMNodeP EBank       = evioDOMNode::createEvioDOMNode<float>(dfcaltruthshowerTag,8);
-    evioDOMNodeP primaryBank = evioDOMNode::createEvioDOMNode<float>(dfcaltruthshowerTag,9);
-    evioDOMNodeP trackBank   = evioDOMNode::createEvioDOMNode<float>(dfcaltruthshowerTag,10);
-    evioDOMNodeP typeBank    = evioDOMNode::createEvioDOMNode<float>(dfcaltruthshowerTag,11);
+    evioDOMNodeP xBank       = evioDOMNode::createEvioDOMNode<float>(tagMap["dfcaltruthshower"],1);
+    evioDOMNodeP yBank       = evioDOMNode::createEvioDOMNode<float>(tagMap["dfcaltruthshower"],2);
+    evioDOMNodeP zBank       = evioDOMNode::createEvioDOMNode<float>(tagMap["dfcaltruthshower"],3);
+    evioDOMNodeP tBank       = evioDOMNode::createEvioDOMNode<float>(tagMap["dfcaltruthshower"],4);
+    evioDOMNodeP pxBank      = evioDOMNode::createEvioDOMNode<float>(tagMap["dfcaltruthshower"],5);
+    evioDOMNodeP pyBank      = evioDOMNode::createEvioDOMNode<float>(tagMap["dfcaltruthshower"],6);
+    evioDOMNodeP pzBank      = evioDOMNode::createEvioDOMNode<float>(tagMap["dfcaltruthshower"],7);
+    evioDOMNodeP EBank       = evioDOMNode::createEvioDOMNode<float>(tagMap["dfcaltruthshower"],8);
+    evioDOMNodeP primaryBank = evioDOMNode::createEvioDOMNode<float>(tagMap["dfcaltruthshower"],9);
+    evioDOMNodeP trackBank   = evioDOMNode::createEvioDOMNode<float>(tagMap["dfcaltruthshower"],10);
+    evioDOMNodeP typeBank    = evioDOMNode::createEvioDOMNode<float>(tagMap["dfcaltruthshower"],11);
     *fcaltruthshower << xBank << yBank << zBank << tBank << pxBank << pyBank<< pzBank<< EBank 
                      << primaryBank<< trackBank<< typeBank;
 
@@ -545,18 +546,18 @@ private:
 
 
     // create bcaltruthshower bank and add to event tree
-    evioDOMNodeP bcaltruthshower = evioDOMNode::createEvioDOMNode(dbcaltruthshowerTag,0);
+    evioDOMNodeP bcaltruthshower = evioDOMNode::createEvioDOMNode(tagMap["dbcaltruthshower"],0);
     tree << bcaltruthshower;
 
 
     // create data banks and add to bcaltruthshower
-    evioDOMNodeP trackBank    =  evioDOMNode::createEvioDOMNode<int>  (dbcaltruthshowerTag,1);
-    evioDOMNodeP primaryBank  =  evioDOMNode::createEvioDOMNode<int>  (dbcaltruthshowerTag,2);
-    evioDOMNodeP phiBank      =  evioDOMNode::createEvioDOMNode<float>(dbcaltruthshowerTag,3);
-    evioDOMNodeP rBank        =  evioDOMNode::createEvioDOMNode<float>(dbcaltruthshowerTag,4);
-    evioDOMNodeP zBank        =  evioDOMNode::createEvioDOMNode<float>(dbcaltruthshowerTag,5);
-    evioDOMNodeP tBank        =  evioDOMNode::createEvioDOMNode<float>(dbcaltruthshowerTag,6);
-    evioDOMNodeP EBank        =  evioDOMNode::createEvioDOMNode<float>(dbcaltruthshowerTag,7);
+    evioDOMNodeP trackBank    =  evioDOMNode::createEvioDOMNode<int>  (tagMap["dbcaltruthshower"],1);
+    evioDOMNodeP primaryBank  =  evioDOMNode::createEvioDOMNode<int>  (tagMap["dbcaltruthshower"],2);
+    evioDOMNodeP phiBank      =  evioDOMNode::createEvioDOMNode<float>(tagMap["dbcaltruthshower"],3);
+    evioDOMNodeP rBank        =  evioDOMNode::createEvioDOMNode<float>(tagMap["dbcaltruthshower"],4);
+    evioDOMNodeP zBank        =  evioDOMNode::createEvioDOMNode<float>(tagMap["dbcaltruthshower"],5);
+    evioDOMNodeP tBank        =  evioDOMNode::createEvioDOMNode<float>(tagMap["dbcaltruthshower"],6);
+    evioDOMNodeP EBank        =  evioDOMNode::createEvioDOMNode<float>(tagMap["dbcaltruthshower"],7);
     *bcaltruthshower << trackBank << primaryBank << phiBank << rBank << zBank << tBank << EBank;
 
 
@@ -589,15 +590,15 @@ private:
 
 
     // create cdchit bank and add to event tree
-    evioDOMNodeP cdchit = evioDOMNode::createEvioDOMNode(dcdchitTag,0);
+    evioDOMNodeP cdchit = evioDOMNode::createEvioDOMNode(tagMap["dcdchit"],0);
     tree << cdchit;
 
 
     // create data banks and add to cdchit bank
-    evioDOMNodeP ringBank  = evioDOMNode::createEvioDOMNode<int>  (dcdchitTag,1);
-    evioDOMNodeP strawBank = evioDOMNode::createEvioDOMNode<int>  (dcdchitTag,2);
-    evioDOMNodeP dEBank    = evioDOMNode::createEvioDOMNode<float>(dcdchitTag,3);
-    evioDOMNodeP tBank     = evioDOMNode::createEvioDOMNode<float>(dcdchitTag,4);
+    evioDOMNodeP ringBank  = evioDOMNode::createEvioDOMNode<int>  (tagMap["dcdchit"],1);
+    evioDOMNodeP strawBank = evioDOMNode::createEvioDOMNode<int>  (tagMap["dcdchit"],2);
+    evioDOMNodeP dEBank    = evioDOMNode::createEvioDOMNode<float>(tagMap["dcdchit"],3);
+    evioDOMNodeP tBank     = evioDOMNode::createEvioDOMNode<float>(tagMap["dcdchit"],4);
     *cdchit << ringBank << strawBank << dEBank << tBank;
 
 
@@ -627,25 +628,25 @@ private:
 
 
     // create cdchit bank and add to event tree
-    evioDOMNodeP mctrajectorypoint = evioDOMNode::createEvioDOMNode(dmctrajectorypointTag,0);
+    evioDOMNodeP mctrajectorypoint = evioDOMNode::createEvioDOMNode(tagMap["dmctrajectorypoint"],0);
     tree << mctrajectorypoint;
 
 
     // create data banks and add to cdchit bank
-    evioDOMNodeP xBank              = evioDOMNode::createEvioDOMNode<float> (dmctrajectorypointTag,1);
-    evioDOMNodeP yBank              = evioDOMNode::createEvioDOMNode<float> (dmctrajectorypointTag,2);
-    evioDOMNodeP zBank              = evioDOMNode::createEvioDOMNode<float> (dmctrajectorypointTag,3);
-    evioDOMNodeP pxBank             = evioDOMNode::createEvioDOMNode<float> (dmctrajectorypointTag,4);
-    evioDOMNodeP pyBank             = evioDOMNode::createEvioDOMNode<float> (dmctrajectorypointTag,5);
-    evioDOMNodeP pzBank             = evioDOMNode::createEvioDOMNode<float> (dmctrajectorypointTag,6);
-    evioDOMNodeP EBank              = evioDOMNode::createEvioDOMNode<float> (dmctrajectorypointTag,7);
-    evioDOMNodeP dEBank             = evioDOMNode::createEvioDOMNode<float> (dmctrajectorypointTag,8);
-    evioDOMNodeP primary_trackBank  = evioDOMNode::createEvioDOMNode<int>   (dmctrajectorypointTag,9);
-    evioDOMNodeP trackBank          = evioDOMNode::createEvioDOMNode<int>   (dmctrajectorypointTag,10);
-    evioDOMNodeP partBank           = evioDOMNode::createEvioDOMNode<int>   (dmctrajectorypointTag,11);
-    evioDOMNodeP radlenBank         = evioDOMNode::createEvioDOMNode<float> (dmctrajectorypointTag,12);
-    evioDOMNodeP stepBank           = evioDOMNode::createEvioDOMNode<float> (dmctrajectorypointTag,13);
-    evioDOMNodeP mechBank           = evioDOMNode::createEvioDOMNode<int>   (dmctrajectorypointTag,14);
+    evioDOMNodeP xBank              = evioDOMNode::createEvioDOMNode<float> (tagMap["dmctrajectorypoint"],1);
+    evioDOMNodeP yBank              = evioDOMNode::createEvioDOMNode<float> (tagMap["dmctrajectorypoint"],2);
+    evioDOMNodeP zBank              = evioDOMNode::createEvioDOMNode<float> (tagMap["dmctrajectorypoint"],3);
+    evioDOMNodeP pxBank             = evioDOMNode::createEvioDOMNode<float> (tagMap["dmctrajectorypoint"],4);
+    evioDOMNodeP pyBank             = evioDOMNode::createEvioDOMNode<float> (tagMap["dmctrajectorypoint"],5);
+    evioDOMNodeP pzBank             = evioDOMNode::createEvioDOMNode<float> (tagMap["dmctrajectorypoint"],6);
+    evioDOMNodeP EBank              = evioDOMNode::createEvioDOMNode<float> (tagMap["dmctrajectorypoint"],7);
+    evioDOMNodeP dEBank             = evioDOMNode::createEvioDOMNode<float> (tagMap["dmctrajectorypoint"],8);
+    evioDOMNodeP primary_trackBank  = evioDOMNode::createEvioDOMNode<int>   (tagMap["dmctrajectorypoint"],9);
+    evioDOMNodeP trackBank          = evioDOMNode::createEvioDOMNode<int>   (tagMap["dmctrajectorypoint"],10);
+    evioDOMNodeP partBank           = evioDOMNode::createEvioDOMNode<int>   (tagMap["dmctrajectorypoint"],11);
+    evioDOMNodeP radlenBank         = evioDOMNode::createEvioDOMNode<float> (tagMap["dmctrajectorypoint"],12);
+    evioDOMNodeP stepBank           = evioDOMNode::createEvioDOMNode<float> (tagMap["dmctrajectorypoint"],13);
+    evioDOMNodeP mechBank           = evioDOMNode::createEvioDOMNode<int>   (tagMap["dmctrajectorypoint"],14);
     *mctrajectorypoint << xBank << yBank << zBank << pxBank << pyBank << pzBank << EBank << dEBank
                        << primary_trackBank << trackBank << partBank << radlenBank << stepBank << mechBank;
 
@@ -686,21 +687,21 @@ private:
 
 
     // create fdchit bank and add to event tree
-    evioDOMNodeP fdchit = evioDOMNode::createEvioDOMNode(dfdchitTag,0);
+    evioDOMNodeP fdchit = evioDOMNode::createEvioDOMNode(tagMap["dfdchit"],0);
     tree << fdchit;
 
 
     // create data banks and add to fdchit bank
-    evioDOMNodeP layerBank   = evioDOMNode::createEvioDOMNode<int>  (dfdchitTag,1);
-    evioDOMNodeP moduleBank  = evioDOMNode::createEvioDOMNode<int>  (dfdchitTag,2);
-    evioDOMNodeP elementBank = evioDOMNode::createEvioDOMNode<int>  (dfdchitTag,3);
-    evioDOMNodeP planeBank   = evioDOMNode::createEvioDOMNode<int>  (dfdchitTag,4);
-    evioDOMNodeP gPlaneBank  = evioDOMNode::createEvioDOMNode<int>  (dfdchitTag,5);
-    evioDOMNodeP gLayerBank  = evioDOMNode::createEvioDOMNode<int>  (dfdchitTag,6);
-    evioDOMNodeP qBank       = evioDOMNode::createEvioDOMNode<float>(dfdchitTag,7);
-    evioDOMNodeP tBank       = evioDOMNode::createEvioDOMNode<float>(dfdchitTag,8);
-    evioDOMNodeP rBank       = evioDOMNode::createEvioDOMNode<float>(dfdchitTag,9);
-    evioDOMNodeP typeBank    = evioDOMNode::createEvioDOMNode<int>  (dfdchitTag,10);
+    evioDOMNodeP layerBank   = evioDOMNode::createEvioDOMNode<int>  (tagMap["dfdchit"],1);
+    evioDOMNodeP moduleBank  = evioDOMNode::createEvioDOMNode<int>  (tagMap["dfdchit"],2);
+    evioDOMNodeP elementBank = evioDOMNode::createEvioDOMNode<int>  (tagMap["dfdchit"],3);
+    evioDOMNodeP planeBank   = evioDOMNode::createEvioDOMNode<int>  (tagMap["dfdchit"],4);
+    evioDOMNodeP gPlaneBank  = evioDOMNode::createEvioDOMNode<int>  (tagMap["dfdchit"],5);
+    evioDOMNodeP gLayerBank  = evioDOMNode::createEvioDOMNode<int>  (tagMap["dfdchit"],6);
+    evioDOMNodeP qBank       = evioDOMNode::createEvioDOMNode<float>(tagMap["dfdchit"],7);
+    evioDOMNodeP tBank       = evioDOMNode::createEvioDOMNode<float>(tagMap["dfdchit"],8);
+    evioDOMNodeP rBank       = evioDOMNode::createEvioDOMNode<float>(tagMap["dfdchit"],9);
+    evioDOMNodeP typeBank    = evioDOMNode::createEvioDOMNode<int>  (tagMap["dfdchit"],10);
     *fdchit << layerBank << moduleBank << elementBank << planeBank << gPlaneBank << gLayerBank
             << qBank << tBank << rBank << typeBank;
 
@@ -737,18 +738,18 @@ private:
 
 
     // create cdchit bank and add to event tree
-    evioDOMNodeP beamphoton = evioDOMNode::createEvioDOMNode(dbeamphotonTag,0);
+    evioDOMNodeP beamphoton = evioDOMNode::createEvioDOMNode(tagMap["dbeamphoton"],0);
     tree << beamphoton;
 
 
     // create data banks and add to cdchit bank
-    evioDOMNodeP xBank   = evioDOMNode::createEvioDOMNode<float>  (dbeamphotonTag,1);
-    evioDOMNodeP yBank   = evioDOMNode::createEvioDOMNode<float>  (dbeamphotonTag,2);
-    evioDOMNodeP zBank   = evioDOMNode::createEvioDOMNode<float>  (dbeamphotonTag,3);
-    evioDOMNodeP pxBank  = evioDOMNode::createEvioDOMNode<float>  (dbeamphotonTag,4);
-    evioDOMNodeP pyBank  = evioDOMNode::createEvioDOMNode<float>  (dbeamphotonTag,5);
-    evioDOMNodeP pzBank  = evioDOMNode::createEvioDOMNode<float>  (dbeamphotonTag,6);
-    evioDOMNodeP tBank   = evioDOMNode::createEvioDOMNode<int>    (dbeamphotonTag,7);
+    evioDOMNodeP xBank   = evioDOMNode::createEvioDOMNode<float>  (tagMap["dbeamphoton"],1);
+    evioDOMNodeP yBank   = evioDOMNode::createEvioDOMNode<float>  (tagMap["dbeamphoton"],2);
+    evioDOMNodeP zBank   = evioDOMNode::createEvioDOMNode<float>  (tagMap["dbeamphoton"],3);
+    evioDOMNodeP pxBank  = evioDOMNode::createEvioDOMNode<float>  (tagMap["dbeamphoton"],4);
+    evioDOMNodeP pyBank  = evioDOMNode::createEvioDOMNode<float>  (tagMap["dbeamphoton"],5);
+    evioDOMNodeP pzBank  = evioDOMNode::createEvioDOMNode<float>  (tagMap["dbeamphoton"],6);
+    evioDOMNodeP tBank   = evioDOMNode::createEvioDOMNode<int>    (tagMap["dbeamphoton"],7);
     *beamphoton << xBank<< yBank<< zBank<< pxBank<< pyBank<< pzBank << tBank;
 
 
@@ -785,20 +786,20 @@ private:
 
 
     // create cdchit bank and add to event tree
-    evioDOMNodeP sctruthhit = evioDOMNode::createEvioDOMNode(dsctruthhitTag,0);
+    evioDOMNodeP sctruthhit = evioDOMNode::createEvioDOMNode(tagMap["dsctruthhit"],0);
     tree << sctruthhit;
 
 
     // create data banks and add to cdchit bank
-    evioDOMNodeP dEdxBank     = evioDOMNode::createEvioDOMNode<float>  (dsctruthhitTag,1);
-    evioDOMNodeP primaryBank  = evioDOMNode::createEvioDOMNode<int8_t> (dsctruthhitTag,2);
-    evioDOMNodeP trackBank    = evioDOMNode::createEvioDOMNode<int>    (dsctruthhitTag,3);
-    evioDOMNodeP ptypeBank    = evioDOMNode::createEvioDOMNode<int>    (dsctruthhitTag,4);
-    evioDOMNodeP rBank        = evioDOMNode::createEvioDOMNode<float>  (dsctruthhitTag,5);
-    evioDOMNodeP phiBank      = evioDOMNode::createEvioDOMNode<float>  (dsctruthhitTag,6);
-    evioDOMNodeP zBank        = evioDOMNode::createEvioDOMNode<float>  (dsctruthhitTag,7);
-    evioDOMNodeP tBank        = evioDOMNode::createEvioDOMNode<float>  (dsctruthhitTag,8);
-    evioDOMNodeP sectorBank   = evioDOMNode::createEvioDOMNode<int>    (dsctruthhitTag,9);
+    evioDOMNodeP dEdxBank     = evioDOMNode::createEvioDOMNode<float>  (tagMap["dsctruthhit"],1);
+    evioDOMNodeP primaryBank  = evioDOMNode::createEvioDOMNode<int8_t> (tagMap["dsctruthhit"],2);
+    evioDOMNodeP trackBank    = evioDOMNode::createEvioDOMNode<int>    (tagMap["dsctruthhit"],3);
+    evioDOMNodeP ptypeBank    = evioDOMNode::createEvioDOMNode<int>    (tagMap["dsctruthhit"],4);
+    evioDOMNodeP rBank        = evioDOMNode::createEvioDOMNode<float>  (tagMap["dsctruthhit"],5);
+    evioDOMNodeP phiBank      = evioDOMNode::createEvioDOMNode<float>  (tagMap["dsctruthhit"],6);
+    evioDOMNodeP zBank        = evioDOMNode::createEvioDOMNode<float>  (tagMap["dsctruthhit"],7);
+    evioDOMNodeP tBank        = evioDOMNode::createEvioDOMNode<float>  (tagMap["dsctruthhit"],8);
+    evioDOMNodeP sectorBank   = evioDOMNode::createEvioDOMNode<int>    (tagMap["dsctruthhit"],9);
     *sctruthhit << dEdxBank << primaryBank << trackBank << ptypeBank << rBank << phiBank 
                 << zBank << tBank << sectorBank;
 
@@ -834,17 +835,17 @@ private:
 
 
     // create cdchit bank and add to event tree
-    evioDOMNodeP fcalhit = evioDOMNode::createEvioDOMNode(dfcalhitTag,0);
+    evioDOMNodeP fcalhit = evioDOMNode::createEvioDOMNode(tagMap["dfcalhit"],0);
     tree << fcalhit;
 
 
     // create data banks and add to cdchit bank
-    evioDOMNodeP rowBank     = evioDOMNode::createEvioDOMNode<int>   (dfcalhitTag,1);
-    evioDOMNodeP columnBank  = evioDOMNode::createEvioDOMNode<int>   (dfcalhitTag,2);
-    evioDOMNodeP xBank       = evioDOMNode::createEvioDOMNode<float> (dfcalhitTag,3);
-    evioDOMNodeP yBank       = evioDOMNode::createEvioDOMNode<float> (dfcalhitTag,4);
-    evioDOMNodeP EBank       = evioDOMNode::createEvioDOMNode<float> (dfcalhitTag,5);
-    evioDOMNodeP tBank       = evioDOMNode::createEvioDOMNode<float> (dfcalhitTag,6);
+    evioDOMNodeP rowBank     = evioDOMNode::createEvioDOMNode<int>   (tagMap["dfcalhit"],1);
+    evioDOMNodeP columnBank  = evioDOMNode::createEvioDOMNode<int>   (tagMap["dfcalhit"],2);
+    evioDOMNodeP xBank       = evioDOMNode::createEvioDOMNode<float> (tagMap["dfcalhit"],3);
+    evioDOMNodeP yBank       = evioDOMNode::createEvioDOMNode<float> (tagMap["dfcalhit"],4);
+    evioDOMNodeP EBank       = evioDOMNode::createEvioDOMNode<float> (tagMap["dfcalhit"],5);
+    evioDOMNodeP tBank       = evioDOMNode::createEvioDOMNode<float> (tagMap["dfcalhit"],6);
     *fcalhit << rowBank << columnBank << xBank << yBank << EBank << tBank;
 
 
@@ -876,17 +877,17 @@ private:
 
 
     // create hddm bcal bank and add to event tree
-    evioDOMNodeP hddmbcalhit = evioDOMNode::createEvioDOMNode(dhddmbcalhitTag,0);
+    evioDOMNodeP hddmbcalhit = evioDOMNode::createEvioDOMNode(tagMap["dhddmbcalhit"],0);
     tree << hddmbcalhit;
 
 
     // create data banks and add to cdchit bank
-    evioDOMNodeP moduleBank  = evioDOMNode::createEvioDOMNode<int>   (dhddmbcalhitTag,1);
-    evioDOMNodeP layerBank   = evioDOMNode::createEvioDOMNode<int>   (dhddmbcalhitTag,2);
-    evioDOMNodeP sectorBank  = evioDOMNode::createEvioDOMNode<int>   (dhddmbcalhitTag,3);
-    evioDOMNodeP EBank       = evioDOMNode::createEvioDOMNode<float> (dhddmbcalhitTag,4);
-    evioDOMNodeP tBank       = evioDOMNode::createEvioDOMNode<float> (dhddmbcalhitTag,5);
-    evioDOMNodeP zLocalBank  = evioDOMNode::createEvioDOMNode<float> (dhddmbcalhitTag,6);
+    evioDOMNodeP moduleBank  = evioDOMNode::createEvioDOMNode<int>   (tagMap["dhddmbcalhit"],1);
+    evioDOMNodeP layerBank   = evioDOMNode::createEvioDOMNode<int>   (tagMap["dhddmbcalhit"],2);
+    evioDOMNodeP sectorBank  = evioDOMNode::createEvioDOMNode<int>   (tagMap["dhddmbcalhit"],3);
+    evioDOMNodeP EBank       = evioDOMNode::createEvioDOMNode<float> (tagMap["dhddmbcalhit"],4);
+    evioDOMNodeP tBank       = evioDOMNode::createEvioDOMNode<float> (tagMap["dhddmbcalhit"],5);
+    evioDOMNodeP zLocalBank  = evioDOMNode::createEvioDOMNode<float> (tagMap["dhddmbcalhit"],6);
     *hddmbcalhit << moduleBank << layerBank << sectorBank << EBank << tBank << zLocalBank;
 
 
@@ -918,25 +919,25 @@ private:
 
 
     // create cdchit bank and add to event tree
-    evioDOMNodeP hddmtofhit = evioDOMNode::createEvioDOMNode(dhddmtofhitTag,0);
+    evioDOMNodeP hddmtofhit = evioDOMNode::createEvioDOMNode(tagMap["dhddmtofhit"],0);
     tree << hddmtofhit;
 
 
     // create data banks and add to cdchit bank
-    evioDOMNodeP planeBank    = evioDOMNode::createEvioDOMNode<int>   (dhddmtofhitTag,1);
-    evioDOMNodeP barBank      = evioDOMNode::createEvioDOMNode<int>   (dhddmtofhitTag,2);
-    evioDOMNodeP ptypeBank    = evioDOMNode::createEvioDOMNode<int>   (dhddmtofhitTag,3);
-    evioDOMNodeP t_northBank  = evioDOMNode::createEvioDOMNode<float> (dhddmtofhitTag,4);
-    evioDOMNodeP dE_northBank = evioDOMNode::createEvioDOMNode<float> (dhddmtofhitTag,5);
-    evioDOMNodeP t_southBank  = evioDOMNode::createEvioDOMNode<float> (dhddmtofhitTag,6);
-    evioDOMNodeP dE_southBank = evioDOMNode::createEvioDOMNode<float> (dhddmtofhitTag,7);
-    evioDOMNodeP xBank        = evioDOMNode::createEvioDOMNode<float> (dhddmtofhitTag,8);
-    evioDOMNodeP yBank        = evioDOMNode::createEvioDOMNode<float> (dhddmtofhitTag,9);
-    evioDOMNodeP zBank        = evioDOMNode::createEvioDOMNode<float> (dhddmtofhitTag,10);
-    evioDOMNodeP pxBank       = evioDOMNode::createEvioDOMNode<float> (dhddmtofhitTag,11);
-    evioDOMNodeP pyBank       = evioDOMNode::createEvioDOMNode<float> (dhddmtofhitTag,12);
-    evioDOMNodeP pzBank       = evioDOMNode::createEvioDOMNode<float> (dhddmtofhitTag,13);
-    evioDOMNodeP EBank        = evioDOMNode::createEvioDOMNode<float> (dhddmtofhitTag,14);
+    evioDOMNodeP planeBank    = evioDOMNode::createEvioDOMNode<int>   (tagMap["dhddmtofhit"],1);
+    evioDOMNodeP barBank      = evioDOMNode::createEvioDOMNode<int>   (tagMap["dhddmtofhit"],2);
+    evioDOMNodeP ptypeBank    = evioDOMNode::createEvioDOMNode<int>   (tagMap["dhddmtofhit"],3);
+    evioDOMNodeP t_northBank  = evioDOMNode::createEvioDOMNode<float> (tagMap["dhddmtofhit"],4);
+    evioDOMNodeP dE_northBank = evioDOMNode::createEvioDOMNode<float> (tagMap["dhddmtofhit"],5);
+    evioDOMNodeP t_southBank  = evioDOMNode::createEvioDOMNode<float> (tagMap["dhddmtofhit"],6);
+    evioDOMNodeP dE_southBank = evioDOMNode::createEvioDOMNode<float> (tagMap["dhddmtofhit"],7);
+    evioDOMNodeP xBank        = evioDOMNode::createEvioDOMNode<float> (tagMap["dhddmtofhit"],8);
+    evioDOMNodeP yBank        = evioDOMNode::createEvioDOMNode<float> (tagMap["dhddmtofhit"],9);
+    evioDOMNodeP zBank        = evioDOMNode::createEvioDOMNode<float> (tagMap["dhddmtofhit"],10);
+    evioDOMNodeP pxBank       = evioDOMNode::createEvioDOMNode<float> (tagMap["dhddmtofhit"],11);
+    evioDOMNodeP pyBank       = evioDOMNode::createEvioDOMNode<float> (tagMap["dhddmtofhit"],12);
+    evioDOMNodeP pzBank       = evioDOMNode::createEvioDOMNode<float> (tagMap["dhddmtofhit"],13);
+    evioDOMNodeP EBank        = evioDOMNode::createEvioDOMNode<float> (tagMap["dhddmtofhit"],14);
     *hddmtofhit << planeBank << barBank << ptypeBank << t_northBank << dE_northBank 
                 << t_southBank << dE_southBank << xBank << yBank << zBank 
                 << pxBank << pyBank << pzBank<< EBank;
@@ -978,14 +979,14 @@ private:
 
 
     // create cdchit bank and add to event tree
-    evioDOMNodeP schit = evioDOMNode::createEvioDOMNode(dschitTag,0);
+    evioDOMNodeP schit = evioDOMNode::createEvioDOMNode(tagMap["dschit"],0);
     tree << schit;
 
 
     // create data banks and add to cdchit bank
-    evioDOMNodeP dEBank      = evioDOMNode::createEvioDOMNode<float>  (dschitTag,1);
-    evioDOMNodeP tBank       = evioDOMNode::createEvioDOMNode<float>  (dschitTag,2);
-    evioDOMNodeP sectorBank  = evioDOMNode::createEvioDOMNode<int>    (dschitTag,3);
+    evioDOMNodeP dEBank      = evioDOMNode::createEvioDOMNode<float>  (tagMap["dschit"],1);
+    evioDOMNodeP tBank       = evioDOMNode::createEvioDOMNode<float>  (tagMap["dschit"],2);
+    evioDOMNodeP sectorBank  = evioDOMNode::createEvioDOMNode<int>    (tagMap["dschit"],3);
     *schit << dEBank << tBank << sectorBank;
 
 
@@ -1014,24 +1015,24 @@ private:
 
 
     // create timebasedtrack bank and add to event tree
-    evioDOMNodeP timebasedtrack = evioDOMNode::createEvioDOMNode(dtracktimebasedTag,0);
+    evioDOMNodeP timebasedtrack = evioDOMNode::createEvioDOMNode(tagMap["dtracktimebased"],0);
     tree << timebasedtrack;
 
 
     // create data banks and add to cdchit bank
-    evioDOMNodeP chisq = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,1);
-    evioDOMNodeP Ndof  = evioDOMNode::createEvioDOMNode<int>    (dtracktimebasedTag,2);
-    evioDOMNodeP FOM   = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,3);
-    evioDOMNodeP x     = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,4);
-    evioDOMNodeP y     = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,5);
-    evioDOMNodeP z     = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,6);
-    evioDOMNodeP px    = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,7);
-    evioDOMNodeP py    = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,8);
-    evioDOMNodeP pz    = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,9);
-    evioDOMNodeP q     = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,10);
-    evioDOMNodeP E     = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,11);
-    evioDOMNodeP mass  = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,12);
-    evioDOMNodeP t0    = evioDOMNode::createEvioDOMNode<float>  (dtracktimebasedTag,13);
+    evioDOMNodeP chisq = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtracktimebased"],1);
+    evioDOMNodeP Ndof  = evioDOMNode::createEvioDOMNode<int>    (tagMap["dtracktimebased"],2);
+    evioDOMNodeP FOM   = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtracktimebased"],3);
+    evioDOMNodeP x     = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtracktimebased"],4);
+    evioDOMNodeP y     = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtracktimebased"],5);
+    evioDOMNodeP z     = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtracktimebased"],6);
+    evioDOMNodeP px    = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtracktimebased"],7);
+    evioDOMNodeP py    = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtracktimebased"],8);
+    evioDOMNodeP pz    = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtracktimebased"],9);
+    evioDOMNodeP q     = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtracktimebased"],10);
+    evioDOMNodeP E     = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtracktimebased"],11);
+    evioDOMNodeP mass  = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtracktimebased"],12);
+    evioDOMNodeP t0    = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtracktimebased"],13);
     *timebasedtrack << chisq << Ndof << FOM << x << y << z << px << py << pz 
                     << q << E << mass << t0;
 
@@ -1070,13 +1071,13 @@ private:
 
 
     // create chargedtrack bank and add to event tree
-    evioDOMNodeP chargedtrack = evioDOMNode::createEvioDOMNode(dchargedtrackTag,0);
+    evioDOMNodeP chargedtrack = evioDOMNode::createEvioDOMNode(tagMap["dchargedtrack"],0);
     tree << chargedtrack;
 
     // create index bank for each charged track and add to chargedtrack bank
     idMap["dchargedtrack"].clear();
     for(unsigned int i=0; i<chargedtracks.size(); i++) {
-      evioDOMNodeP hypotheses = evioDOMNode::createEvioDOMNode<int> (dchargedtrackTag,1);
+      evioDOMNodeP hypotheses = evioDOMNode::createEvioDOMNode<int> (tagMap["dchargedtrack"],1);
       *chargedtrack << hypotheses;
       for(unsigned int j=0; j<chargedtracks[i]->hypotheses.size(); j++) {
         *hypotheses<< idMap["dtracktimebased"][chargedtracks[i]->hypotheses[j]->id];
@@ -1099,20 +1100,20 @@ private:
 
 
     // create photon bank and add to event tree
-    evioDOMNodeP photon = evioDOMNode::createEvioDOMNode(dphotonTag,0);
+    evioDOMNodeP photon = evioDOMNode::createEvioDOMNode(tagMap["dphoton"],0);
     tree << photon;
 
 
     // create data banks and add to photon bank
-    evioDOMNodeP E     = evioDOMNode::createEvioDOMNode<float>  (dphotonTag,1);
-    evioDOMNodeP px    = evioDOMNode::createEvioDOMNode<float>  (dphotonTag,2);
-    evioDOMNodeP py    = evioDOMNode::createEvioDOMNode<float>  (dphotonTag,3);
-    evioDOMNodeP pz    = evioDOMNode::createEvioDOMNode<float>  (dphotonTag,4);
-    evioDOMNodeP x     = evioDOMNode::createEvioDOMNode<float>  (dphotonTag,5);
-    evioDOMNodeP y     = evioDOMNode::createEvioDOMNode<float>  (dphotonTag,6);
-    evioDOMNodeP z     = evioDOMNode::createEvioDOMNode<float>  (dphotonTag,7);
-    evioDOMNodeP t     = evioDOMNode::createEvioDOMNode<float>  (dphotonTag,8);
-    evioDOMNodeP Tag   = evioDOMNode::createEvioDOMNode<int>    (dphotonTag,9);
+    evioDOMNodeP E     = evioDOMNode::createEvioDOMNode<float>  (tagMap["dphoton"],1);
+    evioDOMNodeP px    = evioDOMNode::createEvioDOMNode<float>  (tagMap["dphoton"],2);
+    evioDOMNodeP py    = evioDOMNode::createEvioDOMNode<float>  (tagMap["dphoton"],3);
+    evioDOMNodeP pz    = evioDOMNode::createEvioDOMNode<float>  (tagMap["dphoton"],4);
+    evioDOMNodeP x     = evioDOMNode::createEvioDOMNode<float>  (tagMap["dphoton"],5);
+    evioDOMNodeP y     = evioDOMNode::createEvioDOMNode<float>  (tagMap["dphoton"],6);
+    evioDOMNodeP z     = evioDOMNode::createEvioDOMNode<float>  (tagMap["dphoton"],7);
+    evioDOMNodeP t     = evioDOMNode::createEvioDOMNode<float>  (tagMap["dphoton"],8);
+    evioDOMNodeP Tag   = evioDOMNode::createEvioDOMNode<int>    (tagMap["dphoton"],9);
     *photon << E << px << py << pz << x << y << z << t << Tag;
 
 
@@ -1169,15 +1170,21 @@ private:
           for(iter=evioMap.begin(); iter!=evioMap.end(); iter++) iter->second=minus;
 
         } else if(value=="truth") {
+          evioMap["dbeamphoton"]=!minus;
           evioMap["dmcthrown"]=!minus;
-          evioMap["dtoftruth"]=!minus;
+          evioMap["dmctrackhit"]=!minus;
           evioMap["dfcaltruthshower"]=!minus;
           evioMap["dbcaltruthshower"]=!minus;
+          evioMap["dtoftruth"]=!minus;
+          evioMap["dsctruth"]=!minus;
 
         } else if(value=="hits") {
           evioMap["dcdchit"]=!minus;
           evioMap["dfdchit"]=!minus;
-          evioMap["dmctrackhit"]=!minus;
+          evioMap["dfcalchit"]=!minus;
+          evioMap["dhddmbcalchit"]=!minus;
+          evioMap["dhddmtofchit"]=!minus;
+          evioMap["dschit"]=!minus;
 
         } else if(value=="tracks") {
           evioMap["dtracktimebased"]=!minus;
