@@ -187,6 +187,19 @@
   <xmldumpDictEntry name="t"                    tag="11700"    num="8"/>
   <xmldumpDictEntry name="Tag"                  tag="11700"    num="9"/>
 
+<!-- n.b. skip num 3 for FOM -->
+  <xmldumpDictEntry name="DTrackWireBased"      tag="11800"    num="0"/>
+  <xmldumpDictEntry name="chisq"                tag="11800"    num="1"/>
+  <xmldumpDictEntry name="Ndof"                 tag="11800"    num="2"/>
+  <xmldumpDictEntry name="x"                    tag="11800"    num="4"/>
+  <xmldumpDictEntry name="y"                    tag="11800"    num="5"/>
+  <xmldumpDictEntry name="z"                    tag="11800"    num="6"/>
+  <xmldumpDictEntry name="px"                   tag="11800"    num="7"/>
+  <xmldumpDictEntry name="py"                   tag="11800"    num="8"/>
+  <xmldumpDictEntry name="pz"                   tag="11800"    num="9"/>
+  <xmldumpDictEntry name="q"                    tag="11800"    num="10"/>
+  <xmldumpDictEntry name="E"                    tag="11800"    num="11"/>
+  <xmldumpDictEntry name="mass"                 tag="11800"    num="12"/>
 
 
 </xmlDict>

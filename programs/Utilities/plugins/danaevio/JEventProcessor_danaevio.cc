@@ -27,11 +27,11 @@
 //
 //
 // still to do:
-//    bank tags
+//    bank tags definitions
 //    optimize multi-threading
 //    add evio to external packages
-//    create makefile.evio
-//    bool vs int8_t in evio?
+//    associated objects
+//    tagged factories
 
 
 
@@ -46,6 +46,7 @@
 
 #include "TRACKING/DMCThrown.h"
 #include "TRACKING/DMCTrackHit.h"
+#include "TRACKING/DTrackWireBased.h"
 #include "TRACKING/DTrackTimeBased.h"
 #include "TRACKING/DMCTrajectoryPoint.h"
 
@@ -90,9 +91,9 @@ static string evioFileName = "dana_events.evio";
 static int evioBufSize=200000;
 
 
-// dana objects that can be written out in evio format and default output flag
-// use DANAEVIO or WRITEOUT command-line parameters to override
-// *** if you add to this list be sure to modify decode_object_parameters() appropriately ***
+// list of dana objects that can be written out in evio format including default output flag
+// use -PDANAEVIO or -PWRITEOUT override
+// *** NOTE:  if you add to this list be sure to modify decode_object_parameters() appropriately ***
 static pair<string,bool> danaObs[] =  {
   pair<string,bool> ("dmctrackhit",          false),
   pair<string,bool> ("dbeamphoton",          true),
@@ -108,14 +109,16 @@ static pair<string,bool> danaObs[] =  {
   pair<string,bool> ("dhddmbcalhit",         true),
   pair<string,bool> ("dhddmtofhit",          true),
   pair<string,bool> ("dschit",               true),
+  pair<string,bool> ("dtrackwirebased",      false),
   pair<string,bool> ("dtracktimebased",      false),
   pair<string,bool> ("dchargedtrack",        false),
   pair<string,bool> ("dphoton",              false),
 };
 static map<string,bool> evioMap(danaObs,danaObs+sizeof(danaObs)/sizeof(danaObs[0]));
+static map<string,bool> processedMap(danaObs,danaObs+sizeof(danaObs)/sizeof(danaObs[0]));
 
 
-// id maps for all banks needed to create indices to associated objects
+// indices to associated objects
 static map<int,int> emptyMap;
 static pair<string, map<int,int> > idPairs[] = {
   pair<string, map<int,int> > ("dmctrackhit",        emptyMap),
@@ -132,6 +135,7 @@ static pair<string, map<int,int> > idPairs[] = {
   pair<string, map<int,int> > ("dhddmbcalhit",       emptyMap),
   pair<string, map<int,int> > ("dhddmtofhit",        emptyMap),
   pair<string, map<int,int> > ("dschit",             emptyMap),
+  pair<string, map<int,int> > ("dtrackwirebased",    emptyMap),
   pair<string, map<int,int> > ("dtracktimebased",    emptyMap),
   pair<string, map<int,int> > ("dchargedtrack",      emptyMap),
   pair<string, map<int,int> > ("dphoton",            emptyMap),
@@ -139,7 +143,7 @@ static pair<string, map<int,int> > idPairs[] = {
 static map<string, map<int,int> > idMap(idPairs,idPairs+sizeof(idPairs)/sizeof(idPairs[0]));
 
 
-// evio bank tag definitions (totally arbitrary at the moment)
+// bank tag definitions (totally arbitrary at the moment)
 static pair<string,int> tagPairs[] = {
   pair<string,int> ("danaevent",            10000),
   pair<string,int> ("dmctrackhit",          10100),
@@ -159,11 +163,12 @@ static pair<string,int> tagPairs[] = {
   pair<string,int> ("dtracktimebased",      11500),
   pair<string,int> ("dchargedtrack",        11600),
   pair<string,int> ("dphoton",              11700),
+  pair<string,int> ("dtrackwirebased",      11800),
 };
 static map<string,int> tagMap(tagPairs,tagPairs+sizeof(tagPairs)/sizeof(tagPairs[0]));
 
 
-// mutex needed to protect serialization and writing to file
+// mutex for serializing writing to file
 static pthread_mutex_t evioMutex = PTHREAD_MUTEX_INITIALIZER;
 
 
@@ -270,10 +275,17 @@ private:
 
   jerror_t evnt(JEventLoop *eventLoop, int eventnumber) {
     
-    static int count = 0;
-    count++;
 
-  
+    // clear all object processed flags
+    map<string,bool>::iterator pIter;
+    for(pIter=processedMap.begin(); pIter!=processedMap.end(); pIter++) pIter->second=false;
+
+
+    // clear all id maps
+    map< string, map<int,int> >::iterator idIter;
+    for(idIter=idMap.begin(); idIter!=idMap.end(); idIter++) idIter->second.clear();
+
+
     // create evio DOM tree
     evioDOMTree tree(tagMap["danaevent"],0);
   
@@ -295,6 +307,7 @@ private:
     if(evioMap["dhddmtofhit"           ])  addDHDDMTOFHit(eventLoop,tree);
     if(evioMap["dschit"                ])  addDSCHit(eventLoop,tree);
   
+    if(evioMap["dtrackwirebased"       ])  addDTrackWireBased(eventLoop,tree);
     if(evioMap["dtracktimebased"       ])  addDTrackTimeBased(eventLoop,tree);
     if(evioMap["dchargedtrack"         ])  addDChargedTrack(eventLoop,tree);
     if(evioMap["dphoton"               ])  addDPhoton(eventLoop,tree);
@@ -353,7 +366,7 @@ private:
 
 
     // add track data to banks
-    idMap["dmcthrown"].clear();
+    //    idMap["dmcthrown"].clear();
     for(unsigned int i=0; i<mcthrowns.size(); i++) {
       *typeBank     << mcthrowns[i]->type;
       *pdgtypeBank  << mcthrowns[i]->pdgtype;
@@ -375,6 +388,9 @@ private:
 
       idMap["dmcthrown"][mcthrowns[i]->id]=i;
     }
+
+    // done
+    processedMap["dmcthrown"]=true;
   }
 
 
@@ -408,7 +424,7 @@ private:
 
 
     // add track data to banks
-    idMap["dmctrackhit"].clear();
+    //    idMap["dmctrackhit"].clear();
     for(unsigned int i=0; i<mctrackhits.size(); i++) {
       *rBank        << mctrackhits[i]->r;
       *phiBank      << mctrackhits[i]->phi;
@@ -421,6 +437,9 @@ private:
       idMap["dmctrackhit"][mctrackhits[i]->id]=i;
     }
 
+
+    // done
+    processedMap["dmctrackhit"]=true;
   }
 
 
@@ -458,7 +477,7 @@ private:
 
     
     // add track data to banks
-    idMap["dtoftruth"].clear();
+    //    idMap["dtoftruth"].clear();
     for(unsigned int i=0; i<toftruths.size(); i++) {
 
       *trackBank   << toftruths[i]->track;
@@ -476,6 +495,9 @@ private:
       idMap["dtoftruth"][toftruths[i]->id]=i;
     }
 
+
+    // done
+    processedMap["dtoftruth"]=true;
   }
 
 
@@ -514,7 +536,7 @@ private:
 
 
     // add track data to banks
-    idMap["dfcaltruthshower"].clear();
+    //    idMap["dfcaltruthshower"].clear();
     for(unsigned int i=0; i<fcaltruthshowers.size(); i++) {
       *xBank       << fcaltruthshowers[i]->x();
       *yBank       << fcaltruthshowers[i]->y();
@@ -530,6 +552,10 @@ private:
 
       idMap["dfcaltruthshower"][fcaltruthshowers[i]->id]=i;
     }
+
+
+    // done
+    processedMap["dfcaltruthshower"]=true;
   }
 
 
@@ -562,7 +588,7 @@ private:
 
 
     // add track data to banks
-    idMap["dbcaltruthshower"].clear();
+    //    idMap["dbcaltruthshower"].clear();
     for(unsigned int i=0; i<bcaltruthshowers.size(); i++) {
       *trackBank   << bcaltruthshowers[i]->track;
       *primaryBank << bcaltruthshowers[i]->primary;
@@ -574,6 +600,10 @@ private:
       
       idMap["dbcaltruthshower"][bcaltruthshowers[i]->id]=i;
     }
+
+
+    // done
+    processedMap["dbcaltruthshower"]=true;
   }
 
 
@@ -603,7 +633,7 @@ private:
 
 
     // add track data to banks
-    idMap["dcdchit"].clear();
+    //    idMap["dcdchit"].clear();
     for(unsigned int i=0; i<cdchits.size(); i++) {
       *ringBank  << cdchits[i]->ring;
       *strawBank << cdchits[i]->straw;
@@ -612,6 +642,10 @@ private:
 
       idMap["dcdchit"][cdchits[i]->id]=i;
     }
+
+
+    // done
+    processedMap["dcdchit"]=true;
   }
 
 
@@ -627,12 +661,12 @@ private:
     if(mctrajectorypoints.size()<=0)return;
 
 
-    // create cdchit bank and add to event tree
+    // create bank and add to event tree
     evioDOMNodeP mctrajectorypoint = evioDOMNode::createEvioDOMNode(tagMap["dmctrajectorypoint"],0);
     tree << mctrajectorypoint;
 
 
-    // create data banks and add to cdchit bank
+    // create data banks and add to bank
     evioDOMNodeP xBank              = evioDOMNode::createEvioDOMNode<float> (tagMap["dmctrajectorypoint"],1);
     evioDOMNodeP yBank              = evioDOMNode::createEvioDOMNode<float> (tagMap["dmctrajectorypoint"],2);
     evioDOMNodeP zBank              = evioDOMNode::createEvioDOMNode<float> (tagMap["dmctrajectorypoint"],3);
@@ -652,7 +686,7 @@ private:
 
 
     // add track data to banks
-    idMap["dmctrajectorypoint"].clear();
+    //    idMap["dmctrajectorypoint"].clear();
     for(unsigned int i=0; i<mctrajectorypoints.size(); i++) {
       *xBank              << mctrajectorypoints[i]->x;
       *yBank              << mctrajectorypoints[i]->y;
@@ -671,6 +705,10 @@ private:
 
       idMap["dmctrajectorypoint"][mctrajectorypoints[i]->id]=i;
     }
+
+
+    // done
+    processedMap["dmctrajectorypoint"]=true;
   }
 
 
@@ -707,7 +745,7 @@ private:
 
 
     // add track data to banks
-    idMap["dfdchit"].clear();
+    //    idMap["dfdchit"].clear();
     for(unsigned int i=0; i<fdchits.size(); i++) {
       *layerBank    << fdchits[i]->layer;
       *moduleBank   << fdchits[i]->module;
@@ -722,6 +760,10 @@ private:
 
       idMap["dfdchit"][fdchits[i]->id]=i;
     }
+
+
+    // done
+    processedMap["fdchit"]=true;
   }
 
 
@@ -737,12 +779,12 @@ private:
     if(beamphotons.size()<=0)return;
 
 
-    // create cdchit bank and add to event tree
+    // create bank and add to event tree
     evioDOMNodeP beamphoton = evioDOMNode::createEvioDOMNode(tagMap["dbeamphoton"],0);
     tree << beamphoton;
 
 
-    // create data banks and add to cdchit bank
+    // create data banks and add to bank
     evioDOMNodeP xBank   = evioDOMNode::createEvioDOMNode<float>  (tagMap["dbeamphoton"],1);
     evioDOMNodeP yBank   = evioDOMNode::createEvioDOMNode<float>  (tagMap["dbeamphoton"],2);
     evioDOMNodeP zBank   = evioDOMNode::createEvioDOMNode<float>  (tagMap["dbeamphoton"],3);
@@ -754,7 +796,7 @@ private:
 
 
     // add track data to banks
-    idMap["dbeamphoton"].clear();
+    //    idMap["dbeamphoton"].clear();
     for(unsigned int i=0; i<beamphotons.size(); i++) {
       DVector3 pos = beamphotons[i]->position();
       *xBank   <<  pos.X();
@@ -770,6 +812,10 @@ private:
 
       idMap["dbeamphoton"][beamphotons[i]->id]=i;
     }
+
+
+    // done
+    processedMap["dbeamphoton"]=true;
   }
 
 
@@ -785,12 +831,12 @@ private:
     if(sctruthhits.size()<=0)return;
 
 
-    // create cdchit bank and add to event tree
+    // create bank and add to event tree
     evioDOMNodeP sctruthhit = evioDOMNode::createEvioDOMNode(tagMap["dsctruthhit"],0);
     tree << sctruthhit;
 
 
-    // create data banks and add to cdchit bank
+    // create data banks and add to bank
     evioDOMNodeP dEdxBank     = evioDOMNode::createEvioDOMNode<float>  (tagMap["dsctruthhit"],1);
     evioDOMNodeP primaryBank  = evioDOMNode::createEvioDOMNode<int8_t> (tagMap["dsctruthhit"],2);
     evioDOMNodeP trackBank    = evioDOMNode::createEvioDOMNode<int>    (tagMap["dsctruthhit"],3);
@@ -805,7 +851,7 @@ private:
 
 
     // add track data to banks
-    idMap["dsctruthhit"].clear();
+    //    idMap["dsctruthhit"].clear();
     for(unsigned int i=0; i<sctruthhits.size(); i++) {
       *dEdxBank     << sctruthhits[i]->dEdx;
       *primaryBank  << (int8_t)sctruthhits[i]->primary;
@@ -819,6 +865,10 @@ private:
 
       idMap["dsctruthhit"][sctruthhits[i]->id]=i;
     }
+
+
+    // done
+    processedMap["dsctruthhit"]=true;
   }
 
 
@@ -834,12 +884,12 @@ private:
     if(fcalhits.size()<=0)return;
 
 
-    // create cdchit bank and add to event tree
+    // create bank and add to event tree
     evioDOMNodeP fcalhit = evioDOMNode::createEvioDOMNode(tagMap["dfcalhit"],0);
     tree << fcalhit;
 
 
-    // create data banks and add to cdchit bank
+    // create data banks and add to bank
     evioDOMNodeP rowBank     = evioDOMNode::createEvioDOMNode<int>   (tagMap["dfcalhit"],1);
     evioDOMNodeP columnBank  = evioDOMNode::createEvioDOMNode<int>   (tagMap["dfcalhit"],2);
     evioDOMNodeP xBank       = evioDOMNode::createEvioDOMNode<float> (tagMap["dfcalhit"],3);
@@ -850,7 +900,7 @@ private:
 
 
     // add track data to banks
-    idMap["dfcalhit"].clear();
+    //    idMap["dfcalhit"].clear();
     for(unsigned int i=0; i<fcalhits.size(); i++) {
       *rowBank     << fcalhits[i]->row;
       *columnBank  << fcalhits[i]->column;
@@ -861,6 +911,10 @@ private:
 
       idMap["dfcalhit"][fcalhits[i]->id]=i;
     }
+
+
+    // done
+    processedMap["dfcalhit"]=true;
   }
 
 
@@ -881,7 +935,7 @@ private:
     tree << hddmbcalhit;
 
 
-    // create data banks and add to cdchit bank
+    // create data banks and add to bank
     evioDOMNodeP moduleBank  = evioDOMNode::createEvioDOMNode<int>   (tagMap["dhddmbcalhit"],1);
     evioDOMNodeP layerBank   = evioDOMNode::createEvioDOMNode<int>   (tagMap["dhddmbcalhit"],2);
     evioDOMNodeP sectorBank  = evioDOMNode::createEvioDOMNode<int>   (tagMap["dhddmbcalhit"],3);
@@ -892,7 +946,7 @@ private:
 
 
     // add track data to banks
-    idMap["dhddmbcalhit"].clear();
+    //    idMap["dhddmbcalhit"].clear();
     for(unsigned int i=0; i<hddmbcalhits.size(); i++) {
       *moduleBank  << hddmbcalhits[i]->module;
       *layerBank   << hddmbcalhits[i]->layer;
@@ -903,6 +957,10 @@ private:
 
       idMap["dhddmbcalhit"][hddmbcalhits[i]->id]=i;
     }
+
+
+    // done
+    processedMap["dhddmbcalhit"]=true;
   }
 
 
@@ -918,12 +976,12 @@ private:
     if(hddmtofhits.size()<=0)return;
 
 
-    // create cdchit bank and add to event tree
+    // create bank and add to event tree
     evioDOMNodeP hddmtofhit = evioDOMNode::createEvioDOMNode(tagMap["dhddmtofhit"],0);
     tree << hddmtofhit;
 
 
-    // create data banks and add to cdchit bank
+    // create data banks and add to bank
     evioDOMNodeP planeBank    = evioDOMNode::createEvioDOMNode<int>   (tagMap["dhddmtofhit"],1);
     evioDOMNodeP barBank      = evioDOMNode::createEvioDOMNode<int>   (tagMap["dhddmtofhit"],2);
     evioDOMNodeP ptypeBank    = evioDOMNode::createEvioDOMNode<int>   (tagMap["dhddmtofhit"],3);
@@ -944,7 +1002,7 @@ private:
 
 
     // add track data to banks
-    idMap["dhddmtofhit"].clear();
+    //    idMap["dhddmtofhit"].clear();
     for(unsigned int i=0; i<hddmtofhits.size(); i++) {
       *planeBank    << hddmtofhits[i]->plane;
       *barBank      << hddmtofhits[i]->bar;
@@ -963,6 +1021,10 @@ private:
 
       idMap["dhddmtofhit"][hddmtofhits[i]->id]=i;
     }
+
+
+    // done
+    processedMap["dhddmtofhit"]=true;
   }
 
 
@@ -978,12 +1040,12 @@ private:
     if(schits.size()<=0)return;
 
 
-    // create cdchit bank and add to event tree
+    // create bank and add to event tree
     evioDOMNodeP schit = evioDOMNode::createEvioDOMNode(tagMap["dschit"],0);
     tree << schit;
 
 
-    // create data banks and add to cdchit bank
+    // create data banks and add to bank
     evioDOMNodeP dEBank      = evioDOMNode::createEvioDOMNode<float>  (tagMap["dschit"],1);
     evioDOMNodeP tBank       = evioDOMNode::createEvioDOMNode<float>  (tagMap["dschit"],2);
     evioDOMNodeP sectorBank  = evioDOMNode::createEvioDOMNode<int>    (tagMap["dschit"],3);
@@ -991,7 +1053,7 @@ private:
 
 
     // add track data to banks
-    idMap["dschit"].clear();
+    //    idMap["dschit"].clear();
     for(unsigned int i=0; i<schits.size(); i++) {
       *dEBank      << schits[i]->dE;
       *tBank       << schits[i]->t;
@@ -999,6 +1061,66 @@ private:
 
       idMap["dschit"][schits[i]->id]=i;
     }
+
+
+    // done
+    processedMap["dschit"]=true;
+  }
+
+
+//------------------------------------------------------------------------------
+
+
+  void addDTrackWireBased(JEventLoop *eventLoop, evioDOMTree &tree) {
+
+
+    // is there any data
+    vector<const DTrackWireBased*> wirebasedtracks;
+    eventLoop->Get(wirebasedtracks); 
+    if(wirebasedtracks.size()<=0)return;
+
+
+    // create wirebasedtrack bank and add to event tree
+    evioDOMNodeP wirebasedtrack = evioDOMNode::createEvioDOMNode(tagMap["dtrackwirebased"],0);
+    tree << wirebasedtrack;
+
+
+    // create data banks and add to bank (n.b. time based track has FOM, wire based doesn't)
+    evioDOMNodeP chisq = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtrackwirebased"],1);
+    evioDOMNodeP Ndof  = evioDOMNode::createEvioDOMNode<int>    (tagMap["dtrackwirebased"],2);
+    evioDOMNodeP x     = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtrackwirebased"],4);
+    evioDOMNodeP y     = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtrackwirebased"],5);
+    evioDOMNodeP z     = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtrackwirebased"],6);
+    evioDOMNodeP px    = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtrackwirebased"],7);
+    evioDOMNodeP py    = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtrackwirebased"],8);
+    evioDOMNodeP pz    = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtrackwirebased"],9);
+    evioDOMNodeP q     = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtrackwirebased"],10);
+    evioDOMNodeP E     = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtrackwirebased"],11);
+    evioDOMNodeP mass  = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtrackwirebased"],12);
+    *wirebasedtrack << chisq << Ndof << x << y << z << px << py << pz 
+                    << q << E << mass;
+
+
+    // add track data to banks
+    //    idMap["dtrackwirebased"].clear();
+    for(unsigned int i=0; i<wirebasedtracks.size(); i++) {
+      *chisq      << wirebasedtracks[i]->chisq;
+      *Ndof       << wirebasedtracks[i]->Ndof;
+      *x          << wirebasedtracks[i]->x();
+      *y          << wirebasedtracks[i]->y();
+      *z          << wirebasedtracks[i]->z();
+      *px         << wirebasedtracks[i]->px();
+      *py         << wirebasedtracks[i]->py();
+      *pz         << wirebasedtracks[i]->pz();
+      *q          << wirebasedtracks[i]->charge();
+      *E          << wirebasedtracks[i]->energy();
+      *mass       << wirebasedtracks[i]->mass();
+      idMap["dtrackwirebased"][wirebasedtracks[i]->id]=i;
+    }
+
+
+    // done
+    processedMap["dtrackwirebased"]=true;
   }
 
 
@@ -1019,7 +1141,7 @@ private:
     tree << timebasedtrack;
 
 
-    // create data banks and add to cdchit bank
+    // create data banks and add to bank
     evioDOMNodeP chisq = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtracktimebased"],1);
     evioDOMNodeP Ndof  = evioDOMNode::createEvioDOMNode<int>    (tagMap["dtracktimebased"],2);
     evioDOMNodeP FOM   = evioDOMNode::createEvioDOMNode<float>  (tagMap["dtracktimebased"],3);
@@ -1038,7 +1160,7 @@ private:
 
 
     // add track data to banks
-    idMap["dtracktimebased"].clear();
+    //    idMap["dtracktimebased"].clear();
     for(unsigned int i=0; i<timebasedtracks.size(); i++) {
       *chisq      << timebasedtracks[i]->chisq;
       *Ndof       << timebasedtracks[i]->Ndof;
@@ -1055,6 +1177,18 @@ private:
       *t0         << timebasedtracks[i]->t0();
       idMap["dtracktimebased"][timebasedtracks[i]->id]=i;
     }
+
+
+    // add associated objects banks
+    evioDOMNodeP wire  = evioDOMNode::createEvioDOMNode<int>  (tagMap["dtracktimebased"],101);
+    for(unsigned int i=0; i<timebasedtracks.size(); i++) {
+      
+    }    
+
+
+
+    // done
+    processedMap["dtracktimebased"]=true;
   }
 
 
@@ -1075,7 +1209,7 @@ private:
     tree << chargedtrack;
 
     // create index bank for each charged track and add to chargedtrack bank
-    idMap["dchargedtrack"].clear();
+    //    idMap["dchargedtrack"].clear();
     for(unsigned int i=0; i<chargedtracks.size(); i++) {
       evioDOMNodeP hypotheses = evioDOMNode::createEvioDOMNode<int> (tagMap["dchargedtrack"],1);
       *chargedtrack << hypotheses;
@@ -1084,6 +1218,10 @@ private:
       }
       idMap["dchargedtrack"][chargedtracks[i]->id]=i;
     }
+
+
+    // done
+    processedMap["dchargedtrack"]=true;
   }
 
 
@@ -1118,7 +1256,7 @@ private:
 
 
     // add track data to banks
-    idMap["dphoton"].clear();
+    //    idMap["dphoton"].clear();
     for(unsigned int i=0; i<photons.size(); i++) {
       *E          << photons[i]->energy();
       *px         << photons[i]->px();
@@ -1132,6 +1270,10 @@ private:
 
       idMap["dphoton"][photons[i]->id]=i;
     }
+
+
+    // done
+    processedMap["dphoton"]=true;
   }
 
 
@@ -1187,6 +1329,7 @@ private:
           evioMap["dschit"]=!minus;
 
         } else if(value=="tracks") {
+          evioMap["dtrackwirebased"]=!minus;
           evioMap["dtracktimebased"]=!minus;
           evioMap["dchargedtrack"]=!minus;
           evioMap["dphoton"]=!minus;
