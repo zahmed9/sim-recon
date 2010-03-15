@@ -39,7 +39,6 @@ class DFDCPseudo : public JObject {
 		DFDCPseudo(){}
 	
 
-		std::vector<DFDCHit*> members;	/// Hits that constitute this point
 		float w,dw; //local coordinate of pseudopoint in the direction 
 		            //perpendicular to the wires and its uncertainty
 		float s,ds; //local coordinate of pseudopoint in the direction 
@@ -53,7 +52,6 @@ class DFDCPseudo : public JObject {
 		float dE;
 
 		void toStrings(vector<pair<string,string> > &items)const{
-			AddString(items, "Nmembers", "%d", members.size());
 			AddString(items, "w", "%3.2f", w);
 			AddString(items, "s", "%3.2f", s);
 			AddString(items, "layer", "%d", wire->layer);
