@@ -172,6 +172,10 @@
   <xmldumpDictEntry name="E"                    tag="11500"    num="11"/>
   <xmldumpDictEntry name="mass"                 tag="11500"    num="12"/>
   <xmldumpDictEntry name="t0"                   tag="11500"    num="13"/>
+  <xmldumpDictEntry name="DTrackWireBasedIndex" tag="11500"    num="100"/>
+  <xmldumpDictEntry name="DCDCTrackHitIndex"    tag="11500"    num="101"/>
+  <xmldumpDictEntry name="DFDCPseudoIndex"      tag="11500"    num="102"/>
+
 
   <xmldumpDictEntry name="DChargedTrack"        tag="11600"    num="0"/>
   <xmldumpDictEntry name="hypotheses"           tag="11600"    num="1"/>
@@ -201,5 +205,27 @@
   <xmldumpDictEntry name="E"                    tag="11800"    num="11"/>
   <xmldumpDictEntry name="mass"                 tag="11800"    num="12"/>
 
+  <xmldumpDictEntry name="DCDCTrackHit"         tag="11900"    num="0"/>
+  <xmldumpDictEntry name="ring"                 tag="11900"    num="1"/>
+  <xmldumpDictEntry name="straw"                tag="11900"    num="2"/>
+  <xmldumpDictEntry name="x"                    tag="11900"    num="3"/>
+  <xmldumpDictEntry name="y"                    tag="11900"    num="4"/>
+  <xmldumpDictEntry name="stereo"               tag="11900"    num="5"/>
+  <xmldumpDictEntry name="tdrift"               tag="11900"    num="6"/>
+  <xmldumpDictEntry name="dist"                 tag="11900"    num="7"/>
+  <xmldumpDictEntry name="dE"                   tag="11900"    num="8"/>
+
+  <xmldumpDictEntry name="DFDCPseudo"           tag="12000"    num="0"/>
+  <xmldumpDictEntry name="Nmembers"             tag="12000"    num="1"/>
+  <xmldumpDictEntry name="w"                    tag="12000"    num="2"/>
+  <xmldumpDictEntry name="s"                    tag="12000"    num="3"/>
+  <xmldumpDictEntry name="layer"                tag="12000"    num="4"/>
+  <xmldumpDictEntry name="wire"                 tag="12000"    num="5"/>
+  <xmldumpDictEntry name="time"                 tag="12000"    num="6"/>
+  <xmldumpDictEntry name="dist"                 tag="12000"    num="7"/>
+  <xmldumpDictEntry name="status"               tag="12000"    num="8"/>
+  <xmldumpDictEntry name="x"                    tag="12000"    num="9"/>
+  <xmldumpDictEntry name="y"                    tag="12000"    num="10"/>
+  <xmldumpDictEntry name="dE"                   tag="12000"    num="11"/>
 
 </xmlDict>

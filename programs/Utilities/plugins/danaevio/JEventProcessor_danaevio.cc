@@ -30,7 +30,7 @@
 //    bank tags definitions
 //    optimize multi-threading
 //    add evio to external packages
-//    associated objects
+//    associated objects, tag and num, etc.
 //    tagged factories
 
 
@@ -113,6 +113,8 @@ static pair<string,bool> danaObs[] =  {
   pair<string,bool> ("dtracktimebased",      false),
   pair<string,bool> ("dchargedtrack",        false),
   pair<string,bool> ("dphoton",              false),
+  pair<string,bool> ("dcdctrackhit",         false),
+  pair<string,bool> ("dfdcpseudo",           false),
 };
 static map<string,bool> evioMap(danaObs,danaObs+sizeof(danaObs)/sizeof(danaObs[0]));
 static map<string,bool> processedMap(danaObs,danaObs+sizeof(danaObs)/sizeof(danaObs[0]));
@@ -139,6 +141,8 @@ static pair<string, map<int,int> > idPairs[] = {
   pair<string, map<int,int> > ("dtracktimebased",    emptyMap),
   pair<string, map<int,int> > ("dchargedtrack",      emptyMap),
   pair<string, map<int,int> > ("dphoton",            emptyMap),
+  pair<string, map<int,int> > ("dcdctrackhit",       emptyMap),
+  pair<string, map<int,int> > ("dfdcpseudo",         emptyMap),
 };
 static map<string, map<int,int> > idMap(idPairs,idPairs+sizeof(idPairs)/sizeof(idPairs[0]));
 
@@ -164,6 +168,8 @@ static pair<string,int> tagPairs[] = {
   pair<string,int> ("dchargedtrack",        11600),
   pair<string,int> ("dphoton",              11700),
   pair<string,int> ("dtrackwirebased",      11800),
+  pair<string,int> ("dcdctrackhit",         11900),
+  pair<string,int> ("dfdcpseudo",           12000),
 };
 static map<string,int> tagMap(tagPairs,tagPairs+sizeof(tagPairs)/sizeof(tagPairs[0]));
 
@@ -307,6 +313,8 @@ private:
     if(evioMap["dhddmtofhit"           ])  addDHDDMTOFHit(eventLoop,tree);
     if(evioMap["dschit"                ])  addDSCHit(eventLoop,tree);
   
+    if(evioMap["dcdctrackhit"          ])  addDCDCTrackHit(eventLoop,tree);
+    if(evioMap["dfdcpseudo"            ])  addDFDCPseudo(eventLoop,tree);
     if(evioMap["dtrackwirebased"       ])  addDTrackWireBased(eventLoop,tree);
     if(evioMap["dtracktimebased"       ])  addDTrackTimeBased(eventLoop,tree);
     if(evioMap["dchargedtrack"         ])  addDChargedTrack(eventLoop,tree);
@@ -366,7 +374,6 @@ private:
 
 
     // add track data to banks
-    //    idMap["dmcthrown"].clear();
     for(unsigned int i=0; i<mcthrowns.size(); i++) {
       *typeBank     << mcthrowns[i]->type;
       *pdgtypeBank  << mcthrowns[i]->pdgtype;
@@ -424,7 +431,6 @@ private:
 
 
     // add track data to banks
-    //    idMap["dmctrackhit"].clear();
     for(unsigned int i=0; i<mctrackhits.size(); i++) {
       *rBank        << mctrackhits[i]->r;
       *phiBank      << mctrackhits[i]->phi;
@@ -477,7 +483,6 @@ private:
 
     
     // add track data to banks
-    //    idMap["dtoftruth"].clear();
     for(unsigned int i=0; i<toftruths.size(); i++) {
 
       *trackBank   << toftruths[i]->track;
@@ -536,7 +541,6 @@ private:
 
 
     // add track data to banks
-    //    idMap["dfcaltruthshower"].clear();
     for(unsigned int i=0; i<fcaltruthshowers.size(); i++) {
       *xBank       << fcaltruthshowers[i]->x();
       *yBank       << fcaltruthshowers[i]->y();
@@ -588,7 +592,6 @@ private:
 
 
     // add track data to banks
-    //    idMap["dbcaltruthshower"].clear();
     for(unsigned int i=0; i<bcaltruthshowers.size(); i++) {
       *trackBank   << bcaltruthshowers[i]->track;
       *primaryBank << bcaltruthshowers[i]->primary;
@@ -633,7 +636,6 @@ private:
 
 
     // add track data to banks
-    //    idMap["dcdchit"].clear();
     for(unsigned int i=0; i<cdchits.size(); i++) {
       *ringBank  << cdchits[i]->ring;
       *strawBank << cdchits[i]->straw;
@@ -686,7 +688,6 @@ private:
 
 
     // add track data to banks
-    //    idMap["dmctrajectorypoint"].clear();
     for(unsigned int i=0; i<mctrajectorypoints.size(); i++) {
       *xBank              << mctrajectorypoints[i]->x;
       *yBank              << mctrajectorypoints[i]->y;
@@ -745,7 +746,6 @@ private:
 
 
     // add track data to banks
-    //    idMap["dfdchit"].clear();
     for(unsigned int i=0; i<fdchits.size(); i++) {
       *layerBank    << fdchits[i]->layer;
       *moduleBank   << fdchits[i]->module;
@@ -796,7 +796,6 @@ private:
 
 
     // add track data to banks
-    //    idMap["dbeamphoton"].clear();
     for(unsigned int i=0; i<beamphotons.size(); i++) {
       DVector3 pos = beamphotons[i]->position();
       *xBank   <<  pos.X();
@@ -851,7 +850,6 @@ private:
 
 
     // add track data to banks
-    //    idMap["dsctruthhit"].clear();
     for(unsigned int i=0; i<sctruthhits.size(); i++) {
       *dEdxBank     << sctruthhits[i]->dEdx;
       *primaryBank  << (int8_t)sctruthhits[i]->primary;
@@ -900,7 +898,6 @@ private:
 
 
     // add track data to banks
-    //    idMap["dfcalhit"].clear();
     for(unsigned int i=0; i<fcalhits.size(); i++) {
       *rowBank     << fcalhits[i]->row;
       *columnBank  << fcalhits[i]->column;
@@ -946,7 +943,6 @@ private:
 
 
     // add track data to banks
-    //    idMap["dhddmbcalhit"].clear();
     for(unsigned int i=0; i<hddmbcalhits.size(); i++) {
       *moduleBank  << hddmbcalhits[i]->module;
       *layerBank   << hddmbcalhits[i]->layer;
@@ -1002,7 +998,6 @@ private:
 
 
     // add track data to banks
-    //    idMap["dhddmtofhit"].clear();
     for(unsigned int i=0; i<hddmtofhits.size(); i++) {
       *planeBank    << hddmtofhits[i]->plane;
       *barBank      << hddmtofhits[i]->bar;
@@ -1053,7 +1048,6 @@ private:
 
 
     // add track data to banks
-    //    idMap["dschit"].clear();
     for(unsigned int i=0; i<schits.size(); i++) {
       *dEBank      << schits[i]->dE;
       *tBank       << schits[i]->t;
@@ -1102,7 +1096,6 @@ private:
 
 
     // add track data to banks
-    //    idMap["dtrackwirebased"].clear();
     for(unsigned int i=0; i<wirebasedtracks.size(); i++) {
       *chisq      << wirebasedtracks[i]->chisq;
       *Ndof       << wirebasedtracks[i]->Ndof;
@@ -1160,7 +1153,6 @@ private:
 
 
     // add track data to banks
-    //    idMap["dtracktimebased"].clear();
     for(unsigned int i=0; i<timebasedtracks.size(); i++) {
       *chisq      << timebasedtracks[i]->chisq;
       *Ndof       << timebasedtracks[i]->Ndof;
@@ -1179,12 +1171,54 @@ private:
     }
 
 
-    // add associated objects banks
-    evioDOMNodeP wire  = evioDOMNode::createEvioDOMNode<int>  (tagMap["dtracktimebased"],101);
-    for(unsigned int i=0; i<timebasedtracks.size(); i++) {
-      
-    }    
+    //  ??? must check if index is available ???
+    // add associated object banks
+    
 
+    // DTrackTimeBased
+    evioDOMNodeP wireBasedIndex = evioDOMNode::createEvioDOMNode<int>(tagMap["dtracktimebased"],100);
+    *timebasedtrack << wireBasedIndex;
+    for(unsigned int i=0; i<timebasedtracks.size(); i++) {
+      vector<const DTrackWireBased*> wireTracks;
+      timebasedtracks[i]->GetT(wireTracks); 
+      for(unsigned int j=0; j<wireTracks.size(); j++) *wireBasedIndex << idMap["dtrackwirebased"][wireTracks[j]->id];
+    }
+
+
+    // DCDCTrackHit
+    evioDOMNodeP cdctrackhitIndexBank  = evioDOMNode::createEvioDOMNode(tagMap["dtracktimebased"],101);
+    *timebasedtrack << cdctrackhitIndexBank;
+    for(unsigned int i=0; i<timebasedtracks.size(); i++) {
+
+      evioDOMNodeP cdctrackhitIndex = evioDOMNode::createEvioDOMNode<int> (101,i);  // ??? tag,num ???
+      *cdctrackhitIndexBank << cdctrackhitIndex;
+
+      vector<const DCDCTrackHit*> cdctrackhits;
+      timebasedtracks[i]->GetT(cdctrackhits); 
+      for(unsigned int j=0; j<cdctrackhits.size(); j++) {
+        map<int,int>::iterator iter = idMap["dcdctrackhit"].find(cdctrackhits[j]->id);
+        if(iter==idMap["dcdctrackhit"].end())cerr << "unable to find cdctrackhit id " << cdctrackhits[j]->id << endl;
+        *cdctrackhitIndex << idMap["dcdctrackhit"][cdctrackhits[j]->id];
+      }
+    }
+
+
+    // DFDCPseudo
+    evioDOMNodeP fdcpseudoIndexBank  = evioDOMNode::createEvioDOMNode(tagMap["dtracktimebased"],102);
+    *timebasedtrack << fdcpseudoIndexBank;
+    for(unsigned int i=0; i<timebasedtracks.size(); i++) {
+
+      evioDOMNodeP fdcpseudoIndex = evioDOMNode::createEvioDOMNode<int> (101,i);
+      *fdcpseudoIndexBank << fdcpseudoIndex;
+
+      vector<const DFDCPseudo*> fdcpseudos;
+      timebasedtracks[i]->GetT(fdcpseudos); 
+      for(unsigned int j=0; j<fdcpseudos.size(); j++) {
+        map<int,int>::iterator iter = idMap["dfdcpseudo"].find(fdcpseudos[j]->id);
+        if(iter==idMap["dfdcpseudo"].end())cerr << "unable to find fdcpseudo id " << fdcpseudos[j]->id << endl;
+        *fdcpseudoIndex << idMap["dfdcpseudo"][fdcpseudos[j]->id];
+      }
+    }
 
 
     // done
@@ -1209,7 +1243,6 @@ private:
     tree << chargedtrack;
 
     // create index bank for each charged track and add to chargedtrack bank
-    //    idMap["dchargedtrack"].clear();
     for(unsigned int i=0; i<chargedtracks.size(); i++) {
       evioDOMNodeP hypotheses = evioDOMNode::createEvioDOMNode<int> (tagMap["dchargedtrack"],1);
       *chargedtrack << hypotheses;
@@ -1256,7 +1289,6 @@ private:
 
 
     // add track data to banks
-    //    idMap["dphoton"].clear();
     for(unsigned int i=0; i<photons.size(); i++) {
       *E          << photons[i]->energy();
       *px         << photons[i]->px();
@@ -1278,6 +1310,111 @@ private:
 
 
 //------------------------------------------------------------------------------
+
+
+  void addDCDCTrackHit(JEventLoop *eventLoop, evioDOMTree &tree) {
+
+
+    // is there any data
+    vector<const DCDCTrackHit*> cdctrackhits; 
+    eventLoop->Get(cdctrackhits); 
+    if(cdctrackhits.size()<=0)return;
+
+
+    // create cdctrackhit bank and add to event tree
+    evioDOMNodeP cdctrackhit = evioDOMNode::createEvioDOMNode(tagMap["dcdctrackhit"],0);
+    tree << cdctrackhit;
+
+
+    // create data banks and add to cdctrackhit bank
+    evioDOMNodeP ringBank    = evioDOMNode::createEvioDOMNode<int>    (tagMap["dcdctrackhit"],1);
+    evioDOMNodeP strawBank   = evioDOMNode::createEvioDOMNode<int>    (tagMap["dcdctrackhit"],2);
+    evioDOMNodeP xBank       = evioDOMNode::createEvioDOMNode<float>  (tagMap["dcdctrackhit"],3);
+    evioDOMNodeP yBank       = evioDOMNode::createEvioDOMNode<float>  (tagMap["dcdctrackhit"],4);
+    evioDOMNodeP stereoBank  = evioDOMNode::createEvioDOMNode<float>  (tagMap["dcdctrackhit"],5);
+    evioDOMNodeP tdriftBank  = evioDOMNode::createEvioDOMNode<float>  (tagMap["dcdctrackhit"],6);
+    evioDOMNodeP distBank    = evioDOMNode::createEvioDOMNode<float>  (tagMap["dcdctrackhit"],7);
+    evioDOMNodeP dEBank      = evioDOMNode::createEvioDOMNode<float>  (tagMap["dcdctrackhit"],8);
+    *cdctrackhit << ringBank << strawBank << xBank << yBank << stereoBank << tdriftBank << distBank << dEBank;
+
+
+    // add track data to banks
+    for(unsigned int i=0; i<cdctrackhits.size(); i++) {
+      *ringBank    << cdctrackhits[i]->wire->ring;
+      *strawBank   << cdctrackhits[i]->wire->straw;
+      *xBank       << cdctrackhits[i]->wire->origin.x();
+      *yBank       << cdctrackhits[i]->wire->origin.y();
+      *stereoBank  << cdctrackhits[i]->wire->stereo;
+      *tdriftBank  << cdctrackhits[i]->tdrift;
+      *distBank    << cdctrackhits[i]->dist;
+      *dEBank      << cdctrackhits[i]->dE;
+
+      idMap["dcdctrackhit"][cdctrackhits[i]->id]=i;
+    }
+
+
+    // done
+    processedMap["dcdctrackhit"]=true;
+  }
+
+
+//------------------------------------------------------------------------------
+
+
+  void addDFDCPseudo(JEventLoop *eventLoop, evioDOMTree &tree) {
+
+
+    // is there any data
+    vector<const DFDCPseudo*> fdcpseudos; 
+    eventLoop->Get(fdcpseudos); 
+    if(fdcpseudos.size()<=0)return;
+
+
+    // create fdcpseudo bank and add to event tree
+    evioDOMNodeP fdcpseudo = evioDOMNode::createEvioDOMNode(tagMap["dfdcpseudo"],0);
+    tree << fdcpseudo;
+
+
+    // create data banks and add to fdcpseudo bank
+    evioDOMNodeP NmembersBank  = evioDOMNode::createEvioDOMNode<int>   (tagMap["dfdcpseudo"],1);
+    evioDOMNodeP wBank         = evioDOMNode::createEvioDOMNode<float> (tagMap["dfdcpseudo"],2);
+    evioDOMNodeP sBank         = evioDOMNode::createEvioDOMNode<float> (tagMap["dfdcpseudo"],3);
+    evioDOMNodeP layerBank     = evioDOMNode::createEvioDOMNode<int>   (tagMap["dfdcpseudo"],4);
+    evioDOMNodeP wireBank      = evioDOMNode::createEvioDOMNode<int>   (tagMap["dfdcpseudo"],5);
+    evioDOMNodeP timeBank      = evioDOMNode::createEvioDOMNode<float> (tagMap["dfdcpseudo"],6);
+    evioDOMNodeP distBank      = evioDOMNode::createEvioDOMNode<float> (tagMap["dfdcpseudo"],7);
+    evioDOMNodeP statusBank    = evioDOMNode::createEvioDOMNode<int>   (tagMap["dfdcpseudo"],8);
+    evioDOMNodeP xBank         = evioDOMNode::createEvioDOMNode<float> (tagMap["dfdcpseudo"],9);
+    evioDOMNodeP yBank         = evioDOMNode::createEvioDOMNode<float> (tagMap["dfdcpseudo"],10);
+    evioDOMNodeP dEBank        = evioDOMNode::createEvioDOMNode<float> (tagMap["dfdcpseudo"],11);
+    *fdcpseudo << NmembersBank << wBank << sBank << layerBank << wireBank << timeBank << distBank
+               << statusBank << xBank << yBank << dEBank;
+
+
+    // add track data to banks
+    for(unsigned int i=0; i<fdcpseudos.size(); i++) {
+      *NmembersBank << fdcpseudos[i]->members.size();
+      *wBank        << fdcpseudos[i]->w;
+      *sBank        << fdcpseudos[i]->s;
+      *layerBank    << fdcpseudos[i]->wire->layer;
+      *wireBank     << fdcpseudos[i]->wire->wire;
+      *timeBank     << fdcpseudos[i]->time;
+      *distBank     << fdcpseudos[i]->dist;
+      *statusBank   << fdcpseudos[i]->status;
+      *xBank        << fdcpseudos[i]->x;
+      *yBank        << fdcpseudos[i]->y;
+      *dEBank       << fdcpseudos[i]->dE;
+
+      idMap["dfdcpseudo"][fdcpseudos[i]->id]=i;
+    }
+
+
+    // done
+    processedMap["fdcpseudo"]=true;
+  }
+
+
+//----------------------------------------------------------------------------
 
 
   void decode_object_parameters(void) {
@@ -1333,6 +1470,8 @@ private:
           evioMap["dtracktimebased"]=!minus;
           evioMap["dchargedtrack"]=!minus;
           evioMap["dphoton"]=!minus;
+          evioMap["dcdctrackhit"]=!minus;
+          evioMap["dfdcpseudo"]=!minus;
 
         } else {
           map<string,bool>::iterator found = evioMap.find(value);
