@@ -1376,24 +1376,22 @@ private:
 
 
     // create data banks and add to fdcpseudo bank
-    evioDOMNodeP NmembersBank  = evioDOMNode::createEvioDOMNode<int>   (tagMap["dfdcpseudo"],1);
-    evioDOMNodeP wBank         = evioDOMNode::createEvioDOMNode<float> (tagMap["dfdcpseudo"],2);
-    evioDOMNodeP sBank         = evioDOMNode::createEvioDOMNode<float> (tagMap["dfdcpseudo"],3);
-    evioDOMNodeP layerBank     = evioDOMNode::createEvioDOMNode<int>   (tagMap["dfdcpseudo"],4);
-    evioDOMNodeP wireBank      = evioDOMNode::createEvioDOMNode<int>   (tagMap["dfdcpseudo"],5);
-    evioDOMNodeP timeBank      = evioDOMNode::createEvioDOMNode<float> (tagMap["dfdcpseudo"],6);
-    evioDOMNodeP distBank      = evioDOMNode::createEvioDOMNode<float> (tagMap["dfdcpseudo"],7);
-    evioDOMNodeP statusBank    = evioDOMNode::createEvioDOMNode<int>   (tagMap["dfdcpseudo"],8);
-    evioDOMNodeP xBank         = evioDOMNode::createEvioDOMNode<float> (tagMap["dfdcpseudo"],9);
-    evioDOMNodeP yBank         = evioDOMNode::createEvioDOMNode<float> (tagMap["dfdcpseudo"],10);
-    evioDOMNodeP dEBank        = evioDOMNode::createEvioDOMNode<float> (tagMap["dfdcpseudo"],11);
-    *fdcpseudo << NmembersBank << wBank << sBank << layerBank << wireBank << timeBank << distBank
+    evioDOMNodeP wBank         = evioDOMNode::createEvioDOMNode<float> (tagMap["dfdcpseudo"],1);
+    evioDOMNodeP sBank         = evioDOMNode::createEvioDOMNode<float> (tagMap["dfdcpseudo"],2);
+    evioDOMNodeP layerBank     = evioDOMNode::createEvioDOMNode<int>   (tagMap["dfdcpseudo"],3);
+    evioDOMNodeP wireBank      = evioDOMNode::createEvioDOMNode<int>   (tagMap["dfdcpseudo"],4);
+    evioDOMNodeP timeBank      = evioDOMNode::createEvioDOMNode<float> (tagMap["dfdcpseudo"],5);
+    evioDOMNodeP distBank      = evioDOMNode::createEvioDOMNode<float> (tagMap["dfdcpseudo"],6);
+    evioDOMNodeP statusBank    = evioDOMNode::createEvioDOMNode<int>   (tagMap["dfdcpseudo"],7);
+    evioDOMNodeP xBank         = evioDOMNode::createEvioDOMNode<float> (tagMap["dfdcpseudo"],8);
+    evioDOMNodeP yBank         = evioDOMNode::createEvioDOMNode<float> (tagMap["dfdcpseudo"],9);
+    evioDOMNodeP dEBank        = evioDOMNode::createEvioDOMNode<float> (tagMap["dfdcpseudo"],10);
+    *fdcpseudo << wBank << sBank << layerBank << wireBank << timeBank << distBank
                << statusBank << xBank << yBank << dEBank;
 
 
     // add track data to banks
     for(unsigned int i=0; i<fdcpseudos.size(); i++) {
-      *NmembersBank << fdcpseudos[i]->members.size();
       *wBank        << fdcpseudos[i]->w;
       *sBank        << fdcpseudos[i]->s;
       *layerBank    << fdcpseudos[i]->wire->layer;

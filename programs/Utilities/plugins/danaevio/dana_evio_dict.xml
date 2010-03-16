@@ -216,16 +216,15 @@
   <xmldumpDictEntry name="dE"                   tag="11900"    num="8"/>
 
   <xmldumpDictEntry name="DFDCPseudo"           tag="12000"    num="0"/>
-  <xmldumpDictEntry name="Nmembers"             tag="12000"    num="1"/>
-  <xmldumpDictEntry name="w"                    tag="12000"    num="2"/>
-  <xmldumpDictEntry name="s"                    tag="12000"    num="3"/>
-  <xmldumpDictEntry name="layer"                tag="12000"    num="4"/>
-  <xmldumpDictEntry name="wire"                 tag="12000"    num="5"/>
-  <xmldumpDictEntry name="time"                 tag="12000"    num="6"/>
-  <xmldumpDictEntry name="dist"                 tag="12000"    num="7"/>
-  <xmldumpDictEntry name="status"               tag="12000"    num="8"/>
-  <xmldumpDictEntry name="x"                    tag="12000"    num="9"/>
-  <xmldumpDictEntry name="y"                    tag="12000"    num="10"/>
-  <xmldumpDictEntry name="dE"                   tag="12000"    num="11"/>
+  <xmldumpDictEntry name="w"                    tag="12000"    num="1"/>
+  <xmldumpDictEntry name="s"                    tag="12000"    num="2"/>
+  <xmldumpDictEntry name="layer"                tag="12000"    num="3"/>
+  <xmldumpDictEntry name="wire"                 tag="12000"    num="4"/>
+  <xmldumpDictEntry name="time"                 tag="12000"    num="5"/>
+  <xmldumpDictEntry name="dist"                 tag="12000"    num="6"/>
+  <xmldumpDictEntry name="status"               tag="12000"    num="7"/>
+  <xmldumpDictEntry name="x"                    tag="12000"    num="8"/>
+  <xmldumpDictEntry name="y"                    tag="12000"    num="9"/>
+  <xmldumpDictEntry name="dE"                   tag="12000"    num="10"/>
 
 </xmlDict>
