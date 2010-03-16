@@ -95,8 +95,9 @@ class DReferenceTrajectory{
 		void SetMass(double mass){this->mass = mass;}
 		void SetPLossDirection(direction_t direction){ploss_direction=direction;}
 		direction_t GetPLossDirection(void) const {return ploss_direction;}
-		inline double dPdx(double ptot, double A, double Z, double density) const;
-		inline double dPdx(double ptot, double rhoZ_overA, double rhoZ_overA_logI) const;
+		inline double dPdx_from_A_Z_rho(double ptot, double A, double Z, double density) const;
+		inline double dPdx(double ptot, double KrhoZ_overA,
+				   double rhoZ_overA,double LogI) const;
 
 		const swim_step_t *GetLastSwimStep(void) const {return last_swim_step;}
 		swim_step_t *swim_steps;

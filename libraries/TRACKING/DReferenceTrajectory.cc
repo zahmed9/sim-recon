@@ -205,12 +205,18 @@ void DReferenceTrajectory::Swim(const DVector3 &pos, const DVector3 &mom, double
 		double dP_dx=0.0;
 		if(RootGeom || geom){
 			//double density, A, Z, X0;
-			double rhoZ_overA, rhoZ_overA_logI, X0;
+		  double KrhoZ_overA,rhoZ_overA,LogI, X0;
 			jerror_t err;
 			if(RootGeom){
-				err = RootGeom->FindMatLL(swim_step->origin, rhoZ_overA, rhoZ_overA_logI, X0);
+			  double rhoZ_overA,rhoZ_overA_logI;
+			  err = RootGeom->FindMatLL(swim_step->origin,
+						    rhoZ_overA, 
+						    rhoZ_overA_logI, 
+						    X0);
+			  KrhoZ_overA=0.1535e-3*rhoZ_overA;
+			  LogI=rhoZ_overA_logI/rhoZ_overA;
 			}else{
-				err = geom->FindMat(swim_step->origin, rhoZ_overA, rhoZ_overA_logI, X0);
+			  err = geom->FindMatALT1(swim_step->origin, KrhoZ_overA, rhoZ_overA,LogI, X0);
 			}
 
 			if(err == NOERROR){
@@ -229,7 +235,7 @@ void DReferenceTrajectory::Swim(const DVector3 &pos, const DVector3 &mom, double
 					}
 
 					// Calculate momentum loss due to ionization
-					dP_dx = dPdx(swim_step->mom.Mag(), rhoZ_overA, rhoZ_overA_logI);
+					dP_dx = dPdx(swim_step->mom.Mag(), KrhoZ_overA, rhoZ_overA,LogI);
 					dP = delta_s*dP_dx;
 				}
 			}
@@ -258,7 +264,7 @@ void DReferenceTrajectory::Swim(const DVector3 &pos, const DVector3 &mom, double
 
 			if(my_step_size>2.0)my_step_size=2.0; // maximum step size is 2 cm
 		
-
+		      
 			// Now check the field gradient
 			if (fabs(Bz-Bz_old)>EPS){
 			  double my_step_size_B=0.01*my_step_size
@@ -266,8 +272,9 @@ void DReferenceTrajectory::Swim(const DVector3 &pos, const DVector3 &mom, double
 			  if (my_step_size_B<my_step_size) 
 			    my_step_size=my_step_size_B;
 			}
-			if(my_step_size<0.1)my_step_size=0.1; // minimum step size is 1 mm
 			
+			if(my_step_size<0.1)my_step_size=0.1; // minimum step size is 1 mm
+		       
 			stepper.SetStepSize(my_step_size);
 		}
 
@@ -354,8 +361,10 @@ jerror_t DReferenceTrajectory::GetIntersectionWithRadius(double R,
   if (s) *s = step->s-(1.0-alpha)*delta.Mag();
 
   // flight time
-  if (t){
-    *t = step->t;
+  if (t){	
+    double p=step->mom.Mag();
+    double beta=1./sqrt(1.+mass*mass/p/p);
+    *t = step->t-(1.0-alpha)*delta.Mag()/beta/SPEED_OF_LIGHT;
   }
 
   return NOERROR;
@@ -404,7 +413,9 @@ void DReferenceTrajectory::GetIntersectionWithPlane(const DVector3 &origin, cons
 	  } 
 	  // flight time
 	  if (t){
-	    *t = step->t;
+	    double p=step->mom.Mag();
+	    double beta=1./sqrt(1.+mass*mass/p/p);
+	    *t = step->t+ds/beta/SPEED_OF_LIGHT;
 	  }
 	  
 	  return;
@@ -500,6 +511,14 @@ void DReferenceTrajectory::GetIntersectionWithPlane(const DVector3 &origin, cons
 			if(s){
 				double delta_s = sqrt(my_t*my_t + my_u*my_u);
 				*s = step->s + (phi>0 ? +delta_s:-delta_s);
+			}	  
+			// flight time
+			if (t){
+			  double delta_s = sqrt(my_t*my_t + my_u*my_u);
+			  double ds=(phi>0 ? +delta_s:-delta_s);
+			  double p=step->mom.Mag();
+			  double beta=1./sqrt(1.+mass*mass/p/p);
+			  *t = step->t+ds/beta/SPEED_OF_LIGHT;
 			}
 			
 			// Success. Go ahead and return
@@ -518,7 +537,9 @@ void DReferenceTrajectory::GetIntersectionWithPlane(const DVector3 &origin, cons
 	}
 	// flight time
 	if (t){
-	  *t = step->t;
+	  double p=step->mom.Mag();
+	  double beta=1./sqrt(1.+mass*mass/p/p);
+	  *t = step->t+alpha*p/beta/SPEED_OF_LIGHT;
 	}
 }
 
@@ -1329,6 +1350,7 @@ void DReferenceTrajectory::GetLastDOCAPoint(DVector3 &pos, DVector3 &mom) const
 
 	pos = last_swim_step->origin + x*xdir + y*ydir + z*zdir;
 	mom = last_swim_step->mom;
+
 	mom.Rotate(-last_phi, zdir);
 }
 
@@ -1358,25 +1380,25 @@ DVector3 DReferenceTrajectory::GetLastDOCAPoint(void) const
 //------------------
 // dPdx
 //------------------
-double DReferenceTrajectory::dPdx(double ptot, double A, double Z, double density) const
+double DReferenceTrajectory::dPdx_from_A_Z_rho(double ptot, double A, double Z, double density) const
 {
 	double I = (Z*12.0 + 7.0)*1.0E-9; // From Leo 2nd ed. pg 25.
 	if (Z>=13) I=(9.76*Z+58.8*pow(Z,-0.19))*1.0e-9;
-	double rhoZ_overA = density*Z/A;
-	double rhoZ_overA_logI = rhoZ_overA*log(I);
+	double rhoZ_overA=density*Z/A;
+	double KrhoZ_overA = 0.1535e-3*rhoZ_overA;
 
-	return dPdx(ptot, rhoZ_overA, rhoZ_overA_logI);
+	return dPdx(ptot, KrhoZ_overA,rhoZ_overA,log(I));
 }
 
 //------------------
 // dPdx
 //------------------
-double DReferenceTrajectory::dPdx(double ptot, double rhoZ_overA, double rhoZ_overA_logI) const
+double DReferenceTrajectory::dPdx(double ptot, double KrhoZ_overA, 
+				  double rhoZ_overA,double LogI) const
 {
 	/// Calculate the momentum loss per unit distance traversed of the material with
 	/// the given A, Z, and density. Value returned is in GeV/c per cm
 	/// This follows the July 2008 PDG section 27.2 ppg 268-270.
-	/// The density effect term is ignored.
 	if(mass==0.0)return 0.0; // no ionization losses for neutrals
 	
 	double gammabeta = ptot/mass;
@@ -1386,10 +1408,50 @@ double DReferenceTrajectory::dPdx(double ptot, double rhoZ_overA, double rhoZ_ov
 	double beta2=beta*beta;
 	double me = 0.511E-3;
 	double m_ratio=me/mass;
+	double two_me_gammabeta2=2.*me*gammabeta2;
 
-	double Tmax = 2.0*me*gammabeta2/(1.0+2.0*gamma*m_ratio+m_ratio*m_ratio);
-	double K = 0.307075E-3; // GeV gm^-1 cm^2
-	double dEdx = K*rhoZ_overA/beta2*(0.5*log(2.0*me*gammabeta2*Tmax) - beta2) - K*rhoZ_overA_logI/beta2;
+	double Tmax = two_me_gammabeta2/(1.0+2.0*gamma*m_ratio+m_ratio*m_ratio);
+	//double K = 0.307075E-3; // GeV gm^-1 cm^2
+	// Density effect
+	double delta=0.;	
+	double X=log10(gammabeta);
+	double X0,X1;
+	double Cbar=2.*(LogI-log(28.816e-9*sqrt(rhoZ_overA)))+1.;
+	if (rhoZ_overA>0.01){ // not a gas
+	  if (LogI<-1.6118){ // I<100
+	    if (Cbar<=3.681) X0=0.2;
+	    else X0=0.326*Cbar-1.;
+	    X1=2.;
+	  }
+	  else{
+	    if (Cbar<=5.215) X0=0.2;
+	    else X0=0.326*Cbar-1.5;
+	    X1=3.;
+	  }
+	}
+	else { // gases
+	  X1=4.;
+	  if (Cbar<=9.5) X0=1.6;
+	  else if (Cbar>9.5 && Cbar<=10.) X0=1.7;
+	  else if (Cbar>10 && Cbar<=10.5) X0=1.8;    
+	  else if (Cbar>10.5 && Cbar<=11.) X0=1.9;
+	  else if (Cbar>11.0 && Cbar<=12.25) X0=2.;
+	  else if (Cbar>12.25 && Cbar<=13.804){
+	    X0=2.;
+	    X1=5.;
+	  }
+	  else {
+	    X0=0.326*Cbar-2.5;
+	    X1=5.;
+	  } 
+	}
+	if (X>=X0 && X<X1)
+	  delta=4.606*X-Cbar+(Cbar-4.606*X0)*pow((X1-X)/(X1-X0),3.);
+	else if (X>=X1)
+	  delta= 4.606*X-Cbar;  	
+
+	double dEdx = KrhoZ_overA/beta2*(log(two_me_gammabeta2*Tmax) 
+					 -2.*LogI - 2.0*beta2 -delta);
 
 	double dP_dx = dEdx/beta;
 	
