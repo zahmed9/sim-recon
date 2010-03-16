@@ -12,7 +12,7 @@
 #include "HDGEOMETRY/DRootGeom.h"
 using namespace jana;
 
-#define TCUT 10.e-6 // energy cut for bethe-bloch 
+#define TCUT 100.e-6 // energy cut for bethe-bloch 
 
 extern bool FDCSortByZincreasing(const DFDCPseudo* const &hit1, const DFDCPseudo* const &hit2);
 extern bool CDCSortByRincreasing(const DCDCTrackHit* const &hit1, const DCDCTrackHit* const &hit2);
@@ -22,6 +22,12 @@ bool static DTrackFitter_dedx_cmp(pair<double,double>a,pair<double,double>b){
   double dEdx1=a.first/a.second;
   double dEdx2=b.first/b.second;
   return dEdx1<dEdx2;  
+}
+
+bool static DTrackFitter_dedx_cmp2(DTrackFitter::dedx_t a,DTrackFitter::dedx_t b){
+  double dEdx1=a.dE/a.dx;
+  double dEdx2=b.dE/b.dx;
+  return dEdx1<dEdx2;
 }
 
 //-------------------
@@ -296,7 +302,7 @@ jerror_t DTrackFitter::CalcdEdxHit(const DVector3 &mom,
   double dy=pos.y()-hit->wire->origin.y();
   
   // square of straw radius
-  double rs2=0.8*0.8;
+  double rs2=0.776*0.776;
   
   // Useful temporary variables related to the direction of the wire
   double A=1.-hit->wire->udir.x()*hit->wire->udir.x();
@@ -459,9 +465,10 @@ double DTrackFitter::GetdEdx(double p,double mass_hyp,double mean_path_length){
 			     -2.*mLnIGas-beta2+0.198-delta);
 }
 
-// Empirical form for sigma/mean for gaseous detectors with num_dedx samples 
-// and sampling thickness path_length
-double DTrackFitter::GetdEdxSigma(unsigned int num_hits,double p,double mass,
+// Empirical form for sigma/mean for gaseous detectors with num_dedx 
+// samples and sampling thickness path_length.  Assumes that the number of 
+// hits has already been converted from an (unsigned) int to a double.
+double DTrackFitter::GetdEdxSigma(double num_hits,double p,double mass,
 				  double mean_path_length){
   // kinematic quantities
   double betagamma=p/mass;
@@ -484,9 +491,17 @@ double DTrackFitter::GetdEdxSigma(unsigned int num_hits,double p,double mass,
   double mean_dedx=mKRhoZoverAGas/beta2
     *(log(two_Me_betagamma_sq*T0)-2.*mLnIGas-beta2*(1.+T0/Tmax)-delta);
   
-  return 0.41*mean_dedx*pow(double(num_hits),-0.43)*pow(mean_path_length,-0.32);
+  return 0.41*mean_dedx*pow(num_hits,-0.43)*pow(mean_path_length,-0.32);
   //return 0.41*mean_dedx*pow(double(num_hits),-0.5)*pow(mean_path_length,-0.32);
 }
+// Overload to allow the first argument to be an integer
+double DTrackFitter::GetdEdxSigma(unsigned int num_hits,double p,
+				  double mass,double mean_path_length){
+  double N=double(num_hits);
+  return GetdEdxSigma(N,p,mass,mean_path_length);
+}
+
+
 
 // Get the most probable value and the standard deviation of the energy loss
 jerror_t DTrackFitter::GetdEdxMPandSigma(unsigned int num_hits,double p,
@@ -519,9 +534,8 @@ jerror_t DTrackFitter::GetdEdxMPandSigma(unsigned int num_hits,double p,
   // Bethe-Bloch: mean energy loss
   double mean_dedx
     =Xi*(log(two_Me_betagamma_sq*T0)-2.*mLnIGas-beta2*(1.+T0/Tmax)-delta);
-  
-  dedx_sigma=0.41*mean_dedx*pow(double(num_hits),-0.43)
-    *pow(mean_path_length,-0.32);
+
+  dedx_sigma=0.41*mean_dedx*pow(double(num_hits),-0.43)*pow(mean_path_length,-0.32);
   
   return NOERROR;
 }
@@ -606,4 +620,55 @@ jerror_t DTrackFitter::GetdEdx(const DReferenceTrajectory *rt, double &dedx,
   }
  
   return RESOURCE_UNAVAILABLE;
+}
+
+// Compute the dEdx for a track described by the reference trajectory rt 
+// using a subset of all the FDC and CDC hits on the track. Also returns 
+// the mean path length per hit in the active volume of the detector and 
+// the average measured momentum within the active region.
+jerror_t DTrackFitter::GetdEdx(const DReferenceTrajectory *rt,
+			       vector<dedx_t>&dEdx_list){
+  DVector3 pos,mom;
+  //Get the list of cdc hits used in the fit
+  vector<const DCDCTrackHit*>cdchits;
+  cdchits=GetCDCFitHits();
+
+  //dE and dx pairs
+  pair<double,double>de_and_dx;
+
+  // We cast away the const-ness of the reference trajectory so that we can use the DisToRT method
+  DReferenceTrajectory *my_rt=const_cast<DReferenceTrajectory*>(rt);
+
+  // Loop over cdc hits
+  for (unsigned int i=0;i<cdchits.size();i++){
+    my_rt->DistToRT(cdchits[i]->wire);
+    my_rt->GetLastDOCAPoint(pos, mom);
+
+    // Create the dE,dx pair from the position and momentum using a helical approximation for the path 
+    // in the straw and keep track of the momentum in the active region of the detector
+    if (CalcdEdxHit(mom,pos,cdchits[i],de_and_dx)==NOERROR){
+      dEdx_list.push_back(dedx_t(de_and_dx.first,de_and_dx.second,
+				 mom.Mag()));
+    }
+  }
+  
+  //Get the list of fdc hits used in the fit
+  vector<const DFDCPseudo*>fdchits;
+  fdchits=GetFDCFitHits();
+
+  // loop over fdc hits
+  for (unsigned int i=0;i<fdchits.size();i++){
+    my_rt->DistToRT(fdchits[i]->wire);
+    my_rt->GetLastDOCAPoint(pos, mom);
+   
+    double gas_thickness=1.0; // cm
+    dEdx_list.push_back(dedx_t(1000.*fdchits[i]->dE,
+			       gas_thickness/cos(mom.Theta()),
+			       mom.Mag()));
+  }
+    
+  // Sort the dEdx entries from smallest to largest
+  sort(dEdx_list.begin(),dEdx_list.end(),DTrackFitter_dedx_cmp2);  
+ 
+  return NOERROR;
 }

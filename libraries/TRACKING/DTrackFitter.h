@@ -67,11 +67,20 @@ class DTrackFitter:public jana::JObject{
 			kFitNoImprovement
 		};
 		
+		class dedx_t{
+		public:
+		  dedx_t(double dE,double dx, double p):dE(dE),dx(dx),p(p){}
+		    double dE; // energy loss in layer
+		    double dx; // path length in layer
+		    double p;  // momentum at this dE/dx measurement
+
+		};
+
 		class pull_t{
-			public:
-				pull_t(double resi, double err):resi(resi),err(err){}
-				double resi;	// residual of measurement
-				double err;		// estimated error of measurement
+		public:
+		  pull_t(double resi, double err):resi(resi),err(err){}
+		    double resi;	// residual of measurement
+		    double err;		// estimated error of measurement
 		};
 		
 		// Constructor and destructor
@@ -122,6 +131,8 @@ class DTrackFitter:public jana::JObject{
 		
 		double GetdEdxSigma(unsigned int num_hits,double p, 
 				    double mass,double mean_path_length);
+		double GetdEdxSigma(double num_hits,double p, 
+				    double mass,double mean_path_length);
 		double GetdEdx(double p,double mass_hyp,double mean_path_length);
 		double GetdEdx(double p,double mass_hyp,double dx,DVector3 pos);
 		jerror_t GetdEdxMPandSigma(unsigned int num_hits,double p,
@@ -132,6 +143,9 @@ class DTrackFitter:public jana::JObject{
 		jerror_t GetdEdx(const DReferenceTrajectory *rt, double &dedx,
 				 double &mean_path_length, double &p_avg,
 				 unsigned int &num_hits);
+		jerror_t GetdEdx(const DReferenceTrajectory *rt,
+				 vector<dedx_t>&dEdx_list);
+
 		double GetdEdxVariance(double p,double mass_hyp,double dx,
 				       DVector3 pos);
 
