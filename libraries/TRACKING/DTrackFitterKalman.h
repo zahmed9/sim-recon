@@ -273,6 +273,7 @@ class DTrackFitterKalman: public DTrackFitter{
   // B-field and gradient
   double Bx,By,Bz;
   double dBxdx,dBxdy,dBxdz,dBydx,dBydy,dBydz,dBzdx,dBzdy,dBzdz;
+  bool get_field;
 
   // For dEdx measurements
   double track_dedx;
