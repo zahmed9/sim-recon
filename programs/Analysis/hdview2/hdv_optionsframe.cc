@@ -88,6 +88,15 @@ hdv_optionsframe::hdv_optionsframe(hdv_mainframe *hdvmf, const TGWindow *p, UInt
 	checkbuttons["recon_photons_fcal"]			= new TGCheckButton(hitdrawopts,	"Draw reconstructed photon projections on FCAL");
 	TGHorizontal3DLine *separator2				= new TGHorizontal3DLine(hitdrawopts, 250);
 	checkbuttons["recon_photons_track_match"]	= new TGCheckButton(hitdrawopts,	"Draw reconstructed photons matched to charged tracks");
+	TGHorizontal3DLine *separator3				= new TGHorizontal3DLine(hitdrawopts, 250);
+	checkbuttons["trajectories_photon"]			= new TGCheckButton(hitdrawopts,	"When drawing DMCTrajectoryPoint, draw photon tracks");
+	checkbuttons["trajectories_electron"]		= new TGCheckButton(hitdrawopts,	"When drawing DMCTrajectoryPoint, draw electron tracks");
+	checkbuttons["trajectories_positron"]		= new TGCheckButton(hitdrawopts,	"When drawing DMCTrajectoryPoint, draw positron tracks");
+	checkbuttons["trajectories_proton"]			= new TGCheckButton(hitdrawopts,	"When drawing DMCTrajectoryPoint, draw proton tracks");
+	checkbuttons["trajectories_neutron"]		= new TGCheckButton(hitdrawopts,	"When drawing DMCTrajectoryPoint, draw neutron tracks");
+	checkbuttons["trajectories_piplus"]			= new TGCheckButton(hitdrawopts,	"When drawing DMCTrajectoryPoint, draw piplus tracks");
+	checkbuttons["trajectories_piminus"]		= new TGCheckButton(hitdrawopts,	"When drawing DMCTrajectoryPoint, draw piminus tracks");
+	checkbuttons["trajectories_other"]			= new TGCheckButton(hitdrawopts,	"When drawing DMCTrajectoryPoint, draw all other tracks");
 
 	hitdrawopts->AddFrame(checkbuttons["fdcintersection"], lhints);
 	hitdrawopts->AddFrame(separator0, chints);
@@ -104,6 +113,15 @@ hdv_optionsframe::hdv_optionsframe(hdv_mainframe *hdvmf, const TGWindow *p, UInt
 	hitdrawopts->AddFrame(checkbuttons["recon_photons_fcal"], lhints);
 	hitdrawopts->AddFrame(separator2, chints);
 	hitdrawopts->AddFrame(checkbuttons["recon_photons_track_match"], lhints);
+	hitdrawopts->AddFrame(separator3, chints);
+	hitdrawopts->AddFrame(checkbuttons["trajectories_photon"], lhints);
+	hitdrawopts->AddFrame(checkbuttons["trajectories_electron"], lhints);
+	hitdrawopts->AddFrame(checkbuttons["trajectories_positron"], lhints);
+	hitdrawopts->AddFrame(checkbuttons["trajectories_proton"], lhints);
+	hitdrawopts->AddFrame(checkbuttons["trajectories_neutron"], lhints);
+	hitdrawopts->AddFrame(checkbuttons["trajectories_piplus"], lhints);
+	hitdrawopts->AddFrame(checkbuttons["trajectories_piminus"], lhints);
+	hitdrawopts->AddFrame(checkbuttons["trajectories_other"], lhints);
 
 	//========== Done Button ===========
 	TGTextButton *done = new TGTextButton(botframe,	"Done");

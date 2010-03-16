@@ -29,6 +29,8 @@
 #include <TTimer.h>
 
 class hdv_mainframe;
+class DMCThrown;
+class DKinematicData;
 #ifndef __CINT__
 #include "hdv_mainframe.h"
 #endif
@@ -40,11 +42,21 @@ class hdv_fulllistframe:public TGMainFrame {
 		virtual ~hdv_fulllistframe(){};
 		
 		void DoClose(void);
+		void UpdateTrackLabels(vector<const DMCThrown*> &throwns, vector<const DKinematicData*> &trks);
 		
 	private:
 	
 		hdv_mainframe *hdvmf;
-		map<string, TGCheckButton*> checkbuttons;
+
+		TGComboBox *reconfactory;
+		map<string, vector<TGLabel*> > thrownlabs;
+		map<string, vector<TGLabel*> > reconlabs;
+
+		TGGroupFrame *throwninfo;
+		TGGroupFrame *reconinfo;
+		
+		map<string, TGVerticalFrame *> tf;
+		map<string, TGVerticalFrame *> rf;
 		
 	ClassDef(hdv_fulllistframe,1)
 };

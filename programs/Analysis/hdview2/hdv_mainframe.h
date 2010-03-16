@@ -104,6 +104,7 @@ class hdv_mainframe:public TGMainFrame {
 		bool GetDrawTracks(void){return draw_tracks;}
 		bool GetDrawThrowns(void){return draw_throwns;}
 		bool GetDrawTrajectories(void){return draw_trajectories;}
+		hdv_fulllistframe* GetFullListFrame(void){return fulllistmf;}
 		map<string, vector<TGLabel*> >& GetThrownLabels(void){return thrownlabs;}
 		map<string, vector<TGLabel*> >& GetReconstructedLabels(void){return reconlabs;}
 		

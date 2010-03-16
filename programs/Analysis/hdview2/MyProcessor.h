@@ -27,6 +27,8 @@ class DCDCTrackHit;
 
 #include "hdv_mainframe.h"
 
+class hdv_fulllistframe;
+
 #include <TPolyLine.h>
 #include <TEllipse.h>
 #include <TVector3.h>
@@ -96,6 +98,7 @@ class MyProcessor:public JEventProcessor
 	private:	
 	
 		hdv_mainframe *hdvmf;
+		hdv_fulllistframe *fulllistmf;
 		JEventLoop *loop;
 		JEvent last_jevent;
 		DRootGeom *RootGeom;

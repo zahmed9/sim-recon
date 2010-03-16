@@ -62,6 +62,15 @@ static float BCAL_Zmin = 212.0 - BCAL_Zlen/2.0;
 static vector<vector <DFDCWire *> >fdcwires;
 
 
+bool DMCTrajectoryPoint_track_cmp(const DMCTrajectoryPoint *a,const DMCTrajectoryPoint *b){
+	// sort by track number and then by particle type, then by z-coordinate
+	// (yes, I saw the same track number have different particle types!)
+	if(a->track != b->track)return a->track < b->track;
+	if(a->part  != b->part )return a->part < b->part;
+	return a->z < b->z;
+}
+
+
 MyProcessor *gMYPROC=NULL;
 
 //------------------------------------------------------------------
@@ -107,6 +116,7 @@ jerror_t MyProcessor::init(void)
 		hdvmf->SetTimeBasedTrackFactories(facnames);
 		hdvmf->SetReconstructedFactories(facnames);
 		hdvmf->SetChargedTrackFactories(facnames);
+		fulllistmf = hdvmf->GetFullListFrame();
 	}
 	
 	return NOERROR;
@@ -146,9 +156,12 @@ jerror_t MyProcessor::evnt(JEventLoop *eventLoop, int eventnumber)
 	last_jevent.FreeEvent();
 	last_jevent = loop->GetJEvent();
 	
+	string source = "<no source>";
+	if(last_jevent.GetJEventSource())source = last_jevent.GetJEventSource()->GetSourceName();
+	
 	cout<<"----------- New Event "<<eventnumber<<" -------------"<<endl;
 	hdvmf->SetEvent(eventnumber);
-	hdvmf->SetSource(last_jevent.GetJEventSource()->GetSourceName());
+	hdvmf->SetSource(source.c_str());
 	hdvmf->DoMyRedraw();	
 
 	return NOERROR;
@@ -619,19 +632,51 @@ void MyProcessor::FillGraphics(void)
 	if(hdvmf->GetCheckButton("trajectories")){
 		vector<const DMCTrajectoryPoint*> mctrajectorypoints;
 		loop->Get(mctrajectorypoints);
+		//sort(mctrajectorypoints.begin(), mctrajectorypoints.end(), DMCTrajectoryPoint_track_cmp);
 		
 		int colors[] = {kBlack, kMagenta, kGreen, 13, 14, 39};
 		int Ncolors = 1;
 		int Ntraj=0;
 		DGraphicSet gset(colors[Ntraj%Ncolors], kLine, 3.0);
+		//gset.marker_style = 7;
 		TVector3 last_point;
+		int last_track;
+		int last_part;
 		for(unsigned int i=0; i<mctrajectorypoints.size(); i++){
 			const DMCTrajectoryPoint *pt = mctrajectorypoints[i];
+			
+			switch(pt->part){
+				case	Gamma:
+					if(!hdvmf->GetCheckButton("trajectories_photon"))continue;
+					break;
+				case	Electron:
+					if(!hdvmf->GetCheckButton("trajectories_electron"))continue;
+					break;
+				case	Positron:
+					if(!hdvmf->GetCheckButton("trajectories_positron"))continue;
+					break;
+				case	Proton:
+					if(!hdvmf->GetCheckButton("trajectories_proton"))continue;
+					break;
+				case	Neutron:
+					if(!hdvmf->GetCheckButton("trajectories_neutron"))continue;
+					break;
+				case	PiPlus:
+					if(!hdvmf->GetCheckButton("trajectories_piplus"))continue;
+					break;
+				case	PiMinus:
+					if(!hdvmf->GetCheckButton("trajectories_piminus"))continue;
+					break;
+				default:
+					if(!hdvmf->GetCheckButton("trajectories_other"))continue;
+					break;
+			}
 						
 			TVector3 v(pt->x, pt->y, pt->z);
 
 			if(i>0){
-				if((v-last_point).Mag() > 10.0){
+				//if((v-last_point).Mag() > 10.0){
+				if(pt->track!=last_track || pt->part!=last_part){
 					graphics.push_back(gset);
 					gset.points.clear();
 					gset.color = colors[(++Ntraj)%Ncolors];
@@ -640,6 +685,8 @@ void MyProcessor::FillGraphics(void)
 			
 			gset.points.push_back(v);
 			last_point = v;
+			last_track = pt->track;
+			last_part = pt->part;
 		}
 		graphics.push_back(gset);
 	}
@@ -860,6 +907,9 @@ void MyProcessor::UpdateTrackLabels(void)
 		reconlabs["Ndof"][row]->SetText(Ndof.str().c_str());
 		reconlabs["FOM"][row]->SetText(fom.str().c_str());
 	}
+	
+	// Have the pop-up window with the full particle list update it's labels
+	fulllistmf->UpdateTrackLabels(throwns, trks);
 }
 
 //------------------------------------------------------------------

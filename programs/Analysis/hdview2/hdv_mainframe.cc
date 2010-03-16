@@ -793,6 +793,7 @@ void hdv_mainframe::DoOpenFullListWindow(void)
 		fulllistmf->MapWindow();
 		fulllistmf->RaiseWindow();
 		fulllistmf->RequestFocus();
+		DoUpdateTrackLabels();
 	}
 }
 
