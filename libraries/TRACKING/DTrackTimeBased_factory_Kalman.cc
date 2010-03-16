@@ -17,7 +17,8 @@ using namespace std;
 
 
 #define BCAL_SIGMA 0.5
-#define TOF_SIGMA 0.1
+#define BCAL_COEFF 0.07
+#define TOF_SIGMA 0.05
 
 #include "DTrackTimeBased_factory_Kalman.h"
 #include <TRACKING/DTrackWireBased.h>
@@ -49,6 +50,8 @@ jerror_t DTrackTimeBased_factory_Kalman::init(void)
 	fitter = NULL;
 
 	DEBUG_LEVEL = 0;
+	//DEBUG_HISTS=true;
+	DEBUG_HISTS=false;
 	MOMENTUM_CUT_FOR_DEDX=0.5;
 	MOMENTUM_CUT_FOR_PROTON_ID=2.0;
 
@@ -104,6 +107,77 @@ jerror_t DTrackTimeBased_factory_Kalman::brun(jana::JEventLoop *loop, int runnum
     _DBG_<<"Unable to get a DTrackFitter object! NO Charged track fitting will be done!"<<endl;
     return RESOURCE_UNAVAILABLE;
   }
+
+  if(DEBUG_HISTS){
+    dapp->Lock();
+
+    HBCALdTime=(TH2F*)gROOT->FindObject("HBCALdTime");
+    if (!HBCALdTime){
+      HBCALdTime=new TH2F("HBCALdTime",
+			  "t-t_hyp vs p for BCAL",
+			  100,0,7,4000,-15.,15.);
+      HBCALdTime->SetYTitle("#Delta t [ns]");
+      HBCALdTime->SetXTitle("p [GeV/c]");
+    }  
+    HBCALPull=(TH2F*)gROOT->FindObject("HBCALPull");
+    if (!HBCALPull){
+      HBCALPull=new TH2F("HBCALPull",
+			  "(t-t_hyp)/#sigmat vs p for BCAL",
+			  100,0,7,400,-15.,15.);
+      HBCALPull->SetYTitle("#Delta t/#sigmat");
+      HBCALPull->SetXTitle("p [GeV/c]");
+    }   
+    HBCALdTime_vs_E=(TH2F*)gROOT->FindObject("HBCALdTime_vs_E");
+    if (!HBCALdTime_vs_E){
+      HBCALdTime_vs_E=new TH2F("HBCALdTime_vs_E",
+			  "(t-t_hyp)/#sigmat vs E(BCAL)",
+			  100,0,3,4000,-15.,15.);
+      HBCALdTime_vs_E->SetYTitle("#Delta t/#sigmat");
+      HBCALdTime_vs_E->SetXTitle("E [GeV]");
+    } 
+    HBCALdTime_vs_E_scaled=(TH2F*)gROOT->FindObject("HBCALdTime_vs_E_scaled");
+    if (!HBCALdTime_vs_E_scaled){
+      HBCALdTime_vs_E_scaled=new TH2F("HBCALdTime_vs_E_scaled",
+			  "(t-t_hyp)/#sigmat vs E(BCAL)",
+			  100,0,3,400,-15.,15.);
+      HBCALdTime_vs_E_scaled->SetYTitle("#Delta t/#sigmat");
+      HBCALdTime_vs_E_scaled->SetXTitle("E [GeV]");
+    } 
+    HTOFdTime=(TH2F*)gROOT->FindObject("HTOFdTime");
+    if (!HTOFdTime){
+      HTOFdTime=new TH2F("HTOFdTime",
+			  "t-t_hyp vs p for TOF",
+			  100,0,7,4000,-20.,20.);
+      HTOFdTime->SetYTitle("#Delta t [ns]");
+      HTOFdTime->SetXTitle("p [GeV/c]");
+    }
+    HTOFPull=(TH2F*)gROOT->FindObject("HTOFPull");
+    if (!HTOFPull){
+      HTOFPull=new TH2F("HTOFPull",
+			  "(t-t_hyp)/#sigmat vs p for TOF",
+			  100,0,7,500,-100.,100.);
+      HTOFPull->SetYTitle("#Delta t/#sigmat");
+      HTOFPull->SetXTitle("p [GeV/c]");
+    }
+    HdEdxDiff=(TH2F*)gROOT->FindObject("HdEdxDiff");
+    if (!HdEdxDiff){
+      HdEdxDiff=new TH2F("HdEdxDiff",
+			  "dE/dx-dE/dx_hyp vs p for TOF",
+			  100,0,7,600,-0.03,0.03);
+      HdEdxDiff->SetYTitle("#Delta(dE/dx) [keV/cm]");
+      HdEdxDiff->SetXTitle("p [GeV/c]");
+    }
+    HdEdxPull=(TH2F*)gROOT->FindObject("HdEdxPull");
+    if (!HdEdxPull){
+      HdEdxPull=new TH2F("HdEdxPull",
+			  "(dE/dx-dE/dx_hyp)/#sigma(dE/dx) vs p for TOF",
+			  100,0,7,100,-5.,5.);
+      HdEdxPull->SetYTitle("pull(dE/dx)");
+      HdEdxPull->SetXTitle("p [GeV/c]");
+    }
+    dapp->Unlock();
+  }
+  
   
   return NOERROR;
 }
@@ -145,7 +219,8 @@ jerror_t DTrackTimeBased_factory_Kalman::evnt(JEventLoop *loop, int eventnumber)
     // Make sure there are enough DReferenceTrajectory objects
     while(rtv.size()<=_data.size())rtv.push_back(new DReferenceTrajectory(fitter->GetDMagneticFieldMap()));
     DReferenceTrajectory *rt = rtv[_data.size()];
-    
+    rt->SetMass(track->mass());	
+    rt->SetDGeometry(geom);
     if(DEBUG_LEVEL>1){_DBG__;_DBG_<<"---- Starting time based fit with mass: "<< track->mass()<<endl;}
     
     // Do the fit
@@ -177,7 +252,8 @@ jerror_t DTrackTimeBased_factory_Kalman::evnt(JEventLoop *loop, int eventnumber)
 	// Copy over DKinematicData part
 	DKinematicData *track_kd = timebased_track;
 	*track_kd = fitter->GetFitParameters();
-	rt->SetMass(track_kd->mass());
+	rt->SetMass(track_kd->mass());	
+	rt->SetDGeometry(geom);
 	rt->Swim(timebased_track->position(), timebased_track->momentum(), timebased_track->charge());
 	
 	timebased_track->rt = rt;
@@ -264,30 +340,55 @@ double DTrackTimeBased_factory_Kalman::GetFOM(DTrackTimeBased *dtrack,
   unsigned int ndof=dtrack->Ndof;
 
   // Next compute dEdx in the chambers for this track
-  double dedx,mean_path_length,p_avg;
-  unsigned int num_hits=0;
-  double dedx_chi2=0.;
-  if (fitter->GetdEdx(dtrack->rt,dedx,mean_path_length,p_avg,num_hits)
-      ==NOERROR){
-    double mass=dtrack->rt->GetMass();
-    dtrack->setdEdx(dedx);
-    double dedx_sigma=fitter->GetdEdxSigma(num_hits,p_avg,mass,
-					   mean_path_length);
-    double dedx_most_probable=fitter->GetdEdx(p_avg,mass,mean_path_length);
-    double dedx_diff=dedx-dedx_most_probable;
-    
-    // Chi2 for dedx measurement
-    dedx_chi2=dedx_diff*dedx_diff/dedx_sigma/dedx_sigma;
-
-    chi2_sum+=dedx_chi2;
-    ndof++;
-  }
+  double mean_path_length=0.,p_avg=0.;
   
+  // Get the dEdx info from the CDC/FDC hits in a list
+  vector<DTrackFitter::dedx_t>dEdx_list;
+  fitter->GetdEdx(dtrack->rt,dEdx_list);
+ 
+  // Truncated mean:  loop over a subset of this list, throwing away a
+  // number of the highest dE/dx values.
+  double dEdx=0.,dEdx_diff=0.;
+  double N=0.;
+  double mass=dtrack->rt->GetMass();
+  for (unsigned int i=0;i<0.5*dEdx_list.size();i++){
+    double p=dEdx_list[i].p;
+    double dx=dEdx_list[i].dx;
+    double dE=dEdx_list[i].dE;						
+    double my_dedx=dE/dx;
+    // Get the expected (most probable) dE/dx for a particle with this mass
+    // and momentum for this hit
+    double dEdx_mp=fitter->GetdEdx(p,mass,dx);
+    dEdx+=my_dedx;
+    dEdx_diff+=my_dedx-dEdx_mp;
+    p_avg+=p;
+    mean_path_length+=dx;
+    N+=1.;
+  }
+  dEdx/=N; 
+  dtrack->setdEdx(dEdx);
+  dEdx_diff/=N;
+  mean_path_length/=N;
+  p_avg/=N;
+
+  double dEdx_sigma=fitter->GetdEdxSigma(N,p_avg,mass,mean_path_length);
+  
+  if (DEBUG_HISTS){
+    HdEdxDiff->Fill(p_avg,dEdx_diff);
+    HdEdxPull->Fill(p_avg,dEdx_diff/dEdx_sigma);
+  }
+    
+  // Chi2 for dedx measurement
+  double dedx_chi2=dEdx_diff*dEdx_diff/dEdx_sigma/dEdx_sigma;
+  
+  chi2_sum+=dedx_chi2;
+  ndof++;
+
   // Next match to outer detectors
   double tof_chi2=MatchToTOF(dtrack,tof_points);
   double bcal_chi2=MatchToBCAL(dtrack,bcal_clusters);
   // .. and to start counter
-  double sc_chi2=MatchToSC(dtrack,sc_hits);
+  //double sc_chi2=MatchToSC(dtrack,sc_hits);
 
   if (tof_chi2>-1.){
     chi2_sum+=tof_chi2;
@@ -297,10 +398,10 @@ double DTrackTimeBased_factory_Kalman::GetFOM(DTrackTimeBased *dtrack,
     chi2_sum+=bcal_chi2;
     ndof++;
   }
-  if (sc_chi2>-1.){
-    chi2_sum+=sc_chi2;
-    ndof++;
-  }
+  //  if (sc_chi2>-1.){
+  //  chi2_sum+=sc_chi2;
+  //   ndof++;
+  //}
   
   // Return a combined FOM that includes the tracking chi2 information, the 
   // dEdx result and the tof result where available.
@@ -340,7 +441,7 @@ double DTrackTimeBased_factory_Kalman::MatchToSC(DTrackTimeBased *track,
 
     // Try to match with the track
     DVector3 myproj;
-    track->rt->GetIntersectionWithPlane(pos,norm,myproj,pdir,NULL);
+    track->rt->GetIntersectionWithPlane(pos,norm,myproj,pdir,NULL,NULL);
     double proj_phi=myproj.Phi();
     if (proj_phi<0) proj_phi+=2.*M_PI;
     double dphi=phi-proj_phi;
@@ -410,11 +511,14 @@ double DTrackTimeBased_factory_Kalman::MatchToTOF(DTrackTimeBased *track,
     // Find the distance of closest approach between the track trajectory
     // and the tof cluster position, looking for the minimum
     double my_s=0.;
-    track->rt->GetIntersectionWithPlane(tof_pos,norm,proj_pos,dir,&my_s);
+    double tflight=0.;
+    track->rt->GetIntersectionWithPlane(tof_pos,norm,proj_pos,dir,&my_s,
+					&tflight);
     double d=(tof_pos-proj_pos).Mag();
     if (d<dmin){
       dmin=d;
       mPathLength=my_s;
+      mFlightTime=tflight;
       tof_match_id=k;
     }
   }
@@ -422,8 +526,7 @@ double DTrackTimeBased_factory_Kalman::MatchToTOF(DTrackTimeBased *track,
   // Check for a match 
   double p=track->momentum().Mag();
   double match_sigma=0.75+1./p/p;
-  double prob=erfc(dmin/match_sigma/sqrt(2.));
-  if (prob>0.05){
+  if (dmin<3.*match_sigma){
     // Add the time and path length to the outer detector to the track object
     track->setT1(tof_points[tof_match_id]->t,0.,SYS_TOF);
     track->setPathLength(mPathLength,0.);
@@ -433,19 +536,24 @@ double DTrackTimeBased_factory_Kalman::MatchToTOF(DTrackTimeBased *track,
 
     // Calculate beta and use it to guess PID
     mEndTime=tof_points[tof_match_id]->t;
-    double beta=mPathLength/SPEED_OF_LIGHT/mEndTime;
     double mass=track->mass();  
-    double sigma_beta=SPEED_OF_LIGHT*TOF_SIGMA/mPathLength*beta*beta;
     double beta_hyp=1./sqrt(1.+mass*mass/p/p);
-    double beta_diff=beta-beta_hyp;
-    
+    double t_diff=mEndTime-mPathLength/SPEED_OF_LIGHT/beta_hyp;
+    double t_var=TOF_SIGMA*TOF_SIGMA;
+
+    t_diff=mEndTime-mFlightTime;
+
     DVector3 mypos=tof_points[tof_match_id]->pos;
     mypos[2]=618.0;
     fitter->GetdEdx(p,mass,2.5,mypos);
 
-    // probability
-    //return exp(-beta_diff*beta_diff/2./sigma_beta/sigma_beta);   
-    return beta_diff*beta_diff/sigma_beta/sigma_beta;
+    if (DEBUG_HISTS){
+      HTOFdTime->Fill(p,t_diff);
+      HTOFPull->Fill(p,t_diff/sqrt(t_var));
+    }
+
+    // chi2
+    return t_diff*t_diff/t_var;
   }
     
   return -1.;
@@ -473,12 +581,15 @@ double DTrackTimeBased_factory_Kalman::MatchToBCAL(DTrackTimeBased *track,
     // Find the distance of closest approach between the track trajectory
     // and the bcal cluster position, looking for the minimum
     double my_s=0.;
-    if (track->rt->GetIntersectionWithRadius(bcal_pos.Perp(),proj_pos,&my_s)
+    double tflight=0.;
+    if (track->rt->GetIntersectionWithRadius(bcal_pos.Perp(),proj_pos,&my_s,
+					     &tflight)
 	!=NOERROR) continue;
     double d=(bcal_pos-proj_pos).Mag();
     if (d<dmin){
       dmin=d;
       mPathLength=my_s;
+      mFlightTime=tflight;
       bcal_match_id=k; 
       dz=proj_pos.z()-bcal_pos.z();
       dphi=proj_pos.Phi()-bcal_pos.Phi();
@@ -487,9 +598,6 @@ double DTrackTimeBased_factory_Kalman::MatchToBCAL(DTrackTimeBased *track,
   
   // Check for a match 
   double p=track->momentum().Mag();
-  //double match_sigma=2.+1./(p+0.1)/(p+0.1); //empirical
-  //double prob=erfc(dmin/match_sigma/sqrt(2.));
-  //if (prob>0.05)
   dphi+=0.002+8.314e-3/(p+0.3788)/(p+0.3788);
   double phi_sigma=0.025+5.8e-4/p/p/p;
   if (fabs(dz)<10. && fabs(dphi)<3.*phi_sigma){
@@ -502,15 +610,29 @@ double DTrackTimeBased_factory_Kalman::MatchToBCAL(DTrackTimeBased *track,
     
     // Calculate beta and use it to guess PID
     mEndTime=bcal_clusters[bcal_match_id]->showerTime();
-    double beta= mPathLength/SPEED_OF_LIGHT/mEndTime;   
     double mass=track->mass();  
-    double sigma_beta=SPEED_OF_LIGHT*BCAL_SIGMA/mPathLength*beta*beta;
     double beta_hyp=1./sqrt(1.+mass*mass/p/p);
-    double beta_diff=beta-beta_hyp;
-    
-    // probability
-    //return exp(-beta_diff*beta_diff/2./sigma_beta/sigma_beta);   
-    return beta_diff*beta_diff/sigma_beta/sigma_beta;
+    double t_diff=mEndTime-mPathLength/SPEED_OF_LIGHT/beta_hyp;
+    double E=bcal_clusters[bcal_match_id]->lorentzMomentum().E();
+    double t_sigma=0.12154/sqrt(E)+0.17037*E-0.10843;
+    if (mass>0.9) t_sigma=0.1473/sqrt(E)+0.3431*E-0.1872;
+
+    t_sigma=0.00255*pow(p,-2.52)+0.022;
+    double t_var=t_sigma*t_sigma;
+
+
+    t_diff=mEndTime-mFlightTime;
+
+    if (DEBUG_HISTS){
+      HBCALdTime->Fill(p,t_diff);
+      HBCALPull->Fill(p,t_diff/t_sigma);
+      HBCALdTime_vs_E->Fill(E,t_diff);
+      HBCALdTime_vs_E_scaled->Fill(E,t_diff/t_sigma);
+    }
+
+    // chi2
+    //return beta_diff*beta_diff/sigma_beta/sigma_beta;
+    return t_diff*t_diff/t_var;
     }
 
   return -1.;

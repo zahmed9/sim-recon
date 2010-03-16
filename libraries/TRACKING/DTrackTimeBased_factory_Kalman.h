@@ -7,6 +7,8 @@
 
 #ifndef _DTrackTimeBased_factory_Kalman_
 #define _DTrackTimeBased_factory_Kalman_
+#include <TH2F.h>
+#include <TROOT.h>
 
 #include <JANA/JFactory.h>
 #include <TRACKING/DTrackFitter.h>
@@ -37,6 +39,7 @@ class DTrackTimeBased_factory_Kalman:public jana::JFactory<DTrackTimeBased>{
   jerror_t fini(void);						///< Called after last event of last event source has been processed.
   
   int DEBUG_LEVEL;
+  bool DEBUG_HISTS;
   double MOMENTUM_CUT_FOR_DEDX;
   double MOMENTUM_CUT_FOR_PROTON_ID;
   DTrackFitter *fitter;
@@ -55,7 +58,7 @@ class DTrackTimeBased_factory_Kalman:public jana::JFactory<DTrackTimeBased>{
   double MatchToBCAL(DTrackTimeBased *track,
 		     vector<const DBCALPhoton*>bcal_clusters);
   
-  double mPathLength,mEndTime,mStartTime;
+  double mPathLength,mEndTime,mStartTime,mFlightTime;
   DetectorSystem_t mDetector, mStartDetector;
 
   // Geometry
@@ -65,7 +68,11 @@ class DTrackTimeBased_factory_Kalman:public jana::JFactory<DTrackTimeBased>{
   double sc_costheta; // cos(theta) of bent part
   vector<DVector3>sc_pos;
   vector<DVector3>sc_norm;
-  
+
+  // Debug histograms
+  TH2F *HBCALdTime_vs_E,*HBCALdTime_vs_E_scaled,*HBCALdTime,*HBCALPull;
+  TH2F *HTOFdTime,*HTOFPull;
+  TH2F *HdEdxDiff,*HdEdxPull;
 };
 
 #endif // _DTrackTimeBased_factory_Kalman_
