@@ -23,6 +23,8 @@ class DTwoGammaFit:public DKinematicData {
 // Getters: 
                inline double getChi2() const { return fChi2; }
 
+               inline double getNdf() const { return fNdf; }
+
                inline double getProb() const { return fProb; }
 
 // Puls of px1, ... ,pz2
@@ -45,6 +47,7 @@ class DTwoGammaFit:public DKinematicData {
 
 // Setters:
                void setChi2(double const aChi2);  
+					void setNdf(int const aNdf);  
                void setProb(double const aProb);  
                void setPulls(double const aPull, const int i);  
                void setUMass(double const uMass);  
@@ -59,6 +62,7 @@ class DTwoGammaFit:public DKinematicData {
                DPhoton::PhotonTag fTags[2]; // tag children origin (FCAL/BCAL/charged)
                double fProb;  
                double fChi2;  
+					int fNdf;
                double fMass;  
                double fUMass;  // unconstrained mass
                double fPulls[6]; 
@@ -102,6 +106,12 @@ inline void DTwoGammaFit::setPulls(const double aPull, const int i)
 inline void DTwoGammaFit::setChi2(const double aChi2)
 {
      fChi2 = aChi2;
+}
+
+// Set Ndf from DKinFit
+inline void DTwoGammaFit::setNdf(const int aNdf)
+{
+     fNdf = aNdf;
 }
 
 // Set confidence from DKinFit

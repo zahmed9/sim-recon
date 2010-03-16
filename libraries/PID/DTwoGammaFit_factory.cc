@@ -16,6 +16,11 @@ using namespace jana;
 #include "DTwoGammaFit_factory.h"
 
 
+bool SortByProb(const DTwoGammaFit *a,const DTwoGammaFit *b){
+  return (a->getProb() > b->getProb());
+}
+
+
 //----------------
 // Constructor
 //----------------
@@ -79,6 +84,7 @@ jerror_t DTwoGammaFit_factory::evnt(JEventLoop *eventLoop, int eventnumber)
                 fit2g->setPosition( vertex );
                 fit2g->setProb( kfit->Prob());
                 fit2g->setChi2( kfit->Chi2());
+					 fit2g->setNdf( kfit->Ndf());
                 for (int k=0; k < 6; k++) {
                    fit2g->setPulls( kfit->GetPull(k),  k);
                 }
@@ -100,6 +106,8 @@ jerror_t DTwoGammaFit_factory::evnt(JEventLoop *eventLoop, int eventnumber)
            } 
         } 
 
+	// sort by probability so most probable fits are listed first
+	sort(_data.begin(), _data.end(), SortByProb);
 
 	return NOERROR;
 }
