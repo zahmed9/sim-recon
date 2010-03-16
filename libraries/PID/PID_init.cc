@@ -4,6 +4,7 @@
 using namespace jana;
 
 #include "DPhoton_factory.h"
+#include "DPhoton_factory_THROWN.h"
 #include "DTwoGammaFit_factory.h"
 #include "DTwoGammaFit_factory_PI0.h"
 #include "DTwoGammaFit_factory_ETA.h"
@@ -12,6 +13,7 @@ using namespace jana;
 #include "DParticle_factory_Kalman.h"
 #include "DChargedTrack_factory.h"
 #include "DChargedTrack_factory_Kalman.h"
+#include "DChargedTruthMatch_factory.h"
 
 #include "DBeamPhoton.h"
 typedef JFactory<DBeamPhoton> DBeamPhoton_factory;
@@ -32,6 +34,8 @@ jerror_t PID_init(JEventLoop *loop)
 	loop->AddFactory(new DParticle_factory_Kalman);
 	loop->AddFactory(new DChargedTrack_factory);
 	loop->AddFactory(new DChargedTrack_factory_Kalman);
+	loop->AddFactory(new DChargedTruthMatch_factory);
+	loop->AddFactory(new DPhoton_factory_THROWN);
 
 	return NOERROR;
 }
