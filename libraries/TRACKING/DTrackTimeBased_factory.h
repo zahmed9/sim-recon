@@ -40,6 +40,8 @@ class DTrackTimeBased_factory:public jana::JFactory<DTrackTimeBased>{
   DTrackFitter *fitter;
   vector<DReferenceTrajectory*> rtv;
  
+  
+  void FilterDuplicates(void);  
   double GetFOM(DTrackTimeBased *dtrack,
 		vector<const DBCALPhoton*>bcal_clusters,
 		vector<const DFCALPhoton*>fcal_clusters,
@@ -50,9 +52,11 @@ class DTrackTimeBased_factory:public jana::JFactory<DTrackTimeBased>{
 		     vector<const DBCALPhoton*>bcal_clusters);
   // The following routine is not currently used
   double GetRangeOutFOM(DTrackTimeBased *dtrack);
-  
 
-  double mPathLength,mEndTime,mStartTime;
+  // Geometry
+  const DGeometry *geom;
+
+  double mPathLength,mEndTime,mStartTime,mFlightTime;
   DetectorSystem_t mDetector, mStartDetector;
  
 };
