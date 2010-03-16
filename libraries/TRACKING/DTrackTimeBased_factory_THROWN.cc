@@ -104,6 +104,7 @@ jerror_t DTrackTimeBased_factory_THROWN::evnt(JEventLoop *loop, int eventnumber)
 		track->rt = rt;
 		DVector3 pos = track->position();
 		DVector3 mom = track->momentum();
+		rt->SetMass(thrown->mass());
 		rt->Swim(pos, mom, track->charge());
 
 		// Find hits that should be on this track and add them as associated objects
@@ -131,6 +132,15 @@ jerror_t DTrackTimeBased_factory_THROWN::evnt(JEventLoop *loop, int eventnumber)
 			track->chisq = 0.0;
 			track->Ndof = 0;
 		}
+		
+		// For this to work properly with DChargedTrack, we need to put something
+		// in for the candidateid and the FOM (figure of merit) used to decide if
+		// this is the right mass hypothesis for the candidate. Since there is no
+		// candidate and we *know* it's the right hypothesis, we set the candidateid
+		// to the thrown object's oid and set the FOM to 1.
+		track->candidateid = thrown->id;
+		track->trackid = thrown->id;
+		track->FOM = 1.0;
 
 		_data.push_back(track);
 	}
