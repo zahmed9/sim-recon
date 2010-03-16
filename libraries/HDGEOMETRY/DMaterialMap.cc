@@ -139,6 +139,25 @@ jerror_t DMaterialMap::FindMat(DVector3 &pos,double &rhoZ_overA, double &rhoZ_ov
 //-----------------
 // FindMat
 //-----------------
+jerror_t DMaterialMap::FindMatALT1(DVector3 &pos,double &KrhoZ_overA,
+			       double &rhoZ_overA, double &logI, 
+			       double &RadLen) const
+{
+	const MaterialNode *node = FindNode(pos);
+	if(!node)return RESOURCE_UNAVAILABLE;
+	
+	KrhoZ_overA=node->KrhoZ_overA;
+	rhoZ_overA = node->rhoZ_overA;
+	logI = node->LogI;
+	RadLen = node->RadLen;
+
+	return NOERROR;
+}
+
+
+//-----------------
+// FindMat
+//-----------------
 jerror_t DMaterialMap::FindMat(DVector3 &pos, double &density, double &A, double &Z, double &RadLen) const
 {
 	const MaterialNode *node = FindNode(pos);

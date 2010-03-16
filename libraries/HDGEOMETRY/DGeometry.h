@@ -71,6 +71,9 @@ class DGeometry{
 		// Methods for accessing material map tables obtained from calibDB
 		jerror_t FindMat(DVector3 &pos, double &rhoZ_overA, double &rhoZ_overA_logI, double &RadLen) const;
 		jerror_t FindMat(DVector3 &pos, double &density, double &A, double &Z, double &RadLen) const;
+		jerror_t FindMatALT1(DVector3 &pos, double &KrhoZ_overA, 
+				     double &rhoZ_overA,double &LnI,
+				     double &X0) const;
 		jerror_t FindMatKalman(DVector3 &pos, double &Z,
 				       double &KrhoZ_overA,
 				       double &rhoZ_overA,double &LnI) const;

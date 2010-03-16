@@ -138,6 +138,24 @@ void DGeometry::FindNodes(string xpath, vector<xpathparsed_t> &matched_xpaths) c
 }
 
 //---------------------------------
+// FindMatKalman - parameters for alt1 fitter.
+//---------------------------------
+jerror_t DGeometry::FindMatALT1(DVector3 &pos, double &KrhoZ_overA, 
+				double &rhoZ_overA,double &LnI,
+				double &X0) const
+{
+	for(unsigned int i=0; i<materialmaps.size(); i++){
+	  jerror_t err = materialmaps[i]->FindMatALT1(pos,KrhoZ_overA,
+						      rhoZ_overA,LnI,X0);
+	  if(err==NOERROR)return NOERROR;
+	}
+	return RESOURCE_UNAVAILABLE;
+}
+
+
+
+
+//---------------------------------
 // FindMatKalman - Kalman filter needs slightly different set of parms.
 //---------------------------------
 jerror_t DGeometry::FindMatKalman(DVector3 &pos, double &Z,
