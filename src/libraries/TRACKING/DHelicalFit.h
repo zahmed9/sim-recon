@@ -104,7 +104,7 @@ class DHelicalFit{
   jerror_t FitCircle(void);
   double   ChisqCircle(void);
   jerror_t FitCircleRiemann(void);
-  jerror_t FitCircleRiemann(float BeamRMS);
+  jerror_t FitCircleRiemann(float z_vertex,float BeamRMS);
   jerror_t FitCircleRiemannCorrected(float rc);
   jerror_t FitLineRiemann(void);
   jerror_t GetChargeRiemann(void);
@@ -147,6 +147,7 @@ class DHelicalFit{
   float phi, theta, tanl;
   float z_vertex;
   float chisq;
+  int ndof;
   float dzdphi;
   ChiSqSourceType_t chisq_source;
  

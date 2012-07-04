@@ -39,7 +39,7 @@ public:
   b1piAmpCheck(Kinematics &evt);
   ~b1piAmpCheck(){}
     
-  void SetEvent(Kinematics &evt);
+  void SetEvent(Kinematics &evt, bool findParMatch=false);
 
   void ProcKin();
   

@@ -987,9 +987,10 @@ void CodeBuilder::constructUnpackers()
       {
          cFile << "      int m;"				<< std::endl
                << "      unsigned int mult;"			<< std::endl
-	       << "      xdr_u_int(xdrs,&mult);"		<< std::endl
-               << "      this1 = make_" << tagT << "(mult);"	<< std::endl
-               << "      this1->mult = mult;"			<< std::endl
+	       << "      xdr_u_int(xdrs,&mult);"		<< std::endl;
+	 cFile << "      this1 = make_" << tagT << "(mult);"	<< std::endl;
+
+	 cFile << "      this1->mult = mult;"			<< std::endl
                << "      for (m = 0; m < mult; m++ )"		<< std::endl
                << "      {"					<< std::endl;
       }

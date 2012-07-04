@@ -12,6 +12,7 @@
 #include "BCAL/DBCALHit.h"
 #include "BCAL/DBCALGeometry.h"
 #include "BCAL/DBCALShower_factory_KLOE.h"
+#include "DVector3.h"
 
 #include "units.h"
 
@@ -48,6 +49,11 @@ DBCALShower_factory_KLOE::DBCALShower_factory_KLOE()
   gPARMS->SetDefaultParameter( "BCALRECON:MERGE_THRESH_ZDIST", MERGE_THRESH_ZDIST );
   gPARMS->SetDefaultParameter( "BCALRECON:MERGE_THRESH_XYDIST", MERGE_THRESH_XYDIST );
   gPARMS->SetDefaultParameter( "BCALRECON:BREAK_THRESH_TRMS", BREAK_THRESH_TRMS );
+
+  USE_FIT_SPLIT_ALG = false;
+  gPARMS->SetDefaultParameter( "BCALRECON:USE_FIT_SPLIT_ALG", USE_FIT_SPLIT_ALG );
+
+  
   
   if( !DBCALGeometry::summingOn() ){
 
@@ -262,7 +268,9 @@ jerror_t DBCALShower_factory_KLOE::evnt(JEventLoop *loop, int eventnumber)
 //------------------
 // FindHitsInShower()
 //------------------
-void DBCALShower_factory_KLOE::FindHitsInShower(int indx, vector<const DBCALHit*> &bcalhits, vector<const DBCALHit*> &hitsInShower)
+void DBCALShower_factory_KLOE::
+FindHitsInShower(int indx, vector<const DBCALHit*> &bcalhits, 
+		 vector<const DBCALHit*> &hitsInShower)
 {
 	/// This is called after the clusters have been completely formed. Our
 	/// job is simply to find the DBCALHit objects used to form a given cluster.
@@ -904,6 +912,70 @@ void DBCALShower_factory_KLOE::ClusNorm(void)
     }
 }
 
+
+bool DBCALShower_factory_KLOE::IsClusDoubleHumped(int clusNum)
+{
+  vector<pair <double, DVector3> > cell_e_r;
+  //double rmean=0, rvar=0;
+  DVector3 rmean(0,0,0); 
+  double chi2=0, integ=0, rvarX=0, rvarY=0, rvarZ=0;
+  
+
+  for (int i=1; i < (celtot+1); ++i){
+    if(nclus[i] != clusNum) continue;
+
+    DVector3 r(x_cel[i],y_cel[i],z_cel[i]);
+    cell_e_r.push_back(pair<double, DVector3>(e_cel[i], r));    
+    rmean += e_cel[i]*r;
+    integ += e_cel[i];
+    //cout << "DEBUG-IsClusDoubleHumped: " << i << " Adding e,r=" 
+    // << e_cel[i] << "; " << r.X() << ", " << r.Y() << ", " << r.Z() << endl;
+  }
+  
+  // bypass this analysis if you don't even have enough statistics
+  if(cell_e_r.size()<6) return false;
+
+
+  for(unsigned int i=0; i<cell_e_r.size(); ++i){
+    DVector3 r_rel(cell_e_r[i].second - rmean);
+    //variance integrands:
+    rvarX += cell_e_r[i].first * r_rel.X()*r_rel.X();
+    rvarY += cell_e_r[i].first * r_rel.Y()*r_rel.Y();
+    rvarZ += cell_e_r[i].first * r_rel.Z()*r_rel.Z();
+ 
+    cell_e_r[i].second = r_rel;  // abs. coord. useless now: replace with rel.
+  }
+
+  //cout << "DEBUG-IsClusDoubleHumped: integ=" << integ << "  " << endl;
+
+  double normFact = integ / pow(2*3.141593, 1.5)*sqrt(rvarX*rvarY*rvarZ);
+  
+  for(unsigned int i=0; i<cell_e_r.size(); ++i){
+    double x=cell_e_r[i].second.X();
+    double y=cell_e_r[i].second.Y();
+    double z=cell_e_r[i].second.Z();
+
+    double dev = cell_e_r[i].first - 
+      normFact * exp(-0.5*(x*x/rvarX + y*y/rvarY + z*z/rvarZ));
+
+    chi2 += dev*dev;
+
+  }
+  
+  //cout << "DEBUG-IsClusDoubleHumped: chi2/Ndof=" << chi2/cell_e_r.size() 
+  //   <<  " Splitting? " << (chi2/cell_e_r.size() > 3.0) << endl;
+
+  return chi2/cell_e_r.size() > 3.0; // always pass false for now
+
+}
+
+
+
+
+
+
+
+
 //------------------
 // ClusAnalysis()
 //------------------  
@@ -922,9 +994,10 @@ void DBCALShower_factory_KLOE::ClusAnalysis()
             int ix=clspoi[j];
             if(e_cls[ix]>0.0){
                 float  dist=sqrt(trms_a[ix]*trms_a[ix]+trms_b[ix]*trms_b[ix]);
-                if(dist>BREAK_THRESH_TRMS) {
-                    Clus_Break(ix);
-                    newClust = true;
+                if(dist>BREAK_THRESH_TRMS ||
+		   (USE_FIT_SPLIT_ALG && IsClusDoubleHumped(ix))) {
+		  Clus_Break(ix);
+		  newClust = true;
                 }
             }
         }
@@ -989,9 +1062,28 @@ void DBCALShower_factory_KLOE::ClusAnalysis()
     }
     
     if( newClust ){
-        
-        ClusNorm();
+      ClusNorm();
+      newClust = false;
     }
+
+    //---------------------------
+    /*
+    if(USE_FIT_SPLIT_ALG){
+      for (int j = 1; j < (clstot+1); j++){
+	int ix=clspoi[j];
+	if(e_cls[ix]>0.0){
+	  if(IsClusDoubleHumped(ix)) {
+	    cout << "DEBUG-ClusAnalysis: Splitting cluster (double-humped)\n";
+	    Clus_Break(ix);
+	    newClust = true;
+	  }
+	}
+      }
+      
+      if( newClust ) ClusNorm();
+      }*/
+    
+    
 }
 
 //------------------

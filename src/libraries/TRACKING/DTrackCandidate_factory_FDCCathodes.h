@@ -13,6 +13,7 @@
 #include <DMatrix.h>
 #include "FDC/DFDCSegment_factory.h"
 #include "HDGEOMETRY/DMagneticFieldMap.h"
+#include "DMagneticFieldStepper.h"
 #include <TH1F.h>
 #include <TH2F.h>
 
@@ -45,6 +46,7 @@ class DTrackCandidate_factory_FDCCathodes:public JFactory<DTrackCandidate>{
 	
 	private:  
 		const DMagneticFieldMap *bfield;
+		DMagneticFieldStepper *stepper;
 
 		//jerror_t init(void);						///< Called once at program start.
 		jerror_t brun(JEventLoop *eventLoop, int runnumber);	///< Called everytime a new run number is detected.
@@ -64,10 +66,11 @@ class DTrackCandidate_factory_FDCCathodes:public JFactory<DTrackCandidate>{
                                            DFDCSegment *segment,
                                            vector<DFDCSegment*>package,
                                            unsigned int &match_id);
-	bool DEBUG_HISTS;
+	bool DEBUG_HISTS,USE_FDC;
 	TH2F *match_dist_fdc;
 	vector<double>z_wires;
 	double endplate_z;
+	double TARGET_Z;
 	
 	// Fit parameters
 	double xc,yc,rc,z_vertex,q,phi0,tanl;

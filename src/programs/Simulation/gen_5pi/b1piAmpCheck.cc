@@ -27,25 +27,86 @@ b1piAmpCheck::Hep2T(const HepLorentzVector &v1, TLorentzVector &v2)
  */
 
 void
-b1piAmpCheck::SetEvent(Kinematics &evt) 
+b1piAmpCheck::SetEvent(Kinematics &evt, bool findParMatch) 
 {
   assert(evt.particleList().size()==7);
-  
-  Hep2T(evt.particle(6), m_rhos_pip);
-  Hep2T(evt.particle(5), m_rhos_pim);
-  m_rho = m_rhos_pim + m_rhos_pip;
 
-  Hep2T(evt.particle(4), m_omegas_pi);
-  m_omega= m_rho + m_omegas_pi;
+  if(findParMatch){
+    double bestOmegaMass=999;
+    int pi0_ind=0,rhopip_ind=0,rhopim_ind=0;
+    
+    for(unsigned int i=2 ; i<7 ; ++i){
+      if(evt.particle(i).m()>.137) continue; //find the one pi0
 
-  Hep2T(evt.particle(3), m_b1s_pi);
+      for(unsigned int k=2 ; k<7 ; ++k){
+	if(k == i) continue;
+	  
+	for(unsigned int m=k+1 ; m<7 ; ++m){
+	  if(m == i) continue;
+	
+	  HepLorentzVector candOmega(evt.particle(i)+evt.particle(k)+evt.particle(m));
+	  
+	  if(fabs(candOmega.m()-.783) < fabs(bestOmegaMass-.783)){
+	    bestOmegaMass = candOmega.m();
+	    pi0_ind = i; rhopip_ind = k; rhopim_ind = m;
+	  }
+
+	}
+      }
+    }
+
+    Hep2T(evt.particle(pi0_ind), m_omegas_pi);
+
+    Hep2T(evt.particle(rhopip_ind), m_rhos_pip);
+    Hep2T(evt.particle(rhopim_ind), m_rhos_pim);	    
+
+    m_rho = m_rhos_pim + m_rhos_pip;
+    m_omega= m_rho + m_omegas_pi;
+
+    double bestb1Mass=999;
+    int b1spi_ind=0;
+
+    for(int k=2 ; k<7 ; ++k){
+      if(k==pi0_ind || k==rhopip_ind || k==rhopim_ind) continue;
+
+      TLorentzVector pidummy;
+      Hep2T(evt.particle(k), pidummy);
+
+      TLorentzVector candb1(m_omega + pidummy);
+      if(fabs(candb1.M()-1.23) < fabs(bestb1Mass-1.23)){
+	bestb1Mass = candb1.M();
+	b1spi_ind = k;
+      }
+    }
+
+    Hep2T(evt.particle(b1spi_ind), m_b1s_pi);
+    
+    for(int k=2 ; k<7 ; ++k){
+      if(k==pi0_ind || k==rhopip_ind || k==rhopim_ind || k==b1spi_ind) continue;
+      Hep2T(evt.particle(k), m_Xs_pi);
+    }
+    
+  }else{
+    Hep2T(evt.particle(6), m_rhos_pip);
+    Hep2T(evt.particle(5), m_rhos_pim);
+    
+    Hep2T(evt.particle(4), m_omegas_pi);
+    
+    Hep2T(evt.particle(3), m_b1s_pi);
+    
+    Hep2T(evt.particle(2), m_Xs_pi);
+    
+    m_rho = m_rhos_pim + m_rhos_pip;
+    m_omega= m_rho + m_omegas_pi;
+  }
+
+
   m_b1= m_omega + m_b1s_pi;
-
-  Hep2T(evt.particle(2), m_Xs_pi);
-  m_X= m_b1 + m_Xs_pi;
+  m_X = m_b1 + m_Xs_pi;
 
   Hep2T(evt.particle(0), m_beam);
   Hep2T(evt.particle(1), m_recoil);
+
 
   ProcKin();
 }

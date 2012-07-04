@@ -20,10 +20,11 @@ using namespace std;
 
 #include "AMPTOOLS_AMPS/b1piAngAmp.h"
 #include "AMPTOOLS_AMPS/BreitWigner.h"
+#include "AMPTOOLS_AMPS/polCoef.h"
 
 #include "AMPTOOLS_MCGEN/ProductionMechanism.h"
 #include "AMPTOOLS_MCGEN/GammaPToNPartP.h"
-#include "GammaPTob1piP.h"
+//#include "GammaPTob1piP.h"
 
 #include "IUAmpTools/AmplitudeManager.h"
 #include "IUAmpTools/ConfigFileParser.h"
@@ -41,27 +42,34 @@ using namespace CLHEP;
 void Usage(char* progName )
 {
   cout << endl << " Usage for: " << progName << endl << endl;
-  cout << "\t -c <file>\t Config file" << endl;
-  cout << "\t -o <name>\t Output name base (ascii, hddm and root files generated)" << endl;
-  cout << "\t -a <file>\t File name to record events before accept/reject [optional]" << endl;
-  cout << "\t -l <value>\t Low edge of mass range (GeV) [optional]" << endl;
-  cout << "\t -u <value>\t Upper edge of mass range (GeV) [optional]" << endl;
-  cout << "\t -n <value>\t Minimum number of events to generate [optional]" << endl;
-  cout << "\t -N <value>\t Exact number of events to generate [optional]" << endl;
-  cout << "\t -f \t\t Generate flat in M(X) (no physics) [optional]" << endl;
-  //cout << "\t -d \t\t Plot only diagnostic histograms [optional]" << endl ;
-  cout << "\t -s <value> Specify random number generator seed [optional]" << endl;
-  cout << "\t -b <value> Specify batch size for intensities in accept/reject alg. [optional]" << endl; 
-  cout << "\t -i <value> Specify maximum intensity (accept/reject range)" << endl << endl;
+  cout << "    -c <file>\t Config file [required]" << endl;
+  cout << "    -o <name>\t Output name base (ascii, hddm and root files generated)" << endl;
+  cout << "    -a <file>\t File to record events before accept/reject" << endl;
+  cout << "    -e <file>\t Input file with MC sample to use instead of generating" << endl;
+  cout << "    -l <value>\t Low edge of mass range (GeV)" << endl;
+  cout << "    -u <value>\t Upper edge of mass range (GeV)" << endl;
+  cout << "    -n <value>\t Minimum number of events to generate (allows spill-over)" << endl;
+  cout << "    -N <value>\t Exact number of events to generate" << endl;
+  cout << "    -f \t\t Generate flat in M(X) (no physics)" << endl;
+  cout << "    -d \t\t Compute diagnostic histograms" << endl ;
+  cout << "    -s <value>\t Specify random number generator seed" << endl;
+  cout << "    -b <value>\t Batch size for intensities in accept/reject alg. (def. 2M)" << endl; 
+  cout << "    -i <value>\t Specify maximum intensity (accept/reject range)" << endl << endl;
   
 }
 
 
+bool fileGood(string fname)
+{
+  ifstream file(fname.c_str());
+  return file.good();
+}
+
 
 int main( int argc, char* argv[] ){
   
-  string  configfile("gen_OmegaPiPi.cfg");
-  string  outname("gen_test.ascii"), allGenFName, inMCFName;
+  string  configfile("");
+  string  outname("gen_5pi"), allGenFName, inMCFName;
   b1piAmpCheck AmpCheck;
   bool diag = false, genFlat = false, StrictEvtLimit=false;
   bool saveAll=false, readInEvents=false;
@@ -77,13 +85,13 @@ int main( int argc, char* argv[] ){
   int par_types_list[]={1,14,9,8,7,9,8};
   vector<int> part_types(par_types_list,par_types_list+7);
   float part_masses_list[]={Mpipm, Mpipm, Mpi0, Mpipm, Mpipm};
-  vector<float> part_masses(part_masses_list,part_masses_list+5);
+  vector<double> part_masses(part_masses_list,part_masses_list+5);
 
   
   double CustMaxInten=-1, maxInten=0, runs_maxInten=0.0;
   long int Seed=0;
 
-  int nEvents = 30, batchSize = 200000;
+  int nEvents = 30, batchSize = 2000000;
 
   //Parse command line: -----------------------------------------------
   for (int i = 1; i < argc; i++){
@@ -134,11 +142,17 @@ int main( int argc, char* argv[] ){
     }
   }
   
-  if( configfile.size() == 0 || outname.size() == 0 ){
-    cout << "No config file or output specificed." << endl;
+  if( configfile.size() == 0 ){
+    cerr << "No config file specified." << endl;
     Usage(argv[0]);
     exit(1);
   }
+  if(!fileGood(configfile)){
+    cerr << "Invalid config file!" << endl;
+    exit(1);
+  }    
+     
+
   // END OF ARGUMENT PARSING/CHECKING /////////////////////////////////////////
 
   
@@ -158,12 +172,13 @@ int main( int argc, char* argv[] ){
   //----------------------------------------------------
 
   if(readInEvents){
-    cout << "Performing accept/reject on pre-generated sample from: " << inMCFName << endl;
+    cout << "Performing accept/reject on pre-generated sample from: "
+	 << inMCFName << endl;
     ROOTDataReader rootIn(inMCFName, "kin", true);
     Kinematics *evt;
 
     if(CustMaxInten>0){
-      cout << "  using the specified intensity ceiling: " << CustMaxInten << endl;
+      cout << "  using the specified intensity ceiling: "<< CustMaxInten << endl;
       maxInten=CustMaxInten;
     }else{
       cout << "Looking for peak intensity...\n";
@@ -196,7 +211,7 @@ int main( int argc, char* argv[] ){
 
 
 
-  // prepare dyagnostic histograms ---------------------
+  // prepare diagnostic histograms ---------------------
   TH1F* mass = new TH1F( "M", "Resonance Mass", 180, lowMass, highMass );
   TH1F* massW = new TH1F( "M_W", "Weighted Resonance Mass", 180, lowMass, highMass );
   massW->Sumw2();
@@ -236,6 +251,7 @@ int main( int argc, char* argv[] ){
   
   // setup amplitude manager
   AmplitudeManager ampManager( info->particleList(), info->reactionName() );	
+  ampManager.registerAmplitudeFactor( polCoef() );
   ampManager.registerAmplitudeFactor( b1piAngAmp() );
   ampManager.registerAmplitudeFactor( BreitWigner() );
   ampManager.setupFromConfigurationInfo( cfgInfo );  
@@ -244,7 +260,8 @@ int main( int argc, char* argv[] ){
     ( genFlat ? ProductionMechanism::kFlat : ProductionMechanism::kResonant );
   
   //generate over a range mass -- the daughters are pi-,pi+,omega
-  GammaPTob1piP resProd( lowMass, highMass, type );
+  GammaPToNPartP resProd( lowMass, highMass, part_masses,type );
+  //GammaPTob1piP resProd( lowMass, highMass, type );
   
   // seed the distribution with a sum of noninterfering Breit-Wigners
   // we can easily compute the PDF for this and divide by that when
@@ -283,6 +300,8 @@ int main( int argc, char* argv[] ){
       for(int i = 0; i < batchSize; ++i ) // Get the max. inten. for PS gen
 	if(aVecs->getEvent(i)->weight() > maxInten) 
 	  maxInten = aVecs->getEvent(i)->weight();
+
+    cout << "Beginning accept/reject..." << endl;
     
     printf("MAXINTEN: %25.20f\n",maxInten);
     if(runs_maxInten < maxInten) runs_maxInten=maxInten;
@@ -303,7 +322,6 @@ int main( int argc, char* argv[] ){
     for( int i = 0; i < batchSize ; ++i ){
       
       Kinematics* evt = aVecs->getEvent( i );
-      AmpCheck.SetEvent(*evt);
       
 
       double genWeight = evt->weight();
@@ -318,11 +336,8 @@ int main( int argc, char* argv[] ){
 	IbatchSum+=weightedInten;
       */
       //fprintf(Ifid,"%25.20f\n",weightedInten);
-      
-      if(saveAll) {
-	evt->setWeight( weightedInten );
-	rootAllOut->writeEvent( *evt );
-      }
+      //printf("I = %e\n",weightedInten);
+
 
       // obtain this by looking at the maximum value of intensity * genWeight
       if((!genFlat && weightedInten > drand48() * maxInten) ||
@@ -331,25 +346,29 @@ int main( int argc, char* argv[] ){
 	double histWeight = 1.0;//genFlat ? genWeight : 1.0; 
 	
 	//Fill some useful histograms
-	mass->Fill( AmpCheck.GetMX(), histWeight );
-	massW->Fill( AmpCheck.GetMX(), genWeight );
-        
-	intenW->Fill( weightedInten, histWeight );
-	intenWVsM->Fill( AmpCheck.GetMX(), weightedInten );
-        
-	dalitz->Fill( (AmpCheck.GetXsPi() + AmpCheck.Getb1sPi()).M2(),
-		      (AmpCheck.Getb1sPi() + AmpCheck.GetOmega()).M2(),histWeight);
-	M_rho->Fill(AmpCheck.GetMrho(), histWeight);
-	M_omega->Fill(AmpCheck.GetMomega(), histWeight);
-	M_b1->Fill(AmpCheck.GetMb1(), histWeight);
-	
-	// orientation of production plane in lab
-	prod_ang->Fill(AmpCheck.GetAlpha(), histWeight);
-	XAng->Fill(AmpCheck.GetXPhi(), AmpCheck.GetXCosTheta(), histWeight);
-	b1Ang->Fill(AmpCheck.Getb1Phi(), AmpCheck.Getb1CosTheta(), histWeight);
-	OmegaAng->Fill(AmpCheck.GetOmegaPhi(),AmpCheck.GetOmegaCosTheta(), histWeight);
-	RhoAng->Fill(AmpCheck.GetRhoPhi(), AmpCheck.GetRhoCosTheta(), histWeight);
-	
+	if(diag){
+	  // Set event, forcing search for most likely interm. states
+	  // instead of assuming particular child groupings
+	  AmpCheck.SetEvent(*evt, true);
+	  mass->Fill( AmpCheck.GetMX(), histWeight );
+	  massW->Fill( AmpCheck.GetMX(), genWeight );
+	  
+	  intenW->Fill( weightedInten, histWeight );
+	  intenWVsM->Fill( AmpCheck.GetMX(), weightedInten );
+	  
+	  dalitz->Fill( (AmpCheck.GetXsPi() + AmpCheck.Getb1sPi()).M2(),
+			(AmpCheck.Getb1sPi() + AmpCheck.GetOmega()).M2(),histWeight);
+	  M_rho->Fill(AmpCheck.GetMrho(), histWeight);
+	  M_omega->Fill(AmpCheck.GetMomega(), histWeight);
+	  M_b1->Fill(AmpCheck.GetMb1(), histWeight);
+	  
+	  // orientation of production plane in lab
+	  prod_ang->Fill(AmpCheck.GetAlpha(), histWeight);
+	  XAng->Fill(AmpCheck.GetXPhi(), AmpCheck.GetXCosTheta(), histWeight);
+	  b1Ang->Fill(AmpCheck.Getb1Phi(), AmpCheck.Getb1CosTheta(), histWeight);
+	  OmegaAng->Fill(AmpCheck.GetOmegaPhi(),AmpCheck.GetOmegaCosTheta(), histWeight);
+	  RhoAng->Fill(AmpCheck.GetRhoPhi(), AmpCheck.GetRhoCosTheta(), histWeight);
+	}
 	// we want to save events with weight 1
 	evt->setWeight( 1.0 );
 	
@@ -360,7 +379,10 @@ int main( int argc, char* argv[] ){
 	if(StrictEvtLimit && eventCounter>=nEvents) break;
       }
       
-      
+      if(saveAll) {
+	evt->setWeight( weightedInten );
+	rootAllOut->writeEvent( *evt );
+      }      
       delete evt;
     }
     //printf("BATCH AVERAGE:  %f\n",IbatchSum/batchSize);

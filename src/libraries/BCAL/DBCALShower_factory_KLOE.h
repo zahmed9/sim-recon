@@ -64,6 +64,8 @@ private:
     void Gcf(float &gammcf,float a,float x);
     float Gammln(float xx_gln);
 
+  bool IsClusDoubleHumped(int clusNum);
+
 #undef layermax_bcal
 
 #define modulemax_bcal 48
@@ -206,6 +208,7 @@ private:
     float CLUST_THRESH;         // MIN ENERGY THRESD OF CLUSTER IN GEV    
     float ATTEN_LENGTH;         // Attenuation lenth and other parameters    
     float C_EFFECTIVE;          // Effective v of light in scintillator 
+  bool USE_FIT_SPLIT_ALG;
   
     // energy calibration parameters
     float m_scaleZ_p0;

@@ -46,12 +46,19 @@ int main(int narg, char *argv[])
   srand48(now);
   
   ifstream filetest(INPUT_FILE);
-  if(!filetest.good()){
-    cerr<<"Unable to open input file \""<< INPUT_FILE <<"\" for reading."<<endl;
+  if(strstr(INPUT_FILE,"root://")==NULL && !filetest.good()){
+    cerr<<"Unable to open local input file \""<< INPUT_FILE <<"\" for reading."<<endl;
     exit(-4);
   }
 
+  TFile *file=TFile::Open(INPUT_FILE);
+  if (file->IsZombie()) {
+    cerr<<"Unable to open remote input file \""<< INPUT_FILE <<"\" for reading."<<endl;
+    exit(-5);
+  } else file->Close();
+
   ROOTDataReader reader(INPUT_FILE, TREENAME, true);
+
   NmaxEvents = NmaxEvents < reader.numEvents() ? NmaxEvents : reader.numEvents(); 
 	
   // Open output file

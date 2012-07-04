@@ -16,7 +16,7 @@ using namespace std;
 #include "FCAL/DFCALGeometry.h"
 #include "DVector2.h"
 #include "HDGEOMETRY/DGeometry.h"
-#include <PID/DNeutralTrack.h>
+#include <PID/DNeutralParticle.h>
 #include <PID/DParticleSet.h>
 #include <PID/DPhysicsEvent.h>
 
@@ -67,10 +67,15 @@ hdv_endviewBframe::hdv_endviewBframe(hdv_mainframe *hdvmf, const TGWindow *p, UI
 	AddFrame(botframe, chints);
 
 	TGGroupFrame *canvasframe = new TGGroupFrame(topframe, "FCAL", kVerticalFrame);
-	TGGroupFrame *viewcontrols = new TGGroupFrame(topframe, "Controls", kVerticalFrame);
+	TGGroupFrame *controls = new TGGroupFrame(topframe, "", kVerticalFrame);
 	topframe->AddFrame(canvasframe, lhints);
-	topframe->AddFrame(viewcontrols, lhints);
+	topframe->AddFrame(controls, lhints);
 
+	TGGroupFrame *viewcontrols = new TGGroupFrame(controls, "Controls", kVerticalFrame);
+	controls->AddFrame(viewcontrols, lhints);
+	TGGroupFrame *colorcode = new TGGroupFrame(controls, "Color code", kVerticalFrame);
+	controls->AddFrame(colorcode, lhints);
+	
 		//------------- View canvas
 		ecanvas = new TRootEmbeddedCanvas("endviewB Large Canvas", canvasframe, w, h, kSunkenFrame, GetWhitePixel());
 		canvasframe->AddFrame(ecanvas, chints);
@@ -122,6 +127,26 @@ hdv_endviewBframe::hdv_endviewBframe(hdv_mainframe *hdvmf, const TGWindow *p, UI
 	ss<<"name.\n";
 	TGLabel *saveas	= new TGLabel(viewcontrols, ss.str().c_str());
 	viewcontrols->AddFrame(saveas, chints);
+
+	// color code frame
+	TGLabel* FCCLables[9];
+	unsigned int ccodes[9] = {0xFF0033,0xFF2233,0xFF4433,0xFF6633,0xFF8833,0xFFaa33,0xFFcc33,0xFFee33,0xFFFFaa};
+	//unsigned int basecolor = 255*256*256+int(0.2*255); //r=1, g=0, b=.2
+ 	for (int i=0;i<9;i++) {
+	  double E = pow(10.,((1. - (double)i*0.11)*log10(1./0.005)));
+	  char str1[128];
+	  sprintf(str1,"%5.1f MeV",E);
+	  FCCLables[i] =  new TGLabel(colorcode, (const char*)str1);
+	  FCCLables[i]->SetBackgroundColor(ccodes[i]);
+
+	  //double s = log10(E/0.005)/log10(0.1/0.005);
+	  //s = s<0 ? 0 : s>1 ? 1 : s;
+	  //FCCLables[i]->SetBackgroundColor(basecolor + int(255*(1-s))*256);
+	  colorcode->AddFrame(FCCLables[i],lhints);
+	}
+	
+
+
 
 	//========== Dismiss Button ===========
 	TGTextButton *dismiss = new TGTextButton(botframe,	"dismiss");

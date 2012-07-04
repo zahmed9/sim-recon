@@ -325,6 +325,10 @@ c
       logical hexist
       external hexist   
 
+      character*4 chcase
+      integer mechanism
+      equivalence(chcase,mechanism)
+
 #ifdef BACKGROUND_PROFILING
 ********************************************************************************
 *   The following defines an ntuple containing information on particle type  
@@ -407,7 +411,7 @@ c    +    .and.(vect(1)**2+vect(2)**2).gt.25.0) then
       IF(vect(3).eq.-2200.) THEN
          ph_radius = sqrt(vect(1)*vect(1)+vect(2)*vect(2))
          IF(ph_radius.ge.12.4) THEN
-           ISTOP = 1
+           ISTOP = 97
          ENDIF
       ENDIF
 
@@ -422,6 +426,8 @@ c    +    .and.(vect(1)**2+vect(2)**2).gt.25.0) then
         NMEC = NMEC+1
         LMEC(NMEC) = 30
       endif
+
+
 
 * Place any secondaries generated during this step onto the stack
 
@@ -444,6 +450,26 @@ c             print *, cchar
           endif
        enddo
       endif
+
+* check if particle did decay in which case save vertex and particles
+
+      if (ISTOP .eq. 1) then
+        mechanism = KCASE
+         if ((NGKINE>0) .and. (chcase.eq.'DCAY')) then
+
+            if ((cnames(NLEVEL).ne.'BCAL') .and.
+     +           (cnames(NLEVEL).ne.'FCAL').and.
+     +           (sqrt(VERT(1)**2+VERT(2)**2)<65.).and.
+     +           (VERT(3)<500.)) then
+
+c               print *," KCASE: ",chcase,"  ",NGKINE,"  ",IPART
+               call savenewvertex(KCASE,NGKINE,GKIN,VECT,
+     +              TOFG,iflgk,IPART)
+            endif
+         endif
+      endif
+
+
       
 * For explicit Cerenkov generation, apply an inefficiency factor
 

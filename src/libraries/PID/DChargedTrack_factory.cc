@@ -50,11 +50,12 @@ jerror_t DChargedTrack_factory::evnt(jana::JEventLoop *locEventLoop, int eventnu
 		locChargedTrackHypothesis = locChargedTrackHypotheses[loc_i];
 		locIDMatchFlag = false;
 		for (loc_j = 0; loc_j < _data.size(); loc_j++){
-			if(locChargedTrackHypothesis->dTrackTimeBased->candidateid == _data[loc_j]->dChargedTrackHypotheses[0]->dTrackTimeBased->candidateid){
+			if(locChargedTrackHypothesis->candidateid == _data[loc_j]->dChargedTrackHypotheses[0]->candidateid){
 				_data[loc_j]->dChargedTrackHypotheses.push_back(locChargedTrackHypothesis);
 				locIDMatchFlag = true;
 				break;
 			}
+
 		}
 		if(locIDMatchFlag == true)
 			continue;

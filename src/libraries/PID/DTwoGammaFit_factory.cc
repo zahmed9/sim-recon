@@ -13,7 +13,7 @@ using namespace jana;
 #include "DTwoGammaFit.h"
 #include "DKinFit.h"
 #include "DVertex.h"
-#include "DNeutralTrackHypothesis.h"
+#include "DNeutralParticleHypothesis.h"
 #include "DTwoGammaFit_factory.h"
 
 
@@ -48,13 +48,13 @@ DTwoGammaFit_factory::DTwoGammaFit_factory(double aMass)
 jerror_t DTwoGammaFit_factory::evnt(JEventLoop *eventLoop, int eventnumber)
 { 
   //so the way this works is that for a given DBCALShower/DFCALShower, a
-  //DNeutralTrackHypothesis is created for each DVertex (DVertex's are
+  //DNeutralParticleHypothesis is created for each DVertex (DVertex's are
   //determined by grouping together DChargedTrackHypothesis). We
   //obviously don't want to consider combinations of hypotheses from
   //different vertices.
 
   vector<const DVertex*> vertices;
-  vector<const DNeutralTrackHypothesis*> neutrals;
+  vector<const DNeutralParticleHypothesis*> neutrals;
   eventLoop->Get(vertices);
   eventLoop->Get(neutrals);
    
@@ -93,8 +93,8 @@ jerror_t DTwoGammaFit_factory::evnt(JEventLoop *eventLoop, int eventnumber)
 
 	vector<DKinematicData> kindata;
 	kindata.clear();
-	kindata.push_back( *(neutrals[i]->dKinematicData) );
-	kindata.push_back( *(neutrals[j]->dKinematicData) );
+	kindata.push_back( *(neutrals[i]) );
+	kindata.push_back( *(neutrals[j]) );
 
 	kfit->SetFinal(kindata);
 	//fit!
@@ -104,6 +104,10 @@ jerror_t DTwoGammaFit_factory::evnt(JEventLoop *eventLoop, int eventnumber)
 	if (kinout.size() != 2) continue;
 
 	DTwoGammaFit* fit2g = new DTwoGammaFit( nPairs );
+
+	// Useful later to scrutinize child shower recon.
+	fit2g->AddAssociatedObject(neutrals[i]);
+	fit2g->AddAssociatedObject(neutrals[j]);
 
 	// set two gamma kinematics
 	DLorentzVector P4U = kindata[0].lorentzMomentum() + kindata[1].lorentzMomentum();
@@ -129,8 +133,14 @@ jerror_t DTwoGammaFit_factory::evnt(JEventLoop *eventLoop, int eventnumber)
 	for (int k=0; k < 6; k++) {
 	  fit2g->setPulls( kfit->GetPull(k),  k);
 	}
-	fit2g->setChildID( kindata[0].id, 0);
-	fit2g->setChildID( kindata[1].id, 1);
+
+	// kindata, created with a copy constructor, scrambles the IDs,
+	// so reference to the original neutrals[] is necessary -IS
+	//fit2g->setChildID( kindata[0].id, 0);
+	//fit2g->setChildID( kindata[1].id, 1);
+	fit2g->setChildID( neutrals[i]->id, 0);
+	fit2g->setChildID( neutrals[j]->id, 1);
+
 	fit2g->setChildMom( kindata[0].lorentzMomentum() , 0);
 	fit2g->setChildMom( kindata[1].lorentzMomentum() , 1);
 

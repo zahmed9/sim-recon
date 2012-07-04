@@ -13,7 +13,7 @@
 #include <TRACKING/DHoughFind.h>
 #include <PID/DChargedTrack.h>
 #include "HDGEOMETRY/DRootGeom.h"
-#include <PID/DNeutralShowerCandidate.h>
+#include <PID/DNeutralShower.h>
 #include <TH1F.h>
 
 class DVertex_factory : public jana::JFactory<DVertex>{
@@ -55,6 +55,7 @@ class DVertex_factory : public jana::JFactory<DVertex>{
 
 		float GROUP_NUM_SIGMAS_TIME;
 		float GROUP_NUM_SIGMAS_Z;
+  float VERTEX_AVG_CL_THRES;
 		double dTargetCenter_Z;  
 
 		// Pool of memory heavy vertexInfo_t objects

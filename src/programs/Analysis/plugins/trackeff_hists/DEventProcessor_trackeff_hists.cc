@@ -118,6 +118,7 @@ jerror_t DEventProcessor_trackeff_hists::evnt(JEventLoop *loop, int eventnumber)
 	vector<const DTrackWireBased*> trackWBs;
 	vector<const DChargedTrack*> trackTBs;
 	vector<const DTrackTimeBased*> throwns;
+	vector<const DTrackTimeBased*> locAssociatedTrackTimeBasedVector;
 	vector<const DMCTrajectoryPoint*> mctraj;
 	
 	loop->Get(cdctrackhits);
@@ -138,7 +139,10 @@ jerror_t DEventProcessor_trackeff_hists::evnt(JEventLoop *loop, int eventnumber)
 	vector<track_info> ti_trktb(MAX_TRACKS);
 	for(unsigned int i=0; i<trackcandidates.size(); i++)FillTrackInfo(trackcandidates[i], ti_can);
 	for(unsigned int i=0; i<trackWBs.size(); i++)FillTrackInfo(trackWBs[i], ti_trkwb);
-	for(unsigned int i=0; i<trackTBs.size(); i++)FillTrackInfo(trackTBs[i]->dChargedTrackHypotheses[0]->dTrackTimeBased, ti_trktb);
+	for(unsigned int i=0; i<trackTBs.size(); i++){
+		trackTBs[i]->dChargedTrackHypotheses[0]->GetT(locAssociatedTrackTimeBasedVector);
+		FillTrackInfo(locAssociatedTrackTimeBasedVector[0], ti_trktb);
+	}
 
 	// The highest (and therefore, most interesting) GEANT mechansim for each track in the
 	// region before it gets to the BCAL.
@@ -168,7 +172,9 @@ jerror_t DEventProcessor_trackeff_hists::evnt(JEventLoop *loop, int eventnumber)
 	for(unsigned int i=0; i<throwns.size(); i++){
 		const DTrackTimeBased *thrown = throwns[i];
 
-		trk.pthrown = thrown->momentum();
+		trk.pthrown.SetXYZ(thrown->momentum().x(),
+				   thrown->momentum().y(),
+				   thrown->momentum().z());
 
 		// Get info for thrown track
 		GetNhits(thrown, trk.Ncdc, trk.Nfdc, trk.track);
@@ -217,7 +223,7 @@ void DEventProcessor_trackeff_hists::FillTrackInfo(const DKinematicData *kd,  ve
 //------------------
 void DEventProcessor_trackeff_hists::GetTrackInfo(const DKinematicData *kd, track_info &ti, int &track_no)
 {
-	ti.p = kd->momentum();
+  ti.p.SetXYZ(kd->momentum().x(),kd->momentum().y(),kd->momentum().z());
 	GetNhits(kd, ti.Ncdc, ti.Nfdc, track_no);
 	
 	// Try dynamic casting DKinematicData into something that can be used to get

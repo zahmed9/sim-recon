@@ -45,8 +45,8 @@ using namespace std;
 #include "FCAL/DFCALHit.h"
 #include <PID/DParticleSet.h>
 #include <PID/DPhysicsEvent.h>
-#include "PID/DNeutralTrack.h"
-#include "PID/DNeutralShowerCandidate.h"
+#include "PID/DNeutralParticle.h"
+#include "PID/DNeutralShower.h"
 #include "PID/DTwoGammaFit.h"
 #include "BCAL/DBCALHit.h"
 #include "DVector2.h"
@@ -57,7 +57,7 @@ extern hdv_mainframe *hdvmf;
 static float FCAL_Zmin = 622.8;
 static float FCAL_Rmin = 6.0;
 static float FCAL_Rmax = 212.0/2.0;
-static float BCAL_Rmin=65.0;
+static float BCAL_Rmin = 65.0;
 static float BCAL_Zlen = 390.0;
 static float BCAL_Zmin = 212.0 - BCAL_Zlen/2.0;
 
@@ -113,13 +113,14 @@ jerror_t MyProcessor::init(void)
 		vector<string> facnames;
 		loops[0]->GetFactoryNames(facnames);
 
-		hdvmf = new hdv_mainframe(gClient->GetRoot(), 1000, 600);
+		hdvmf = new hdv_mainframe(gClient->GetRoot(), 1400, 700);
 		hdvmf->SetCandidateFactories(facnames);
 		hdvmf->SetWireBasedTrackFactories(facnames);
 		hdvmf->SetTimeBasedTrackFactories(facnames);
 		hdvmf->SetReconstructedFactories(facnames);
 		hdvmf->SetChargedTrackFactories(facnames);
 		fulllistmf = hdvmf->GetFullListFrame();
+		debugermf = hdvmf->GetDebugerFrame();
 	}
 	
 	return NOERROR;
@@ -192,64 +193,101 @@ void MyProcessor::FillGraphics(void)
 	graphics_yz.clear();  // The objects placed in these will be deleted by hdv_mainframe
 	
 	if(!loop)return;
+
+	vector<const DTrackCandidate*> trCand;
+	loop->Get(trCand);
+	vector<const DTrackTimeBased*> trTB;
+	loop->Get(trTB);
+	vector<const DTrackWireBased*> trWB;
+	loop->Get(trWB);
+	hdv_debugerframe *p = hdvmf->GetDebugerFrame();
+	p->SetNTrCand(trCand.size());
+	p->SetNTrWireBased(trWB.size());
+	p->SetNTrTimeBased(trTB.size());
 	
 	// BCAL hits
 	if(hdvmf->GetCheckButton("bcal")){
-		vector<const DBCALHit*> bcalhits;
-		loop->Get(bcalhits);
-		
-		for(unsigned int i=0; i<bcalhits.size(); i++){
-			const DBCALHit *hit = bcalhits[i];
-			TPolyLine *poly = hdvmf->GetBCALPolyLine(hit->module, hit->layer, hit->sector);
-			if(!poly)continue;
+	  vector<const DBCALHit*> bcalhits;
+	  loop->Get(bcalhits);
+	  
+	  for(unsigned int i=0; i<bcalhits.size(); i++){
+	    const DBCALHit *hit = bcalhits[i];
+	    TPolyLine *poly = hdvmf->GetBCALPolyLine(hit->module, hit->layer, hit->sector);
 
-			double a = hit->E/0.02;
-			double f = sqrt(a>1.0 ? 1.0:a<0.0 ? 0.0:a);
-			double grey = 0.8;
-			double s = 1.0 - f;
+	    if(!poly)continue;
 
-			float r = s*grey;
-			float g = s*grey;
-			float b = f*(1.0-grey) + grey;
-
-			poly->SetFillColor(TColor::GetColor(r,g,b));
-			//poly->SetLineColor(TColor::GetColor(r,g,b));
-			//poly->SetLineWidth(3.0);
-			poly->SetFillStyle(3001);
-		}
+#if 0
+	    double a = hit->E/0.02;
+	    double f = sqrt(a>1.0 ? 1.0:a<0.0 ? 0.0:a);
+	    //double grey = 0.8;
+	    //double s = 1.0 - f;
+	    
+	    //float r = s*grey;
+	    //float g = s*grey;
+	    //float b = f*(1.0-grey) + grey;
+	    //float b = 0.;
+	    //float g = 0.;
+	    //float r = f*(1.0-grey) + grey;
+	    
+	    float r = 1.;
+	    float g = 1.-f;
+	    float b = 0.2;
+	    if(f<=0.0){
+	      r = 1.;
+	      g = 1.;
+	      b = 0.9;
+	    }
+#endif
+            double s = log10(hit->E/0.005)/log10(0.1/0.005); // s=1 for 100MeV energy deposit
+            float r = 1.;
+            float g = 0;
+	    if(s < 0.0) g=1.0;
+	    else if(s > 1.0) g=0.0;
+	    else g = 1.0 - s;
+            float b = 0.2;
+	   
+	    poly->SetFillColor(TColor::GetColor(r,g,b));
+	    poly->SetLineColor(TColor::GetColor(r,g,b));
+	    poly->SetLineWidth(1);
+	    poly->SetFillStyle(3000);	    
+	  }
 	}	
 
 	// FCAL hits
 	if(hdvmf->GetCheckButton("fcal")){
-		vector<const DFCALHit*> fcalhits;
-		loop->Get(fcalhits);
-		
-		for(unsigned int i=0; i<fcalhits.size(); i++){
-			const DFCALHit *hit = fcalhits[i];
-			TPolyLine *poly = hdvmf->GetFCALPolyLine(hit->x, hit->y);
-			if(!poly)continue;
-
+	  vector<const DFCALHit*> fcalhits;
+	  loop->Get(fcalhits);
+	  
+	  for(unsigned int i=0; i<fcalhits.size(); i++){
+	    const DFCALHit *hit = fcalhits[i];
+	    TPolyLine *poly = hdvmf->GetFCALPolyLine(hit->x, hit->y);
+	    if(!poly)continue;
+	    
 #if 0			
-			double a = hit->E/0.005;
-			double f = sqrt(a>1.0 ? 1.0:a<0.0 ? 0.0:a);
-			double grey = 0.8;
-			double s = 1.0 - f;
-
-			float r = s*grey;
-			float g = s*grey;
-			float b = f*(1.0-grey) + grey;
+	    double a = hit->E/0.005;
+	    double f = sqrt(a>1.0 ? 1.0:a<0.0 ? 0.0:a);
+	    double grey = 0.8;
+	    double s = 1.0 - f;
+	    
+	    float r = s*grey;
+	    float g = s*grey;
+	    float b = f*(1.0-grey) + grey;
 #endif
-			double s = log10(hit->E/0.005)/log10(1.0/0.005); // s=1 for 1GeV energy deposit
-			if(s<0.0) s=0.0;
-			float r = s;
-			float g = s;
-			float b = s;
-			
-
-			poly->SetFillColor(TColor::GetColor(r,g,b));
-		}
-	}	
+	    double s = log10(hit->E/0.005)/log10(1.0/0.005); // s=1 for 1GeV energy deposit
+	    float r = 1.;
+	    float g = 1.-s;
+	    float b = 0.2;
+	    if(s<0.0){
+	      r = 1.;
+	      g = 1.;
+	      b = 0.9;
+	    }
+	    
+	    poly->SetFillColor(TColor::GetColor(r,g,b));
+	  }
+	}
 	
+
 	// CDC hits
 	if(hdvmf->GetCheckButton("cdc")){
 		vector<const DCDCTrackHit*> cdctrackhits;
@@ -407,6 +445,153 @@ void MyProcessor::FillGraphics(void)
 		graphics.push_back(gset);
 	}
 
+	// Track Hits for Track Candidates and Candidate trajectory in Debuger Window
+	for(unsigned int n=0; n<trCand.size(); n++){
+	  if (n>9)
+	    break;
+	  char str1[128];
+	  sprintf(str1,"Candidate%d",n+1);
+	  
+	  if(hdvmf->GetCheckButton(str1)){	
+
+	    int color = n+1;
+	    if (color > 4)
+	      color++;
+	    if (color > 6)
+	      color++;	      
+	    
+	    AddKinematicDataTrack(trCand[n], color, 1.5);
+
+	    vector<const DCDCTrackHit*> cdctrackhits;
+	    trCand[n]->Get(cdctrackhits);
+	    for(unsigned int i=0; i<cdctrackhits.size(); i++){
+	      const DCDCWire *wire = cdctrackhits[i]->wire;
+	      DGraphicSet gset(color, kLine, 1.0);
+	      DVector3 dpoint=wire->origin-(wire->L/2.0)*wire->udir;
+	      TVector3 tpoint(dpoint.X(),dpoint.Y(),dpoint.Z());
+	      gset.points.push_back(tpoint);
+	      dpoint=wire->origin+(wire->L/2.0)*wire->udir;
+	      tpoint.SetXYZ(dpoint.X(),dpoint.Y(),dpoint.Z());
+	      gset.points.push_back(tpoint);
+	      graphics.push_back(gset);
+	      
+	    } // end loop of cdc hits of track candidate
+	    vector<const DFDCPseudo*> fdcpseudos;
+	    trCand[n]->Get(fdcpseudos);
+	    DGraphicSet gsetp(color, kMarker, 0.5);
+	    
+	    for(unsigned int i=0; i<fdcpseudos.size(); i++){
+	      const DFDCWire *wire = fdcpseudos[i]->wire;
+	      
+	      // Pseudo point
+	      TVector3 pos(fdcpseudos[i]->xy.X(), 
+			   fdcpseudos[i]->xy.Y(), wire->origin.Z());
+	      gsetp.points.push_back(pos);
+	    }	
+	    graphics.push_back(gsetp);
+	    
+	  }
+	}
+
+	// Wire Based Track Hits and trajectory for Debuger Window
+	for(unsigned int n=0; n<trWB.size(); n++){
+	  if (n>9)
+	    break;
+	  char str1[128];
+	  sprintf(str1,"WireBased%d",n+1);
+	  
+	  if(hdvmf->GetCheckButton(str1)){	
+
+	    int color = trWB[n]->candidateid;
+	    if (color > 4)
+	      color++;
+	    if (color > 6)
+	      color++;	      
+
+	    AddKinematicDataTrack(trWB[n], color, 1.5);
+
+	    vector<const DCDCTrackHit*> cdctrackhits;
+	    trWB[n]->Get(cdctrackhits);
+	    for(unsigned int i=0; i<cdctrackhits.size(); i++){
+	      const DCDCWire *wire = cdctrackhits[i]->wire;
+	      DGraphicSet gset(color, kLine, 1.0);
+	      DVector3 dpoint=wire->origin-(wire->L/2.0)*wire->udir;
+	      TVector3 tpoint(dpoint.X(),dpoint.Y(),dpoint.Z());
+	      gset.points.push_back(tpoint);
+	      dpoint=wire->origin+(wire->L/2.0)*wire->udir;
+	      tpoint.SetXYZ(dpoint.X(),dpoint.Y(),dpoint.Z());
+	      gset.points.push_back(tpoint);
+	      graphics.push_back(gset);
+	      
+	    } // end loop of cdc hits of track candidate
+	    vector<const DFDCPseudo*> fdcpseudos;
+	    trWB[n]->Get(fdcpseudos);
+	    DGraphicSet gsetp(color, kMarker, 0.5);
+	    
+	    for(unsigned int i=0; i<fdcpseudos.size(); i++){
+	      const DFDCWire *wire = fdcpseudos[i]->wire;
+	      
+	      // Pseudo point
+	      TVector3 pos(fdcpseudos[i]->xy.X(), 
+			   fdcpseudos[i]->xy.Y(), wire->origin.Z());
+	      gsetp.points.push_back(pos);
+	    }
+	    graphics.push_back(gsetp);
+	    
+	  }
+	}
+
+	// Time Based Track Hits and trajectory for Debuger Window
+	for(unsigned int n=0; n<trTB.size(); n++){
+	  if (n>9)
+	    break;
+	  char str1[128];
+	  sprintf(str1,"TimeBased%d",n+1);
+	  
+	  if(hdvmf->GetCheckButton(str1)){	
+
+	    int color = trTB[n]->candidateid;
+	    if (color > 4)
+	      color++;
+	    if (color > 6)
+	      color++;	      
+
+	    AddKinematicDataTrack(trTB[n], color, 1.5);
+
+	    vector<const DCDCTrackHit*> cdctrackhits;
+	    trTB[n]->Get(cdctrackhits);
+	    for(unsigned int i=0; i<cdctrackhits.size(); i++){
+	      const DCDCWire *wire = cdctrackhits[i]->wire;
+	      DGraphicSet gset(color, kLine, 1.0);
+	      DVector3 dpoint=wire->origin-(wire->L/2.0)*wire->udir;
+	      TVector3 tpoint(dpoint.X(),dpoint.Y(),dpoint.Z());
+	      gset.points.push_back(tpoint);
+	      dpoint=wire->origin+(wire->L/2.0)*wire->udir;
+	      tpoint.SetXYZ(dpoint.X(),dpoint.Y(),dpoint.Z());
+	      gset.points.push_back(tpoint);
+	      graphics.push_back(gset);
+	      
+	    } // end loop of cdc hits of track candidate
+	    vector<const DFDCPseudo*> fdcpseudos;
+	    trTB[n]->Get(fdcpseudos);
+	    DGraphicSet gsetp(color, kMarker, 0.5);
+	    
+	    for(unsigned int i=0; i<fdcpseudos.size(); i++){
+	      const DFDCWire *wire = fdcpseudos[i]->wire;
+	      
+	      // Pseudo point
+	      TVector3 pos(fdcpseudos[i]->xy.X(), 
+			   fdcpseudos[i]->xy.Y(), wire->origin.Z());
+	      gsetp.points.push_back(pos);
+	    }
+	    graphics.push_back(gsetp);
+	    
+	  }
+	}
+
+
+
+	
 	// TOF Truth points
 	if(hdvmf->GetCheckButton("toftruth")){	
 		vector<const DMCTrackHit*> mctrackhits;
@@ -433,8 +618,11 @@ void MyProcessor::FillGraphics(void)
 
 			TVector3 pos(hit->r*cos(hit->phi), hit->r*sin(hit->phi), hit->z);
 			gset.points.push_back(pos);
+
+			TMarker *m = new TMarker(pos.X(), pos.Y(), 2);	
+			graphics_xyA.push_back(m);
 		}
-		graphics.push_back(gset);
+		//graphics.push_back(gset);
 	}
 
 	// FCAL Truth points
@@ -453,54 +641,87 @@ void MyProcessor::FillGraphics(void)
 				DVector2 pos_face = fgeom->positionOnFace(hit->row, hit->column);
 				TVector3 pos(pos_face.X(), pos_face.Y(), FCAL_Zmin);
 				gset.points.push_back(pos);
+				
+				TMarker *m = new TMarker(pos.X(), pos.Y(), 2);	
+				//m->SetColor(kGreen);
+				//m->SetLineWidth(1);
+				graphics_xyB.push_back(m);
+
+				TMarker *m1 = new TMarker(pos.Z(), pos.X(), 2);	
+				graphics_xz.push_back(m1);
+				TMarker *m2 = new TMarker(pos.Z(), pos.Y(), 2);	
+				graphics_yz.push_back(m2);
 			}
-			graphics.push_back(gset);
+			//graphics.push_back(gset);
 		}
 	}
 
 	// BCAL reconstructed photons
 	if(hdvmf->GetCheckButton("recon_photons_bcal")){
-		vector<const DNeutralTrack*> neutrals;
+		vector<const DNeutralParticle*> neutrals;
 		loop->Get(neutrals);
+	
 		DGraphicSet gset(kYellow+2, kMarker, 1.25);
 		gset.marker_style=21;
 		for(unsigned int i=0; i<neutrals.size(); i++){
-		  vector<const DNeutralShowerCandidate*> locShowerCandidates;
-		  neutrals[i]->GetT(locShowerCandidates);
-		  DetectorSystem_t locDetectorSystem = locShowerCandidates[0]->dDetectorSystem;
-		  if(locDetectorSystem == SYS_BCAL) continue;	
-		  TVector3 pos( locShowerCandidates[0]->dSpacetimeVertex.X(), 
-				locShowerCandidates[0]->dSpacetimeVertex.Y(), 
-				locShowerCandidates[0]->dSpacetimeVertex.Z());
-		  gset.points.push_back(pos);
+		  vector<const DNeutralShower*> locNeutralShowers;
+		  neutrals[i]->GetT(locNeutralShowers);
+		  DetectorSystem_t locDetectorSystem = locNeutralShowers[0]->dDetectorSystem;
+		  if(locDetectorSystem == SYS_BCAL){
+		    TVector3 pos( locNeutralShowers[0]->dSpacetimeVertex.X(), 
+				  locNeutralShowers[0]->dSpacetimeVertex.Y(), 
+				  locNeutralShowers[0]->dSpacetimeVertex.Z());
+		    gset.points.push_back(pos);
+		    
+		    double dist2 = 2.0 + 5.0*locNeutralShowers[0]->dEnergy;
+		    TEllipse *e = new TEllipse(pos.X(), pos.Y(), dist2, dist2);
+		    e->SetLineColor(kGreen);
+		    e->SetFillStyle(0);
+		    e->SetLineWidth(2);
+		    graphics_xyA.push_back(e);
+		  }
 		}
-		graphics.push_back(gset);
+		//graphics.push_back(gset);
 	}
 
 	// FCAL reconstructed photons
 	if(hdvmf->GetCheckButton("recon_photons_fcal")){
-		vector<const DNeutralTrack*> neutrals;
+		vector<const DNeutralParticle*> neutrals;
 		loop->Get(neutrals);
 		DGraphicSet gset(kOrange, kMarker, 1.25);
+		gset.marker_style=2;
 		for(unsigned int i=0; i<neutrals.size(); i++){
-		  vector<const DNeutralShowerCandidate*> locShowerCandidates;
-		  neutrals[i]->GetT(locShowerCandidates);
-		  DetectorSystem_t locDetectorSystem = locShowerCandidates[0]->dDetectorSystem;
-		  if(locDetectorSystem == SYS_FCAL) continue;
+		  vector<const DNeutralShower*> locNeutralShowers;
+		  neutrals[i]->GetT(locNeutralShowers);
+		  DetectorSystem_t locDetectorSystem = locNeutralShowers[0]->dDetectorSystem;
+		  if(locDetectorSystem == SYS_FCAL){
 			
-			TVector3 pos( locShowerCandidates[0]->dSpacetimeVertex.X(), 
-				      locShowerCandidates[0]->dSpacetimeVertex.Y(), 
-				      locShowerCandidates[0]->dSpacetimeVertex.Z());
+			TVector3 pos( locNeutralShowers[0]->dSpacetimeVertex.X(), 
+				      locNeutralShowers[0]->dSpacetimeVertex.Y(), 
+				      locNeutralShowers[0]->dSpacetimeVertex.Z());
 			gset.points.push_back(pos);
 			
-			double dist2 = 2.0 + 2.0*locShowerCandidates[0]->dEnergy;
+			double dist2 = 2.0 + 10.0*locNeutralShowers[0]->dEnergy;
 			TEllipse *e = new TEllipse(pos.X(), pos.Y(), dist2, dist2);
-			e->SetLineColor(kOrange);
+			e->SetLineColor(kGreen);
 			e->SetFillStyle(0);
 			e->SetLineWidth(2);
 			graphics_xyB.push_back(e);
+
+			TEllipse *e1 = new TEllipse(pos.Z(), pos.X(), dist2, dist2);
+			e1->SetLineColor(kGreen);
+			e1->SetFillStyle(0);
+			e1->SetLineWidth(2);
+			graphics_xz.push_back(e1);
+			TEllipse *e2 = new TEllipse(pos.Z(), pos.Y(), dist2, dist2);
+			e2->SetLineColor(kGreen);
+			e2->SetFillStyle(0);
+			e2->SetLineWidth(2);
+			graphics_yz.push_back(e2);
+
+		  }
 		}
-		graphics.push_back(gset);
+		//graphics.push_back(gset);
 	}
 
 	// Reconstructed photons matched with tracks
@@ -509,21 +730,21 @@ void MyProcessor::FillGraphics(void)
 		loop->Get(ctracks);
 		for(unsigned int i=0; i<ctracks.size(); i++){
 		  const DChargedTrack *locCTrack = ctracks[i];
-		  vector<const DNeutralShowerCandidate*> locShowerCandidates;
-		  locCTrack->GetT(locShowerCandidates);
+		  vector<const DNeutralShower*> locNeutralShowers;
+		  locCTrack->GetT(locNeutralShowers);
 
-		  if (!locShowerCandidates.size()) continue;
+		  if (!locNeutralShowers.size()) continue;
 		  
 		  
 		  // Decide if this hit BCAL of FCAL based on z of position on calorimeter
-		  bool is_bcal = (locShowerCandidates[0]->dDetectorSystem == SYS_BCAL );
+		  bool is_bcal = (locNeutralShowers[0]->dDetectorSystem == SYS_BCAL );
 		  
 		  // Draw on all frames except FCAL frame
 		  DGraphicSet gset(kRed, kMarker, 1.25);
 		  gset.marker_style = is_bcal ? 22:3;
-		  TVector3 tpos( locShowerCandidates[0]->dSpacetimeVertex.X(), 
-				 locShowerCandidates[0]->dSpacetimeVertex.Y(), 
-				 locShowerCandidates[0]->dSpacetimeVertex.Z());
+		  TVector3 tpos( locNeutralShowers[0]->dSpacetimeVertex.X(), 
+				 locNeutralShowers[0]->dSpacetimeVertex.Y(), 
+				 locNeutralShowers[0]->dSpacetimeVertex.Z());
 		  gset.points.push_back(tpos);
 		  graphics.push_back(gset);
 		  
@@ -531,7 +752,7 @@ void MyProcessor::FillGraphics(void)
 		  if(is_bcal)continue;
 		  
 		  // Draw on FCAL pane
-		  double dist2 = 2.0 + 2.0*locShowerCandidates[0]->dEnergy;
+		  double dist2 = 2.0 + 2.0*locNeutralShowers[0]->dEnergy;
 		  TEllipse *e = new TEllipse(tpos.X(), tpos.Y(), dist2, dist2);
 		  e->SetLineColor(gset.color);
 		  e->SetFillStyle(0);
@@ -773,7 +994,7 @@ void MyProcessor::FillGraphics(void)
 		vector<const DTrackCandidate*> trackcandidates;
 		loop->Get(trackcandidates, hdvmf->GetFactoryTag("DTrackCandidate"));
 		for(unsigned int i=0; i<trackcandidates.size(); i++){
-			int color=30;
+			int color=i+1;
 			double size=2.0;
 			//if(trackcandidates[i]->charge() >0.0) color += 100; // lighter shade
 			//if(trackcandidates[i]->charge() <0.0) color += 150; // darker shade
@@ -806,26 +1027,27 @@ void MyProcessor::FillGraphics(void)
 		for(unsigned int i=0; i<chargedtracks.size(); i++){
 		  int color=kViolet-3;
 		  double size=1.25;
-		  if (chargedtracks[i]->dChargedTrackHypotheses[0]->dTrackTimeBased->charge()>0) color=kMagenta;
+		  if (chargedtracks[i]->Get_Charge() > 0) color=kMagenta;
 		
-		  if (chargedtracks[i]->dChargedTrackHypotheses[0]->dTrackTimeBased->mass()>0.9) size=2.5;
-		  AddKinematicDataTrack(chargedtracks[i]->dChargedTrackHypotheses[0]->dTrackTimeBased,color,size);
+		  if (chargedtracks[i]->Get_BestFOM()->mass() > 0.9) size=2.5;
+		  AddKinematicDataTrack(chargedtracks[i]->Get_BestFOM(),color,size);
 		}
 	}
 
-	// DNeutralTracks
-	if(hdvmf->GetCheckButton("DNeutralTracks")){
-		vector<const DNeutralTrack*> photons;
-		loop->Get(photons, hdvmf->GetFactoryTag("DNeutralTrack"));
+	// DNeutralParticles
+	if(hdvmf->GetCheckButton("neutrals")){
+		vector<const DNeutralParticle*> photons;
+		loop->Get(photons, hdvmf->GetFactoryTag("DNeutralParticle"));
+    
 		for(unsigned int i=0; i<photons.size(); i++){
 		  int color = kBlack;
-		  vector<const DNeutralShowerCandidate*> locShowerCandidates;
-		  photons[i]->GetT(locShowerCandidates);
-		  DetectorSystem_t locDetSys = locShowerCandidates[0]->dDetectorSystem;
+		  vector<const DNeutralShower*> locNeutralShowers;
+		  photons[i]->GetT(locNeutralShowers);
+		  DetectorSystem_t locDetSys = locNeutralShowers[0]->dDetectorSystem;
 		  if(locDetSys==SYS_FCAL)color = kOrange;
 		  if(locDetSys==SYS_BCAL)color = kYellow+2;
 		  //if(locDetSys==DPhoton::kCharge)color = kRed;
-		  AddKinematicDataTrack(photons[i]->dNeutralTrackHypotheses[0]->dKinematicData, color, 1.00);
+		  AddKinematicDataTrack(photons[i]->Get_BestFOM(), color, 1.00);
 		}
 	}
 }
@@ -847,11 +1069,21 @@ void MyProcessor::UpdateTrackLabels(void)
 
 	// Get the track info as DKinematicData objects
 	vector<const DKinematicData*> trks;
+	vector<const DKinematicData*> TrksCand;
+	vector<const DTrackWireBased*> TrksWireBased;
+	vector<const DTrackTimeBased*> TrksTimeBased;
+	vector<const DTrackCandidate*> cand;
+	if(loop)loop->Get(cand);
+	for(unsigned int i=0; i<cand.size(); i++)TrksCand.push_back(cand[i]);
+
+	if(loop)loop->Get(TrksWireBased);
+	if(loop)loop->Get(TrksTimeBased);
+	
 	if(name=="DChargedTrack"){
 		vector<const DChargedTrack*> chargedtracks;
 		if(loop)loop->Get(chargedtracks, tag.c_str());
 		for(unsigned int i=0; i<chargedtracks.size(); i++){
-		  trks.push_back(chargedtracks[i]->dChargedTrackHypotheses[0]->dTrackTimeBased);
+		  trks.push_back(chargedtracks[i]->Get_BestFOM());
 		}
 	}	
 	if(name=="DTrackTimeBased"){
@@ -869,11 +1101,11 @@ void MyProcessor::UpdateTrackLabels(void)
 		if(loop)loop->Get(candidates, tag.c_str());
 		for(unsigned int i=0; i<candidates.size(); i++)trks.push_back(candidates[i]);
 	}
-	if(name=="DNeutralTrack"){
-		vector<const DNeutralTrack*> photons;
+	if(name=="DNeutralParticle"){
+		vector<const DNeutralParticle*> photons;
 		if(loop)loop->Get(photons, tag.c_str());
 		for(unsigned int i=0; i<photons.size(); i++) {
-		  trks.push_back(photons[i]->dNeutralTrackHypotheses[0]->dKinematicData);
+		  trks.push_back(photons[i]->Get_BestFOM());
 		}
 	}
 	if(name=="DTwoGammaFit"){
@@ -1003,7 +1235,11 @@ void MyProcessor::UpdateTrackLabels(void)
 	
 	// Have the pop-up window with the full particle list update it's labels
 	fulllistmf->UpdateTrackLabels(throwns, trks);
-}
+	debugermf->SetTrackCandidates(TrksCand);
+	debugermf->SetTrackWireBased(TrksWireBased);
+	debugermf->SetTrackTimeBased(TrksTimeBased);
+	debugermf->UpdateTrackLabels();
+}                 
 
 //------------------------------------------------------------------
 // AddKinematicDataTrack 
@@ -1165,13 +1401,15 @@ _DBG__;
 	// Find the specified track	
 	if(dataname=="DChargedTrack"){
 		vector<const DChargedTrack*> chargedtracks;
+		vector<const DTrackTimeBased*> timebasedtracks;
 		loop->Get(chargedtracks, tag.c_str());
 		if(index>=chargedtracks.size())return;
-		q = chargedtracks[index]->dChargedTrackHypotheses[0]->dTrackTimeBased->charge();
-		pos = chargedtracks[index]->dChargedTrackHypotheses[0]->dTrackTimeBased->position();
-		mom = chargedtracks[index]->dChargedTrackHypotheses[0]->dTrackTimeBased->momentum();
-		chargedtracks[index]->dChargedTrackHypotheses[0]->dTrackTimeBased->Get(cdchits);
-		mass = chargedtracks[index]->dChargedTrackHypotheses[0]->dTrackTimeBased->mass();
+		q = chargedtracks[index]->Get_Charge();
+		pos = chargedtracks[index]->Get_BestFOM()->position();
+		mom = chargedtracks[index]->Get_BestFOM()->momentum();
+		chargedtracks[index]->Get_BestFOM()->GetT(timebasedtracks);
+		timebasedtracks[0]->Get(cdchits);
+		mass = chargedtracks[index]->Get_BestFOM()->mass();
 	}
 
 	if(dataname=="DTrackTimeBased"){

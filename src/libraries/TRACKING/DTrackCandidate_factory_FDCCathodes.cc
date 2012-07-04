@@ -9,7 +9,6 @@
 
 #include "DTrackCandidate_factory_FDCCathodes.h"
 #include "DANA/DApplication.h"
-#include "DMagneticFieldStepper.h"
 #include "FDC/DFDCPseudo_factory.h"
 #include "FDC/DFDCSegment_factory.h"
 #include "DHelicalFit.h"
@@ -22,11 +21,8 @@
 #define MAX_SEGMENTS 20
 #define HALF_PACKAGE 6.0
 #define FDC_OUTER_RADIUS 50.0 
-#define BEAM_VAR 0.001 // cm^2
+#define BEAM_VAR 1.0 // cm^2
 #define HIT_CHI2_CUT 10.0
-#define Z_VERTEX 65.0
-#define Z_MAX 85.0
-#define Z_MIN 45.0
 
 ///
 /// DTrackCandidate_factory_FDCCathodes::brun():
@@ -36,11 +32,18 @@ jerror_t DTrackCandidate_factory_FDCCathodes::brun(JEventLoop* eventLoop,
   DApplication* dapp=dynamic_cast<DApplication*>(eventLoop->GetJApplication());
   bfield = dapp->GetBfield();
   const DGeometry *dgeom  = dapp->GetDGeometry(runnumber);
-  dgeom->GetFDCZ(z_wires); 
+  
+  USE_FDC=true;
+  if (!dgeom->GetFDCZ(z_wires)){
+    _DBG_<< "FDC geometry not available!" <<endl;
+    USE_FDC=false;
+  }
+
   // Get the position of the CDC downstream endplate from DGeometry
   double endplate_dz,endplate_rmin,endplate_rmax;
   dgeom->GetCDCEndplate(endplate_z,endplate_dz,endplate_rmin,endplate_rmax);
   endplate_z+=endplate_dz;
+  dgeom->GetTargetZ(TARGET_Z);
 
   DEBUG_HISTS=false;
   gPARMS->SetDefaultParameter("TRKFIND:DEBUG_HISTS", DEBUG_HISTS);
@@ -55,11 +58,15 @@ jerror_t DTrackCandidate_factory_FDCCathodes::brun(JEventLoop* eventLoop,
     dapp->Unlock();
   }
     
+  // Initialize the stepper
+  stepper=new DMagneticFieldStepper(bfield);
+  stepper->SetStepSize(1.0);
+
   return NOERROR;
 }
 
 // Local routine for sorting segments by charge and curvature
-bool DTrackCandidate_segment_cmp(const DFDCSegment *a, const DFDCSegment *b){
+inline bool DTrackCandidate_segment_cmp(const DFDCSegment *a, const DFDCSegment *b){
   //  double k1=a->S(0,0),k2=b->S(0,0);
   //double q1=k1/fabs(k1),q2=k2/fabs(k2);
   //if (q1!=q2) return q1<q2;
@@ -73,6 +80,8 @@ bool DTrackCandidate_segment_cmp(const DFDCSegment *a, const DFDCSegment *b){
 //------------------
 jerror_t DTrackCandidate_factory_FDCCathodes::evnt(JEventLoop *loop, int eventnumber)
 {
+  if (!USE_FDC) return NOERROR;
+
   vector<const DFDCSegment*>segments;
   eventLoop->Get(segments);
   // abort if there are no segments
@@ -81,7 +90,8 @@ jerror_t DTrackCandidate_factory_FDCCathodes::evnt(JEventLoop *loop, int eventnu
   std::sort(segments.begin(), segments.end(), DTrackCandidate_segment_cmp);
 
   // Group segments by package
-  vector<DFDCSegment*>package[4]; 
+  vector<DFDCSegment*>package[4];
+  
   for (unsigned int i=0;i<segments.size();i++){
      const DFDCSegment *segment=segments[i];
  package[(segment->hits[0]->wire->layer-1)/6].push_back((DFDCSegment*)segment);
@@ -112,7 +122,7 @@ jerror_t DTrackCandidate_factory_FDCCathodes::evnt(JEventLoop *loop, int eventnu
     for (unsigned int i=0;i<package[0].size();i++){
       DFDCSegment *segment=package[0][i];
       match2=match3=match4=NULL;
-      
+
       // Tracking parameters from first segment
       tanl=segment->tanl;
       phi0=segment->phi0;
@@ -122,7 +132,8 @@ jerror_t DTrackCandidate_factory_FDCCathodes::evnt(JEventLoop *loop, int eventnu
       rc=segment->rc;
       // Sign of the charge
       q=segment->q;
-      
+      stepper->SetCharge(q);
+
       //double qsum=q;
       //unsigned int num_q=1;
 
@@ -236,12 +247,15 @@ jerror_t DTrackCandidate_factory_FDCCathodes::evnt(JEventLoop *loop, int eventnu
 	pack1_matched[i]=1;
 
 	DHelicalFit fit;
+	double max_r=0.;
 	if (segment){ 
 	  for (unsigned int n=0;n<segment->hits.size();n++){
 	    const DFDCPseudo *hit=segment->hits[n];
 	    fit.AddHit(hit);
 	    Bz_avg-=bfield->GetBz(hit->xy.X(),hit->xy.Y(),
 				  hit->wire->origin.z());
+	    double r=hit->xy.Mod();
+	    if (r>max_r) max_r=r;
 	  }
 	}
 	if (match2){
@@ -249,7 +263,9 @@ jerror_t DTrackCandidate_factory_FDCCathodes::evnt(JEventLoop *loop, int eventnu
 	    const DFDCPseudo *hit=match2->hits[n];
 	    fit.AddHit(hit);
 	    Bz_avg-=bfield->GetBz(hit->xy.X(),hit->xy.Y(),
-				  hit->wire->origin.z());	    
+				  hit->wire->origin.z());
+	    double r=hit->xy.Mod();
+	    if (r>max_r) max_r=r;
 	  }
 	  num_hits+=match2->hits.size();
 	}
@@ -259,6 +275,8 @@ jerror_t DTrackCandidate_factory_FDCCathodes::evnt(JEventLoop *loop, int eventnu
 	    fit.AddHit(hit);
 	    Bz_avg-=bfield->GetBz(hit->xy.X(),hit->xy.Y(),
 				  hit->wire->origin.z());
+	    double r=hit->xy.Mod();
+	    if (r>max_r) max_r=r;
 	  }
 	  num_hits+=match3->hits.size();
 	}
@@ -268,11 +286,13 @@ jerror_t DTrackCandidate_factory_FDCCathodes::evnt(JEventLoop *loop, int eventnu
 	    fit.AddHit(hit);
 	    Bz_avg-=bfield->GetBz(hit->xy.X(),hit->xy.Y(),
 				  hit->wire->origin.z());
+	    double r=hit->xy.Mod();
+	    if (r>max_r) max_r=r;
 	  }
 	  num_hits+=match4->hits.size();
 	}
 	// Fake point at origin
-	//fit.AddHitXYZ(0.,0.,Z_VERTEX,BEAM_VAR,BEAM_VAR,0.);
+	if (max_r<10) fit.AddHitXYZ(0.,0.,TARGET_Z,BEAM_VAR,BEAM_VAR,0.);
 	if (fit.FitCircleAndLineRiemann(mysegments[0]->rc)==NOERROR){      
 	  // Charge
 	  //if (q==0) 
@@ -474,7 +494,8 @@ jerror_t DTrackCandidate_factory_FDCCathodes::evnt(JEventLoop *loop, int eventnu
       rc=segment->rc;
       // Sign of the charge
       q=segment->q;
-      
+      stepper->SetCharge(q);
+
       //double qsum=q;
       
       // Start filling vector of segments belonging to current track    
@@ -525,15 +546,18 @@ jerror_t DTrackCandidate_factory_FDCCathodes::evnt(JEventLoop *loop, int eventnu
       // Variables for determining average Bz
       double Bz_avg=0.;
       unsigned int num_hits=segment->hits.size();
-
+ 
       if (mysegments.size()>1){
 	DHelicalFit fit;
+	double max_r=0.;
 	if (segment){ 
 	  for (unsigned int n=0;n<segment->hits.size();n++){
 	    const DFDCPseudo *hit=segment->hits[n];
 	    fit.AddHit(hit);
 	    Bz_avg-=bfield->GetBz(hit->xy.X(),hit->xy.Y(),
 				  hit->wire->origin.z());
+	    double r=hit->xy.Mod();
+	    if (r>max_r) max_r=r;
 	  }
 	}
 	if (match3){
@@ -541,7 +565,9 @@ jerror_t DTrackCandidate_factory_FDCCathodes::evnt(JEventLoop *loop, int eventnu
 	    const DFDCPseudo *hit=match3->hits[n];
 	    fit.AddHit(hit);
 	    Bz_avg-=bfield->GetBz(hit->xy.X(),hit->xy.Y(),
-				  hit->wire->origin.z());	    
+				  hit->wire->origin.z()); 
+	    double r=hit->xy.Mod();
+	    if (r>max_r) max_r=r;	    
 	  }
 	  num_hits+=match3->hits.size();
 	}
@@ -556,11 +582,14 @@ jerror_t DTrackCandidate_factory_FDCCathodes::evnt(JEventLoop *loop, int eventnu
 	    double z=hit->wire->origin.z();
 	    fit.AddHitXYZ(x,y,z,covxx,covyy,covxy);  
 	    Bz_avg-=bfield->GetBz(x,y,z);
+
+	    double r=hit->xy.Mod();
+	    if (r>max_r) max_r=r;
 	  }
 	  num_hits+=match4->hits.size();
 	}
 	// Fake point at origin
-	//fit.AddHitXYZ(0.,0.,Z_VERTEX,BEAM_VAR,BEAM_VAR,0.);
+	if (max_r<10) fit.AddHitXYZ(0.,0.,TARGET_Z,BEAM_VAR,BEAM_VAR,0.);
 	if (fit.FitCircleAndLineRiemann(mysegments[0]->rc)==NOERROR){
 	  // Charge
 	  //if (q==0) 
@@ -652,7 +681,7 @@ jerror_t DTrackCandidate_factory_FDCCathodes::evnt(JEventLoop *loop, int eventnu
 	double ratio=segment->hits[0]->xy.Mod()/(2.*rc);
 	if (ratio<1.){
 	  double sperp=2.*rc*asin(ratio);
-	  tanl=(segment->hits[0]->wire->origin.z()-Z_VERTEX)/sperp;
+	  tanl=(segment->hits[0]->wire->origin.z()-TARGET_Z)/sperp;
 	}
       }		
 
@@ -705,6 +734,7 @@ jerror_t DTrackCandidate_factory_FDCCathodes::evnt(JEventLoop *loop, int eventnu
       rc=segment->rc;
       // Sign of the charge
       q=segment->q;
+      stepper->SetCharge(q);
 
       // Start filling vector of segments belonging to current track    
       vector<DFDCSegment*>mysegments; 
@@ -734,17 +764,20 @@ jerror_t DTrackCandidate_factory_FDCCathodes::evnt(JEventLoop *loop, int eventnu
           
       if (mysegments.size()>1){
 	DHelicalFit fit;
+	double max_r=0.;
 	for (unsigned int m=0;m<mysegments.size();m++){
 	  for (unsigned int n=0;n<mysegments[m]->hits.size();n++){
 	    const DFDCPseudo *hit=mysegments[m]->hits[n];
 	    fit.AddHit(hit);
 	    Bz_avg-=bfield->GetBz(hit->xy.X(),hit->xy.Y(),
 				  hit->wire->origin.z());	    
+	    double r=hit->xy.Mod();
+	    if (r>max_r) max_r=r;
 	  }
 	  num_hits+=mysegments[m]->hits.size();
 	}
 	// Fake point at origin
-	//fit.AddHitXYZ(0.,0.,Z_VERTEX,BEAM_VAR,BEAM_VAR,0.);
+	if (max_r<10) fit.AddHitXYZ(0.,0.,TARGET_Z,BEAM_VAR,BEAM_VAR,0.);
 	if (fit.FitCircleAndLineRiemann(mysegments[0]->rc)==NOERROR){     	
 	  // Charge
 	  //if (q==0) 
@@ -837,7 +870,7 @@ jerror_t DTrackCandidate_factory_FDCCathodes::evnt(JEventLoop *loop, int eventnu
 	double ratio=segment->hits[0]->xy.Mod()/(2.*rc);
 	if (ratio<1.){
 	  double sperp=2.*rc*asin(ratio);
-	  tanl=(segment->hits[0]->wire->origin.z()-Z_VERTEX)/sperp;
+	  tanl=(segment->hits[0]->wire->origin.z()-TARGET_Z)/sperp;
 	}
       }	
      
@@ -893,7 +926,7 @@ jerror_t DTrackCandidate_factory_FDCCathodes::evnt(JEventLoop *loop, int eventnu
       double ratio=segment->hits[0]->xy.Mod()/(2.*rc);
       if (ratio<1.){
 	double sperp=2.*rc*asin(ratio);
-	tanl=(segment->hits[0]->wire->origin.z()-Z_VERTEX)/sperp;
+	tanl=(segment->hits[0]->wire->origin.z()-TARGET_Z)/sperp;
       }
     }	
     
@@ -971,11 +1004,7 @@ DFDCSegment *DTrackCandidate_factory_FDCCathodes::GetTrackMatch(double z,
 						 vector<DFDCSegment*>package,
 						 unsigned int &match_id){
   DFDCSegment *match=NULL;
-  DVector3 norm;  // normal to FDC planes
-  norm.SetXYZ(0.,0.,1.);
-
-  // Initialize the stepper 
-  DMagneticFieldStepper stepper(bfield, q); 
+  DVector3 norm(0.,0.,1.);  // normal to FDC planes
 
   // Get the position and momentum at the exit of the package for the 
   // current segment
@@ -983,16 +1012,20 @@ DFDCSegment *DTrackCandidate_factory_FDCCathodes::GetTrackMatch(double z,
   if (GetPositionAndMomentum(segment,pos,mom)!=NOERROR) return NULL;
   if (z<pos.z()) mom=-1.0*mom;
 
+  // magnitude of momentum
+  double p=mom.Mag();
+
   // Match to the next package by swimming the track through the field
   double diff_min=1000.,diff;
-  if (stepper.SwimToPlane(pos,mom,origin,norm,NULL)==false){
+  if (stepper->SwimToPlane(pos,mom,origin,norm,NULL)==false){
     for (unsigned int j=0;j<package.size();j++){
       DFDCSegment *segment2=package[j];
+      unsigned int index=segment2->hits.size()-1;
  
-      double x2=segment2->hits[segment2->hits.size()-1]->xy.X();
-      double y2=segment2->hits[segment2->hits.size()-1]->xy.Y();
-      diff=sqrt((pos.x()-x2)*(pos.x()-x2)+(pos.y()-y2)*(pos.y()-y2));
-      if (diff<diff_min&&diff<MATCH_RADIUS(mom.Mag())){
+      double dx=pos.x()-segment2->hits[index]->xy.X();
+      double dy=pos.y()-segment2->hits[index]->xy.Y();
+      diff=sqrt(dx*dx+dy*dy);
+      if (diff<diff_min&&diff<MATCH_RADIUS(p)){
 	diff_min=diff;
 	match=segment2;
 	match_id=j;
@@ -1009,11 +1042,11 @@ DFDCSegment *DTrackCandidate_factory_FDCCathodes::GetTrackMatch(double z,
       if (GetPositionAndMomentum(segment2,pos,mom)==NOERROR){
         mom=-1.0*mom;
         origin.SetZ(segment->hits[0]->wire->origin.z());
-        if (stepper.SwimToPlane(pos,mom,origin,norm,NULL)==false){
-          double x2=segment->hits[0]->xy.X();
-          double y2=segment->hits[0]->xy.Y();
-          diff=sqrt((pos.x()-x2)*(pos.x()-x2)+(pos.y()-y2)*(pos.y()-y2));
-          if (diff<diff_min&&diff<MATCH_RADIUS(mom.Mag())){
+        if (stepper->SwimToPlane(pos,mom,origin,norm,NULL)==false){
+          double dx=pos.x()-segment->hits[0]->xy.X();
+          double dy=pos.y()-segment->hits[0]->xy.Y();
+          diff=sqrt(dx*dx+dy*dy);
+          if (diff<diff_min&&diff<MATCH_RADIUS(p)){
 	    diff_min=diff;
 	    match=segment2;
             match_id=i;
@@ -1042,11 +1075,12 @@ DFDCSegment *DTrackCandidate_factory_FDCCathodes::GetTrackMatch(double z,
     
     for (unsigned int j=0;j<package.size();j++){
       DFDCSegment *segment2=package[j];
+      unsigned int index=segment2->hits.size()-1;
  
-      double x2=segment2->hits[segment2->hits.size()-1]->xy.X();
-      double y2=segment2->hits[segment2->hits.size()-1]->xy.Y();
-      diff=sqrt((pos.x()-x2)*(pos.x()-x2)+(pos.y()-y2)*(pos.y()-y2));
-      if (diff<diff_min&&diff<MATCH_RADIUS(mom.Mag())){
+      double dx=pos.x()-segment2->hits[index]->xy.X();
+      double dy=pos.y()-segment2->hits[index]->xy.Y();
+      diff=sqrt(dx*dx+dy*dy);
+      if (diff<diff_min&&diff<MATCH_RADIUS(p)){
 	diff_min=diff;
 	match=segment2;
 	match_id=j;
@@ -1069,11 +1103,11 @@ DFDCSegment *DTrackCandidate_factory_FDCCathodes::GetTrackMatch(double z,
       if (GetPositionAndMomentum(segment2,pos,mom)==NOERROR){
         mom=-1.0*mom;
         origin.SetZ(segment->hits[0]->wire->origin.z());
-        if (stepper.SwimToPlane(pos,mom,origin,norm,NULL)==false){
-          double x2=segment->hits[0]->xy.X();
-          double y2=segment->hits[0]->xy.Y();
-          diff=sqrt((pos.x()-x2)*(pos.x()-x2)+(pos.y()-y2)*(pos.y()-y2));
-          if (diff<diff_min&&diff<MATCH_RADIUS(mom.Mag())){
+        if (stepper->SwimToPlane(pos,mom,origin,norm,NULL)==false){
+          double dx=pos.x()-segment->hits[0]->xy.X();
+          double dy=pos.y()-segment->hits[0]->xy.Y();
+          diff=sqrt(dx*dx+dy*dy);
+          if (diff<diff_min&&diff<MATCH_RADIUS(p)){
 	    diff_min=diff;
 	    match=segment2;
             match_id=i;
@@ -1086,7 +1120,7 @@ DFDCSegment *DTrackCandidate_factory_FDCCathodes::GetTrackMatch(double z,
   }
 
   if(DEBUG_HISTS){
-    match_dist_fdc->Fill(mom.Mag(),diff_min);
+    match_dist_fdc->Fill(p,diff_min);
   }
   return match;
 }

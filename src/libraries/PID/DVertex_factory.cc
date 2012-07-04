@@ -44,6 +44,10 @@ jerror_t DVertex_factory::brun(jana::JEventLoop *loop, int runnumber)
   gPARMS->SetDefaultParameter("PID:GROUP_NUM_SIGMAS_Z"   , GROUP_NUM_SIGMAS_Z   , "Number of sigmas particles (tracks and or photons) can be apart in z and still be associated with same vertex");
   gPARMS->SetDefaultParameter("PID:DEBUG_HISTS"   , DEBUG_HISTS   , "Enable generation and filling if PID related debugging histos");
 
+  VERTEX_AVG_CL_THRES=0.01;
+  gPARMS->SetDefaultParameter("PID:VERTEX_AVG_CL_THRES", VERTEX_AVG_CL_THRES, 
+			      "Track fit CL threshold for including in vertex averaging");
+
   // Specify the size of the vertexInfo pool.
   // This is not a strict limit. Rather, it is the size the pool will be reduced
   // to if it has grown larger on the previous event and the current event does
@@ -104,9 +108,9 @@ jerror_t DVertex_factory::evnt(JEventLoop *loop, int eventnumber)
 
 	// If no vertices but neutral showers present, create vertex at center of target
 	if(_data.size() == 0){
-		vector<const DNeutralShowerCandidate *> locNeutralShowerCandidates;
-		loop->Get(locNeutralShowerCandidates);
-		if(locNeutralShowerCandidates.size() > 0){ //use center of target
+		vector<const DNeutralShower *> locNeutralShowers;
+		loop->Get(locNeutralShowers);
+		if(locNeutralShowers.size() > 0){ //use center of target
 			DVertex *locVertex = new DVertex;
 			locVertex->dTimeUncertainty = 0.0;
 			DLorentzVector locSpacetimeVertex(0.0, 0.0, dTargetCenter_Z, 0.0);
@@ -140,14 +144,13 @@ jerror_t DVertex_factory::MakeVertices(vector<const DChargedTrack*> &locChargedT
 	unsigned int loc_i, loc_j;
 	// Vector to hold list of vertexInfo_t objects for all charged tracks
 	vector<vertexInfo_t*> locVertexInfos;
-	const DTrackTimeBased *locTrackTimeBased;
 
 	// Assign and fill vertexInfo_t objects for each charged track
 	for(loc_i = 0; loc_i < locChargedTracks.size(); loc_i++){
-		vertexInfo_t *locVertexInfo = dVertexInfoPool[locVertexInfos.size()];
-		// Use the fit result with the highest figure of merit
-		FillVertexInfoChargedTrack(locVertexInfo, locChargedTracks[loc_i]);
-		locVertexInfos.push_back(locVertexInfo);
+	  vertexInfo_t *locVertexInfo = dVertexInfoPool[locVertexInfos.size()];
+	  // Use the fit result with the highest figure of merit
+	  FillVertexInfoChargedTrack(locVertexInfo, locChargedTracks[loc_i]);
+	  locVertexInfos.push_back(locVertexInfo);
 	}
 	// Group tracks together
 	vector< vector<vertexInfo_t *> > locVertexInfoGroups;
@@ -163,17 +166,36 @@ jerror_t DVertex_factory::MakeVertices(vector<const DChargedTrack*> &locChargedT
 
 		// Simply average POCA to beamline for all tracks	
 		DVector3 temp;
-		double t0 = 0.;
+		double t0 = 0., NgoodTracks=0;
 		double sum_invar = 0.0, invar = 0.0;
+		
 		for(loc_j = 0; loc_j < locVertexInfoGroup.size(); loc_j++){
-			locTrackTimeBased = locVertexInfoGroup[loc_j]->dChargedTrack->dChargedTrackHypotheses[0]->dTrackTimeBased;	 
-			invar = 1.0/(locVertexInfoGroup[loc_j]->sigmat*locVertexInfoGroup[loc_j]->sigmat);
-			sum_invar += invar;
-			t0 += locVertexInfoGroup[loc_j]->t*invar;
-			temp += locTrackTimeBased->position();
+
+		  bool isQualityTrack=false;
+		  for(unsigned int loc_k=0 ; loc_k < locVertexInfoGroup[loc_j]->
+			dChargedTrack->dChargedTrackHypotheses.size() && !isQualityTrack; ++loc_k){
+		    const DChargedTrackHypothesis *hypo=locVertexInfoGroup[loc_j]
+		      ->dChargedTrack->dChargedTrackHypotheses[loc_k];
+
+		    if( TMath::Prob(hypo->dChiSq, hypo->dNDF) > VERTEX_AVG_CL_THRES ) 
+		      isQualityTrack=true;
+
+		    
+		  }
+		  if(!isQualityTrack) continue;
+
+		  NgoodTracks++;
+		  invar = 1.0/(locVertexInfoGroup[loc_j]->sigmat*locVertexInfoGroup[loc_j]->sigmat);
+		  sum_invar += invar;
+		  t0 += locVertexInfoGroup[loc_j]->t*invar;
+		  temp += locVertexInfoGroup[loc_j]->dChargedTrack->dChargedTrackHypotheses[0]->position();
 		}
+
+		if(NgoodTracks<0.5) continue;
+		
 		t0 *= 1.0/sum_invar;
-		temp *= 1.0/double(locVertexInfoGroup.size());
+		//temp *= 1.0/double(locVertexInfoGroup.size());
+		temp *= 1.0/NgoodTracks;
 		locVertex->dSpacetimeVertex.SetVect(temp);
 		locVertex->dSpacetimeVertex.SetT(t0);
 		locVertex->dTimeUncertainty = 0.; // <------ this needs to be fixed
@@ -194,12 +216,12 @@ void DVertex_factory::FillVertexInfoChargedTrack(DVertex_factory::vertexInfo_t *
 {
 	locVertexInfo->Reset();
 	locVertexInfo->dChargedTrack = locChargedTrack;
-	const DTrackTimeBased *locTimeBasedTrack = locChargedTrack->dChargedTrackHypotheses[0]->dTrackTimeBased;
+	const DChargedTrackHypothesis* locChargedTrackHypothesis = locChargedTrack->dChargedTrackHypotheses[0];
 
-	locVertexInfo->t = locTimeBasedTrack->t0();
-	locVertexInfo->sigmat = locTimeBasedTrack->t0_err();
-	locVertexInfo->z = locTimeBasedTrack->z();
-	locVertexInfo->sigmaz = 0.8/sin(locTimeBasedTrack->momentum().Theta()); // in cm.  For now, use 3mm wide angle track resolution scaled by sin(theta)
+	locVertexInfo->t = locChargedTrackHypothesis->t0();
+	locVertexInfo->sigmat = locChargedTrackHypothesis->t0_err();
+	locVertexInfo->z = locChargedTrackHypothesis->z();
+	locVertexInfo->sigmaz = 0.8/sin(locChargedTrackHypothesis->momentum().Theta()); // in cm.  For now, use 3mm wide angle track resolution scaled by sin(theta)
 
 	locVertexInfo->Fill(locVertexInfo->t, locVertexInfo->sigmat, locVertexInfo->z, locVertexInfo->sigmaz);
 }

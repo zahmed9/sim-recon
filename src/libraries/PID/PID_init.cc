@@ -11,14 +11,16 @@ using namespace jana;
 #include "DChargedTrack_factory.h"
 #include "DChargedTrackHypothesis_factory.h"
 #include "DChargedTruthMatch_factory.h"
-#include "DNeutralTrack_factory.h"
-#include "DNeutralTrackHypothesis_factory.h"
-#include "DNeutralShowerCandidate_factory.h"
+#include "DNeutralParticle_factory.h"
+#include "DNeutralParticleHypothesis_factory.h"
+#include "DNeutralShower_factory.h"
 #include "DVertexIndependentResults_factory.h"
 #include "DVertex_factory.h"
 #include "DVertex_factory_THROWN.h"
 #include "DPhysicsEvent_factory.h"
 #include "DParticleSet_factory.h"
+#include "DPiPlus_factory.h"
+#include "DPiMinus_factory.h"
 
 #include "DBeamPhoton.h"
 #include "DMCReaction.h"
@@ -39,14 +41,16 @@ jerror_t PID_init(JEventLoop *loop)
 	loop->AddFactory(new DChargedTrack_factory);
 	loop->AddFactory(new DChargedTrackHypothesis_factory);
 	loop->AddFactory(new DChargedTruthMatch_factory);
-	loop->AddFactory(new DNeutralTrack_factory);
-	loop->AddFactory(new DNeutralTrackHypothesis_factory);
-	loop->AddFactory(new DNeutralShowerCandidate_factory);
+	loop->AddFactory(new DNeutralParticle_factory);
+	loop->AddFactory(new DNeutralParticleHypothesis_factory);
+	loop->AddFactory(new DNeutralShower_factory);
 	loop->AddFactory(new DVertexIndependentResults_factory);
 	loop->AddFactory(new DVertex_factory);
 	loop->AddFactory(new DVertex_factory_THROWN);
 	loop->AddFactory(new DParticleSet_factory);
 	loop->AddFactory(new DPhysicsEvent_factory);
+	loop->AddFactory(new DPiPlus_factory);
+	loop->AddFactory(new DPiMinus_factory);
 
 	return NOERROR;
 }

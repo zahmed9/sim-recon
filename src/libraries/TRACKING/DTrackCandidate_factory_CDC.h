@@ -94,6 +94,7 @@ class DTrackCandidate_factory_CDC:public JFactory<DTrackCandidate>{
 				vector<DCDCTrkHit*> hits;
 				vector<DCDCTrkHit> stereo_hits;
 				vector<const DFDCPseudo*> fdchits;
+				vector<unsigned int>HitBitPattern;
 				double phi_avg;
 				double tdrift_avg;
 				bool linked;
@@ -124,7 +125,7 @@ class DTrackCandidate_factory_CDC:public JFactory<DTrackCandidate>{
 		
 		typedef vector<vector<DCDCSeed > >::iterator ringiter;
 		
-		jerror_t GetCDCHits(JEventLoop *loop);
+		jerror_t GetCDCHits(JEventLoop *loop,unsigned int &numhits);
 		void FindSeeds(vector<DCDCTrkHit*> &hits, vector<DCDCSeed> &seeds);
 		void LinkSubSeeds(vector<DCDCSeed*> &parent, ringiter ring, ringiter ringend, vector<DCDCSeed> &seeds);
 		void LinkSeeds(vector<DCDCSeed> &in_seeds1, vector<DCDCSeed> &in_seeds2, vector<DCDCSeed> &seeds, unsigned int max_linked_hits);
@@ -147,8 +148,7 @@ class DTrackCandidate_factory_CDC:public JFactory<DTrackCandidate>{
 
 		vector<int> superlayer_boundaries;
 
-		const DMagneticFieldMap *bfield;
-		 
+		const DMagneticFieldMap *bfield; 
 
 		unsigned int MAX_ALLOWED_CDC_HITS;
 		unsigned int MAX_SUBSEED_STRAW_DIFF;
@@ -161,9 +161,11 @@ class DTrackCandidate_factory_CDC:public JFactory<DTrackCandidate>{
 		double MAX_CDC_MATCH_ANGLE; // degrees
 		double MAX_FDC_MATCH_ANGLE; // degrees
 		double MAX_SEED_LINK_ANGLE;
+		double TARGET_Z;
 		double TARGET_Z_MIN;
 		double TARGET_Z_MAX;
 		int DEBUG_LEVEL;
+		bool FILTER_SEEDS;
 };
 
 #endif // _DTrackCandidate_factory_CDC_
