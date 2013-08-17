@@ -19,8 +19,8 @@ public:
   // create an index for different histograms
   enum { kHist1 = 0, kNumHists };
   
-  ThreePiPlotGenerator( AmpToolsInterface& ati );
-    
+  ThreePiPlotGenerator( const FitResults& results );
+ 
 private:
         
   void projectEvent( Kinematics* kin );

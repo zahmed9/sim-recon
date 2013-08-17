@@ -3,8 +3,8 @@
 #include "IUAmpTools/Histogram.h"
 #include "IUAmpTools/Kinematics.h"
 
-ThreePiPlotGenerator::ThreePiPlotGenerator( AmpToolsInterface& ati ) :
-PlotGenerator( ati )
+ThreePiPlotGenerator::ThreePiPlotGenerator( const FitResults& results ) :
+PlotGenerator( results )
 {
   // calls to bookHistogram go here
 
