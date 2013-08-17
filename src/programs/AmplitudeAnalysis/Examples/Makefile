@@ -1,3 +1,3 @@
-DIRS += threepi_binned threepi_all
+DIRS += threepi_binned
 
 include $(HALLD_HOME)/src/BMS/Makefile.dirs
