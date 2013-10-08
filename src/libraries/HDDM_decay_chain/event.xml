@@ -14,7 +14,7 @@
         <properties charge="int" mass="float"/>
       </target>
       <vertex maxOccurs="unbounded">
-        <product decayVertex="int" id="int" maxOccurs="unbounded" mech="int" parentid="int" pdgtype="int" type="Particle_t">
+        <product decayVertex="int" id="int" geantId="int" maxOccurs="unbounded" mech="int" parentid="int" pdgtype="int" type="Particle_t">
           <momentum E="float" px="float" py="float" pz="float"/>
           <properties minOccurs="0" charge="int" mass="float"/>
         </product>
