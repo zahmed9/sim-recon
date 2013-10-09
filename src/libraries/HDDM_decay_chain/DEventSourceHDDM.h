@@ -7,6 +7,7 @@
 //
 // Changes:	Oct 3, 2012 Yi Qiang: add classes for Cerenkov detector
 //			OCt 10, 2012 Yi Qiang: modifed Cerenkov classes with general Cere hits
+//			Oct 8, 2013 Yi Qiang: added dedicated object for RICH Truth Hit
 //
 
 #ifndef _JEVENT_SOURCEHDDM_H_
@@ -42,8 +43,8 @@ using namespace std;
 #include "CCAL/DCCALTruthShower.h"
 #include "CCAL/DCCALHit.h"
 #include "TOF/DTOFTruth.h"
-#include "TOF/DTOFRawHit.h"
-#include "TOF/DTOFRawHitMC.h"
+#include "TOF/DTOFHit.h"
+#include "TOF/DTOFHitMC.h"
 #include "START_COUNTER/DSCTruthHit.h"
 #include "START_COUNTER/DSCHit.h"
 #include <PID/DMCReaction.h>
@@ -52,8 +53,10 @@ using namespace std;
 #include <TAGGER/DTagger.h>
 // load CERE headers, yqiang Oct 3, 2012
 // modified by yqiang, Oct 10 2012
+// added RichTruthHit object, yqiang, Oct 7, 2013
 #include <CERE/DCereHit.h>
 #include <RICH/DRichHit.h>
+#include <RICH/DRichTruthHit.h>
 
 class DEventSourceHDDM:public JEventSource
 {
@@ -96,8 +99,8 @@ class DEventSourceHDDM:public JEventSource
 		jerror_t Extract_DMCTrajectoryPoint(s_HDDM_t *hddm_s, JFactory<DMCTrajectoryPoint> *factory);
 		jerror_t Extract_DTOFTruth(s_HDDM_t *hddm_s,  JFactory<DTOFTruth> *factory);
 
-		jerror_t Extract_DTOFRawHit( s_HDDM_t *hddm_s,  JFactory<DTOFRawHit>* factory, JFactory<DTOFRawHitMC>* factoryMC,string tag);
-		jerror_t Extract_DTOFRawHitMC( s_HDDM_t *hddm_s,  JFactory<DTOFRawHitMC>* factoryMC, JFactory<DTOFRawHit>* factory,string tag);
+		jerror_t Extract_DTOFHit( s_HDDM_t *hddm_s,  JFactory<DTOFHit>* factory, JFactory<DTOFHitMC>* factoryMC,string tag);
+		jerror_t Extract_DTOFHitMC( s_HDDM_t *hddm_s,  JFactory<DTOFHitMC>* factoryMC, JFactory<DTOFHit>* factory,string tag);
 
 		jerror_t Extract_DSCHit(s_HDDM_t *hddm_s,  JFactory<DSCHit> *factory);
 		jerror_t Extract_DSCTruthHit(s_HDDM_t *hddm_s,  JFactory<DSCTruthHit> *factory);
@@ -111,9 +114,11 @@ class DEventSourceHDDM:public JEventSource
 
 		// add RICH hit and Truth, yqiang Oct 3, 2012
 		// modifed by yqiang, Oct 10 2012 now include both truth hits in DMCThrown
+		// Oct 8, 2013, added dedicated object for RICH truth hit
 		jerror_t GetRichTruthHits(s_HDDM_t *hddm_s, vector<DMCTrackHit*>& data);
 		jerror_t Extract_DCereHit(s_HDDM_t *hddm_s, JFactory<DCereHit> *factory);
 		jerror_t Extract_DRichHit(s_HDDM_t *hddm_s, JFactory<DRichHit> *factory);
+		jerror_t Extract_DRichTruthHit(s_HDDM_t *hddm_s, JFactory<DRichTruthHit> *factory);
 
 		s_iostream_t *fin;
 		s_HDDM_t *hddm_s;
