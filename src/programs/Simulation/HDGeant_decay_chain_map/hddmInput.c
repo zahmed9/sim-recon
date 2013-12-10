@@ -63,6 +63,8 @@
 #include <hddm_s.h>
 #include <geant3.h>
 
+#include "gid_map.h"
+
 void settofg_(float origin[3], float *time0);
 
 s_iostream_t* thisInputStream = 0;
@@ -192,7 +194,7 @@ int loadInput ()
             if (prod->decayVertex == 0)
             {
                gskine_(p, &kind, &nvtx, &ubuf, &nubuf, &ntrk);
-	       prod->geantId = ntrk;
+	       gidSet(ntrk, ip + 1);
             }
          }
       }
@@ -270,7 +272,7 @@ int storeInput (int runNo, int eventNo, int ntracks)
       ps->in[ps->mult].type = kind;
       ps->in[ps->mult].pdgtype = 0;	/* don't bother with the PDG type here */
       ps->in[ps->mult].id = itra;	/* unique value for this particle within the event */
-      ps->in[ps->mult].geantId = itra;	/* assume same value for geant id */
+      gidSet(itra, itra);	        /* assume same value for geant id */
       ps->in[ps->mult].parentid = 0;	/* All internally generated particles have no parent */
       ps->in[ps->mult].mech = 0;	/* maybe this should be set to something? */
       ps->in[ps->mult].momentum = make_s_Momentum();

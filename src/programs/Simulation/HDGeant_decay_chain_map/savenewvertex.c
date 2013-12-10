@@ -12,6 +12,7 @@ savenewvertex: particle stoped because it decayed
 
 #include <hddm_s.h>
 #include <geant3.h>
+#include "gid_map.h"
 
 extern s_HDDM_t* thisInputEvent;
 
@@ -61,12 +62,12 @@ void SaveNewVertex(int kcase, int Npart, float *gkin,
     ps->in[i].momentum->E  = gkin[i*5+3];
     ps->in[i].type = gkin[i*5+4];
     ps->in[i].pdgtype = PDGtype(gkin[i*5+4]);
-    ps->in[i].parentid = getId(itra);
-    ps->in[i].id = thisId++;
-    ps->in[i].geantId = iflgk[i];
+    ps->in[i].parentid = gidGetId(itra);
+    ps->in[i].id = thisId;
     ps->in[i].mech = kcase;
     ps->in[i].decayVertex = VertexCount;
-
+    gidSet(iflgk[i], thisId);
+    thisId++;
   }
     
 }
@@ -110,35 +111,4 @@ int getLastId() {
     }
   }
   return maxId;
-}
-
-int getId(int geantId) {
-  int found = 0;
-  int id = 0;
-  s_Reactions_t* reacts;
-  int reactCount, ir;
-  reacts = thisInputEvent ->physicsEvents->in[0].reactions;
-  reactCount = reacts->mult;
-  for (ir = 0; ir < reactCount && !found; ir++) {
-    s_Vertices_t* verts;
-    int vertCount, iv;
-    s_Reaction_t* react = &reacts->in[ir];
-    verts = react->vertices;
-    vertCount = verts->mult;
-    for (iv = 0; iv < vertCount && !found; iv++) {
-      s_Products_t* prods;
-      int prodCount, ip;
-      s_Vertex_t* vert = &verts->in[iv];
-      prods = vert->products;
-      prodCount = prods->mult;
-      for (ip = 0; ip < prodCount && !found; ip++) {
-	s_Product_t* prod = &prods->in[ip];
-	if (prod->geantId == geantId) {
-	  id = prod->id;
-	  found = 1;
-	}
-      }
-    }
-  }
-  return id;
 }
