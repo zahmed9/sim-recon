@@ -2,11 +2,11 @@
 
 #include <stdio.h>
 
-#include "hddm_s.h"
+#include <HDDM/hddm_s.h>
 
 extern s_HDDM_t* thisOutputEvent;
 
-unsigned int Npoints;
+unsigned int Npoints=0;
 unsigned int Maxpoints;
 int last_track_num;
 int last_stack_num;
