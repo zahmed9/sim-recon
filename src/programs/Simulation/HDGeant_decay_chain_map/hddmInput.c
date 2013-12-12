@@ -60,7 +60,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <hddm_s.h>
+#include <HDDM/hddm_s.h>
 #include <geant3.h>
 
 #include "gid_map.h"
