@@ -61,7 +61,8 @@ static TH1F *tofEnergies;
 static TH1F *fcalEnergies;
 static TH1F *bcalEnergies;
 static TH1F *stEnergies;
-static TH1F *tagEnergies;
+static TH1F *tagmEnergies;
+static TH1F *tagfEnergies;
 
 static TH1F *fdcCharges;
 static TH1F *cdcCharges;
@@ -72,7 +73,8 @@ static TH1F *cdcTimes;
 static TH1F *fcalTimes;
 static TH1F *bcalTimes;
 static TH1F *stTimes;
-static TH1F *tagTimes;
+static TH1F *tagmTimes;
+static TH1F *tagfTimes;
 
 
 //  is this thread-safe?
@@ -310,7 +312,8 @@ jerror_t JEventProcessor_rawevent::init(void) {
     stEnergies   = new TH1F("ste",   "ST energies in keV",1000,0.,5000.);
     fcalEnergies = new TH1F("fcale", "FCAL energies in keV",1000,0.,500000.);
     bcalEnergies = new TH1F("bcale", "BCAL energies in keV",1000,0.,1000000.);
-    tagEnergies  = new TH1F("tage",  "Tagger energies in keV",1000,0.,40000.);
+    tagmEnergies = new TH1F("tagme", "Tagger microscope energies in keV",1000,0.,40000.);
+    tagfEnergies = new TH1F("tagfe", "Tagger fixed array energies in keV",1000,0.,40000.);
 
     fdcCharges   = new TH1F("fdcq",  "FDC charges in fC",1000,0.,1500.);
     cdcCharges   = new TH1F("cdcq",  "CDC charges in fC",1000,0.,25000.);
@@ -321,7 +324,8 @@ jerror_t JEventProcessor_rawevent::init(void) {
     cdcTimes     = new TH1F("cdct",  "CDC times in nsec",1000,0.,1000.-tMin/1000);
     bcalTimes    = new TH1F("bcalt", "BCAL times in nsec",1000,0.,200.-tMin/1000);
     fcalTimes    = new TH1F("fcalt", "FCAL times in nsec",1000,0.,200.-tMin/1000);
-    tagTimes     = new TH1F("tagt",  "Tagger times in nsec",1000,0.,250.-tMin/1000);
+    tagmTimes    = new TH1F("tagmt", "Tagger microscope times in nsec",1000,0.,250.-tMin/1000);
+    tagfTimes    = new TH1F("tagft", "Tagger fixed array times in nsec",1000,0.,250.-tMin/1000);
   }
 
   return NOERROR;
@@ -441,7 +445,7 @@ jerror_t JEventProcessor_rawevent::brun(JEventLoop *eventLoop, int runnumber) {
     }
   }
 
-  static bool compareDTaggerHits(const DTagger* h1, const DTagger* h2) {
+  static bool compareDTAGMHits(const DTAGMHit* h1, const DTAGMHit* h2) {
     if(h1->row!=h2->row) {
       return(h1->row<h2->row);
     } else if(h1->column!=h2->column) {
@@ -987,22 +991,22 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
   }
 
 
-  // DTagger - FADC250 and F1TDC32 (60 ps)
-  vector<const DTagger*> dtaggerhits;
-  eventLoop->Get(dtaggerhits);
-  sort(dtaggerhits.begin(),dtaggerhits.end(),compareDTaggerHits);
+  // DTAGM - FADC250 and F1TDC32 (60 ps)
+  vector<const DTAGMHit*> dtagmhits;
+  eventLoop->Get(dtagmhits);
+  sort(dtagmhits.begin(),dtagmhits.end(),compareDTAGMHits);
 
   hc=0;
-  for(i=0; i<dtaggerhits.size(); i++) {
-    if((dtaggerhits[i]->E>0)&&((dtaggerhits[i]->t*1000.)>tMin)&&(dtaggerhits[i]->t*1000.<trigTime)) {
+  for(i=0; i<dtagmhits.size(); i++) {
+    if((dtagmhits[i]->E>0)&&((dtagmhits[i]->t*1000.)>tMin)&&(dtagmhits[i]->t*1000.<trigTime)) {
 
-      uint32_t E     = dtaggerhits[i]->E*1000000.;    // in keV
-      uint32_t t     = dtaggerhits[i]->t*1000.-tMin;  // in picoseconds
+      uint32_t E     = dtagmhits[i]->E*1000000.;    // in keV
+      uint32_t t     = dtagmhits[i]->t*1000.-tMin;  // in picoseconds
 
-      if(noroot==0)tagEnergies->Fill(dtaggerhits[i]->E*1000000.);
-      if(noroot==0)tagTimes->Fill(dtaggerhits[i]->t-tMin/1000);
+      if(noroot==0)tagmEnergies->Fill(dtagmhits[i]->E*1000000.);
+      if(noroot==0)tagmTimes->Fill(dtagmhits[i]->t-tMin/1000);
 
-      cscRef cscADC      = DTaggerTranslationADC(dtaggerhits[i]);
+      cscRef cscADC      = DTAGMTranslationADC(dtagmhits[i]);
 	  if(!(cscADC == CSCREF_NULL)){
 		  hc++;
 		  hitCount++;
@@ -1022,7 +1026,8 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
 		  
 		  if(dumphits>1) {
 			jout << endl;
-			jout << " Tagger ADC row,column are " << dtaggerhits[i]->row << ", " << dtaggerhits[i]->column<< endl;
+			jout << " Tagger microscope ADC row,column are " 
+                             << dtagmhits[i]->row << ", " << dtagmhits[i]->column<< endl;
 			jout << " c,s,c are " << cscADC.crate << ", " << cscADC.slot << ", " << cscADC.channel << endl;
 			jout << " hdata is: " << hit[0].hdata[0] << ", " << hit[0].hdata[1] << endl;
 			jout << " E,t are " << E << ", " << t << endl;
@@ -1038,7 +1043,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
 		  }
 	  }
 
-      cscRef cscTDC      = DTaggerTranslationTDC(dtaggerhits[i]);
+      cscRef cscTDC      = DTAGMTranslationTDC(dtagmhits[i]);
 	  if(!(cscADC == CSCREF_NULL)){
 		  hitCount++;
 		  nhits=1;
@@ -1055,7 +1060,8 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
 		  
 		  if(dumphits>1) {
 			jout << endl;
-			jout << " Tagger TDC row,column are " << dtaggerhits[i]->row << ", " << dtaggerhits[i]->column << endl;
+			jout << " Tagger microscope TDC row,column are " 
+                             << dtagmhits[i]->row << ", " << dtagmhits[i]->column << endl;
 			jout << " c,s,c are " << cscTDC.crate << ", " << cscTDC.slot << ", " << cscTDC.channel << endl;
 			jout << " hdata is: " << hit[0].hdata[0] << endl;
 			jout << " E,t are " << E << ", " << t << endl;
@@ -1073,7 +1079,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
     }
   }
   if((dumphits>=1)&&(hc>0)) {
-    jout << endl << "Tagger hits: " << hc << endl << endl;
+    jout << endl << "Tagger microscope hits: " << hc << endl << endl;
   }
 
 
@@ -1710,7 +1716,7 @@ cscRef JEventProcessor_rawevent::DSTHitTranslationTDC(const DSCHit* hit) const {
 //----------------------------------------------------------------------------
 
 
-cscRef JEventProcessor_rawevent::DTaggerTranslationTDC(const DTagger* hit) const {
+cscRef JEventProcessor_rawevent::DTAGMHitTranslationTDC(const DTAGMHit* hit) const {
   // HDGeant always puts 0 for "row". Translation table has values 1-5 with summed columns being 1.
   // Add 1 to row for now to make it 1 corresponding to the one value the simulation produces.
   // Also, the HDGeant simulation of tagger hits uses an old design with 128 columns.
@@ -1725,7 +1731,7 @@ cscRef JEventProcessor_rawevent::DTaggerTranslationTDC(const DTagger* hit) const
 //----------------------------------------------------------------------------
 
 
-cscRef JEventProcessor_rawevent::DTaggerTranslationADC(const DTagger* hit) const {
+cscRef JEventProcessor_rawevent::DTAGMHitTranslationADC(const DTAGMHit* hit) const {
   // HDGeant always puts 0 for "row". Translation table has values 1-5 with summed columns being 1.
   // Add 1 to row for now to make it 1 corresponding to the one value the simulation produces.
   if( hit->column > 100) return CSCREF_NULL;
