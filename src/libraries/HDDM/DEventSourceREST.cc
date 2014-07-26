@@ -149,9 +149,15 @@ jerror_t DEventSourceREST::GetObjects(JEvent &event, JFactory_base *factory)
       return Extract_DMCThrown(record,
                      dynamic_cast<JFactory<DMCThrown>*>(factory));
    }
-   if (dataClassName =="DTagger") {
-      return Extract_DTagger(record,
-                     dynamic_cast<JFactory<DTagger>*>(factory));
+   if (dataClassName =="DTAGMHit") {
+      return Extract_DTAGMHit(record,
+                     dynamic_cast<JFactory<DTAGMHit>*>(factory),
+                     locEventLoop);
+   }
+   if (dataClassName =="DTAGFHit") {
+      return Extract_DTAGFHit(record,
+                     dynamic_cast<JFactory<DTAGFHit>*>(factory),
+                     locEventLoop);
    }
    if (dataClassName =="DTOFPoint") {
       return Extract_DTOFPoint(record,
@@ -359,10 +365,11 @@ jerror_t DEventSourceREST::Extract_DMCThrown(hddm_r::HDDM *record,
 }
 
 //------------------
-// Extract_DTagger
+// Extract_DTAGMHit
 //------------------
-jerror_t DEventSourceREST::Extract_DTagger(hddm_r::HDDM *record,
-                                   JFactory<DTagger>* factory)
+jerror_t DEventSourceREST::Extract_DTAGMHit(hddm_r::HDDM *record,
+                                   JFactory<DTAGMHit>* factory,
+                                   JEventLoop *eventLoop)
 {
    /// Copies the data from the taggerHit hddm record. This is called
    /// from JEventSourceREST::GetObjects. If factory is NULL, this
@@ -373,7 +380,12 @@ jerror_t DEventSourceREST::Extract_DTagger(hddm_r::HDDM *record,
    }
    string tag = (factory->Tag())? factory->Tag() : "";
 
-   vector<DTagger*> data;
+   vector<DTAGMHit*> data;
+   vector<const DTAGMGeometry*> tagmGeomVect;
+   eventLoop->Get( tagmGeomVect );
+   if (tagmGeomVect.size() < 1)
+      return OBJECT_NOT_AVAILABLE;
+   const DTAGMGeometry& tagmGeom = *(tagmGeomVect[0]);
 
    // loop over taggerHit records
    const hddm_r::TaggerHitList &tags = record->getTaggerHits();
@@ -382,12 +394,57 @@ jerror_t DEventSourceREST::Extract_DTagger(hddm_r::HDDM *record,
       if (iter->getJtag() != tag) {
          continue;
       }
-      DTagger *tagger = new DTagger();
-      tagger->E = iter->getE();
-      tagger->t = iter->getT();
-      tagger->row = 0;
-      tagger->column = 0;
-      data.push_back(tagger);
+      DTAGMHit *taghit = new DTAGMHit();
+      taghit->E = iter->getE();
+      taghit->t = iter->getT();
+      taghit->row = 0;
+      if (tagmGeom.E_to_column(taghit->E, taghit->column)) {
+         data.push_back(taghit);
+      }
+   }
+
+   // Copy into factory
+   factory->CopyTo(data);
+
+   return NOERROR;
+}
+
+//------------------
+// Extract_DTAGFHit
+//------------------
+jerror_t DEventSourceREST::Extract_DTAGFHit(hddm_r::HDDM *record,
+                                   JFactory<DTAGFHit>* factory,
+                                   JEventLoop *eventLoop)
+{
+   /// Copies the data from the taggerHit hddm record. This is called
+   /// from JEventSourceREST::GetObjects. If factory is NULL, this
+   /// returns OBJECT_NOT_AVAILABLE immediately.
+
+   if (factory==NULL) {
+      return OBJECT_NOT_AVAILABLE;
+   }
+   string tag = (factory->Tag())? factory->Tag() : "";
+
+   vector<DTAGFHit*> data;
+   vector<const DTAGFGeometry*> tagfGeomVect;
+   eventLoop->Get( tagfGeomVect );
+   if (tagfGeomVect.size() < 1)
+      return OBJECT_NOT_AVAILABLE;
+   const DTAGFGeometry& tagfGeom = *(tagfGeomVect[0]);
+
+   // loop over taggerHit records
+   const hddm_r::TaggerHitList &tags = record->getTaggerHits();
+   hddm_r::TaggerHitList::iterator iter;
+   for (iter = tags.begin(); iter != tags.end(); ++iter) {
+      if (iter->getJtag() != tag) {
+         continue;
+      }
+      DTAGFHit *taghit = new DTAGFHit();
+      taghit->E = iter->getE();
+      taghit->t = iter->getT();
+      if (tagfGeom.E_to_channel(taghit->E, taghit->channel)) {
+         data.push_back(taghit);
+      }
    }
 
    // Copy into factory
