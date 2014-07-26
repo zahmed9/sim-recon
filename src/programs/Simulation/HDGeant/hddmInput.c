@@ -194,8 +194,9 @@ int loadInput ()
             s_Product_t* prod = &prods->in[ip];
             kind = prod->type;
 				
-				/* Don't tell geant to track particles that are intermediary types */
-				if(kind<=0)continue;
+	    /* Don't tell geant to track particles that are intermediary types */
+	    if (kind <= 0)
+              continue;
 				
             p[0] = prod->momentum->px;
             p[1] = prod->momentum->py;
