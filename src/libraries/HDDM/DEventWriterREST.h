@@ -16,7 +16,8 @@
 
 #include "PID/DMCReaction.h"
 #include "TRACKING/DMCThrown.h"
-#include "TAGGER/DTagger.h"
+#include "TAGGER/DTAGMHit.h"
+#include "TAGGER/DTAGFHit.h"
 #include "FCAL/DFCALShower.h"
 #include "PID/DNeutralShower.h"
 #include <PID/DDetectorMatches.h>

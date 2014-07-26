@@ -78,14 +78,24 @@ bool DEventWriterREST::Write_RESTEvent(JEventLoop* locEventLoop, string locOutpu
 		}
 	}
 
-	// push any DTagger objects to the output record
-	std::vector<const DTagger*> taggerhits;
-	locEventLoop->Get(taggerhits);
-	for (size_t i=0; i < taggerhits.size(); i++)
+	// push any DTAGMHit objects to the output record
+	std::vector<const DTAGMHit*> microtags;
+	locEventLoop->Get(microtags);
+	for (size_t i=0; i < microtags.size(); i++)
 	{
 		hddm_r::TaggerHitList hit = res().addTaggerHits(1);
-		hit().setT(taggerhits[i]->t);
-		hit().setE(taggerhits[i]->E);
+		hit().setT(microtags[i]->t);
+		hit().setE(microtags[i]->E);
+	}
+
+	// push any DTAGFHit objects to the output record
+	std::vector<const DTAGFHit*> fixedtags;
+	locEventLoop->Get(fixedtags);
+	for (size_t i=0; i < fixedtags.size(); i++)
+	{
+		hddm_r::TaggerHitList hit = res().addTaggerHits(1);
+		hit().setT(fixedtags[i]->t);
+		hit().setE(fixedtags[i]->E);
 	}
 
 	// push any DFCALShower objects to the output record
