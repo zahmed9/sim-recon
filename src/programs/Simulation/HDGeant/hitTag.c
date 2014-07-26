@@ -73,6 +73,7 @@ void hitTagger (float xin[4], float xout[4],
 {
    int micro_chan;
    int fixed_chan;
+   double Etag = 0;
    double E = pin[3];
    double t = xin[3]*1e9-(xin[2]-REF_TIME_Z_CM)/C_CM_PER_NS;
    t = floor(t/BEAM_BUCKET_SPACING_NS+0.5)*BEAM_BUCKET_SPACING_NS;
@@ -142,7 +143,7 @@ void hitTagger (float xin[4], float xout[4],
          if ( E < micro_channel_Erange[2*i] &&
               E > micro_channel_Erange[2*i+1] )
          {
-            E = (micro_channel_Erange[2*i] + micro_channel_Erange[2*i+1])/2;
+            Etag = (micro_channel_Erange[2*i] + micro_channel_Erange[2*i+1])/2;
             micro_chan = i;
             break;
          }
@@ -155,7 +156,7 @@ void hitTagger (float xin[4], float xout[4],
          if ( E < fixed_channel_Erange[2*i] &&
               E > fixed_channel_Erange[2*i+1] )
          {
-            E = (fixed_channel_Erange[2*i] + fixed_channel_Erange[2*i+1])/2;
+            Etag = (fixed_channel_Erange[2*i] + fixed_channel_Erange[2*i+1])/2;
             fixed_chan = i;
             break;
          }
@@ -166,19 +167,19 @@ void hitTagger (float xin[4], float xout[4],
 
    if (micro_chan > -1) {
       int nhit;
-      s_TaggerHits_t* hits;
+      s_TaggerTruthHits_t* hits;
       int mark = micro_chan + 1000;
       void** twig = getTwig(&microTree, mark);
       if (*twig == 0)
       {
          s_Tagger_t* tag = *twig = make_s_Tagger();
          s_MicroChannels_t* channels = make_s_MicroChannels(1);
-         hits = make_s_TaggerHits(MICRO_MAX_HITS);
+         hits = make_s_TaggerTruthHits(MICRO_MAX_HITS);
          hits->mult = 0;
-         channels->in[0].taggerHits = hits;
+         channels->in[0].taggerTruthHits = hits;
          channels->in[0].column = micro_chan;
          channels->in[0].row = 0;
-         channels->in[0].E = E;
+         channels->in[0].E = Etag;
          channels->mult = 1;
          tag->microChannels = channels;
          microCount++;
@@ -186,7 +187,7 @@ void hitTagger (float xin[4], float xout[4],
       else
       {
          s_Tagger_t* tag = *twig;
-         hits = tag->microChannels->in[0].taggerHits;
+         hits = tag->microChannels->in[0].taggerTruthHits;
       }
    
       if (hits != HDDM_NULL)
@@ -203,7 +204,9 @@ void hitTagger (float xin[4], float xout[4],
          }
          else if (nhit < MICRO_MAX_HITS)   /* create new hit */
          {
+            hits->in[nhit].bg = track;
             hits->in[nhit].t = t;
+            hits->in[nhit].E = E;
             hits->mult++;
          }
          else
@@ -219,18 +222,18 @@ void hitTagger (float xin[4], float xout[4],
 
    if (fixed_chan > -1) {
       int nhit;
-      s_TaggerHits_t* hits;
+      s_TaggerTruthHits_t* hits;
       int mark = fixed_chan + 1000;
       void** twig = getTwig(&fixedTree, mark);
       if (*twig == 0)
       {
          s_Tagger_t* tag = *twig = make_s_Tagger();
          s_FixedChannels_t* channels = make_s_FixedChannels(1);
-         hits = make_s_TaggerHits(FIXED_MAX_HITS);
+         hits = make_s_TaggerTruthHits(FIXED_MAX_HITS);
          hits->mult = 0;
-         channels->in[0].taggerHits = hits;
+         channels->in[0].taggerTruthHits = hits;
          channels->in[0].channel = fixed_chan;
-         channels->in[0].E = E;
+         channels->in[0].E = Etag;
          channels->mult = 1;
          tag->fixedChannels = channels;
          fixedCount++;
@@ -238,7 +241,7 @@ void hitTagger (float xin[4], float xout[4],
       else
       {
          s_Tagger_t* tag = *twig;
-         hits = tag->fixedChannels->in[0].taggerHits;
+         hits = tag->fixedChannels->in[0].taggerTruthHits;
       }
    
       if (hits != HDDM_NULL)
@@ -255,7 +258,9 @@ void hitTagger (float xin[4], float xout[4],
          }
          else if (nhit < FIXED_MAX_HITS)   /* create new hit */
          {
+            hits->in[nhit].bg = track;
             hits->in[nhit].t = t;
+            hits->in[nhit].E = E;
             hits->mult++;
          }
          else
@@ -299,7 +304,7 @@ s_Tagger_t* pickTagger ()
       int channel;
       for (channel=0; channel < channels->mult; ++channel)
       {
-         s_TaggerHits_t* hits = channels->in[channel].taggerHits;
+         s_TaggerTruthHits_t* hits = channels->in[channel].taggerTruthHits;
 
          /* constraint t values to lie within time range */
          int i;
@@ -341,7 +346,7 @@ s_Tagger_t* pickTagger ()
       int channel;
       for (channel=0; channel < channels->mult; ++channel)
       {
-         s_TaggerHits_t* hits = channels->in[channel].taggerHits;
+         s_TaggerTruthHits_t* hits = channels->in[channel].taggerTruthHits;
 
          /* constraint t values to lie within time range */
          int i;
