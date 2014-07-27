@@ -397,9 +397,7 @@ void SmearCDC(hddm_s::HDDM *record)
 void AddNoiseHitsCDC(hddm_s::HDDM *record)
 {
    // Calculate the number of noise hits for each straw and store
-   // them in a sparse map. We must do it this way since we have to know
-   // the total number of CdcStraw_t structures to allocate in our
-   // call to make_s_CdcStraws.
+   // them in a sparse map, then copy into the output hddm record.
    //
    // The straw rates are obtained using a parameterization done
    // to calculate the event size for the August 29, 2007 online
