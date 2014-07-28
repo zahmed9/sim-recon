@@ -89,7 +89,7 @@ DEventSourceHDDM::~DEventSourceHDDM()
 jerror_t DEventSourceHDDM::GetEvent(JEvent &event)
 {
    /// Implementation of JEventSource virtual function
-      
+
    if (!fin)
       return EVENT_SOURCE_NOT_OPEN;
 
