@@ -95,21 +95,12 @@ jerror_t JEventProcessor_danahddm::brun(JEventLoop *loop, int runnumber)
 //-------------------------------
 jerror_t JEventProcessor_danahddm::evnt(JEventLoop *loop, int eventnumber)
 {
-   // This is a little complicated. We need to get a hold of the s_HDDM_t
-   // structure pointer for this event so we can pass it to flush_s_HDDM()
-   // along with our ouput stream pointer. The flush routine frees up the
-   // memory in the s_HDDM_t structure. When the framework tries "flush"ing
-   // a second time, we get a seg fault. To prevent the framework from
-   // flushing, we have to clear the free_on_flush flag (by default set
-   // to true). This means we need to get the DEventSource pointer and
-   // downcast to a DEventSourceHDDM structure. It's a little strange setting
-   // this for every event, but we have no way of knowing when the event
-   // source changes and this at least guarantees it for all event sources.
    JEvent& event = loop->GetJEvent();
    JEventSource *source = event.GetJEventSource();
    DEventSourceHDDM *hddm_source = dynamic_cast<DEventSourceHDDM*>(source);
    if (! hddm_source) {
-      std::cerr << " This program MUST be used only with HDDM files as inputs!" << std::endl;
+      std::cerr << " This program MUST be used only with HDDM files as inputs!"
+                << std::endl;
       exit(-1);
    }
    hddm_s::HDDM *hddm = (hddm_s::HDDM*)event.GetRef();
