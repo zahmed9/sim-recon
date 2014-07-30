@@ -2,6 +2,11 @@
  *  hddm-xml :	tool that reads in a HDDM document (Hall D Data Model)
  *		and translates it into plain-text xml.
  *
+ *  Version 1.3 - Richard Jones, July 2014.
+ *  - Added support for input hddm streams with additional features
+ *    provided through the c++ API, including on-the-fly compression with
+ *    zlib and bzlib2, and per-record crc32 integrity checks.
+ *
  *  Version 1.2 - Richard Jones, December 2005.
  *  - Updated code to use STL strings and vectors instead of old c-style
  *    pre-allocated arrays and strXXX functions.
@@ -54,6 +59,7 @@
 #include <xstream/z.h>
 #include <xstream/bz.h>
 #include <xstream/xdr.h>
+#include <xstream/digest.h>
 
 #include <iostream>
 #include <fstream>
@@ -253,6 +259,8 @@ int main(int argC, char* argV[])
    std::istringstream iss;
    iss.rdbuf()->pubsetbuf(event_buffer,event_buffer_size);
    xstream::xdr::istream ifx(iss.rdbuf());
+   int integrity_check_mode = 0;
+   int compression_mode = 0;
    while (reqcount && ifs->good())
    {
       DOMNodeList* contList = rootEl->getChildNodes();
@@ -280,24 +288,63 @@ int main(int argC, char* argV[])
          ifx >> size;
          ifs->read(event_buffer+8,size);
          ifx >> format >> flags;
-         if (size == 8 && format == 0 && flags == 0x00) {
-            continue;
+         int compression_flags = flags & 0xf0;
+         int integrity_flags = flags & 0x0f;
+         if (size == 8 && format == 0 && compression_flags == 0x00) {
+            if (compression_mode != 0) {
+               std::cerr << "hddm-xml error: compression disabled in"
+                            " mid-stream, this stream is no longer readable."
+                         << std::endl;
+               break;
+            }
          }
-         else if (size == 8 && format == 0 && flags == 0x10) {
-            xstream::z::istreambuf *zin_sb;
-            zin_sb = new xstream::z::istreambuf(ifs->rdbuf());
-            ifs->rdbuf(zin_sb);
-            continue;
+         else if (size == 8 && format == 0 && compression_flags == 0x10) {
+            if (compression_mode == 0) {
+               compression_mode = compression_flags;
+               xstream::z::istreambuf *zin_sb;
+               zin_sb = new xstream::z::istreambuf(ifs->rdbuf());
+               ifs->rdbuf(zin_sb);
+            }
+            else if (compression_mode != compression_flags) {
+               std::cerr << "hddm-xml error: compression mode changed in"
+                            " mid-stream, this stream is no longer readable."
+                         << std::endl;
+               break;
+            }
          }
-         else if (size == 8 && format == 0 && flags == 0x20) {
-            xstream::bz::istreambuf *bzin_sb;
-            bzin_sb = new xstream::bz::istreambuf(ifs->rdbuf());
-            ifs->rdbuf(bzin_sb);
-            continue;
+         else if (size == 8 && format == 0 && compression_flags == 0x20) {
+            if (compression_mode == 0) {
+               compression_mode = compression_flags;
+               xstream::bz::istreambuf *bzin_sb;
+               bzin_sb = new xstream::bz::istreambuf(ifs->rdbuf());
+               ifs->rdbuf(bzin_sb);
+            }
+            else if (compression_mode != compression_flags) {
+               std::cerr << "hddm-xml error: compression mode changed in"
+                            " mid-stream, this stream is no longer readable."
+                         << std::endl;
+               break;
+            }
          }
          else {
+            std::cerr << "hddm-xml error: unrecognized stream compression"
+                         " encountered, this stream is no longer readable."
+                      << std::endl;
             break;
          }
+         if (size == 8 && format == 0 && integrity_flags == 0x0) {
+            integrity_check_mode = 0;
+         }
+         else if (size == 8 && format == 0 && integrity_flags == 0x1) {
+            integrity_check_mode = 1;
+         }
+         else {
+            std::cerr << "hddm-xml error: unrecognized stream modifier"
+                         " encountered, this stream is no longer readable."
+                      << std::endl;
+            break;
+         }
+         continue;
       }
       else if (tsize+4 > event_buffer_size) {
          char *new_buffer = new char[event_buffer_size = tsize+1000];
@@ -310,6 +357,26 @@ int main(int argC, char* argV[])
       }
       ifs->read(event_buffer+4,tsize);
       --reqcount;
+
+      if (integrity_check_mode == 1) {
+         char crcbuf[10];
+         std::istringstream sstr;
+         xstream::xdr::istream xstr(sstr);
+         sstr.rdbuf()->pubsetbuf(crcbuf,10);
+         unsigned int recorded_crc;
+         ifs->read(crcbuf,4);
+         xstr >> recorded_crc;
+         xstream::digest::crc32 crc;
+         std::ostream out(&crc);
+         out.write(event_buffer,tsize+4);
+         out.flush();
+         if (crc.digest() != recorded_crc) {
+            std::cerr << "hddm-xml error: crc32 check error on input stream"
+                         " encountered, this stream is no longer readable."
+                      << std::endl;
+            break;
+         }
+      }
 
       for (int c = 0; c < contLength; c++)
       {
