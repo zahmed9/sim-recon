@@ -18,10 +18,11 @@ enum DetectorSystem_t{
      SYS_CHERENKOV  = 0x0010,
      SYS_FCAL       = 0x0020,
      SYS_UPV        = 0x0040,
-     SYS_TAGGER     = 0x0080,
+     SYS_TAGM       = 0x0080,
      SYS_START      = 0x0100,
      SYS_RICH       = 0x0200,
-     SYS_CCAL       = 0x0400
+     SYS_CCAL       = 0x0400,
+     SYS_TAGF       = 0x0800
 };
 
 inline const char* SystemName(DetectorSystem_t sys)
@@ -51,8 +52,11 @@ inline const char* SystemName(DetectorSystem_t sys)
           case SYS_UPV:
               return "UPV";
               break;
-          case SYS_TAGGER:
-              return "TAGGER";
+          case SYS_TAGM:
+              return "TAGM";
+              break;
+          case SYS_TAGF:
+              return "TAGF";
               break;
           case SYS_START:
               return "ST";
