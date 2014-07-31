@@ -43,6 +43,16 @@ JEventProcessor_danahddm::JEventProcessor_danahddm()
   jout << std::endl << "  hddm output file name is " << hddmFileName
        << std::endl << std::endl;
   
+  HDDM_USE_COMPRESSION = true;
+  gPARMS->SetDefaultParameter("HDDM:USE_COMPRESSION", HDDM_USE_COMPRESSION,
+                         "Turn on/off compression of the output HDDM stream."
+                         " Set to \"0\" to turn off (it's on by default)");
+  HDDM_USE_INTEGRITY_CHECKS = true;
+  gPARMS->SetDefaultParameter("HDDM:USE_INTEGRITY_CHECKS",
+                               HDDM_USE_INTEGRITY_CHECKS,
+                         "Turn on/off automatic integrity checking on the"
+                         " output HDDM stream."
+                         " Set to \"0\" to turn off (it's on by default)");
   file = NULL;
   fout = NULL;
   Nevents_written = 0;
@@ -86,6 +96,26 @@ jerror_t JEventProcessor_danahddm::brun(JEventLoop *loop, int runnumber)
    file = new std::ofstream(hddmFileName.c_str());
    fout = new hddm_s::ostream(*file);
    Nevents_written = 0;
+ 
+   // enable on-the-fly bzip2 compression on output stream
+   if (HDDM_USE_COMPRESSION) {
+      jout << " Enabling bz2 compression of output HDDM file stream" 
+           << std::endl;
+      fout->setCompression(hddm_s::k_bz2_compression);
+   }
+   else {
+      jout << " HDDM compression disabled" << std::endl;
+   }
+
+   // enable a CRC data integrity check at the end of each event record
+   if (HDDM_USE_INTEGRITY_CHECKS) {
+      jout << " Enabling CRC data integrity check in output HDDM file stream"
+           << std::endl;
+      fout->setIntegrityChecks(hddm_s::k_crc32_integrity);
+   }
+   else {
+      jout << " HDDM integrity checks disabled" << std::endl;
+   }
 
    return NOERROR;
 }

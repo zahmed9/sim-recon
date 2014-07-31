@@ -40,6 +40,9 @@ class JEventProcessor_danahddm : public JEventProcessor {
       hddm_s::ostream *fout;
       unsigned long Nevents_written;
 
+      bool HDDM_USE_COMPRESSION;
+      bool HDDM_USE_INTEGRITY_CHECKS;
+
       void Add_DTrackTimeBased(JEventLoop *loop, 
                                hddm_s::ReconViewList::iterator riter);
       
