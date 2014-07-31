@@ -19,6 +19,9 @@ string HDDM_CLASS = "s";
 int QUIT = 0;
 int seed = 0;
 
+bool HDDM_USE_COMPRESSION = false;
+bool HDDM_USE_INTEGRITY_CHECKS = false;
+
 TRandom2 *rndm;
 
 //-----------
@@ -84,6 +87,12 @@ int main(int argc,char* argv[]) {
       seed = atoi(optarg);
       std::cout << "random seed: " << seed << std::endl;
       break;
+    case 'C':
+      HDDM_USE_COMPRESSION = true;
+      break;
+    case 'I':
+      HDDM_USE_INTEGRITY_CHECKS = true;
+      break;
     default:
       break;
     }
@@ -128,7 +137,13 @@ int main(int argc,char* argv[]) {
       exit(-1);
     }
     ostr_s = new hddm_s::ostream(ofs);
-  
+    if (HDDM_USE_COMPRESSION) {
+       ostr_s->setCompression(hddm_r::k_bz2_compression);
+    }
+    if (HDDM_USE_INTEGRITY_CHECKS) {
+       ostr_s->setIntegrityChecks(hddm_r::k_crc32_integrity);
+    }
+
     if (saveRemainder) {
       ofs_remainder.open(OUTFILENAME_REMAINDER.c_str());
       if (! ofs_remainder.is_open()) {
@@ -137,6 +152,12 @@ int main(int argc,char* argv[]) {
          exit(-1);
       }
       ostr_s_remainder = new hddm_s::ostream(ofs_remainder);
+      if (HDDM_USE_COMPRESSION) {
+         ostr_s_remainder->setCompression(hddm_r::k_bz2_compression);
+      }
+      if (HDDM_USE_INTEGRITY_CHECKS) {
+         ostr_s_remainder->setIntegrityChecks(hddm_r::k_crc32_integrity);
+      }
     }
     else {
       ostr_s_remainder = NULL;
@@ -150,12 +171,41 @@ int main(int argc,char* argv[]) {
 
   else {
     ifs.open(INFILENAME.c_str());
+    if (! ifs.is_open()) {
+      std::cout << " Error opening input file \"" << INFILENAME 
+                << "\"!" << std::endl;
+      exit(-1);
+    }
     istr_r = new hddm_r::istream(ifs);
+
     ofs.open(OUTFILENAME.c_str());
+    if (! ofs.is_open()) {
+      std::cout << " Error opening output file \"" << OUTFILENAME 
+                << "\"!" << std::endl;
+      exit(-1);
+    }
     ostr_r = new hddm_r::ostream(ofs);
-    ofs_remainder.open(OUTFILENAME_REMAINDER.c_str());
-    if (saveRemainder) 
+    if (HDDM_USE_COMPRESSION) {
+       ostr_r->setCompression(hddm_r::k_bz2_compression);
+    }
+    if (HDDM_USE_INTEGRITY_CHECKS) {
+       ostr_r->setIntegrityChecks(hddm_r::k_crc32_integrity);
+    }
+    if (saveRemainder) {
+      ofs_remainder.open(OUTFILENAME_REMAINDER.c_str());
+      if (! ofs_remainder.is_open()) {
+         std::cout << " Error opening output file \"" << OUTFILENAME_REMAINDER
+                   << "\"!" << std::endl;
+         exit(-1);
+      }
       ostr_r_remainder = new hddm_r::ostream(ofs_remainder);
+      if (HDDM_USE_COMPRESSION) {
+         ostr_r_remainder->setCompression(hddm_r::k_bz2_compression);
+      }
+      if (HDDM_USE_INTEGRITY_CHECKS) {
+         ostr_r_remainder->setIntegrityChecks(hddm_r::k_crc32_integrity);
+      }
+    }
     else
       ostr_r_remainder = NULL;
 
@@ -285,6 +335,10 @@ void Usage(void)
             << std::endl;
   std::cout << "    -M MAX           Set maximum number of events"
             << std::endl;
+  std::cout << "    -C               Enable compression in the output"
+               " hddm streams" << std::endl;
+  std::cout << "    -I               Enable data integrity checks in the"
+               " output hddm streams" << std::endl;
   std::cout << std::endl;
 
   exit(0);
