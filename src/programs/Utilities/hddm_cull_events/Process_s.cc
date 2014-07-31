@@ -22,7 +22,25 @@ void Process_s(unsigned int &NEvents, unsigned int &NEvents_read)
                 << std::endl;
       exit(-1);
    }
+
    hddm_s::ostream *fout = new hddm_s::ostream(*ofs);
+   if (HDDM_USE_COMPRESSION) {
+      std::cout << " Enabling bz2 compression of output HDDM file stream" 
+                << std::endl;
+      fout->setCompression(hddm_s::k_bz2_compression);
+   }
+   else {
+      std::cout << " HDDM compression disabled on output" << std::endl;
+   }
+
+   if (HDDM_USE_INTEGRITY_CHECKS) {
+      std::cout << " Enabling data integrity check on output HDDM file stream"
+                << std::endl;
+      fout->setIntegrityChecks(hddm_s::k_crc32_integrity);
+   }
+   else {
+      std::cout << " HDDM integrity checks disabled on output" << std::endl;
+   }
 
    // Loop over input files
    time_t last_time = time(NULL);
