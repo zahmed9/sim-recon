@@ -33,4 +33,8 @@ class MyProcessor:public JEventProcessor
       std::ofstream *ofs;
       hddm_s::ostream *fout;
       unsigned long Nevents_written;
+
+   private:
+      bool HDDM_USE_COMPRESSION;
+      bool HDDM_USE_INTEGRITY_CHECKS;
 };
