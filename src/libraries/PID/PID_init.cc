@@ -21,16 +21,16 @@ using namespace jana;
 
 #include "DBeamPhoton.h"
 #include "DMCReaction.h"
-typedef JFactory<DBeamPhoton> DBeamPhoton_factory;
-typedef JFactory<DMCReaction> DMCReaction_factory;
 
 #define UC_CLUSTERIZER
 
 jerror_t PID_init(JEventLoop *loop)
 {
 	/// Create and register PID data factories
-	loop->AddFactory(new DBeamPhoton_factory);
-	loop->AddFactory(new DMCReaction_factory);
+	loop->AddFactory(new JFactory<DMCReaction>());
+	loop->AddFactory(new JFactory<DBeamPhoton>());
+	loop->AddFactory(new JFactory<DBeamPhoton>("TRUTH"));
+	loop->AddFactory(new JFactory<DBeamPhoton>("MCGEN"));
 	loop->AddFactory(new DParticleID_factory);
 	loop->AddFactory(new DParticleID_factory_PID1);
 	loop->AddFactory(new DChargedTrack_factory);

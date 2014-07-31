@@ -26,9 +26,6 @@
 #include "DMCThrown.h"
 #include "DMCTrackHit.h"
 #include "DMCTrajectoryPoint.h"
-typedef JFactory<DMCThrown> DMCThrown_factory;
-typedef JFactory<DMCTrackHit> DMCTrackHit_factory;
-typedef JFactory<DMCTrajectoryPoint> DMCTrajectoryPoint_factory;
 
 jerror_t TRACKING_init(JEventLoop *loop)
 {
@@ -43,9 +40,9 @@ jerror_t TRACKING_init(JEventLoop *loop)
 	loop->AddFactory(new DTrackCandidate_factory_CDC_or_FDCpseudo());
 	loop->AddFactory(new DTrackCandidate_factory_THROWN());
 	loop->AddFactory(new DTrackCandidate_factory_CDCCOSMIC());
-	loop->AddFactory(new DMCTrackHit_factory());
-	loop->AddFactory(new DMCThrown_factory());
-	loop->AddFactory(new DMCTrajectoryPoint_factory());
+	loop->AddFactory(new JFactory<DMCTrackHit>());
+	loop->AddFactory(new JFactory<DMCThrown>());
+	loop->AddFactory(new JFactory<DMCTrajectoryPoint>());
 	loop->AddFactory(new DTrackWireBased_factory_THROWN());
 	loop->AddFactory(new DTrackTimeBased_factory_THROWN());
 	loop->AddFactory(new DTrackFitter_factory());
