@@ -230,9 +230,10 @@ jerror_t DEventSourceHDDM::GetObjects(JEvent &event, JFactory_base *factory)
       return Extract_DMCReaction(record,
                      dynamic_cast<JFactory<DMCReaction>*>(factory), loop);
 
-   if (dataClassName == "DBeamPhoton" && tag == "")
+   if (dataClassName == "DBeamPhoton" && (tag == "" || tag == "TRUTH"
+                                                    || tag == "MCGEN") )
       return Extract_DBeamPhoton(record, 
-                     dynamic_cast<JFactory<DBeamPhoton>*>(factory), loop);
+                     dynamic_cast<JFactory<DBeamPhoton>*>(factory), loop, tag);
  
    if (dataClassName == "DMCThrown" && tag == "")
       return Extract_DMCThrown(record,
@@ -852,7 +853,7 @@ jerror_t DEventSourceHDDM::Extract_DMCReaction(hddm_s::HDDM *record,
    /// from JEventSourceHDDM::GetObjects. If factory is NULL, this
    /// returns OBJECT_NOT_AVAILABLE immediately.
    
-   JFactory_base* fac = loop->GetFactory("DBeamPhoton", "");
+   JFactory_base* fac = loop->GetFactory("DBeamPhoton", "MCGEN");
    JFactory<DBeamPhoton> *factory2 = dynamic_cast<JFactory<DBeamPhoton>*> (fac);
    
    if (factory == NULL || factory2 == NULL)
@@ -952,16 +953,57 @@ jerror_t DEventSourceHDDM::Extract_DMCReaction(hddm_s::HDDM *record,
 //------------------
 jerror_t DEventSourceHDDM::Extract_DBeamPhoton(hddm_s::HDDM *record,
                                    JFactory<DBeamPhoton> *factory,
-                                   JEventLoop *loop)
+                                   JEventLoop *loop,
+                                   string tag)
 {
-   /// This defers to the Extract_DMCReaction method which extracts both
-   /// the DMCReaction and DBeamPhoton objects at the same time.
-   /// Note that only empty tags are honored by this source.
+   /// If tag="MCGEN" then defer to the Extract_DMCReaction method which
+   /// extracts both the DMCReaction and DBeamPhoton objects at the same time.
+   /// Otherwise, generate new DBeamPhoton objects from hits in the tagger
+   /// microscope and fixed array counters.
 
-   JFactory_base* factory2 = loop->GetFactory("DMCReaction", "");
-   return Extract_DMCReaction(record, 
-                              dynamic_cast<JFactory<DMCReaction>*>(factory2),
-                              loop);
+   if (tag == "MCGEN") {
+      JFactory_base* factory2 = loop->GetFactory("DMCReaction", "");
+      return Extract_DMCReaction(record, 
+                     dynamic_cast<JFactory<DMCReaction>*>(factory2),
+                     loop);
+   }
+
+   vector<DBeamPhoton*> dbeam_photons;
+
+   vector<const DTAGMHit*> tagm_hits;
+   loop->Get(tagm_hits,tag.c_str());
+   for (unsigned int ih=0; ih < tagm_hits.size(); ++ih) {
+      DVector3 pos(0.0, 0.0, 65.0);
+      DVector3 mom(0.0, 0.0, tagm_hits[ih]->E);
+      DBeamPhoton *gamma = new DBeamPhoton;
+      gamma->setMomentum(mom);
+      gamma->setPosition(pos);
+      gamma->setCharge(0);
+      gamma->setMass(0);
+      gamma->setTime(tagm_hits[ih]->t);
+      gamma->setT0(tagm_hits[ih]->t, 0.200, SYS_TAGM);
+      dbeam_photons.push_back(gamma);
+   }
+
+   vector<const DTAGFHit*> tagf_hits;
+   loop->Get(tagf_hits,tag.c_str());
+   for (unsigned int ih=0; ih < tagf_hits.size(); ++ih) {
+      DVector3 pos(0.0, 0.0, 65.0);
+      DVector3 mom(0.0, 0.0, tagf_hits[ih]->E);
+      DBeamPhoton *gamma = new DBeamPhoton;
+      gamma->setMomentum(mom);
+      gamma->setPosition(pos);
+      gamma->setCharge(0);
+      gamma->setMass(0);
+      gamma->setTime(tagf_hits[ih]->t);
+      gamma->setT0(tagf_hits[ih]->t, 0.350, SYS_TAGF);
+      dbeam_photons.push_back(gamma);
+   }
+
+   // Copy into factory
+   factory->CopyTo(dbeam_photons);
+
+   return NOERROR;
 }
 
 //------------------

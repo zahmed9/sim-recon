@@ -56,7 +56,8 @@ class DEventSourceREST:public JEventSource
    jerror_t Extract_DMCReaction(hddm_r::HDDM *record,
                     JFactory<DMCReaction> *factory);
    jerror_t Extract_DBeamPhoton(hddm_r::HDDM *record,
-                    JFactory<DBeamPhoton> *factory);
+                    JFactory<DBeamPhoton> *factory,
+                    JEventLoop *eventLoop);
    jerror_t Extract_DMCThrown(hddm_r::HDDM *record,
                     JFactory<DMCThrown> *factory);
    jerror_t Extract_DTAGMHit(hddm_r::HDDM *record,

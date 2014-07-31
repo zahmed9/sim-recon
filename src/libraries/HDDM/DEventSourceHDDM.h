@@ -88,7 +88,7 @@ class DEventSourceHDDM:public JEventSource
       jerror_t Extract_DBCALIncidentParticle(hddm_s::HDDM *record, JFactory<DBCALIncidentParticle> *factory);
       jerror_t Extract_DBCALTDCHit(hddm_s::HDDM *record, JFactory<DBCALTDCHit> *factory);
       jerror_t Extract_DMCReaction(hddm_s::HDDM *record, JFactory<DMCReaction> *factory, JEventLoop *loop);
-      jerror_t Extract_DBeamPhoton(hddm_s::HDDM *record, JFactory<DBeamPhoton> *factory, JEventLoop *loop);
+      jerror_t Extract_DBeamPhoton(hddm_s::HDDM *record, JFactory<DBeamPhoton> *factory, JEventLoop *loop, string tag);
       jerror_t Extract_DMCThrown(hddm_s::HDDM *record, JFactory<DMCThrown> *factory);
       jerror_t Extract_DCDCHit(hddm_s::HDDM *record, JFactory<DCDCHit> *factory, string tag);
       jerror_t Extract_DFDCHit(hddm_s::HDDM *record, JFactory<DFDCHit> *factory, string tag);

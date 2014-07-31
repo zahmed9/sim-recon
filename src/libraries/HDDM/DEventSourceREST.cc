@@ -143,7 +143,8 @@ jerror_t DEventSourceREST::GetObjects(JEvent &event, JFactory_base *factory)
    }
    if (dataClassName =="DBeamPhoton") {
       return Extract_DBeamPhoton(record,
-                     dynamic_cast<JFactory<DBeamPhoton>*>(factory));
+                     dynamic_cast<JFactory<DBeamPhoton>*>(factory),
+                     locEventLoop);
    }
    if (dataClassName =="DMCThrown") {
       return Extract_DMCThrown(record,
@@ -258,11 +259,14 @@ jerror_t DEventSourceREST::Extract_DMCReaction(hddm_r::HDDM *record,
 // Extract_DBeamPhoton
 //------------------
 jerror_t DEventSourceREST::Extract_DBeamPhoton(hddm_r::HDDM *record,
-                                   JFactory<DBeamPhoton> *factory)
+                                   JFactory<DBeamPhoton> *factory,
+                                   JEventLoop *eventLoop)
 {
-   /// Copies the data from the Reaction hddm class. This is called
-   /// from JEventSourceREST::GetObjects. If factory is NULL, this
-   /// returns OBJECT_NOT_AVAILABLE immediately.
+   /// This is called from JEventSourceREST::GetObjects. If factory is NULL,
+   /// return OBJECT_NOT_AVAILABLE immediately. If factory tag="MCGEN" then
+   /// copy the beam photon data from the Reaction hddm class, otherwise
+   /// generate one DBeamPhoton for each hit in the tagger microscope and
+   /// fixed array counters.
 
    if (factory==NULL) {
       return OBJECT_NOT_AVAILABLE;
@@ -271,26 +275,56 @@ jerror_t DEventSourceREST::Extract_DBeamPhoton(hddm_r::HDDM *record,
 
    vector<DBeamPhoton*> dbeam_photons;
 
-   // loop over reaction records
-   const hddm_r::ReactionList &reactions = record->getReactions();
-   hddm_r::ReactionList::iterator iter;
-   for (iter = reactions.begin(); iter != reactions.end(); ++iter) {
-      if (iter->getJtag() != tag) {
-         continue;
+   if (tag == "MCGEN") {
+      // loop over reaction records
+      const hddm_r::ReactionList &reactions = record->getReactions();
+      hddm_r::ReactionList::iterator iter;
+      for (iter = reactions.begin(); iter != reactions.end(); ++iter) {
+         DBeamPhoton *beamphoton = new DBeamPhoton;
+         double Ebeam = iter->getEbeam();
+         beamphoton->setPID(Gamma);
+         beamphoton->setPosition(DVector3(0.0, 0.0, 65.0));
+         beamphoton->setMomentum(DVector3(0.0, 0.0, Ebeam));
+         beamphoton->setMass(0.0);
+         beamphoton->setCharge(0.0);
+         beamphoton->setT0(0.0, 0.0, SYS_NULL);
+//         double zint = iter->getVertex(0).getOrigin().getVz();
+//         beamphoton->setTime((zint-65.0)/SPEED_OF_LIGHT);
+         beamphoton->setTime(0.0); //0 because position is defined at 0, 0, 65.  Would be non-zero if position wasn't forced...
+         dbeam_photons.push_back(beamphoton);
       }
-      DBeamPhoton *beamphoton = new DBeamPhoton;
-      double Ebeam = iter->getEbeam();
-      beamphoton->setPID(Gamma);
-      beamphoton->setPosition(DVector3(0.0, 0.0, 65.0));
-      beamphoton->setMomentum(DVector3(0.0, 0.0, Ebeam));
-      beamphoton->setMass(0.0);
-      beamphoton->setCharge(0.0);
-      beamphoton->clearErrorMatrix();
-      beamphoton->setT0(0.0, 0.0, SYS_NULL);
-//      double zint = iter->getVertex(0).getOrigin().getVz();
-//      beamphoton->setTime((zint-65.0)/SPEED_OF_LIGHT);
-      beamphoton->setTime(0.0); //0 because position is defined at 0, 0, 65.  Would be non-zero if position wasn't forced...
-      dbeam_photons.push_back(beamphoton);
+   }
+
+   else {
+      vector<const DTAGMHit*> tagm_hits;
+      eventLoop->Get(tagm_hits,tag.c_str());
+      for (unsigned int ih=0; ih < tagm_hits.size(); ++ih) {
+         DVector3 pos(0.0, 0.0, 65.0);
+         DVector3 mom(0.0, 0.0, tagm_hits[ih]->E);
+         DBeamPhoton *gamma = new DBeamPhoton;
+         gamma->setMomentum(mom);
+         gamma->setPosition(pos);
+         gamma->setCharge(0);
+         gamma->setMass(0);
+         gamma->setTime(tagm_hits[ih]->t);
+         gamma->setT0(tagm_hits[ih]->t, 0.200, SYS_TAGM);
+         dbeam_photons.push_back(gamma);
+      }
+
+      vector<const DTAGFHit*> tagf_hits;
+      eventLoop->Get(tagf_hits,tag.c_str());
+      for (unsigned int ih=0; ih < tagf_hits.size(); ++ih) {
+         DVector3 pos(0.0, 0.0, 65.0);
+         DVector3 mom(0.0, 0.0, tagf_hits[ih]->E);
+         DBeamPhoton *gamma = new DBeamPhoton;
+         gamma->setMomentum(mom);
+         gamma->setPosition(pos);
+         gamma->setCharge(0);
+         gamma->setMass(0);
+         gamma->setTime(tagf_hits[ih]->t);
+         gamma->setT0(tagf_hits[ih]->t, 0.350, SYS_TAGF);
+         dbeam_photons.push_back(gamma);
+      }
    }
 
    // Copy into factories
