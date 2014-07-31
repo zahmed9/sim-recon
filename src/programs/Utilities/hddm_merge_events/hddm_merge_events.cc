@@ -25,6 +25,8 @@ std::vector<char*> INFILENAMES;
 char *OUTFILENAME = NULL;
 int QUIT = 0;
 int MAXEVENTS=-1;
+bool HDDM_USE_COMPRESSION=false;
+bool HDDM_USE_INTEGRITY_CHECKS=false;
 
 
 #define _DBG_ std::cout << __FILE__ << ":" << __LINE__ << " "
@@ -84,6 +86,23 @@ int main(int narg,char* argv[])
       exit(-1);
    }
    hddm_s::ostream *fout = new hddm_s::ostream(*ofs);
+   if (HDDM_USE_COMPRESSION) {
+      std::cout << " Enabling bz2 compression of output HDDM file stream" 
+                << std::endl;
+      fout->setCompression(hddm_s::k_bz2_compression);
+   }
+   else {
+      std::cout << " HDDM compression disabled on output" << std::endl;
+   }
+
+   if (HDDM_USE_INTEGRITY_CHECKS) {
+      std::cout << " Enabling data integrity check on output HDDM file stream"
+                << std::endl;
+      fout->setIntegrityChecks(hddm_s::k_crc32_integrity);
+   }
+   else {
+      std::cout << " HDDM integrity checks disabled on output" << std::endl;
+   }
    
    // Loop over events from input files, interleaving them 
    // into the output file until one of the inputs does not
@@ -186,6 +205,12 @@ void ParseCommandLineArguments(int narg, char* argv[])
             case 's':
                loop=false;
                break;
+            case 'I':
+               HDDM_USE_INTEGRITY_CHECKS=true;
+               break;
+            case 'C':
+               HDDM_USE_COMPRESSION=true;
+               break;
          }
       }
       else {
@@ -229,6 +254,10 @@ void Usage(void)
                 " following inputs" << std::endl;
    std::cout << "    -s            Stop when all events from the following"
                 " inputs have been read" << std::endl;
+   std::cout << "    -I            Enable data integrity checks on output"
+                " hddm stream" << std::endl;
+   std::cout << "    -C            Enable compression on output hddm stream"
+             << std::endl;
    std::cout << std::endl;
    std::cout << " This will take events from 1 or more HDDM files"
                 " and merge them" << std::endl;
