@@ -12,7 +12,8 @@ string HDDM_CLASS = "s";
 vector<char*> INFILENAMES;
 char *OUTFILENAME = NULL;
 int QUIT = 0;
-
+bool HDDM_USE_COMPRESSION = false;
+bool HDDM_USE_INTEGRITY_CHECKS = false;
 
 
 //-----------
@@ -65,6 +66,13 @@ void ParseCommandLineArguments(int narg, char* argv[])
                break;
             case 'r':
                HDDM_CLASS = "r";
+               break;
+            case 'C':
+               HDDM_USE_COMPRESSION = true;
+               break;
+            case 'I':
+               HDDM_USE_INTEGRITY_CHECKS = true;
+               break;
          }
       }
       else {
@@ -91,12 +99,16 @@ void ParseCommandLineArguments(int narg, char* argv[])
 void Usage(void)
 {
    std::cout << std::endl << "Usage:" << std::endl;
-   std::cout << "     hddm_merge_files [-oOutputfile] "
+   std::cout << "     hddm_merge_files [options] "
                 "file1.hddm file2.hddm ..." << std::endl;
    std::cout << std::endl;
    std::cout << "options:" << std::endl;
    std::cout << "    -oOutputfile  Set output filename "
              << "(def. merged_files.hddm)" << std::endl;
+   std::cout << "    -I            Enable data integrity checks on"
+                " the output hddm stream" << std::endl;
+   std::cout << "    -C            Enable data compression on"
+                " the output hddm stream" << std::endl;
    std::cout << std::endl;
    std::cout << " This will merge 1 or more HDDM files "
                 "into a single HDDM file." << std::endl;
