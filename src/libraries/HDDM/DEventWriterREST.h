@@ -46,6 +46,7 @@ class DEventWriterREST : public JObject
 
 		string dOutputFileBaseName;
 		bool HDDM_USE_COMPRESSION;
+		bool HDDM_USE_INTEGRITY_CHECKS;
 };
 
 #endif //_DEventWriterREST_

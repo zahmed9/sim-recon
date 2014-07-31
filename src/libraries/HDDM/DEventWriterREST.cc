@@ -21,6 +21,12 @@ DEventWriterREST::DEventWriterREST(JEventLoop* locEventLoop,
    gPARMS->SetDefaultParameter("HDDM:USE_COMPRESSION", HDDM_USE_COMPRESSION,
                           "Turn on/off compression of the output HDDM stream."
                           " Set to \"0\" to turn off (it's on by default)");
+   HDDM_USE_INTEGRITY_CHECKS = true;
+   gPARMS->SetDefaultParameter("HDDM:USE_INTEGRITY_CHECKS",
+                                HDDM_USE_INTEGRITY_CHECKS,
+                          "Turn on/off automatic integrity checking on the"
+                          " output HDDM stream."
+                          " Set to \"0\" to turn off (it's on by default)");
 }
 
 bool DEventWriterREST::Write_RESTEvent(JEventLoop* locEventLoop, 
@@ -489,14 +495,21 @@ bool DEventWriterREST::Write_RESTEvent(string locOutputFileName,
          jout << " Enabling bz2 compression of output HDDM file stream" 
               << std::endl;
          locRESTFilePointers.second->setCompression(hddm_r::k_bz2_compression);
-      }else{
+      }
+      else {
          jout << " HDDM compression disabled" << std::endl;
       }
 
       // enable a CRC data integrity check at the end of each event record
-      jout << " Enabling CRC data integrity check in output HDDM file stream" 
-           << std::endl;
-      locRESTFilePointers.second->setIntegrityChecks(hddm_r::k_crc32_integrity);
+      if (HDDM_USE_INTEGRITY_CHECKS) {
+         jout << " Enabling CRC data integrity check in output HDDM file stream"
+              << std::endl;
+         locRESTFilePointers.second->setIntegrityChecks(
+                                     hddm_r::k_crc32_integrity);
+      }
+      else {
+         jout << " HDDM integrity checks disabled" << std::endl;
+      }
 
       // write a comment record at the head of the file
       hddm_r::HDDM locCommentRecord;
