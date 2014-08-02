@@ -69,6 +69,7 @@ typedef struct{
   DMatrix1x4 H;
   double doca,t,z;
   double drift_time,drift;
+  int ring_id,straw_id;
   bool used_in_fit;
 }cdc_update_t;
 
@@ -145,6 +146,7 @@ typedef struct{
 #define ADJACENT_MATCH_RADIUS 1.0
 #define MATCH_RADIUS 2.0
 #define INTERSECTION_LINK_MATCH_RADIUS 10.0
+#define PSEUDO_LINK_MATCH_RADIUS 7.0
 #define CDC_MATCH_RADIUS 5.0
 
 class DEventProcessor_dc_alignment:public jana::JEventProcessor{
@@ -290,7 +292,7 @@ class DEventProcessor_dc_alignment:public jana::JEventProcessor{
 			vector<const DCDCTrackHit *>&stereo_hits,
 			vector<cdc_track_t>&LinkedSegments);
   jerror_t LinkSegments(vector<segment_t>segments[4], 
-			vector<vector<const DFDCPseudo *> >&LinkedSegments);
+			vector<segment_t>&LinkedSegments);
   jerror_t LinkSegments(vector<intersection_segment_t>segments[4], 
 			vector<intersection_segment_t>&LinkedSegments);
   jerror_t FindOffsets(vector<const DFDCPseudo *>&hits,
@@ -344,8 +346,8 @@ class DEventProcessor_dc_alignment:public jana::JEventProcessor{
     
   pthread_mutex_t mutex;
 
-  TH1F *Hprob,*Hprelimprob,*Hbeta,*Hmatch,*Hcdcmatch,*Hcdcmatch_stereo;
-  TH1F *Hpseudo_prob,*Hpseudo_prelimprob,*Hlink_match;
+  TH1F *Hprob,*Hbeta,*Hmatch,*Hcdcmatch,*Hcdcmatch_stereo;
+  TH1F *Hpseudo_prob,*Hlink_match;
   TH1F *Hintersection_match,*Hintersection_link_match;
   TH1F *Hcdc_prob,*Hcdc_prelimprob;
   TH2F *Hbcalmatch,*Hcdcdrift_time;
@@ -355,6 +357,7 @@ class DEventProcessor_dc_alignment:public jana::JEventProcessor{
   TH2F *Hdv_vs_dE,*Hbcalmatchxy,*Hcdc_time_vs_d;
   TH1F *Hfcalmatch;
   TH1F *Hztarg;
+  TH2F *Hcdc_ring_res[28],*Hcdc_ring_time[28];
 
   double mT0;
   double target_to_fcal_distance;
@@ -368,8 +371,9 @@ class DEventProcessor_dc_alignment:public jana::JEventProcessor{
   double mMinTime,mOuterTime,mOuterZ,mBeta;
   unsigned int mMinTimeID;
   
-  bool COSMICS,USE_DRIFT_TIMES,READ_LOCAL_FILE,USE_BCAL,ALIGN_WIRE_PLANES;
-  bool  FILL_TREE;
+  bool COSMICS,USE_DRIFT_TIMES,READ_ANODE_FILE,USE_BCAL,ALIGN_WIRE_PLANES;
+  bool  FILL_TREE,RUN_BENCHMARK,USE_FCAL,READ_CATHODE_FILE;
+  unsigned int MIN_PSEUDOS,MIN_INTERSECTIONS;
 
   // drift time tables
   vector<double>cdc_drift_table;
@@ -400,6 +404,8 @@ inline double DEventProcessor_dc_alignment::cdc_variance(double t){
   //sigma+=0.02;
   
   //sigma=0.08/(t+1.)+0.03;
+
+  //  sigma=0.05;
   
   return sigma*sigma;
 }
