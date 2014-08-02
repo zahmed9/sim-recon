@@ -20,10 +20,13 @@ void DKinFitter_GlueX::Set_BField(const DMagneticFieldMap* locMagneticFieldMap)
 TVector3 DKinFitter_GlueX::Get_BField(const TVector3& locPosition) const
 {
 	if(dMagneticFieldMap == NULL)
-		return (TVector3());
+	{
+		cout << "ERROR: MAGNETIC FIELD MAP IS NULL. Aborting" << endl;
+		abort();
+	}
 
 	double locBx, locBy, locBz;
-	dMagneticFieldMap->GetField(locPosition.X(), locPosition.Y(),locPosition.Z(), locBx, locBy, locBz);
+	dMagneticFieldMap->GetField(locPosition.X(), locPosition.Y(), locPosition.Z(), locBx, locBy, locBz);
 	return (TVector3(locBx, locBy, locBz));
 }
 

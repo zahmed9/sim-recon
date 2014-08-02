@@ -13,6 +13,7 @@
 #include <JANA/JEventLoop.h>
 using namespace jana;
 #include <TH2F.h>
+#include <TH1F.h>
 #include "DTrackCandidate.h"
 #include <DVector3.h>
 #include "CDC/DCDCTrackHit.h"
@@ -50,16 +51,7 @@ class DTrackCandidate_factory:public JFactory<DTrackCandidate>{
     //DEBUG_HISTS=true;
   };
   ~DTrackCandidate_factory(){};
-  
-  jerror_t GetPositionAndMomentum(const DFDCSegment *segment,
-				  DVector3 &pos, DVector3 &mom);
-  jerror_t GetPositionAndMomentum(DHelicalFit &fit,double Bz,
-				  const DVector3 &origin,
-				  DVector3 &pos,
-				  DVector3 &mom);
-  jerror_t GetPositionAndMomentum(DHelicalFit &fit,double Bz,DVector3 &pos,
-				  DVector3 &mom);
-  
+   
  protected:
   virtual jerror_t init(void);
   virtual jerror_t evnt(JEventLoop *loop, int eventnumber);	///< Invoked via JEventProcessor virtual method
@@ -77,6 +69,17 @@ class DTrackCandidate_factory:public JFactory<DTrackCandidate>{
   void ProjectHelixToZ(const double z,const double q,const DVector3 &mom,
 		       DVector3 &pos);
 
+  jerror_t GetPositionAndMomentum(const DFDCSegment *segment,
+				  DVector3 &pos, DVector3 &mom);
+  jerror_t GetPositionAndMomentum(DHelicalFit &fit,double Bz,
+				  const DVector3 &origin,
+				  DVector3 &pos,
+				  DVector3 &mom);
+  jerror_t GetPositionAndMomentum(DHelicalFit &fit,double Bz,DVector3 &pos,
+				  DVector3 &mom);
+  jerror_t GetPositionAndMomentum(double z,DHelicalFit &fit,
+				  double Bz,DVector3 &pos,DVector3 &mom);
+
   void UpdatePositionAndMomentum(DTrackCandidate *can,const DFDCPseudo *fdchit,
 				 DHelicalFit &fit,double Bz_avg,int axial_id);
 
@@ -93,24 +96,32 @@ class DTrackCandidate_factory:public JFactory<DTrackCandidate>{
   bool MatchMethod3(const DTrackCandidate *cdccan,vector<int> &forward_matches,
 		    vector<unsigned int>&used_cdc_hits
 		    );  
-  void MatchMethod4(DTrackCandidate *srccan,vector<int> &forward_matches,
+  bool MatchMethod4(const DTrackCandidate *srccan,vector<int> &forward_matches,
 		    int &num_fdc_cands_remaining);
   bool MatchMethod5(DTrackCandidate *can,  
 		    vector<const DCDCTrackHit *>&cdchits,
 		    vector<int> &forward_matches);
-  void MatchMethod6(unsigned int fdc_id,
-		    DTrackCandidate *can, 
+  void MatchMethod6(DTrackCandidate *can, 
 		    vector<const DFDCSegment *>&segments,
 		    vector<unsigned int>&used_cdc_hits,  
-		    unsigned int &num_unmatched_cdcs,
-		    vector<int>&forward_matches,
-		    int &num_fdc_cands_remaining
+		    unsigned int &num_unmatched_cdcs
 		    );
-  bool MatchMethod7(unsigned int current_id,unsigned int pack1,
-		    DHelicalFit &fit,DTrackCandidate *can,
-		    vector<int>&forward_matches,
+  bool MatchMethod7(DTrackCandidate *srccan,vector<int> &forward_matches,
 		    int &num_fdc_cands_remaining);
-
+  bool MatchMethod8(const DTrackCandidate *cdccan,vector<int> &forward_matches,
+		    vector<unsigned int>&used_cdc_hits);
+  bool MatchMethod9(unsigned int src_index,const DTrackCandidate *srccan, 
+		    const DFDCSegment *segment,
+		    vector<const DTrackCandidate*>&cands,
+		    vector<int> &forward_matches);
+  bool MatchMethod10(unsigned int src_index,const DTrackCandidate *srccan, 
+		     const DFDCSegment *segment,
+		     vector<const DTrackCandidate*>&cands,
+		     vector<int> &forward_matches);
+  bool MatchMethod11(double q,DVector3 &mypos,DVector3 &mymom,
+		     DHelicalFit &fit2,const DFDCSegment *segment1,
+		     const DFDCSegment *segment2);
+ 
  private:
   const DMagneticFieldMap *bfield;
   DMagneticFieldStepper *stepper;
@@ -123,6 +134,7 @@ class DTrackCandidate_factory:public JFactory<DTrackCandidate>{
   int DEBUG_LEVEL,MIN_NUM_HITS;
   bool DEBUG_HISTS;
   TH2F *match_dist,*match_dist_vs_p;
+  TH2F *match_center_dist2;
 
   double FactorForSenseOfRotation;
   DVector3 cdc_endplate;

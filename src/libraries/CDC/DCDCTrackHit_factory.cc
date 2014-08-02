@@ -55,6 +55,34 @@ jerror_t DCDCTrackHit_factory::brun(JEventLoop *loop, int runnumber)
     Nstraws[i]=cdcwires[i].size();
   }
 
+	// Get drift time parameters
+	JCalibration *jcalib = dapp->GetJCalibration((loop->GetJEvent()).GetRunNumber());
+	map<string, double> cdc_drift_parms;
+	jcalib->Get("CDC/cdc_drift_parms", cdc_drift_parms);
+	CDC_DRIFT_BSCALE_PAR1 = cdc_drift_parms["bscale_par1"];
+	CDC_DRIFT_BSCALE_PAR2 = cdc_drift_parms["bscale_par2"];
+
+	typedef map<string,double>::iterator iter_double;
+  	vector< map<string, double> > tvals;
+	if (jcalib->Get("CDC/cdc_drift_table", tvals)==false){    
+		for(unsigned int i=0; i<tvals.size(); i++){
+			map<string, double> &row = tvals[i];
+			iter_double iter = row.find("t");
+			cdc_drift_table.push_back(1000.*iter->second);
+		}
+	}
+	if(cdc_drift_table.empty()){
+		jerr << endl;
+		jerr << " No values found for \"CDC/cdc_drift_table\"!" <<endl;
+		jerr << endl;
+		jerr << " This probably means you'r using an old calibration DB." << endl;
+		jerr << " Check your JANA_CALIB_URL environment variable." << endl;
+		jerr << " (This message printed from DCDCTrackHit_factory::brun())" << endl;
+		exit(-1);
+	}
+	cdc_drift_table_min = cdc_drift_table[0];
+	cdc_drift_table_max = cdc_drift_table[cdc_drift_table.size()-1];
+
   return NOERROR;
 }
 
@@ -111,7 +139,28 @@ jerror_t DCDCTrackHit_factory::evnt(JEventLoop *loop, int eventnumber)
 		double gas_gain=1e5;
 		double electron_charge=1.6022e-4; /* fC */
 		hit->dE=cdchit->q*w_eff/(gas_gain*electron_charge);
-		hit->dist = -1.;  // the actual drift distance is calculated later, use a placeholder value here
+		
+		// Calculate drift distance assuming no tof to wire for now.
+		// The tracking package will replace this once an estimate
+		// of the tof to the wire is known. This algorithm was copied
+		// from the method DTrackFitterKalmanSIMD::ComputeCDCDrift
+		// so that a distance could be used for drawing the CDC 
+		// drift times in hdview2, even when track fitting isn't done.
+		double B = 2.0; // just assume 2T B-field everywhere
+		double dtc =(CDC_DRIFT_BSCALE_PAR1 + CDC_DRIFT_BSCALE_PAR2 * B)* hit->tdrift;
+    	double tcorr = hit->tdrift - dtc;
+		unsigned int index=0;
+		if(tcorr < cdc_drift_table_min){
+			index = 0;
+		}else if (tcorr >= cdc_drift_table_max){
+			index = cdc_drift_table.size()-1;
+		}else{
+			index=locate(cdc_drift_table,tcorr);
+		}
+		double dt=cdc_drift_table[index+1]-cdc_drift_table[index];
+		double frac=(tcorr-cdc_drift_table[index])/dt;
+		hit->dist = 0.01*(double(index)+frac);  // the actual drift distance is calculated later, use a placeholder value here
+
 		hit->AddAssociatedObject(cdchit);
 
 		if (MATCH_TRUTH_HITS==true&&mctrackhits.size()>0){
@@ -130,5 +179,31 @@ jerror_t DCDCTrackHit_factory::evnt(JEventLoop *loop, int eventnumber)
 	}
 	
 	return NOERROR;
+}
+
+//------------------
+// locate
+// Locate a position in vector xx given x
+// (this copied from DTrackFitterKalmanSIMD.cc)
+//------------------
+unsigned int DCDCTrackHit_factory::locate(vector<double>&xx,double x){
+  int ju,jm,jl;
+  int ascnd;
+
+  int n=xx.size();
+
+  jl=-1;
+  ju=n;
+  ascnd=(xx[n-1]>=xx[0]);
+  while(ju-jl>1){
+    jm=(ju+jl)>>1;
+    if ( (x>=xx[jm])==ascnd)
+      jl=jm;
+    else
+      ju=jm;
+  }
+  if (x==xx[0]) return 0;
+  else if (x==xx[n-1]) return n-2;
+  return jl;
 }
 

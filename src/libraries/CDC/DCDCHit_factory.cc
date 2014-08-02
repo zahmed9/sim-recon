@@ -18,7 +18,6 @@ using namespace jana;
 
 #define CDC_MAX_CHANNELS  3522
 
-static int USE_MC_CALIB = 0;
 static double DIGI_THRESHOLD = -1000000.0;
 
 //------------------
@@ -26,8 +25,6 @@ static double DIGI_THRESHOLD = -1000000.0;
 //------------------
 jerror_t DCDCHit_factory::init(void)
 {
-        // should we use calibrations for simulated data? - this is a temporary workaround
-        gPARMS->SetDefaultParameter("DIGI:USEMC",USE_MC_CALIB);
         gPARMS->SetDefaultParameter("CDC:DIGI_THRESHOLD",DIGI_THRESHOLD, "Do not convert CDC digitized hits into DCDCHit objects that would have q less than this");
 
 	return NOERROR;
@@ -45,7 +42,7 @@ jerror_t DCDCHit_factory::brun(jana::JEventLoop *eventLoop, int runnumber)
 	/// set the base conversion scales
 	//a_scale    = 1.0E6/1.3E5; 
 	a_scale    = 4.0E3/1.0E2; 
-	t_scale    = 8.0;    // 8 ns/count
+	t_scale    = 8.0/10.0;    // 8 ns/count and integer time is in 1/10th of sample
 
 	/// Read in calibration constants
         vector<double> raw_gains;
@@ -58,13 +55,8 @@ jerror_t DCDCHit_factory::brun(jana::JEventLoop *eventLoop, int runnumber)
 	    jout << "Error loading /CDC/wire_gains !" << endl;
         if(eventLoop->GetCalib("/CDC/pedestals", raw_pedestals))
 	    jout << "Error loading /CDC/pedestals !" << endl;
-	if(USE_MC_CALIB>0) {
-	    if(eventLoop->GetCalib("/CDC/timing_offsets::mc", raw_time_offsets))
-		jout << "Error loading /CDC/timing_offsets !" << endl;
-	} else {
-	    if(eventLoop->GetCalib("/CDC/timing_offsets", raw_time_offsets))
-		jout << "Error loading /CDC/timing_offsets !" << endl;
-	}
+	if(eventLoop->GetCalib("/CDC/timing_offsets", raw_time_offsets))
+	    jout << "Error loading /CDC/timing_offsets !" << endl;
 
 	// fill the tables
         FillCalibTable(gains, raw_gains, Nstraws);
@@ -74,17 +66,17 @@ jerror_t DCDCHit_factory::brun(jana::JEventLoop *eventLoop, int runnumber)
 	// Verify that the right number of rings was read for each set of constants
 	char str[256];
 	if(gains.size() != Nrings){
-		sprintf(str, "Bad # of rings for CDC gain from CCDB! CCDB=%ld , should be %d", gains.size(), Nrings);
+		sprintf(str, "Bad # of rings for CDC gain from CCDB! CCDB=%zu , should be %d", gains.size(), Nrings);
 		cerr << str << endl;
 		throw JException(str);
 	}
 	if(pedestals.size() != Nrings){
-		sprintf(str, "Bad # of rings for CDC pedestal from CCDB! CCDB=%ld , should be %d", pedestals.size(), Nrings);
+		sprintf(str, "Bad # of rings for CDC pedestal from CCDB! CCDB=%zu , should be %d", pedestals.size(), Nrings);
 		cerr << str << endl;
 		throw JException(str);
 	}
 	if(time_offsets.size() != Nrings){
-		sprintf(str, "Bad # of rings for CDC time_offset from CCDB! CCDB=%ld , should be %d", time_offsets.size(), Nrings);
+		sprintf(str, "Bad # of rings for CDC time_offset from CCDB! CCDB=%zu , should be %d", time_offsets.size(), Nrings);
 		cerr << str << endl;
 		throw JException(str);
 	}
@@ -92,17 +84,17 @@ jerror_t DCDCHit_factory::brun(jana::JEventLoop *eventLoop, int runnumber)
 	// Verify the right number of straws was read for each ring for each set of constants
 	for(unsigned int i=0; i<Nrings; i++){
 		if(gains[i].size() != Nstraws[i]){
-			sprintf(str, "Bad # of straws for CDC gain from CCDB! CCDB=%ld , should be %d for ring %d", gains[i].size(), Nstraws[i], i+1);
+			sprintf(str, "Bad # of straws for CDC gain from CCDB! CCDB=%zu , should be %d for ring %d", gains[i].size(), Nstraws[i], i+1);
 			cerr << str << endl;
 			throw JException(str);
 		}
 		if(pedestals[i].size() != Nstraws[i]){
-			sprintf(str, "Bad # of straws for CDC pedestal from CCDB! CCDB=%ld , should be %d for ring %d", pedestals[i].size(), Nstraws[i], i+1);
+			sprintf(str, "Bad # of straws for CDC pedestal from CCDB! CCDB=%zu , should be %d for ring %d", pedestals[i].size(), Nstraws[i], i+1);
 			cerr << str << endl;
 			throw JException(str);
 		}
 		if(time_offsets[i].size() != Nstraws[i]){
-			sprintf(str, "Bad # of straws for CDC time_offset from CCDB! CCDB=%ld , should be %d for ring %d", time_offsets[i].size(), Nstraws[i], i+1);
+			sprintf(str, "Bad # of straws for CDC time_offset from CCDB! CCDB=%zu , should be %d for ring %d", time_offsets[i].size(), Nstraws[i], i+1);
 			cerr << str << endl;
 			throw JException(str);
 		}
@@ -144,12 +136,12 @@ jerror_t DCDCHit_factory::evnt(JEventLoop *loop, int eventnumber)
 		}
 		
 		// Get pedestal. Preference is given to pedestal measured
-		// for event. Otherwise, use statitical one from CCDB
+		// for event. Otherwise, use statistical one from CCDB
 		double pedestal = pedestals[ring-1][straw-1];
 		vector<const Df125PulseIntegral*> PIvect;
 		digihit->Get(PIvect);
 		if(!PIvect.empty()) pedestal = (double)PIvect[0]->pedestal;
-		
+ 		
 		// Apply calibration constants here
 		double A = (double)digihit->pulse_integral;
 		double T = (double)digihit->pulse_time;
@@ -251,10 +243,5 @@ void DCDCHit_factory::FillCalibTable(vector< vector<double> > &table, vector<dou
 
         table[ring].push_back( raw_table[channel] );
     }
-/*
-    cerr << "LOADED TABLE " << endl;
-    cerr << " number of rings = " << table.size() << endl;
-    for(int i=0; i<table.size(); i++)
-	cerr << " ring #" << i+1 << " has " << table[i].size() << " straws" << endl;
-*/
+
 }
