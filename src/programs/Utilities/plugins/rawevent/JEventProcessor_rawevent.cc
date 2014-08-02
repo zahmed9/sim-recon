@@ -158,12 +158,12 @@ static int detID[MAXCRATE][MAXSLOT];
 static uint64_t trigTime     = 32000000;    // in picoseconds
 static float tMin            = -100000.;    // minimum hit time in picoseconds
 
-static int trigtick          = 4000;    // in picoseconds
-//static int CAENTDCtick       = 25;      // in picoseconds
-static int F1TDC32tick       = 60;      // in picoseconds
-static int F1TDC48tick       = 120;     // in picoseconds
-static int FADC250tick       = 4000;    // in picoseconds
-static int FADC125tick       = 8000;    // in picoseconds
+static double trigtick          = 4000;    // in picoseconds
+//static int CAENTDCtick       = 25;       // in picoseconds
+static double F1TDC32tick       = 60.;     // in picoseconds
+static double F1TDC48tick       = 120.;    // in picoseconds
+static double FADC250tick       = 62.5;    // in picoseconds
+static double FADC125tick       = 800.;    // in picoseconds
 
 
 // debug
@@ -417,6 +417,20 @@ jerror_t JEventProcessor_rawevent::brun(JEventLoop *eventLoop, int runnumber) {
     }
   }
 
+  static bool compareDBCALTDCHits(const DBCALTDCHit* h1, const DBCALTDCHit* h2) {
+    if(h1->module!=h2->module) {
+      return(h1->module<h2->module);
+    } else if(h1->sector!=h2->sector) {
+      return(h1->sector<h2->sector);
+    } else if(h1->layer!=h2->layer) {
+      return(h1->layer<h2->layer);
+    } else if(h1->end!=h2->end) {
+      return(h1->end<h2->end);
+    } else {
+      return(h1->t<h2->t);
+    }
+  }
+
   static bool compareDFDCHits(const DFDCHit* h1, const DFDCHit* h2) {
     if(h1->gPlane!=h2->gPlane) {
       return(h1->gPlane<h2->gPlane);
@@ -526,7 +540,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
   for(i=0; i<dcdchits.size(); i++) {
     if((dcdchits[i]->q>0)&&((dcdchits[i]->t*1000.)>tMin)&&(dcdchits[i]->t*1000.<trigTime)) {
 
-      uint32_t q     = dcdchits[i]->q * (1.3E5/1.0E6); // q is in femtoCoulombs (max is ~1E6) 
+	uint32_t q     = dcdchits[i]->q * (1./5.18) * (1.3E5/1.0E6); // q is in femtoCoulombs (max is ~1E6) 
       uint32_t t     = dcdchits[i]->t*1000.0 -tMin;    // t is in nanoseconds (max is ~900ns)
       
       if(noroot==0)cdcCharges->Fill(dcdchits[i]->q);
@@ -547,7 +561,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
       hit[0].nwords      = 2;
       hit[0].hdata       = mcData;
       hit[0].hdata[0]    = q;  // in fADC counts
-      hit[0].hdata[1]    = t/FADC125tick;
+      hit[0].hdata[1]    = static_cast<double>(t)/FADC125tick;
       //if(q>0x7ffff)cerr << "q too large for CDC: " << q << endl;
       
       if(dumphits>1) {
@@ -602,7 +616,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
       hit[0].nwords      = 2;
       hit[0].hdata       = mcData;
       hit[0].hdata[0]    = E;  // in fADC counts
-      hit[0].hdata[1]    = t/FADC250tick;
+      hit[0].hdata[1]    = static_cast<double>(t)/FADC250tick;
       if(E>0x7ffff)cerr << "E too large for TOF: " << E << endl;
       
       if(dumphits>1) {
@@ -635,7 +649,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
       hit[0].module_mode = 0;
       hit[0].nwords      = 1;
       hit[0].hdata       = mcData;
-      hit[0].hdata[0]    = t/F1TDC32tick;
+      hit[0].hdata[0]    = static_cast<double>(t)/F1TDC32tick;
       
       if(dumphits>1) {
         jout << endl;
@@ -691,7 +705,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
       hit[0].nwords      = 2;
       hit[0].hdata       = mcData;
       hit[0].hdata[0]    = E;
-      hit[0].hdata[1]    = t/FADC250tick;
+      hit[0].hdata[1]    = static_cast<double>(t)/FADC250tick;
       if(E/10>0x7ffff)cerr << "E too large for BCAL: " << E << endl;
       
       if(dumphits>1) {
@@ -712,7 +726,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
           exit(EXIT_FAILURE);
         }
       }
-
+      /**
       hitCount++;
       nhits=1;
       cscRef cscTDC      = DBCALHitTranslationTDC(dbcalhits[i]);
@@ -725,7 +739,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
       hit[0].module_mode = 0;
       hit[0].nwords      = 1;
       hit[0].hdata       = mcData;
-      hit[0].hdata[0]    = t/F1TDC32tick;
+      hit[0].hdata[0]    = static_cast<double>(t)/F1TDC32tick;
       
       if(dumphits>1) {
         jout << endl;
@@ -744,10 +758,67 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
           exit(EXIT_FAILURE);
         }
       }
+      **/
     }
   }
   if((dumphits>=1)&&(hc>0)) {
     jout << endl << "BCAL hits: " << hc << endl << endl;
+  }
+
+
+  // BCAL TDC hits are handled in separate objections
+  vector<const DBCALTDCHit*> dbcaltdchits;
+  eventLoop->Get(dbcaltdchits);
+  sort(dbcaltdchits.begin(),dbcaltdchits.end(),compareDBCALTDCHits);
+  
+  hc=0;
+  for(i=0; i<dbcaltdchits.size(); i++) {
+    if(((dbcaltdchits[i]->t*1000.)>tMin)&&(dbcaltdchits[i]->t*1000.<trigTime)) {
+
+      int32_t E     = 0;
+      int32_t t     = dbcaltdchits[i]->t*1000.-tMin;  // in picoseconds
+
+      if(noroot==0)bcalTimes->Fill(dbcaltdchits[i]->t-tMin/1000);
+
+
+      cscRef cscTDC      = DBCALHitTranslationTDC(dbcaltdchits[i]);
+          if(cscTDC == CSCREF_NULL) continue;
+
+      hc++;
+      hitCount++;
+      nhits=1;
+      hit[0].hit_id      = hitCount;
+      hit[0].det_id      = detID;
+      hit[0].crate_id    = cscTDC.crate;
+      hit[0].slot_id     = cscTDC.slot;
+      hit[0].chan_id     = cscTDC.channel;
+      hit[0].module_id   = F1TDC32;
+      hit[0].module_mode = 0;
+      hit[0].nwords      = 1;
+      hit[0].hdata       = mcData;
+      hit[0].hdata[0]    = static_cast<double>(t)/F1TDC32tick;
+      
+      if(dumphits>1) {
+        jout << endl;
+        jout << " BCAL TDC module,sector,layer,end are " << dbcaltdchits[i]->module<< ", " << dbcaltdchits[i]->sector
+             << ", " << dbcaltdchits[i]->layer << ", " << dbcaltdchits[i]->end << endl;
+        jout << " c,s,c are " << cscTDC.crate << ", " << cscTDC.slot << ", " << cscTDC.channel << endl;
+        jout << " hdata is: " << hit[0].hdata[0] << endl;
+        jout << " E,t are " << E << ", " << t << endl;
+        jout << endl;
+      }
+      
+      if(nomc2coda==0) {
+	  stat = mc2codaWrite(eventID,nhits,(struct coda_hit_info *)&hit[0]);
+	  if(stat!=nhits) {
+	      jerr << "?error return from mc2codaWrite() for BCAL TDC: " << stat << endl << endl;
+	      exit(EXIT_FAILURE);
+	  }
+      }
+    }
+  }
+  if((dumphits>=1)&&(hc>0)) {
+    jout << endl << "BCAL TDC hits: " << hc << endl << endl;
   }
 
 
@@ -782,7 +853,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
       hit[0].nwords      = 2;
       hit[0].hdata       = mcData;
       hit[0].hdata[0]    = E; 
-      hit[0].hdata[1]    = t/FADC250tick;
+      hit[0].hdata[1]    = static_cast<double>(t)/FADC250tick;
       if(E/10>0x7ffff)cerr << "E too large for FCAL: " << E << endl;
       
       if(dumphits>1) {
@@ -825,7 +896,6 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
       if(noroot==0)fdcTimes->Fill(dfdchits[i]->t-tMin/1000);
 
       int type = dfdchits[i]->type;
-
       // FADC125
       if(type==1) {
         hc++;
@@ -842,7 +912,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
         hit[0].nwords      = 2;
         hit[0].hdata       = mcData;
         hit[0].hdata[0]    = q; 
-        hit[0].hdata[1]    = t/FADC125tick;
+        hit[0].hdata[1]    = static_cast<double>(t)/FADC125tick;
         if(q>0x7ffff)cerr << "q too large for FDC: " << q << endl;
         
         if(dumphits>2) {
@@ -865,6 +935,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
 
       // F1TDC48
       } else if(type==0) {
+        hc++;
         hitCount++;
         nhits=1;
         cscRef cscTDC      = DFDCAnodeHitTranslation(dfdchits[i]);
@@ -877,7 +948,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
         hit[0].module_mode = 0;
         hit[0].nwords      = 1;
         hit[0].hdata       = mcData;
-        hit[0].hdata[0]    = t/F1TDC48tick;
+        hit[0].hdata[0]    = static_cast<double>(t)/F1TDC48tick;
         
         if(dumphits>2) {
           jout << endl;
@@ -896,8 +967,9 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
           }
         }
       }
-    }
+    } 
   }
+
   if((dumphits>=1)&&(hc>0)) {
     jout << endl << "FDC hits: " << hc << endl << endl;
   }
@@ -933,7 +1005,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
       hit[0].nwords      = 2;
       hit[0].hdata       = mcData;
       hit[0].hdata[0]    = E; 
-      hit[0].hdata[1]    = t/FADC250tick;
+      hit[0].hdata[1]    = static_cast<double>(t)/FADC250tick;
       if(E>0x7ffff)cerr << "E too large for ST: " << E << endl;
       
       if(dumphits>1) {
@@ -966,7 +1038,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
       hit[0].module_mode = 0;
       hit[0].nwords      = 1;
       hit[0].hdata       = mcData;
-      hit[0].hdata[0]    = t/F1TDC32tick;
+      hit[0].hdata[0]    = static_cast<double>(t)/F1TDC32tick;
       
       if(dumphits>1) {
         jout << endl;
@@ -1021,7 +1093,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
 		  hit[0].nwords      = 2;
 		  hit[0].hdata       = mcData;
 		  hit[0].hdata[0]    = E/1000;  // in MeV
-		  hit[0].hdata[1]    = t/FADC250tick;
+		  hit[0].hdata[1]    = static_cast<double>(t)/FADC250tick;
 		  if(E/1000>0x7ffff)cerr << "E too large for Tagger: " << E << endl;
 		  
 		  if(dumphits>1) {
@@ -1056,7 +1128,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
 		  hit[0].module_mode = 0;
 		  hit[0].nwords      = 1;
 		  hit[0].hdata       = mcData;
-		  hit[0].hdata[0]    = t/F1TDC32tick;
+		  hit[0].hdata[0]    = static_cast<double>(t)/F1TDC32tick;
 		  
 		  if(dumphits>1) {
 			jout << endl;
@@ -1329,7 +1401,7 @@ void JEventProcessor_rawevent::StartElement(void *userData, const char *xmlname,
 			break;
 		case CAEN1190:
 		case CAEN1290:
-			detID[nCrate-1][slot-1]   = 2;
+			detID[nCrate-1][slot-1]   = 20;
 			break;
 		default:
 			detID[nCrate-1][slot-1]   = 0;
@@ -1641,7 +1713,8 @@ cscRef JEventProcessor_rawevent::DBCALHitTranslationADC(const DBCALHit *hit) con
 //----------------------------------------------------------------------------
 
 
-cscRef JEventProcessor_rawevent::DBCALHitTranslationTDC(const DBCALHit *hit) const {
+//cscRef JEventProcessor_rawevent::DBCALHitTranslationTDC(const DBCALHit *hit) const {
+cscRef JEventProcessor_rawevent::DBCALHitTranslationTDC(const DBCALTDCHit *hit) const {
   // BCAL does not have TDC channels for layer 4, but some older simulation files
   // have this. Ignore those hits here.
   if(hit->layer > 3) return CSCREF_NULL;

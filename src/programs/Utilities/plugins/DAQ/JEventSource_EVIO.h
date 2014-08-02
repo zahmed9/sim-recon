@@ -45,14 +45,17 @@ using namespace evio;
 #include "Df250PulseRawData.h"
 #include "Df250TriggerTime.h"
 #include "Df250PulseTime.h"
+#include "Df250PulsePedestal.h"
 #include "Df250WindowRawData.h"
 #include "Df125TriggerTime.h"
 #include "Df125PulseIntegral.h"
 #include "Df125PulseTime.h"
+#include "Df125PulsePedestal.h"
 #include "Df125PulseRawData.h"
 #include "Df125WindowRawData.h"
 #include "DF1TDCHit.h"
 #include "DF1TDCTriggerTime.h"
+#include "DCAEN1290TDCHit.h"
 
 //-----------------------------------------------------------------------
 /// The JEventSource_EVIO class implements a JEventSource capable of reading in
@@ -113,6 +116,15 @@ using namespace evio;
 ///     end of the file or more importantly, in the order the
 ///     method appears in the class definition.
 ///
+///
+/// JFactoryGenerator_DAQ.h
+/// --------------------
+/// 1.) Add an include line to the top of the file for each new
+///     data type.
+///
+/// 2.) Add a line for each new data type to the GenerateFactories()
+///     method of JFactoryGenerator_DAQ.
+///
 ///----------------------------------------------------------------------
 
 class JEventSource_EVIO: public jana::JEventSource{
@@ -166,7 +178,10 @@ class JEventSource_EVIO: public jana::JEventSource{
 		float TIMEOUT;
 		bool  EMULATE_PULSE_INTEGRAL_MODE;
 		int32_t  EMULATE_SPARSIFICATION_THRESHOLD;
+		uint32_t EMULATE_FADC250_TIME_THRESHOLD;
+		uint32_t EMULATE_FADC125_TIME_THRESHOLD;
 		string MODTYPE_MAP_FILENAME;
+		bool ENABLE_DISENTANGLING;
 
 		// Utility class with multiple roles:
 		//
@@ -223,8 +238,11 @@ class JEventSource_EVIO: public jana::JEventSource{
 	
 		void EmulateDf250PulseIntergral(vector<JObject*> &wrd_objs, vector<JObject*> &pi_objs);
 		void EmulateDf125PulseIntergral(vector<JObject*> &wrd_objs, vector<JObject*> &pi_objs);
+		void EmulateDf250PulseTime(vector<JObject*> &wrd_objs, vector<JObject*> &pt_objs, vector<JObject*> &pp_objs);
+		void EmulateDf125PulseTime(vector<JObject*> &wrd_objs, vector<JObject*> &pt_objs, vector<JObject*> &pp_objs);
 		jerror_t ParseEvents(ObjList *objs_ptr);
 		int32_t GetRunNumber(evioDOMTree *evt);
+		int32_t FindRunNumber(uint32_t *iptr);
 		MODULE_TYPE GuessModuleType(const uint32_t *istart, const uint32_t *iend);
 		bool IsF250ADC(const uint32_t *istart, const uint32_t *iend);
 		bool IsF1TDC(const uint32_t *istart, const uint32_t *iend);
@@ -239,8 +257,7 @@ class JEventSource_EVIO: public jana::JEventSource{
 		void Parsef250Bank(int32_t rocid, const uint32_t* &iptr, const uint32_t *iend, list<ObjList*> &events);
 		void Parsef125Bank(int32_t rocid, const uint32_t* &iptr, const uint32_t *iend, list<ObjList*> &events);
 		void ParseF1TDCBank(int32_t rocid, const uint32_t* &iptr, const uint32_t *iend, list<ObjList*> &events);
-		void ParseF1TDCBank_style1(int32_t rocid, const uint32_t* &iptr, const uint32_t *iend, list<ObjList*> &events);
-		void ParseF1TDCBank_style2(int32_t rocid, const uint32_t* &iptr, const uint32_t *iend, list<ObjList*> &events);
+		uint32_t F1TDC_channel(uint32_t chip, uint32_t chan_on_chip, int modtype);
 		void ParseTSBank(int32_t rocid, const uint32_t* &iptr, const uint32_t *iend, list<ObjList*> &events);
 		void ParseTIBank(int32_t rocid, const uint32_t* &iptr, const uint32_t *iend, list<ObjList*> &events);
 		void ParseCAEN1190(int32_t rocid, const uint32_t* &iptr, const uint32_t *iend, list<ObjList*> &events);

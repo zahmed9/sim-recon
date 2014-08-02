@@ -16,6 +16,8 @@ using namespace std;
 
 #ifdef HAVE_EVIO		
 #include <evioFileChannel.hxx>
+
+extern "C" uint32_t *swap_int32_t(uint32_t *data, unsigned int length, uint32_t *dest);
 #endif // HAVE_EVIO
 
 #ifdef HAVE_ET
@@ -86,12 +88,15 @@ JEventSource_EVIO::JEventSource_EVIO(const char* source_name):JEventSource(sourc
 	PARSE_EVIO_EVENTS = true;
 	BUFFER_SIZE = 2000000; // in bytes
 	ET_STATION_NEVENTS = 10;
-	ET_STATION_CREATE_BLOCKING = true;
+	ET_STATION_CREATE_BLOCKING = false;
 	VERBOSE = 0;
 	TIMEOUT = 2.0;
 	EMULATE_PULSE_INTEGRAL_MODE = true;
 	EMULATE_SPARSIFICATION_THRESHOLD = -100000; // =-100000 is equivalent to no threshold
+	EMULATE_FADC250_TIME_THRESHOLD = 10;
+	EMULATE_FADC125_TIME_THRESHOLD = 80;
 	MODTYPE_MAP_FILENAME = "modtype.map";
+	ENABLE_DISENTANGLING = true;
 	
 	if(gPARMS){
 		gPARMS->SetDefaultParameter("EVIO:AUTODETECT_MODULE_TYPES", AUTODETECT_MODULE_TYPES, "Try and guess the module type tag,num values for which there is no module map entry.");
@@ -104,8 +109,11 @@ JEventSource_EVIO::JEventSource_EVIO(const char* source_name):JEventSource(sourc
 		gPARMS->SetDefaultParameter("EVIO:VERBOSE", VERBOSE, "Set verbosity level for processing and debugging statements while parsing. 0=no debugging messages. 10=all messages");
 		gPARMS->SetDefaultParameter("EVIO:EMULATE_PULSE_INTEGRAL_MODE", EMULATE_PULSE_INTEGRAL_MODE, "If non-zero, and Df250WindowRawData objects exist in the event AND no Df250PulseIntegral objects exist, then use the waveform data to generate Df250PulseIntegral objects. Default is for this feature to be on. Set this to zero to disable it.");
 		gPARMS->SetDefaultParameter("EVIO:EMULATE_SPARSIFICATION_THRESHOLD", EMULATE_SPARSIFICATION_THRESHOLD, "If EVIO:EMULATE_PULSE_INTEGRAL_MODE is on, then this is used to apply a cut on the non-pedestal-subtracted integral to determine if a Df250PulseIntegral is produced or not.");
+		gPARMS->SetDefaultParameter("EVIO:EMULATE_FADC250_TIME_THRESHOLD", EMULATE_FADC250_TIME_THRESHOLD, "If EVIO:EMULATE_PULSE_INTEGRAL_MODE is on, then DF250PulseTime objects will be emulated as well. This sets the sample threshold above pedestal from which the time will be determined.");
+		gPARMS->SetDefaultParameter("EVIO:EMULATE_FADC125_TIME_THRESHOLD", EMULATE_FADC125_TIME_THRESHOLD, "If EVIO:EMULATE_PULSE_INTEGRAL_MODE is on, then DF125PulseTime objects will be emulated as well. This sets the sample threshold above pedestal from which the time will be determined.");
 		gPARMS->SetDefaultParameter("ET:TIMEOUT", TIMEOUT, "Set the timeout in seconds for each attempt at reading from ET system (repeated attempts will still be made indefinitely until program quits or the quit_on_et_timeout flag is set.");
 		gPARMS->SetDefaultParameter("EVIO:MODTYPE_MAP_FILENAME", MODTYPE_MAP_FILENAME, "Optional module type conversion map for use with files generated with the non-standard module types");
+		gPARMS->SetDefaultParameter("EVIO:ENABLE_DISENTANGLING", ENABLE_DISENTANGLING, "Enable/disable disentangling of multi-block events. Enabled by default. Set to 0 to disable.");
 	}
 	
 	// Try to open the file.
@@ -156,13 +164,16 @@ JEventSource_EVIO::JEventSource_EVIO(const char* source_name):JEventSource(sourc
 	event_source_data_types.insert("Df250PulseRawData");
 	event_source_data_types.insert("Df250TriggerTime");
 	event_source_data_types.insert("Df250PulseTime");
+	event_source_data_types.insert("Df250PulsePedestal");
 	event_source_data_types.insert("Df250WindowRawData");
 	event_source_data_types.insert("Df125PulseIntegral");
 	event_source_data_types.insert("Df125TriggerTime");
 	event_source_data_types.insert("Df125PulseTime");
+	event_source_data_types.insert("Df125PulsePedestal");
 	event_source_data_types.insert("Df125WindowRawData");
 	event_source_data_types.insert("DF1TDCHit");
 	event_source_data_types.insert("DF1TDCTriggerTime");
+	event_source_data_types.insert("DCAEN1290TDCHit");
 
 	// Read in optional module type translation map if it exists	
 	ReadOptionalModuleTypeTranslation();
@@ -427,6 +438,7 @@ jerror_t JEventSource_EVIO::GetEvent(JEvent &event)
 		objs_ptr = new ObjList();
 		objs_ptr->eviobuff = buff;
 		objs_ptr->eviobuff_size = buff_size;
+		objs_ptr->run_number = FindRunNumber(buff);
 	}
 
 	// Store a pointer to the ObjList object for this event in the
@@ -562,7 +574,8 @@ jerror_t JEventSource_EVIO::ParseEvents(ObjList *objs_ptr)
 					//skipped_parsing = false;	
 					ParseEVIOEvent(evt, my_full_events);
 				}catch(JException &jexception){
-					jerr << jexception.what() << endl;
+					jerr << "Exception thrown from ParseEVIOEvent!" << endl;
+					jerr << jexception.toString() << endl;
 				}
 			}
 
@@ -741,8 +754,42 @@ _DBG__;
 				return NO_MORE_EVENTS_IN_SOURCE;
 			}
 			
-			// Copy event into "buff", byte swapping if needed
-			evioswap(et_buff, swap_needed ? 1:0, buff);
+			// Copy event into "buff", byte swapping if needed.
+			// The evioswap routine will not handle the NTH correctly
+			// so we need to swap that separately and then swap each
+			// event in the stack using evioswap so that the different
+			// bank types are handled properly. If no swapping is
+			// needed, we just copy it all over in one go.
+			if(!swap_needed){
+
+				// Copy NTH and all events without swapping
+				memcpy(buff, et_buff, bufsize_bytes);
+
+			}else{
+
+				// Swap+copy NTH
+				swap_int32_t(et_buff, 8, buff);
+				
+				// Loop over events in stack
+				int Nevents_in_stack=0;
+				uint32_t idx = 8;
+				while(idx<len){
+					uint32_t mylen = EVIO_SWAP32(et_buff[idx]);
+					if(VERBOSE>7) evioout <<"        swapping event: idx=" << idx <<" mylen="<<mylen<<endl;
+					if( (idx+mylen) > len ){
+						_DBG_ << "Bad word count while swapping events in ET event stack!" << endl;
+						_DBG_ << "idx="<<idx<<" mylen="<<mylen<<" len="<<len<<endl;
+						_DBG_ << "This indicates a problem either with the DAQ system"<<endl;
+						_DBG_ << "or this parser code! Contact davidl@jlab.org x5567 " <<endl;
+						break;
+					}
+					swap_int32_t(&et_buff[idx], mylen+1, &buff[idx]);
+					idx += mylen+1;
+					Nevents_in_stack++;
+				}
+				
+				if(VERBOSE>3) evioout << "        Found " << Nevents_in_stack << " events in the ET event stack." << endl;
+			}
 
 			// Put ET event back since we're done with it
 			et_event_put(sys_id, att_id, pe);
@@ -822,17 +869,83 @@ jerror_t JEventSource_EVIO::GetObjects(JEvent &event, JFactory_base *factory)
 		hit_objs_by_type[hit_obj->className()].push_back(hit_obj);
 	}
 
-	// Optionally generate Df250PulseIntegral objects from Df250WindowRawData objects. 
+	// Optionally generate Df250PulseIntegral and Df250PulseTime objects from Df250WindowRawData objects. 
 	if(EMULATE_PULSE_INTEGRAL_MODE && (hit_objs_by_type["Df250PulseIntegral"].size()==0)){
+		vector<JObject*> pt_objs;
+		vector<JObject*> pp_objs;
+		EmulateDf250PulseTime(hit_objs_by_type["Df250WindowRawData"], pt_objs, pp_objs);
+		if(pt_objs.size() != 0) hit_objs_by_type["Df250PulseTime"] = pt_objs;
+		if(pp_objs.size() != 0) hit_objs_by_type["Df250PulsePedestal"] = pp_objs;
+
 		vector<JObject*> pi_objs;
 		EmulateDf250PulseIntergral(hit_objs_by_type["Df250WindowRawData"], pi_objs);
 		if(pi_objs.size() != 0) hit_objs_by_type["Df250PulseIntegral"] = pi_objs;
+
+		// Make PulseTime, PulseIntegral, and PulsePedestal objects associated objects of one another
+		// We need to cast the pointers as DDAQAddress types for the LinkAssociationsWithPulseNumber
+		// tmeplated method to work.
+		vector<DDAQAddress*> da_pt_objs;
+		vector<DDAQAddress*> da_pi_objs;
+		vector<DDAQAddress*> da_pp_objs;
+		for(unsigned int i=0; i<pt_objs.size(); i++) da_pt_objs.push_back((DDAQAddress*)pt_objs[i]);
+		for(unsigned int i=0; i<pi_objs.size(); i++) da_pi_objs.push_back((DDAQAddress*)pi_objs[i]);
+		for(unsigned int i=0; i<pp_objs.size(); i++) da_pp_objs.push_back((DDAQAddress*)pp_objs[i]);
+		LinkAssociations(da_pt_objs, da_pi_objs);
+		LinkAssociations(da_pt_objs, da_pp_objs);
+		LinkAssociations(da_pi_objs, da_pp_objs);
 	}
-	// Optionally generate Df125PulseIntegral objects from Df125WindowRawData objects. 
+
+	// Optionally generate Df125PulseIntegral and Df125PulseTime objects from Df125WindowRawData objects. 
 	if(EMULATE_PULSE_INTEGRAL_MODE && (hit_objs_by_type["Df125PulseIntegral"].size()==0)){
+		vector<JObject*> pt_objs;
+		vector<JObject*> pp_objs;
+		EmulateDf125PulseTime(hit_objs_by_type["Df125WindowRawData"], pt_objs, pp_objs);
+		if(pt_objs.size() != 0) hit_objs_by_type["Df125PulseTime"] = pt_objs;
+		if(pp_objs.size() != 0) hit_objs_by_type["Df125PulsePedestal"] = pp_objs;
+
 		vector<JObject*> pi_objs;
 		EmulateDf125PulseIntergral(hit_objs_by_type["Df125WindowRawData"], pi_objs);
-		if(pi_objs.size() != 0) hit_objs_by_type["Df125PulseIntegral"] = pi_objs;
+		if(pi_objs.size() != 0) hit_objs_by_type["Df125PulseIntegral"] = pi_objs;	
+		
+		// Make PulseTime and PulseIntegral objects associated objects of one another
+		// We need to cast the pointers as DDAQAddress types for the LinkAssociationsWithPulseNumber
+		// tmeplated method to work.
+		vector<DDAQAddress*> da_pt_objs;
+		vector<DDAQAddress*> da_pi_objs;
+		vector<DDAQAddress*> da_pp_objs;
+		for(unsigned int i=0; i<pt_objs.size(); i++) da_pt_objs.push_back((DDAQAddress*)pt_objs[i]);
+		for(unsigned int i=0; i<pi_objs.size(); i++) da_pi_objs.push_back((DDAQAddress*)pi_objs[i]);
+		for(unsigned int i=0; i<pp_objs.size(); i++) da_pi_objs.push_back((DDAQAddress*)pp_objs[i]);
+		LinkAssociations(da_pt_objs, da_pi_objs);
+		LinkAssociations(da_pt_objs, da_pp_objs);
+		LinkAssociations(da_pi_objs, da_pp_objs);
+	}
+		
+	// Initially, the F250, F125 firmware does not include the
+	// pedestal measurement in the pulse integral data
+	// (it is an add-on Pulse Pedestal word) We want the
+	// pedestal field of the Df250PulseIntegral objects
+	// to contain the measured pedestals in both cases. 
+	// Check all Df250PulseIntegral objects for an associated
+	// Df250PulsePedestal object. If it has one, copy the
+	// pedestal from it into the Df250PulseIntegral.
+	vector<JObject*> &vpi250 = hit_objs_by_type["Df250PulseIntegral"];
+	for(unsigned int i=0; i<vpi250.size(); i++){
+		Df250PulseIntegral *pi = (Df250PulseIntegral*)vpi250[i];
+		vector<const Df250PulsePedestal*> vpp;
+		pi->Get(vpp);
+		if(!vpp.empty()){
+			pi->pedestal = vpp[0]->pedestal;
+		}
+	}
+	vector<JObject*> &vpi125 = hit_objs_by_type["Df125PulseIntegral"];
+	for(unsigned int i=0; i<vpi125.size(); i++){
+		Df125PulseIntegral *pi = (Df125PulseIntegral*)vpi125[i];
+		vector<const Df125PulsePedestal*> vpp;
+		pi->Get(vpp);
+		if(!vpp.empty()){
+			pi->pedestal = vpp[0]->pedestal;
+		}
 	}
 
 	// Loop over types of data objects, copying to appropriate factory
@@ -842,7 +955,7 @@ jerror_t JEventSource_EVIO::GetObjects(JEvent &event, JFactory_base *factory)
 		fac->CopyTo(iter->second);
 	}
 	objs_ptr->own_objects = false;
-
+	
 	// Returning OBJECT_NOT_AVAILABLE tells JANA that this source cannot
 	// provide the type of object requested and it should try and generate
 	// it via a factory algorithm. Returning NOERROR on the other hand
@@ -880,10 +993,12 @@ jerror_t JEventSource_EVIO::GetObjects(JEvent &event, JFactory_base *factory)
 			else if(dataClassName == "Df250PulseRawData")     checkSourceFirst = ((JFactory<Df250PulseRawData    >*)fac)->GetCheckSourceFirst();
 			else if(dataClassName == "Df250TriggerTime")      checkSourceFirst = ((JFactory<Df250TriggerTime     >*)fac)->GetCheckSourceFirst();
 			else if(dataClassName == "Df250PulseTime")        checkSourceFirst = ((JFactory<Df250PulseTime       >*)fac)->GetCheckSourceFirst();
+			else if(dataClassName == "Df250PulsePedestal")    checkSourceFirst = ((JFactory<Df250PulsePedestal   >*)fac)->GetCheckSourceFirst();
 			else if(dataClassName == "Df250WindowRawData")    checkSourceFirst = ((JFactory<Df250WindowRawData   >*)fac)->GetCheckSourceFirst();
 			else if(dataClassName == "Df125PulseIntegral")    checkSourceFirst = ((JFactory<Df125PulseIntegral   >*)fac)->GetCheckSourceFirst();
 			else if(dataClassName == "Df125TriggerTime")      checkSourceFirst = ((JFactory<Df125TriggerTime     >*)fac)->GetCheckSourceFirst();
 			else if(dataClassName == "Df125PulseTime")        checkSourceFirst = ((JFactory<Df125PulseTime       >*)fac)->GetCheckSourceFirst();
+			else if(dataClassName == "Df125PulsePedestal")    checkSourceFirst = ((JFactory<Df125PulsePedestal   >*)fac)->GetCheckSourceFirst();
 			else if(dataClassName == "Df125WindowRawData")    checkSourceFirst = ((JFactory<Df125WindowRawData   >*)fac)->GetCheckSourceFirst();
 			else if(dataClassName == "DF1TDCHit")             checkSourceFirst = ((JFactory<DF1TDCHit            >*)fac)->GetCheckSourceFirst();
 			else if(dataClassName == "DF1TDCTriggerTime")     checkSourceFirst = ((JFactory<DF1TDCTriggerTime    >*)fac)->GetCheckSourceFirst();
@@ -960,13 +1075,10 @@ void JEventSource_EVIO::EmulateDf250PulseIntergral(vector<JObject*> &wrd_objs, v
 			signalsum += samplesvector[c_samp];
 		}
 		
-		// Scale pedestal to window width 
-		int32_t pedestal_tot = ((int32_t)nsamples*pedestalsum)/(int32_t)ped_samples;
-
 		myDf250PulseIntegral->pulse_number = pulse_number;
 		myDf250PulseIntegral->quality_factor = quality_factor;
 		myDf250PulseIntegral->integral = signalsum;
-		myDf250PulseIntegral->pedestal = pedestal_tot;
+		myDf250PulseIntegral->pedestal = 0;  // This will be replaced by the one from Df250PulsePedestal in GetObjects
 		
 		// Add the Df250WindowRawData object as an associated object
 		myDf250PulseIntegral->AddAssociatedObject(f250WindowRawData);
@@ -1017,13 +1129,10 @@ void JEventSource_EVIO::EmulateDf125PulseIntergral(vector<JObject*> &wrd_objs, v
 			signalsum += samplesvector[c_samp];
 		}
 		
-		// Scale pedestal to window width 
-		int32_t pedestal_tot = ((int32_t)nsamples*pedestalsum)/(int32_t)ped_samples;
-
 		myDf125PulseIntegral->pulse_number = pulse_number;
 		myDf125PulseIntegral->quality_factor = quality_factor;
 		myDf125PulseIntegral->integral = signalsum;
-		myDf125PulseIntegral->pedestal = pedestal_tot;
+		myDf125PulseIntegral->pedestal = 0;  // This will be replaced by the one from Df125PulsePedestal in GetObjects
 		
 		// Add the Df125WindowRawData object as an associated object
 		myDf125PulseIntegral->AddAssociatedObject(f125WindowRawData);
@@ -1036,6 +1145,296 @@ void JEventSource_EVIO::EmulateDf125PulseIntergral(vector<JObject*> &wrd_objs, v
 			// Integral is below threshold so discard the hit.
 			delete myDf125PulseIntegral;
 		}
+	}
+}
+
+//----------------
+// EmulateDf250PulseTime
+//----------------
+void JEventSource_EVIO::EmulateDf250PulseTime(vector<JObject*> &wrd_objs, vector<JObject*> &pt_objs, vector<JObject*> &pp_objs)
+{
+	uint32_t Nped_samples = 4;   // number of samples to use for pedestal calculation (PED_SAMPLE)
+	uint32_t Nsamples = 14; // Number of samples used to define leading edge (was NSAMPLES in Naomi's code)
+
+	// Loop over all window raw data objects
+	for(unsigned int i=0; i<wrd_objs.size(); i++){
+		const Df250WindowRawData *f250WindowRawData = (Df250WindowRawData*)wrd_objs[i];
+
+		// Get a vector of the samples for this channel
+		const vector<uint16_t> &samplesvector = f250WindowRawData->samples;
+		uint32_t Nsamples_all = samplesvector.size(); // (was NADCBUFFER in Naomi's code)
+		if(Nsamples_all < (Nped_samples+Nsamples)){
+			char str[256];
+			sprintf(str, "Too few samples in Df250WindowRawData for pulse time extraction! Nsamples_all=%d, (Nped_samples+Nsamples)=%d", Nsamples_all, (Nped_samples+Nsamples));
+			jerr << str << endl;
+			throw JException(str);
+		}
+
+		// loop over the first ped_samples samples to calculate pedestal
+		int32_t pedestalsum = 0;
+		for (uint32_t c_samp=0; c_samp<Nped_samples; c_samp++) {
+			pedestalsum += samplesvector[c_samp];
+		}
+		pedestalsum /= (double)Nped_samples;
+
+		// Calculate single sample threshold based on pdestal
+		double effective_threshold = EMULATE_FADC250_TIME_THRESHOLD + pedestalsum;
+
+		// Look for sample above threshold. Start looking after pedestal
+		// region but only up to Nsamples from end of window so we know
+		// there are at least Nsamples from which to calculate time
+		uint32_t ihitsample; // sample number of first sample above effective_threshold
+		for(ihitsample=Nped_samples; ihitsample<(Nsamples_all - Nsamples); ihitsample++){
+			if(samplesvector[ihitsample] > effective_threshold) break;
+		}
+		
+		// Didn't find sample above threshold. Don't make hit.
+		if(ihitsample >= (Nsamples_all - Nsamples)) continue;
+		
+		// Find peak value. This has to be at ihitsample or later
+		uint32_t pulse_peak = 0;
+		for(uint32_t isample=ihitsample; isample<Nsamples_all; isample++){
+			if(samplesvector[isample] > pulse_peak) pulse_peak = samplesvector[isample];
+		}
+
+		// At this point we know we have a hit and will be able to extract a time.
+		// Go ahead and make the PulseTime object, filling in the "rough" time.
+		// and corresponding quality factor. The time and quality factor
+		// will be updated later when and if we can calculate a more accurate one.
+
+		// create new Df250PulseTime object
+		Df250PulseTime *myDf250PulseTime = new Df250PulseTime;
+		myDf250PulseTime->rocid =f250WindowRawData->rocid;
+		myDf250PulseTime->slot = f250WindowRawData->slot;
+		myDf250PulseTime->channel = f250WindowRawData->channel;
+		myDf250PulseTime->itrigger = f250WindowRawData->itrigger;
+		myDf250PulseTime->pulse_number = 0;
+		myDf250PulseTime->quality_factor = 1;
+		myDf250PulseTime->time = ihitsample*10 - 20; // Rough time 20 is "ROUGH_DT" in Naomi's original code
+
+		// create new Df250PulsePedestal object
+		Df250PulsePedestal *myDf250PulsePedestal = new Df250PulsePedestal;
+		myDf250PulsePedestal->rocid =f250WindowRawData->rocid;
+		myDf250PulsePedestal->slot = f250WindowRawData->slot;
+		myDf250PulsePedestal->channel = f250WindowRawData->channel;
+		myDf250PulsePedestal->itrigger = f250WindowRawData->itrigger;
+		myDf250PulsePedestal->pulse_number = 0;
+		myDf250PulsePedestal->pedestal = pedestalsum;
+		myDf250PulsePedestal->pulse_peak = pulse_peak;
+		
+		// Add the Df250WindowRawData object as an associated object
+		myDf250PulseTime->AddAssociatedObject(f250WindowRawData);
+		myDf250PulsePedestal->AddAssociatedObject(f250WindowRawData);
+		myDf250PulseTime->AddAssociatedObject(myDf250PulsePedestal);
+		
+		// Add to list of Df250PulseTime and Df250PulsePedestal objects
+		pt_objs.push_back(myDf250PulseTime);
+		pp_objs.push_back(myDf250PulsePedestal);
+
+		//----- SIMPLE--------
+		// The following is a simple algorithm that does a linear interpolation
+		// between the samples before and after the first sample over threshold.
+		
+		// Linear interpolation of two samples surrounding the first sample over threshold
+		double sample1 = (double)samplesvector[ihitsample - 1];
+		double sample2 = (double)samplesvector[ihitsample + 1];
+		double m = (sample2 - sample1)/2.0; // slope where x is in units of samples
+		double b = sample2 - m*(double)(ihitsample + 1);
+		double time_samples = m==0.0 ? (double)ihitsample:(effective_threshold -b)/m;
+		myDf250PulseTime->time = (uint32_t)(time_samples*10.0);
+		myDf250PulseTime->quality_factor = 0;
+		//----- SIMPLE--------		
+	}
+}
+
+//----------------
+// EmulateDf125PulseTime
+//----------------
+void JEventSource_EVIO::EmulateDf125PulseTime(vector<JObject*> &wrd_objs, vector<JObject*> &pt_objs, vector<JObject*> &pp_objs)
+{
+	uint32_t Nped_samples = 4;   // number of samples to use for pedestal calculation (PED_SAMPLE)
+	uint32_t Nsamples = 14; // Number of samples used to define leading edge (was NSAMPLES in Naomi's code)
+
+	// Loop over all window raw data objects
+	for(unsigned int i=0; i<wrd_objs.size(); i++){
+		const Df125WindowRawData *f125WindowRawData = (Df125WindowRawData*)wrd_objs[i];
+
+		// Get a vector of the samples for this channel
+		const vector<uint16_t> &samplesvector = f125WindowRawData->samples;
+		uint32_t Nsamples_all = samplesvector.size(); // (was NADCBUFFER in Naomi's code)
+		if(Nsamples_all < (Nped_samples+Nsamples)){
+			char str[256];
+			sprintf(str, "Too few samples in Df125WindowRawData for pulse time extraction! Nsamples_all=%d, (Nped_samples+Nsamples)=%d", Nsamples_all, (Nped_samples+Nsamples));
+			jerr << str << endl;
+			throw JException(str);
+		}
+
+		// loop over the first ped_samples samples to calculate pedestal
+		int32_t pedestalsum = 0;
+		for (uint32_t c_samp=0; c_samp<Nped_samples; c_samp++) {
+			pedestalsum += samplesvector[c_samp];
+		}
+		pedestalsum /= (double)Nped_samples;
+
+		// Calculate single sample threshold based on pdestal
+		double effective_threshold = EMULATE_FADC125_TIME_THRESHOLD + pedestalsum;
+
+		// Look for sample above threshold. Start looking after pedestal
+		// region but only up to Nsamples from end of window so we know
+		// there are at least Nsamples from which to calculate time
+		uint32_t ihitsample; // sample number of first sample above effective_threshold
+		for(ihitsample=Nped_samples; ihitsample<(Nsamples_all - Nsamples); ihitsample++){
+			if(samplesvector[ihitsample] > effective_threshold) break;
+		}
+		
+		// Didn't find sample above threshold. Don't make hit.
+		if(ihitsample >= (Nsamples_all - Nsamples)) continue;
+
+		// Find peak value. This has to be at ihitsample or later
+		uint32_t pulse_peak = 0;
+		for(uint32_t isample=ihitsample; isample<Nsamples_all; isample++){
+			if(samplesvector[isample] > pulse_peak) pulse_peak = samplesvector[isample];
+		}
+
+		// At this point we know we have a hit and will be able to extract a time.
+		// Go ahead and make the PulseTime object, filling in the "rough" time.
+		// and corresponding quality factor. The time and quality factor
+		// will be updated later when and if we can calculate a more accurate one.
+
+		// create new Df125PulseTime object
+		Df125PulseTime *myDf125PulseTime = new Df125PulseTime;
+		myDf125PulseTime->rocid =f125WindowRawData->rocid;
+		myDf125PulseTime->slot = f125WindowRawData->slot;
+		myDf125PulseTime->channel = f125WindowRawData->channel;
+		myDf125PulseTime->itrigger = f125WindowRawData->itrigger;
+		myDf125PulseTime->pulse_number = 0;
+		myDf125PulseTime->quality_factor = 1;
+		myDf125PulseTime->time = ihitsample*10 - 20; // Rough time 20 is "ROUGH_DT" in Naomi's original code
+
+		// create new Df125PulsePedestal object
+		Df125PulsePedestal *myDf125PulsePedestal = new Df125PulsePedestal;
+		myDf125PulsePedestal->rocid =f125WindowRawData->rocid;
+		myDf125PulsePedestal->slot = f125WindowRawData->slot;
+		myDf125PulsePedestal->channel = f125WindowRawData->channel;
+		myDf125PulsePedestal->itrigger = f125WindowRawData->itrigger;
+		myDf125PulsePedestal->pulse_number = 0;
+		myDf125PulsePedestal->pedestal = pedestalsum;
+		myDf125PulsePedestal->pulse_peak = pulse_peak;
+		
+		// Add the Df125WindowRawData object as an associated object
+		myDf125PulseTime->AddAssociatedObject(f125WindowRawData);
+		myDf125PulsePedestal->AddAssociatedObject(f125WindowRawData);
+		myDf125PulseTime->AddAssociatedObject(myDf125PulsePedestal);
+		
+		// Add to list of Df125PulseTime objects
+		pt_objs.push_back(myDf125PulseTime);
+		pp_objs.push_back(myDf125PulsePedestal);
+
+		//----- UP-SAMPLING--------		
+		uint32_t THRESH_HI = 64;  // single sample threshold above pedestal for timing hit (THRESH_HI)
+		uint32_t THRESH_LO = 16;  // single sample threshold above pedestal for calculating pulse time (THRESH_LO)
+		uint32_t PED_SAMPLE = 4;
+		// Thresholds used for timing
+		uint32_t adc_thres_hi = samplesvector[PED_SAMPLE] + THRESH_HI;
+		uint32_t adc_thres_lo = samplesvector[PED_SAMPLE] + THRESH_LO;
+		
+		// Find first sample above high threshold
+		uint32_t ihi_thresh;
+		bool over_threshold = false;
+		for(ihi_thresh=Nped_samples+1; ihi_thresh<(Nsamples_all - Nsamples); ihi_thresh++){
+			if(samplesvector[ihi_thresh] > adc_thres_hi){
+				over_threshold = true;
+				break;
+			}
+		}
+		
+		// If unable to find sample above hi thresh, use "rough" time. This actually
+		// should never happen since the pulse hit threshold is even larger.
+		if(!over_threshold) continue;
+
+		// Find first sample below the low threshold
+		uint32_t ilo_thresh;
+		bool below_threshold = false;
+		for(ilo_thresh=ihi_thresh-1; ilo_thresh>=PED_SAMPLE; ilo_thresh--){
+			if(samplesvector[ilo_thresh] <= adc_thres_lo){
+				below_threshold = true;
+				break;
+			}
+		}
+		
+		// Upsample
+		uint32_t iubuf[9]; // Number of mini-samples + 1
+		int z[9]; // signed integer version of iubuf used for running calculation
+		int nz = 8; // NUPSAMPLED
+		const int K[43]={-4, -9, -13, -10, 5, 37, 82, 124, 139, 102, -1, -161, -336, -455, -436, -212, 241, 886, 1623, 2309, 2795, 2971, 2795, 2309, 1623, 886, 241, -212, -436, -455, -336, -161, -1, 102, 139, 124, 82, 37, 5, -10, -13, -9, -4};    
+		int k,j,dk;
+		const int Kscale = 16384;
+		int firstk = 40 + (ilo_thresh-4)*5;
+		for (k=firstk; k<firstk+nz; k++) {
+
+			dk = k - firstk;    
+			z[dk]=0.0;
+
+			for (j=k%5;j<43;j+=5) z[dk] += samplesvector[(k-j)/5]*K[j]; 
+
+			z[dk] = (int)(5*z[dk])/Kscale;
+		}
+		for(int i=0; i<9; i++) iubuf[i] = z[i];
+		
+		// Find first mini-sample below lo threshold starting from top
+		below_threshold = false;
+		uint32_t ilo_thresh2;
+		for(ilo_thresh2=7; ilo_thresh2>0; ilo_thresh2--){
+			if(iubuf[ilo_thresh2] <= adc_thres_lo){
+				below_threshold = true;
+				break;
+			}
+		}
+		
+		// Linearly interpolate between ilo_thresh2 and the mini-sample right
+		// after it to find the threshold crossing time. Since min-samples are
+		// in time units of 5 samples and we report in units of 10 samples, we
+		// only need to find the crossing point to within 1/2 sample. This is
+		// done in a more complicated way on the FPGA since division is not so
+		// easy.
+		double y1 = (double)iubuf[ilo_thresh2];
+		double y2 = (double)iubuf[ilo_thresh2+1];
+		double m = (y2 - y1); // denominator is x2-x1 = 1 in units of mini-samples
+		double b = y1; // just need time realtive to ilo_thresh2 so define that sample as t=0
+		double tfrac = 0.0;
+		if( m!=0.0 ) tfrac = (adc_thres_lo - b)/m;
+		
+		// Calculate time in units of 1/10 samples
+		uint32_t itime1 = ilo_thresh*10;  // ilo_thresh is in units of samples
+		uint32_t itime2 = ilo_thresh2*2;  // ilo_thresh2 is in units of minisamples
+		uint32_t itime3 = (uint32_t)(tfrac*2.0); // tfrac is in units of fraction of minisamples
+		myDf125PulseTime->time = itime1 + itime2 + itime3;
+		myDf125PulseTime->quality_factor = 0;
+		//----- UP-SAMPLING--------		
+
+//		//----- SIMPLE--------
+//		// The following is a simple algorithm that does a linear interpolation
+//		// between the samples before and after the first sample over threshold.
+//		
+//		// Linear interpolation of two samples surrounding the first sample over threshold
+//		double sample1 = (double)samplesvector[ihitsample - 1];
+//		double sample2 = (double)samplesvector[ihitsample + 1];
+//		double m = (sample2 - sample1)/2.0; // slope where x is in units of samples
+//		double b = sample2 - m*(double)(ihitsample + 1);
+//		double time_samples = m==0.0 ? (double)ihitsample:(effective_threshold -b)/m;
+//		myDf125PulseTime->time = (uint32_t)(time_samples*10.0);
+//		myDf125PulseTime->quality_factor = 0;
+//		//----- SIMPLE--------
+		
+		// The following is empirical from the first BCAL/CDC cosmic data
+		myDf125PulseTime->time -= 170.0;
+		if(myDf125PulseTime->time > 10000){
+			// If calculated time is <170.0, then the unsigned int is problematic. Flag this if it happens
+			myDf125PulseTime->time = 0;
+			myDf125PulseTime->quality_factor = 2;
+		}
+		
+		
 	}
 }
 
@@ -1078,13 +1477,74 @@ int32_t JEventSource_EVIO::GetRunNumber(evioDOMTree *evt)
 	return last_run_number;
 }
 
+//----------------
+// FindRunNumber
+//----------------
+int32_t JEventSource_EVIO::FindRunNumber(uint32_t *iptr)
+{
+	if(VERBOSE>1) evioout << " .. Searching for run number ..." <<endl;
+
+	// Assume first word is number of words in bank
+	uint32_t *iend = &iptr[*iptr - 1];
+	if(*iptr > 256) iend = &iptr[256];
+	uint32_t Nrocs=0;
+	bool has_timestamps = false;
+	while(iptr<iend){
+		iptr++;
+		switch((*iptr)>>16){
+			case 0xFF10:
+			case 0xFF11:
+			case 0xFF20:
+			case 0xFF21:
+			case 0xFF24:
+			case 0xFF25:
+			case 0xFF30:
+				// These Trigger Bank Tag values have no run number info in them
+				if(VERBOSE>2) evioout << " ... Trigger bank tag (0x" << hex << ((*iptr)>>16) << dec << ") does not contain run number" <<endl;
+				return 0;
+			case 0xFF23:
+			case 0xFF27:
+				has_timestamps = true;
+			case 0xFF22:
+			case 0xFF26:
+				if(VERBOSE>2) evioout << " ... Trigger bank tag (0x" << hex << ((*iptr)>>16) << dec << ") does contain run number" <<endl;
+				Nrocs = (*iptr) & 0x0F;
+				break;
+			default:
+				continue;
+		}
+		iptr++;
+		if( ((*iptr)&0x00FF0000) != 0x000A0000) { iptr--; continue; }
+		uint32_t M = iptr[-3] & 0x000000FF; // Number of events from Physics Event header
+		if(VERBOSE>2) evioout << " ... Trigger bank " << (has_timestamps ? "does":"doesn't") << " have timestamps. Nevents in block M=" << M <<endl;
+		iptr++;
+		uint64_t *iptr64 = (uint64_t*)iptr;
+
+		uint64_t event_num = *iptr64;
+		iptr64++;
+		if(has_timestamps) iptr64 = &iptr64[M]; // advance past timestamps
+		if(VERBOSE>3) evioout << " .... Event num: " << event_num <<endl;
+
+		// For some reason, we have to first put this into  
+		// 64bit number and then cast it. 
+		uint64_t run64 = (*iptr64)>>32;
+		int32_t run = (int32_t)run64;
+		if(VERBOSE>1) evioout << " .. Found run number: " << run <<endl;
+
+		return run;
+	}
+	
+	return 0;
+}
 
 //----------------
 // MergeObjLists
 //----------------
 void JEventSource_EVIO::MergeObjLists(list<ObjList*> &events1, list<ObjList*> &events2)
 {
-	if(VERBOSE>5) evioout << "      Entering MergeObjLists().  &events1=" << hex << &events1 << "  &events2=" << &events2 << dec << endl;
+	if(VERBOSE>5) evioout << "      Entering MergeObjLists().  "
+								<< " &events1=" << hex << &events1 << dec << "(" << events1.size() << " events) "
+								<< " &events2=" << hex << &events2 << dec << "(" << events2.size() << " events) " << endl;
 
 	/// Merge the events referenced in events2 into the events1 list.
 	///
@@ -1110,6 +1570,7 @@ void JEventSource_EVIO::MergeObjLists(list<ObjList*> &events1, list<ObjList*> &e
 	unsigned int Nevents2 = events2.size();
 	if(Nevents1>0 && Nevents2>0){
 		if(Nevents1 != Nevents2){
+			evioout << "Mismatch of number of events passed to MergeObjLists. Throwing exception." << endl;
 			throw JException("Number of events in JEventSource_EVIO::MergeObjLists do not match!");
 		}
 	}
@@ -1266,10 +1727,11 @@ void JEventSource_EVIO::ParseEVIOEvent(evioDOMTree *evt, list<ObjList*> &full_ev
 		        case 3:
 		        case 6:  // flash 250 module, MMD 2014/2/4
 		        case 16: // flash 125 module (CDC), DL 2014/6/19
+		        case 26: // F1TDC BCAL 7/31/2014
 				ParseJLabModuleData(rocid, iptr, iend, tmp_events);
 				break;
 
-			case 2:
+			case 20:
 				ParseCAEN1190(rocid, iptr, iend, tmp_events);
 				break;
 
@@ -1301,7 +1763,10 @@ void JEventSource_EVIO::ParseEVIOEvent(evioDOMTree *evt, list<ObjList*> &full_ev
 		}
 
 		// Merge this bank's partial events into the full events
-		if(bank_parsed) MergeObjLists(full_events, tmp_events);
+		if(bank_parsed){
+			if(VERBOSE>5) evioout << "     Merging objects in ParseEVIOEvent" << endl;
+			MergeObjLists(full_events, tmp_events);
+		}
 	}
 	
 	// Set the run number for all events
@@ -1390,7 +1855,10 @@ void JEventSource_EVIO::ParseJLabModuleData(int32_t rocid, const uint32_t* &iptr
 		
 		if(VERBOSE>9) evioout << "Finished parsing (last word: " << hex << iptr[-1] << dec << ")" << endl;
 
-		if(module_parsed) MergeObjLists(events, tmp_events);
+		if(module_parsed){
+			if(VERBOSE>5) evioout << "     Merging objects in ParseJLabModuleData" << endl;
+			MergeObjLists(events, tmp_events);
+		}
 	}
 
 	if(VERBOSE>5) evioout << "     Leaving ParseJLabModuleData()" << endl;
@@ -1438,6 +1906,8 @@ void JEventSource_EVIO::Parsef250Bank(int32_t rocid, const uint32_t* &iptr, cons
 		uint32_t pulse_number = 0;
 		uint32_t quality_factor = 0;
 		uint32_t pulse_time = 0;
+		uint32_t pedestal = 0;
+		uint32_t pulse_peak = 0;
 		bool overflow = false;
 
 		bool found_block_trailer = false;
@@ -1457,8 +1927,13 @@ void JEventSource_EVIO::Parsef250Bank(int32_t rocid, const uint32_t* &iptr, cons
 				//slot_event_header = (*iptr>>22) & 0x1F;
 				itrigger = (*iptr>>0) & 0x3FFFFF;
 				if( (itrigger!=last_itrigger) || (objs==NULL) ){
-					if(objs) events.push_back(objs);
-					objs = new ObjList;
+					if(ENABLE_DISENTANGLING){
+						if(objs){
+							events.push_back(objs);
+							objs = NULL;
+						}
+					}
+					if(!objs) objs = new ObjList;
 					last_itrigger = itrigger;
 				}
 				break;
@@ -1504,6 +1979,13 @@ void JEventSource_EVIO::Parsef250Bank(int32_t rocid, const uint32_t* &iptr, cons
 				// This is marked "reserved for future implementation" in the current manual (v2).
 				// As such, we don't try handling it here just yet.
 				break;
+			case 10: // Pulse Pedestal
+				channel = (*iptr>>23) & 0x0F;
+				pulse_number = (*iptr>>21) & 0x03;
+				pedestal = (*iptr>>12) & 0x1FF;
+				pulse_peak = (*iptr>>0) & 0xFFF;
+				if(objs) objs->hit_objs.push_back(new Df250PulsePedestal(rocid, slot, channel, itrigger, pulse_number, pedestal, pulse_peak));
+				break;
 			case 13: // Event Trailer
 				// This is marked "suppressed for normal readout – debug mode only" in the
 				// current manual (v2). It does not contain any data so the most we could do here
@@ -1545,6 +2027,7 @@ void JEventSource_EVIO::Parsef250Bank(int32_t rocid, const uint32_t* &iptr, cons
 		vector<Df250PulseRawData*> vprd;
 		vector<Df250PulseIntegral*> vpi;
 		vector<Df250PulseTime*> vpt;
+		vector<Df250PulsePedestal*> vpp;
 		for(unsigned int i=0; i<hit_objs.size(); i++){
 			AddIfAppropriate(hit_objs[i], vtrigt);
 			AddIfAppropriate(hit_objs[i], vwrd);
@@ -1552,12 +2035,16 @@ void JEventSource_EVIO::Parsef250Bank(int32_t rocid, const uint32_t* &iptr, cons
 			AddIfAppropriate(hit_objs[i], vprd);
 			AddIfAppropriate(hit_objs[i], vpi);
 			AddIfAppropriate(hit_objs[i], vpt);
+			AddIfAppropriate(hit_objs[i], vpp);
 		}
 		
 		// Connect Df250PulseIntegral with Df250PulseTime, and Df250PulseRawData
 		LinkAssociationsWithPulseNumber(vprd, vpi);
 		LinkAssociationsWithPulseNumber(vprd, vpt);
-		LinkAssociationsWithPulseNumber(vpt, vpi);
+		LinkAssociationsWithPulseNumber(vprd, vpp);
+		LinkAssociationsWithPulseNumber(vpi, vpt);
+		LinkAssociationsWithPulseNumber(vpi, vpp);
+		LinkAssociationsWithPulseNumber(vpt, vpp);
 		
 		// Connect Df250WindowSum and Df250WindowRawData
 		LinkAssociations(vwrd, vws);
@@ -1568,6 +2055,7 @@ void JEventSource_EVIO::Parsef250Bank(int32_t rocid, const uint32_t* &iptr, cons
 		LinkAssociationsModuleOnly(vtrigt, vprd);
 		LinkAssociationsModuleOnly(vtrigt, vpi);
 		LinkAssociationsModuleOnly(vtrigt, vpt);
+		LinkAssociationsModuleOnly(vtrigt, vpp);
 	}
 }
 
@@ -1731,6 +2219,8 @@ void JEventSource_EVIO::Parsef125Bank(int32_t rocid, const uint32_t* &iptr, cons
 		uint32_t pulse_number = 0;
 		uint32_t pulse_time = 0;
 		uint32_t quality_factor = 0;
+		uint32_t pedestal = 0;
+		uint32_t pulse_peak = 0;
 		//bool overflow = false;
 
 		bool found_block_trailer = false;
@@ -1749,11 +2239,15 @@ void JEventSource_EVIO::Parsef125Bank(int32_t rocid, const uint32_t* &iptr, cons
 			case 2: // Event Header
 				//slot_event_header = (*iptr>>22) & 0x1F;
 				itrigger = (*iptr>>0) & 0x3FFFFF;
-				if( (itrigger!=last_itrigger) || (objs==NULL) ){
-					if(objs) events.push_back(objs);
-					objs = new ObjList;
+				if(VERBOSE>7) evioout << "      FADC125 Event Header: itrigger="<<itrigger<<" (objs=0x"<<hex<<objs<<dec<<", last_itrigger="<<last_itrigger<<", rocid="<<rocid<<", slot="<<slot<<")" <<endl;
+				if( (itrigger!=last_itrigger) && !ENABLE_DISENTANGLING ){
+					if(objs){
+						events.push_back(objs);
+						objs = NULL;
+					}
 					last_itrigger = itrigger;
 				}
+				if(!objs) objs = new ObjList;
 				break;
 			case 3: // Trigger Time
 				t = ((*iptr)&0xFFFFFF)<<0;
@@ -1763,10 +2257,12 @@ void JEventSource_EVIO::Parsef125Bank(int32_t rocid, const uint32_t* &iptr, cons
 				}else{
 					iptr--;
 				}
+				if(VERBOSE>7) evioout << "      FADC125 Trigger Time (t="<<t<<")"<<endl;
 				if(objs) objs->hit_objs.push_back(new Df125TriggerTime(rocid, slot, itrigger, t));
 				break;
 			case 4: // Window Raw Data
 				// iptr passed by reference and so will be updated automatically
+				if(VERBOSE>7) evioout << "      FADC125 Window Raw Data"<<endl;
 				MakeDf125WindowRawData(objs, rocid, slot, itrigger, iptr);
 				break;
 			case 7: // Pulse Integral
@@ -1782,7 +2278,13 @@ void JEventSource_EVIO::Parsef125Bank(int32_t rocid, const uint32_t* &iptr, cons
 				quality_factor = (*iptr>>19) & 0x03;
 				pulse_time = (*iptr>>0) & 0x7FFFF;
 				if(objs) objs->hit_objs.push_back(new Df125PulseTime(rocid, slot, channel, itrigger, pulse_number, quality_factor, pulse_time));
-
+				break;
+			case 10: // Pulse Pedestal
+				channel = (*iptr>>23) & 0x0F;
+				pulse_number = (*iptr>>21) & 0x03;
+				pedestal = (*iptr>>12) & 0x1FF;
+				pulse_peak = (*iptr>>0) & 0xFFF;
+				if(objs) objs->hit_objs.push_back(new Df125PulsePedestal(rocid, slot, channel, itrigger, pulse_number, pedestal, pulse_peak));
 				break;
 			//case 4: // Window Raw Data
 			case 5: // Window Sum
@@ -1824,24 +2326,30 @@ void JEventSource_EVIO::Parsef125Bank(int32_t rocid, const uint32_t* &iptr, cons
 		vector<Df125PulseRawData*>  vprd;
 		vector<Df125PulseIntegral*> vpi;
 		vector<Df125PulseTime*> vpt;
+		vector<Df125PulsePedestal*> vpp;
 		for(unsigned int i=0; i<hit_objs.size(); i++){
 			AddIfAppropriate(hit_objs[i], vtrigt);
 			AddIfAppropriate(hit_objs[i], vwrd);
 			AddIfAppropriate(hit_objs[i], vprd);
 			AddIfAppropriate(hit_objs[i], vpi);
 			AddIfAppropriate(hit_objs[i], vpt);
+			AddIfAppropriate(hit_objs[i], vpp);
 		}
 		
 		// Connect Df125PulseIntegral with Df125PulseTime
 		LinkAssociationsWithPulseNumber(vprd, vpi);
 		LinkAssociationsWithPulseNumber(vprd, vpt);
-		LinkAssociationsWithPulseNumber(vpt, vpi);
+		LinkAssociationsWithPulseNumber(vprd, vpp);
+		LinkAssociationsWithPulseNumber(vpi, vpt);
+		LinkAssociationsWithPulseNumber(vpi, vpp);
+		LinkAssociationsWithPulseNumber(vpt, vpp);
 				
-		// Connect Df250TriggerTime to everything
+		// Connect Df125TriggerTime to everything
 		LinkAssociationsModuleOnly(vtrigt, vwrd);
 		LinkAssociationsModuleOnly(vtrigt, vprd);
 		LinkAssociationsModuleOnly(vtrigt, vpi);
 		LinkAssociationsModuleOnly(vtrigt, vpt);
+		LinkAssociationsModuleOnly(vtrigt, vpp);
 	}
 }
 
@@ -1954,124 +2462,16 @@ void JEventSource_EVIO::MakeDf125PulseRawData(ObjList *objs, uint32_t rocid, uin
 //----------------
 void JEventSource_EVIO::ParseF1TDCBank(int32_t rocid, const uint32_t* &iptr, const uint32_t* iend, list<ObjList*> &events)
 {
-	
-	// The new (as yet unadopted in firmware) format for the F1TDC
-	// data replaces the highest byte of the header/trailer, and data words
-	// with one using the common JLab module scheme (as documented in the F250).
-	// In order be compatible with both the orginal format (used for test setups
-	// and any data taken with a F1TDC that has not had its firmware updated to
-	// this new standard) we look for a marker word indicating the old style
-	// TDC. I believe this marker word is really just put out by the readout list
-	// and not the firmware. However, it is the cleanest handle I have in the data
-	// data at the moment.
-	//
-	// Note that at the time of this writing, NO hardware
-	// has been updated as the new scheme is still under discussion within the
-	// DAQ group. We do, however have data from mc2coda that follows the new scheme.
-	
-	// Look for marker word
-	if(*iptr == 0xf1daffff){
+	/// Parse data from a single F1TDCv2 (32 ch) or F1TDCv3 (48 ch) module.
+	/// This code is based on the document F1TDC_V2_V3_4_29_14.pdf obtained from:
+	/// https://coda.jlab.org/wiki/index.php/JLab_Module_Manuals
 
-		// Advance to next word
-		iptr++;
-
-		ParseF1TDCBank_style1(rocid, iptr, iend, events);
-	}else{
-		ParseF1TDCBank_style2(rocid, iptr, iend, events);
-	}
-
-}
-
-//----------------
-// ParseF1TDCBank_style1
-//----------------
-void JEventSource_EVIO::ParseF1TDCBank_style1(int32_t rocid, const uint32_t* &iptr, const uint32_t* iend, list<ObjList*> &events)
-{
-	/// Parse data from a single F1TDC module.
-
-	// WARNING!! This code was written some time ago to work with a file
-	// containing beam test data but was merged with code written to read
-	// mc2coda style data. It was since been re-separated, but not tested
-	// on the original beam test data file. THIS MAY NOT WORK!!
-	// 12/30/2012 DL
-	
-	//uint32_t slot_header = 1000;
-	//uint32_t chip_header = 1000;
-	//uint32_t chan_header = 1000;
-	uint32_t ievent = 0;
-	uint32_t trig_time = 0;
-	ObjList *objs = NULL;
-
-	// Loop over words in bank
-	bool looking_for_header = true;
-	for(; iptr<iend; iptr++){
-		
-		// ROC marker word at end of test setup data file. Skip it.
-		if(*iptr == 0xda0000ff){ iptr++; break;}
-		
-		uint32_t slot = (*iptr>>27) & 0x1F;
-		
-		// if slot is 0 or 30, we are supposed to ignore the data.
-		if(slot == 30 || slot ==0)continue;
-		
-		// Check if this is a header/trailer or a data word
-		if(((*iptr>>23) & 0x1) == 0){
-			// header/trailer word
-			uint32_t last_ievent = ievent;
-			//slot_header = slot;
-			//chip_header = (*iptr>>3) & 0x07;
-			//chan_header = (*iptr>>0) & 0x07;
-			ievent = (*iptr>>16) & 0x3F;
-			trig_time = (*iptr>>7) & 0x01FF;
-			
-			// Check if we are at boundary of a new event
-			if(objs==NULL || ievent!=last_ievent){
-				if(objs != NULL) events.push_back(objs);
-				objs = new ObjList;
-			}
-			
-		}else{
-			// data word
-
-			if(looking_for_header){
-				jerr << "F1TDC data word encountered where header excpected!" << endl;
-			}
-
-			uint32_t chip = (*iptr>>19) & 0x07;
-			uint32_t chan = (*iptr>>16) & 0x07;
-			uint32_t channel = (chip<<3) + (chan<<0);
-			uint32_t time = (*iptr>>0) & 0xFFFF;
-			
-			DF1TDCHit *hit = new DF1TDCHit(rocid, slot, channel, ievent, trig_time, time);
-			if(objs)objs->hit_objs.push_back(hit);
-		}
-	}
-	
-	// Add last event in block to list
-	if(objs != NULL)events.push_back(objs);
-}
-
-
-//----------------
-// ParseF1TDCBank_style2
-//----------------
-void JEventSource_EVIO::ParseF1TDCBank_style2(int32_t rocid, const uint32_t* &iptr, const uint32_t* iend, list<ObjList*> &events)
-{
-	/// Parse data for "new" style F1TDC data format (see comments in ParseF1TDCBank)
-
-	/// Parse data from a single F1TDC module.
-
-	// The scheme Dave Abbott proposes will add a block header word to F1TDC
-	// output that is the same format as for the FADC250. (This block header
-	// is not described in the F1TDC manual). Data generated by his mc2coda
-	// library includes this block header.
-	
-	// The new (as yet unadopted in firmware) format for the F1TDC
-	// data replaces the highest byte of the header/trailer, and data words
-	// with one using the common JLab module scheme (as documented in:
-	// "VME Data Format Standards for JLAB Modules").
+	if(VERBOSE>0) evioout << "  Entering ParseF1TDCBank" << endl;
 
 	const uint32_t *istart = iptr;
+	
+	// Some early data had a marker word at just before the actual F1 data
+	if(*iptr == 0xf1daffff) iptr++;
 
 	// Block header word
 	// Double check that block header is set
@@ -2079,10 +2479,11 @@ void JEventSource_EVIO::ParseF1TDCBank_style2(int32_t rocid, const uint32_t* &ip
 		throw JException("F1TDC Block header corrupt! (high 5 bits not set to 0x80000000!)");
 	}
 
-	uint32_t slot_block_header    = (*iptr)>>22 & 0x001F;
-	//uint32_t module_type          = (*iptr)>>18 & 0x000F;
-	//uint32_t block_number         = (*iptr)>> 8 & 0x03FF;
-	uint32_t Nevents_block_header = (*iptr)>> 0 & 0x000F;
+	uint32_t slot_block_header     = (*iptr)>>22 & 0x001F;
+	uint32_t block_num             = (*iptr)>> 8 & 0x03FF;
+	uint32_t Nevents_block_header  = (*iptr)>> 0 & 0x000F;
+	int modtype = (*iptr)>>18 & 0x000F;  // should match a DModuleType::type_id_t
+	if(VERBOSE>2) evioout << "    F1 Block Header: slot=" << slot_block_header << " block_num=" << block_num << " Nevents=" << Nevents_block_header << endl;
 
 	// Advance to next word
 	iptr++;
@@ -2099,6 +2500,7 @@ void JEventSource_EVIO::ParseF1TDCBank_style2(int32_t rocid, const uint32_t* &ip
 
 		uint32_t slot_event_header  = (*iptr)>>22 & 0x00000001F;
 		uint32_t itrigger           = (*iptr)>>0  & 0x0003FFFFF;
+		if(VERBOSE>2) evioout << "      F1 Event Header: slot=" << slot_block_header << " itrigger=" << itrigger << endl;
 		
 		// Make sure slot number from event header matches block header
 		if(slot_event_header != slot_block_header){
@@ -2112,20 +2514,25 @@ void JEventSource_EVIO::ParseF1TDCBank_style2(int32_t rocid, const uint32_t* &ip
 		if(iptr>=iend) throw JException("F1TDC data corrupt! Block truncated before timestamp word!");
 
 		// The most recent documentation says that the first time stamp
-		// word holds the low 24 bits and the second the high 24 bits. According to Dave A.,
+		// word holds the low 24 bits and the second the high 16 bits. According to Dave A.,
 		// the second word is optional.
 		uint32_t trig_time = ((*iptr)&0xFFFFFF);
+		if(VERBOSE>2) evioout << "      F1 Trigger time: low 24 bits=" << trig_time << endl;
 		iptr++;
 		if(iptr>=iend) throw JException("F1TDC data corrupt! Block truncated before trailer word!");
 		if(((*iptr>>31) & 0x1) == 0){
-			trig_time += ((*iptr)&0xFFFFFF)<<24; // from word on the street: second trigger time word is optional!!??
+			trig_time += ((*iptr)&0xFFFF)<<24; // from word on the street: second trigger time word is optional!!??
+			if(VERBOSE>2) evioout << "      F1 Trigger time: high 16 bits=" << ((*iptr)&0xFFFF) << " total trig_time=" << trig_time << endl;
 		}else{
-			iptr--;
+			iptr--; // second time word not present, back up pointer
 		}
 			
 		// Create a new object list (i.e. new event)
-		if(objs)events.push_back(objs);
-		objs = new ObjList();
+		if(objs!=NULL && ENABLE_DISENTANGLING){
+			events.push_back(objs);
+			objs = NULL;
+		}
+		if(!objs) objs = new ObjList;
 		
 		if(objs) objs->hit_objs.push_back(new DF1TDCTriggerTime(rocid, slot_block_header, itrigger, trig_time));
 			
@@ -2133,76 +2540,64 @@ void JEventSource_EVIO::ParseF1TDCBank_style2(int32_t rocid, const uint32_t* &ip
 		iptr++;
 
 		// Loop over F1 data words
+		uint32_t chip_f1header=0, chan_on_chip_f1header=0, itrigger_f1header=0, trig_time_f1header=0;
 		while( iptr<iend && ((*iptr)>>31)==0x1 ){
 		
-			// The following are derived from a combination of documentation
-			// for the JLab F1TDC board and looking at the code for mc2coda
-			//
-			// JLab header bits
-			// bit 31: 0=continuation  1=data defining (n.b. all words here should have bit 31 set!)
-			// bits 27-30: data type 0100b=F1 header  0101b=F1 Trailer 0110b=F1 data
-			// bit 26: res locked (should be 1)
-			// bit 25: output fifo OK
-			// bit 24: hit fifo OK
-			// 
-			// F1 header/trailer word
-			// bit 23: 0
-			// bits 16-22: itrigger
-			// bits 7-15: trig time
-			// bit 6: xor setup register (??)
-			// bits 3-5: chip
-			// bits 0-2: channel
-			// 
-			// F1 data word
-			// bit 23: 1 
-			// bit 22: 0
-			// bits 19-21: chip
-			// bits 16-18: channel
-			// bits 0-15: time
-			
-			// Skip filler words no matter what
-			if(*iptr == 0xF8000000) {iptr++; continue;}
-
 			bool done = false;
-				
-			uint32_t chip, chan, channel, time;
-			uint32_t my_itrigger=0;
+			
+			uint32_t chip, chan_on_chip, time;
+			uint32_t channel;
 			DF1TDCHit *hit=NULL;
 			switch( (*iptr) & 0xF8000000 ){
 				case 0xC0000000: // F1 Header
-					my_itrigger = ((*iptr)>>16) & 0x3F;
-					if( my_itrigger != (itrigger & 0x3F)){
-						throw JException("Trigger number in data word does not match F1 TDC header!");
-					}
+					chip_f1header         = ((*iptr)>> 3) & 0x07;
+					chan_on_chip_f1header = ((*iptr)>> 0) & 0x07;  // this is always 7 in real data!
+					itrigger_f1header     = ((*iptr)>>16) & 0x3F;
+					trig_time_f1header    = ((*iptr)>> 7) & 0x1FF;
+					if(VERBOSE>5) evioout << "      Found F1 header: chip=" << chip_f1header << " chan=" << chan_on_chip_f1header << " itrig=" << itrigger_f1header << " trig_time=" << trig_time_f1header << endl;
+					if( itrigger_f1header != (itrigger & 0x3F)) throw JException("Trigger number in F1 header word does not match Event header word!");
 					break;
-				case 0xB8000000: // F1 Data (we don't check that bit 23 is set!)
-					chip = (*iptr>>19) & 0x07;
-					chan = (*iptr>>16) & 0x07;
-					channel = (chip<<3) + (chan<<0);
-					time = (*iptr>>0) & 0xFFFF;
-					hit = new DF1TDCHit(rocid, slot_block_header, channel, itrigger, trig_time, time);
+				case 0xB8000000: // F1 Data
+					chip         = (*iptr>>19) & 0x07;
+					chan_on_chip = (*iptr>>16) & 0x07;
+					time         = (*iptr>> 0) & 0xFFFF;
+					if(VERBOSE>5) evioout << "      Found F1 data  : chip=" << chip << " chan=" << chan_on_chip  << " time=" << time << " (header: chip=" << chip_f1header << ")" << endl;
+					//if(chip!=chip_f1header) throw JException("F1 chip number in data does not match header!");
+					channel = F1TDC_channel(chip, chan_on_chip, modtype);
+					hit = new DF1TDCHit(rocid, slot_block_header, channel, itrigger, trig_time_f1header, time, *iptr);
 					if(objs)objs->hit_objs.push_back(hit);
 					break;
-//				case 0xA8000000: // F1 Trailer
-//					my_itrigger = ((*iptr)>>16) & 0x3F;
-//					if( my_itrigger != (itrigger & 0x3F)){
-//						throw JException("Trigger number in trailer word does not match F1 TDC header!");
-//					}
-//					break;
 				case 0xF8000000: // Filler word
+					if(VERBOSE>7) evioout << "      Found F1 filler word" << endl;
 					break;
+				case 0x80000000: // JLab block header  (handled in outer loop)
+				case 0x88000000: // JLab block trailer (handled in outer loop)
+				case 0x90000000: // JLab event header  (handled in outer loop)
+				case 0x98000000: // Trigger time       (handled in outer loop)
 				case 0xF0000000: // module has no valid data available for read out (how to handle this?)
-				case 0x90000000: // JLab event header (handled in outer loop)
-				case 0x88000000: // JLab block trailer
+					if(VERBOSE>5) evioout << "      Found F1 break word: 0x" << hex << *iptr << dec << endl;
 					done = true;
 					break;
 				default:
 					cerr<<endl;
 					cout.flush(); cerr.flush();
+					_DBG_<<"Unknown data word in F1TDC block. Dumping for debugging:" << endl;
 					for(const uint32_t *iiptr = istart; iiptr<iend; iiptr++){
 						_DBG_<<"0x"<<hex<<*iiptr<<dec;
 						if(iiptr == iptr)cerr<<"  <----";
+						switch( (*iiptr) & 0xF8000000 ){
+							case 0x80000000: cerr << "   F1 Block Header"; break;
+							case 0x90000000: cerr << "   F1 Event Header"; break;
+							case 0x98000000: cerr << "   F1 Trigger time"; break;
+							case 0xC0000000: cerr << "   F1 Header"; break;
+							case 0xB8000000: cerr << "   F1 Data"; break;
+							case 0x88000000: cerr << "   F1 Block Trailer"; break;
+							case 0xF8000000: cerr << "   Filler word"; break;
+							case 0xF0000000: cerr << "   <module has no valid data>"; break;
+							default: break;
+						}
 						cerr<<endl;
+						if(iiptr > (iptr+4)) break;
 					}
 
 					throw JException("Unexpected word type in F1TDC block!");
@@ -2231,7 +2626,7 @@ void JEventSource_EVIO::ParseF1TDCBank_style2(int32_t rocid, const uint32_t* &ip
 	iptr++;
 
 	// Skip filler words
-	while(iptr<iend && *iptr==0xF8000000)iptr++;
+	while(iptr<iend && (*iptr&0xF8000000)==0xF8000000)iptr++;
 
 	// Double check that we found all of the events we were supposed to
 	if(events.size() != Nevents_block_header){
@@ -2241,6 +2636,28 @@ void JEventSource_EVIO::ParseF1TDCBank_style2(int32_t rocid, const uint32_t* &ip
 		throw JException(ss.str());
 	}
 
+}
+
+//----------------
+// F1TDC_channel
+//----------------
+uint32_t JEventSource_EVIO::F1TDC_channel(uint32_t chip, uint32_t chan_on_chip, int modtype)
+{
+	/// Convert a F1TDC chip number and channel on the chip to the
+	/// front panel channel number. This is based on "Input Channel Mapping"
+	/// section at the very bottom of the document F1TDC_V2_V3_4_29_14.pdf
+
+	uint32_t channel_map[8] = {0, 0, 1, 1, 2, 2, 3, 3};
+	switch(modtype){
+		case DModuleType::F1TDC32:
+			return (4 * chip) + channel_map[ chan_on_chip&0x7 ];
+		case DModuleType::F1TDC48:
+			return (chip <<3) | chan_on_chip;
+		default:
+			_DBG_ << "Calling F1TDC_channel for module type: " << DModuleType::GetName((DModuleType::type_id_t)modtype) << endl;
+			throw JException("F1TDC_channel called for non-F1TDC module type");
+	}
+	return 1000000; // (should never get here)
 }
 
 //----------------
@@ -2269,7 +2686,127 @@ void JEventSource_EVIO::ParseTIBank(int32_t rocid, const uint32_t* &iptr, const 
 //----------------
 void JEventSource_EVIO::ParseCAEN1190(int32_t rocid, const uint32_t* &iptr, const uint32_t *iend, list<ObjList*> &events)
 {
+	/// Parse data from a CAEN 1190 or 1290 module
+	/// (See ppg. 72-74 of V1290_REV15.pdf manual)
+	
+	uint32_t slot = 0;
+	uint32_t event_count = 0;
+	uint32_t word_count = 0;
+	uint32_t trigger_time_tag = 0;
+	uint32_t tdc_num = 0;
+	uint32_t event_id = 0;
+	uint32_t bunch_id = 0;
+	uint32_t last_event_id = event_id - 1;
 
+	// We need to accomodate multi-event blocks where
+	// events are entangled (i.e. hits from event 1
+	// are mixed inbetween those of event 2,3,4,
+	// etc... With CAEN modules, we only know which
+	// event a hit came from by looking at the event_id
+	// in the TDC header. This value is only 12 bits
+	// and could roll over within an event block. This
+	// means we need to keep track of the order we
+	// encounter them in so it is maintained in the
+	// "events" container. The event_id order is kept
+	// in the "event_id_order" vector.
+	ObjList *objs = NULL;
+	map<uint32_t, ObjList*> objmap;
+	vector<uint32_t> event_id_order; 
+
+	while(iptr<iend){
+	
+		// This word appears to be appended to the data.
+		// Probably in the ROL. Ignore it if found.
+		if(*iptr == 0xd00dd00d) {iptr++; continue;}
+	
+		uint32_t type = (*iptr) >> 27;
+		uint32_t edge = 0; // 1=trailing, 0=leading
+		uint32_t channel = 0;
+		uint32_t tdc = 0;
+		uint32_t error_flags = 0;
+		DCAEN1290TDCHit *caen1290tdchit = NULL;
+		map<uint32_t, ObjList*>::iterator iter;
+		switch(type){
+			case 0b01000:  // Global Header
+				slot = (*iptr) & 0x1f;
+				event_count = ((*iptr)>>5) & 0xffffff;
+				if(VERBOSE>7) evioout << "         CAEN TDC Global Header (slot=" << slot << " , event count=" << event_count << ")" << endl;
+
+				// If event_id has changed. Find or create ObjList (event)
+				// to write this hit into.
+				if(last_event_id != event_id){
+					
+					iter = objmap.find(event_id);
+					if(iter != objmap.end()){
+						objs = iter->second;
+					}else{
+						if(objs==NULL || ENABLE_DISENTANGLING){
+							objs = new ObjList();
+							objmap[event_id] = objs;
+							event_id_order.push_back(event_id);
+						}
+					}
+					last_event_id = event_id;
+				}
+				break;
+			case 0b10000:  // Global Trailer
+				slot = (*iptr) & 0x1f;
+				word_count = ((*iptr)>>5) & 0x7ffff;
+				if(VERBOSE>7) evioout << "         CAEN TDC Global Trailer (slot=" << slot << " , word count=" << word_count << ")" << endl;
+				slot = event_count = word_count = trigger_time_tag = tdc_num = event_id = bunch_id = 0;
+				break;
+			case 0b10001:  // Global Trigger Time Tag
+				trigger_time_tag = ((*iptr)>>5) & 0x7ffffff;
+				if(VERBOSE>7) evioout << "         CAEN TDC Global Trigger Time Tag (tag=" << trigger_time_tag << ")" << endl;
+				break;
+			case 0b00001:  // TDC Header
+				tdc_num = ((*iptr)>>24) & 0x03;
+				event_id = ((*iptr)>>12) & 0x0fff;
+				bunch_id = (*iptr) & 0x0fff;
+				if(VERBOSE>7) evioout << "         CAEN TDC TDC Header (tdc=" << tdc_num <<" , event id=" << event_id <<" , bunch id=" << bunch_id << ")" << endl;
+				break;
+			case 0b00000:  // TDC Measurement
+				edge = ((*iptr)>>26) & 0x01;
+				channel = ((*iptr)>>21) & 0x1f;
+				tdc = ((*iptr)>>0) & 0x1fffff;
+				if(VERBOSE>7) evioout << "         CAEN TDC TDC Measurement (" << (edge ? "trailing":"leading") << " , channel=" << channel << " , tdc=" << tdc << ")" << endl;
+
+				// Create DCAEN1290TDCHit object
+				if(objs){
+					caen1290tdchit = new DCAEN1290TDCHit(rocid, slot, channel, 0, edge, tdc_num, event_id, bunch_id, tdc);
+					objs->hit_objs.push_back(caen1290tdchit);
+				}
+				break;
+			case 0b00100:  // TDC Error
+				error_flags = (*iptr) & 0x7fff;
+				if(VERBOSE>7) evioout << "         CAEN TDC TDC Error (err flags=0x" << hex << error_flags << dec << ")" << endl;
+				break;
+			case 0b00011:  // TDC Trailer
+				tdc_num = ((*iptr)>>24) & 0x03;
+				event_id = ((*iptr)>>12) & 0x0fff;
+				word_count = ((*iptr)>>0) & 0x0fff;
+				if(VERBOSE>7) evioout << "         CAEN TDC TDC Trailer (tdc=" << tdc_num <<" , event id=" << event_id <<" , word count=" << word_count << ")" << endl;
+				tdc_num = event_id = bunch_id = 0;
+				break;
+			case 0b11000:  // Filler Word
+				if(VERBOSE>7) evioout << "         CAEN TDC Filler Word" << endl;
+				break;
+			default:
+				evioout << "Unknown datatype: 0x" << hex << type << " full word: "<< *iptr << dec << endl;
+		}
+	
+		iptr++;
+	}
+	
+	// Copy all ObjLists into events, preserving order
+	for(unsigned int i=0; i<event_id_order.size(); i++){
+		map<uint32_t, ObjList*>::iterator iter = objmap.find(event_id_order[i]);
+		if(iter != objmap.end()){
+			events.push_back(iter->second);
+		}else{
+			_DBG_<<"CAEN1290: Unable to find map entry for event id:"<<event_id_order[i]<<"!!!"<<endl;
+		}
+	}
 }
 
 //----------------
