@@ -183,13 +183,13 @@
   <danaevioDictEntry name="DSCHit.assocObjectBanks"                   tag="11200"    num="254"/>
   <danaevioDictEntry name="DSCHit.assocObjects"                       tag="11200"    num="255"/>
 
-  <danaevioDictEntry name="DTAGFHit"                                  tag="11300"    num="0"/>
-  <danaevioDictEntry name="DTAGFHit.objId"                            tag="11300"    num="1"/>
-  <danaevioDictEntry name="DTAGFHit.channel"                          tag="11300"    num="2"/>
-  <danaevioDictEntry name="DTAGFHit.E"                                tag="11300"    num="3"/>
-  <danaevioDictEntry name="DTAGFHit.t"                                tag="11300"    num="4"/>
-  <danaevioDictEntry name="DTAGFHit.assocObjectBaks"                  tag="11300"    num="254"/>
-  <danaevioDictEntry name="DTAGFHit.assocObjects"                     tag="11300"    num="255"/>
+  <danaevioDictEntry name="DTAGHHit"                                  tag="11300"    num="0"/>
+  <danaevioDictEntry name="DTAGHHit.objId"                            tag="11300"    num="1"/>
+  <danaevioDictEntry name="DTAGHHit.channel"                          tag="11300"    num="2"/>
+  <danaevioDictEntry name="DTAGHHit.E"                                tag="11300"    num="3"/>
+  <danaevioDictEntry name="DTAGHHit.t"                                tag="11300"    num="4"/>
+  <danaevioDictEntry name="DTAGHHit.assocObjectBaks"                  tag="11300"    num="254"/>
+  <danaevioDictEntry name="DTAGHHit.assocObjects"                     tag="11300"    num="255"/>
 
   <danaevioDictEntry name="DTAGMHit"                                  tag="11301"    num="0"/>
   <danaevioDictEntry name="DTAGMHit.objId"                            tag="11301"    num="1"/>
