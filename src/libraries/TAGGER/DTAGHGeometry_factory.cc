@@ -1,21 +1,21 @@
 //
-// File: DTAGFGeometry_factory.cc
+// File: DTAGHGeometry_factory.cc
 // Created: Sat Jul 5 10:09:27 EST 2014
 // Creator: jonesrt on gluey.phys.uconn.edu
 //
 
-#include "DTAGFGeometry_factory.h"
-#include "DTAGFGeometry.h"
+#include "DTAGHGeometry_factory.h"
+#include "DTAGHGeometry.h"
 
 //------------------
 // brun
 //------------------
-jerror_t DTAGFGeometry_factory::brun(JEventLoop *loop, int runnumber)
+jerror_t DTAGHGeometry_factory::brun(JEventLoop *loop, int runnumber)
 {
    assert( _data.size() == 0 );
 
    flags = PERSISTANT;
-   _data.push_back( new DTAGFGeometry(loop, runnumber) );
+   _data.push_back( new DTAGHGeometry(loop, factory_tag, runnumber) );
    
    return NOERROR;
 }
@@ -23,7 +23,7 @@ jerror_t DTAGFGeometry_factory::brun(JEventLoop *loop, int runnumber)
 //------------------
 // erun
 //------------------
-jerror_t DTAGFGeometry_factory::erun(void)
+jerror_t DTAGHGeometry_factory::erun(void)
 {
    for (unsigned int i=0; i < _data.size(); i++)
       delete _data[i];
