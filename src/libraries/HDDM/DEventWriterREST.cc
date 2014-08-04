@@ -104,8 +104,8 @@ bool DEventWriterREST::Write_RESTEvent(JEventLoop* locEventLoop,
       hit().setE(microtags[i]->E);
    }
 
-   // push any DTAGFHit objects to the output record
-   std::vector<const DTAGFHit*> fixedtags;
+   // push any DTAGHHit objects to the output record
+   std::vector<const DTAGHHit*> fixedtags;
    locEventLoop->Get(fixedtags);
    for (size_t i=0; i < fixedtags.size(); i++)
    {

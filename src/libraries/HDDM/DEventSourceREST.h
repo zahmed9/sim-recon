@@ -23,9 +23,7 @@
 #include <PID/DBeamPhoton.h>
 #include <PID/DDetectorMatches.h>
 #include <TAGGER/DTAGMHit.h>
-#include <TAGGER/DTAGFHit.h>
-#include <TAGGER/DTAGMGeometry.h>
-#include <TAGGER/DTAGFGeometry.h>
+#include <TAGGER/DTAGHHit.h>
 #include "TRACKING/DMCThrown.h"
 #include <TRACKING/DTrackTimeBased.h>
 #include <FCAL/DFCALShower.h>
@@ -63,8 +61,8 @@ class DEventSourceREST:public JEventSource
    jerror_t Extract_DTAGMHit(hddm_r::HDDM *record,
                     JFactory<DTAGMHit>* factory,
                     JEventLoop *eventLoop);
-   jerror_t Extract_DTAGFHit(hddm_r::HDDM *record,
-                    JFactory<DTAGFHit>* factory,
+   jerror_t Extract_DTAGHHit(hddm_r::HDDM *record,
+                    JFactory<DTAGHHit>* factory,
                     JEventLoop *eventLoop);
    jerror_t Extract_DSCHit(hddm_r::HDDM *record,
                     JFactory<DSCHit>* factory);
