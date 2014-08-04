@@ -7,49 +7,47 @@
 #ifndef _DTAGMGeometry_
 #define _DTAGMGeometry_
 
+#include <string>
+
 #include <JANA/JFactory.h>
 #include <JANA/JObject.h>
 using namespace jana;
 
 #include "units.h"
 
+#define TAGM_MAX_ROW     5
+#define TAGM_MAX_COLUMN  102
+
+
 class DTAGMGeometry : public JObject {
  public:
    
    JOBJECT_PUBLIC(DTAGMGeometry);
 
-   DTAGMGeometry(JEventLoop *loop, int runnumber);
+   DTAGMGeometry(JEventLoop *loop, std::string tag, int runnumber);
    ~DTAGMGeometry();
 
-   static const unsigned int kRowCount = 5;
-   static const unsigned int kColumnCount = 100;
-   static const unsigned int kChannelCount = 120;
-   static const double kFiberWidth = 0.2; // cm
-   static const double kFiberLength = 2.0; // cm
+   static const unsigned int kRowCount;
+   static const unsigned int kColumnCount;
+   static const double kFiberWidth;  // cm
+   static const double kFiberLength; // cm
 
-   bool row_column_to_channel(int row, int column, int &channel) const;
-   bool channel_to_row_column(int channel, int &row, int &column) const;
-   bool E_to_column(double E, int &column) const;
-
+   // columns are numbered 1..kColumnCount
    double getElow(unsigned int column) const;
    double getEhigh(unsigned int column) const;
+   bool E_to_column(double E, unsigned int &column) const;
 
    void toStrings(vector<pair<string,string> > &items) const {
       AddString(items, "kFiberWidth", "%f cm", kFiberWidth);
       AddString(items, "kFiberLength", "%f cm", kFiberLength);
       AddString(items, "kRowCount", "%d", kRowCount);
       AddString(items, "kColumnCount", "%d", kColumnCount);
-      AddString(items, "kChannelCount", "%d", kChannelCount);
    }
    
  private:
    double m_endpoint_energy_GeV;
-   double m_scaled_energy_range[2*kChannelCount];
-
-   // column numbers lie within range 0..kColumnCount-1
-   // row number is 0 for column sum, 1..kRowCount for individual fibers
-   int    m_column_number[kChannelCount];
-   int    m_row_number[kChannelCount];
+   double m_column_xlow[TAGM_MAX_COLUMN+1];
+   double m_column_xhigh[TAGM_MAX_COLUMN+1];
 };
 
 #endif // _DTAGMGeometry_

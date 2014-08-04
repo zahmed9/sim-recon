@@ -15,7 +15,7 @@ jerror_t DTAGMGeometry_factory::brun(JEventLoop *loop, int runnumber)
    assert( _data.size() == 0 );
 
    flags = PERSISTANT;
-   _data.push_back( new DTAGMGeometry(loop, runnumber) );
+   _data.push_back( new DTAGMGeometry(loop, factory_tag, runnumber) );
    
    return NOERROR;
 }
