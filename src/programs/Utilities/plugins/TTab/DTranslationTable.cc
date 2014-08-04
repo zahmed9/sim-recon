@@ -102,6 +102,10 @@ DTranslationTable::DTranslationTable(JEventLoop *loop)
 	supplied_data_types.insert("DSCTDCDigiHit");
 	supplied_data_types.insert("DTOFDigiHit");
 	supplied_data_types.insert("DTOFTDCDigiHit");
+	supplied_data_types.insert("DTAGMDigiHit");
+	supplied_data_types.insert("DTAGMTDCDigiHit");
+	supplied_data_types.insert("DTAGHDigiHit");
+	supplied_data_types.insert("DTAGHTDCDigiHit");
 }
 
 //---------------------------------
@@ -203,6 +207,10 @@ void DTranslationTable::ApplyTranslationTable(JEventLoop *loop) const
 	vector<DSCTDCDigiHit*> vsctdc;
 	vector<DTOFDigiHit*> vtof;
 	vector<DTOFTDCDigiHit*> vtoftdc;
+	vector<DTAGMDigiHit*> vtagm;
+	vector<DTAGMTDCDigiHit*> vtagmtdc;
+	vector<DTAGHDigiHit*> vtagh;
+	vector<DTAGHTDCDigiHit*> vtaghtdc;
 	
 	// Df250PulseIntegral (will apply Df250PulseTime via associated objects)
 	vector<const Df250PulseIntegral*> pulseintegrals250;
@@ -241,6 +249,8 @@ void DTranslationTable::ApplyTranslationTable(JEventLoop *loop) const
 			case FCAL        : vfcal.push_back( MakeFCALDigiHit(chaninfo.fcal, pi, pt) ); break;
 			case SC          : vsc.push_back  ( MakeSCDigiHit(  chaninfo.sc,   pi, pt) ); break;
 			case TOF         : vtof.push_back ( MakeTOFDigiHit( chaninfo.tof,  pi, pt) ); break;
+			case TAGM        : vtagm.push_back( MakeTAGMDigiHit(chaninfo.tagm, pi, pt) ); break;
+			case TAGH        : vtagh.push_back( MakeTAGHDigiHit(chaninfo.tagh, pi, pt) ); break;
 
 			default:
 				if(VERBOSE>4) ttout << "       - Don't know how to make DigiHit objects for this detector type!" << endl;
@@ -320,6 +330,8 @@ void DTranslationTable::ApplyTranslationTable(JEventLoop *loop) const
 			case BCAL     : vbcaltdc.push_back( MakeBCALTDCDigiHit(chaninfo.bcal,      hit) ); break;
 			case FDC_WIRES: vfdcwire.push_back( MakeFDCWireDigiHit(chaninfo.fdc_wires, hit) ); break;
 			case SC       : vsctdc.push_back( MakeSCTDCDigiHit(chaninfo.sc,      hit) ); break;
+			case TAGM     : vtagmtdc.push_back( MakeTAGMTDCDigiHit(chaninfo.tagm,      hit) ); break;
+			case TAGH     : vtaghtdc.push_back( MakeTAGHTDCDigiHit(chaninfo.tagh,      hit) ); break;
 
 			default:  	
 			    if(VERBOSE>4) ttout << "       - Don't know how to make DigiHit objects for this detector type!" << endl;
@@ -376,6 +388,10 @@ void DTranslationTable::ApplyTranslationTable(JEventLoop *loop) const
 		ttout << "       vsctdc.size() = " << vsctdc.size() << endl;
 		ttout << "         vtof.size() = " << vtof.size() << endl;
 		ttout << "      vtoftdc.size() = " << vtoftdc.size() << endl;
+		ttout << "        vtagm.size() = " << vtagm.size() << endl;
+		ttout << "     vtagmtdc.size() = " << vtagmtdc.size() << endl;
+		ttout << "        vtagh.size() = " << vtagh.size() << endl;
+		ttout << "     vtaghtdc.size() = " << vtaghtdc.size() << endl;
 	}
 	
 	// Find factory for each container and copy the object pointers into it
@@ -390,6 +406,10 @@ void DTranslationTable::ApplyTranslationTable(JEventLoop *loop) const
 	CopyToFactory(loop, vsctdc);
 	CopyToFactory(loop, vtof);
 	CopyToFactory(loop, vtoftdc);
+	CopyToFactory(loop, vtagm);
+	CopyToFactory(loop, vtagmtdc);
+	CopyToFactory(loop, vtagh);
+	CopyToFactory(loop, vtaghtdc);
 
 }
 
@@ -449,6 +469,33 @@ DSCDigiHit* DTranslationTable::MakeSCDigiHit(const SCIndex_t &idx, const Df250Pu
 	CopyDf250Info(h, pi, pt);
 
 	h->sector = idx.sector;
+
+	return h;
+}
+
+//---------------------------------
+// MakeTAGMDigiHit
+//---------------------------------
+DTAGMDigiHit* DTranslationTable::MakeTAGMDigiHit(const TAGMIndex_t &idx, const Df250PulseIntegral *pi, const Df250PulseTime *pt) const
+{
+	DTAGMDigiHit *h = new DTAGMDigiHit();
+	CopyDf250Info(h, pi, pt);
+
+	h->row = idx.row;
+	h->column = idx.col;
+
+	return h;
+}
+
+//---------------------------------
+// MakeTAGHDigiHit
+//---------------------------------
+DTAGHDigiHit* DTranslationTable::MakeTAGHDigiHit(const TAGHIndex_t &idx, const Df250PulseIntegral *pi, const Df250PulseTime *pt) const
+{
+	DTAGHDigiHit *h = new DTAGHDigiHit();
+	CopyDf250Info(h, pi, pt);
+
+	h->counter_id = idx.id;
 
 	return h;
 }
@@ -524,6 +571,33 @@ DSCTDCDigiHit*  DTranslationTable::MakeSCTDCDigiHit(const SCIndex_t &idx, const 
 	CopyDF1TDCInfo(h, hit);
 
 	h->sector = idx.sector;
+
+	return h;
+}
+
+//---------------------------------
+// MakeTAGMTDCDigiHit
+//---------------------------------
+DTAGMTDCDigiHit*  DTranslationTable::MakeTAGMTDCDigiHit(const TAGMIndex_t &idx, const DF1TDCHit *hit) const
+{
+	DTAGMTDCDigiHit *h = new DTAGMTDCDigiHit();
+	CopyDF1TDCInfo(h, hit);
+
+	h->row = idx.row;
+	h->column = idx.col;
+
+	return h;
+}
+
+//---------------------------------
+// MakeTAGHTDCDigiHit
+//---------------------------------
+DTAGHTDCDigiHit*  DTranslationTable::MakeTAGHTDCDigiHit(const TAGHIndex_t &idx, const DF1TDCHit *hit) const
+{
+	DTAGHTDCDigiHit *h = new DTAGHTDCDigiHit();
+	CopyDF1TDCInfo(h, hit);
+
+	h->counter_id = idx.id;
 
 	return h;
 }
