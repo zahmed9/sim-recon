@@ -22,7 +22,7 @@ enum DetectorSystem_t{
      SYS_START      = 0x0100,
      SYS_RICH       = 0x0200,
      SYS_CCAL       = 0x0400,
-     SYS_TAGF       = 0x0800
+     SYS_TAGH       = 0x0800
 };
 
 inline const char* SystemName(DetectorSystem_t sys)
@@ -55,8 +55,8 @@ inline const char* SystemName(DetectorSystem_t sys)
           case SYS_TAGM:
               return "TAGM";
               break;
-          case SYS_TAGF:
-              return "TAGF";
+          case SYS_TAGH:
+              return "TAGH";
               break;
           case SYS_START:
               return "ST";
