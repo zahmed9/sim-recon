@@ -49,7 +49,7 @@ void SmearTOF(hddm_s::HDDM *record);
 void SmearSTC(hddm_s::HDDM *record);
 void SmearCherenkov(hddm_s::HDDM *record);
 void SmearTAGM(hddm_s::HDDM *record);
-void SmearTAGF(hddm_s::HDDM *record);
+void SmearTAGH(hddm_s::HDDM *record);
 void InitCDCGeometry(void);
 void InitFDCGeometry(void);
 
@@ -145,7 +145,7 @@ extern double STC_PADDLE_THRESHOLD;
 
 // Tagging counter time resolutions (s)
 extern double TAGM_TSIGMA;
-extern double TAGF_TSIGMA;
+extern double TAGH_TSIGMA;
 
 // Photon-statistics factor for smearing hit energy (from Criss's MC)
 // (copied from DFCALMCResponse_factory.cc 7/2/2009 DL)
@@ -237,7 +237,7 @@ void Smear(hddm_s::HDDM *record)
       SmearSTC(record);
       SmearCherenkov(record);
       SmearTAGM(record);
-      SmearTAGF(record);
+      SmearTAGH(record);
    }
    if (ADD_NOISE) {
       AddNoiseHitsCDC(record);
@@ -836,19 +836,19 @@ void SmearTAGM(hddm_s::HDDM *record)
 }
 
 //-----------
-// SmearTAGF
+// SmearTAGH
 //-----------
-void SmearTAGF(hddm_s::HDDM *record)
+void SmearTAGH(hddm_s::HDDM *record)
 {
-   hddm_s::FixedChannelList tagfs = record->getFixedChannels();
-   hddm_s::FixedChannelList::iterator iter;
-   for (iter = tagfs.begin(); iter != tagfs.end(); ++iter) {
+   hddm_s::HodoChannelList taghs = record->getHodoChannels();
+   hddm_s::HodoChannelList::iterator iter;
+   for (iter = taghs.begin(); iter != taghs.end(); ++iter) {
       iter->deleteTaggerHits();
       hddm_s::TaggerTruthHitList thits = iter->getTaggerTruthHits();
       hddm_s::TaggerTruthHitList::iterator titer;
       for (titer = thits.begin(); titer != thits.end(); ++titer) {
          // smear the time
-         double t = titer->getT() + SampleGaussian(TAGF_TSIGMA);
+         double t = titer->getT() + SampleGaussian(TAGH_TSIGMA);
          hddm_s::TaggerHitList hits = iter->addTaggerHits();
          hits().setT(t);
       }

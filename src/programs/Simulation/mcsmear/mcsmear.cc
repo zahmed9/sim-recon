@@ -90,7 +90,7 @@ double FTOF_BAR_THRESHOLD    = 0.0;
 double STC_PADDLE_THRESHOLD  = 0.0;
 
 double TAGM_TSIGMA = 0.200;
-double TAGF_TSIGMA = 0.350;
+double TAGH_TSIGMA = 0.350;
 
 double FCAL_PHOT_STAT_COEF   = 0.0; //0.035;
 double FCAL_BLOCK_THRESHOLD  = 0.0; //20.0*k_MeV;
