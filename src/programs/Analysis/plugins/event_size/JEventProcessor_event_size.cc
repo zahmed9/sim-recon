@@ -20,7 +20,7 @@ using namespace jana;
 #include <TOF/DTOFRawHit.h>
 #include <START_COUNTER/DSCHit.h>
 #include <TAGGER/DTAGMHit.h>
-#include <TAGGER/DTAGFHit.h>
+#include <TAGGER/DTAGHHit.h>
 
 // Routine used to create our JEventProcessor
 #include <JANA/JApplication.h>
@@ -169,7 +169,7 @@ jerror_t JEventProcessor_event_size::evnt(JEventLoop *loop, int eventnumber)
 	vector<const DTOFRawHit*> tofhits;
 	vector<const DSCHit*> schits;
 	vector<const DTAGMHit*> tagmhits;
-	vector<const DTAGFHit*> tagfhits;
+	vector<const DTAGHHit*> taghhits;
 	
 	loop->Get(beamphotons);
 	loop->Get(bcalhits);
@@ -180,7 +180,7 @@ jerror_t JEventProcessor_event_size::evnt(JEventLoop *loop, int eventnumber)
 	loop->Get(tofhits);
 	loop->Get(schits);
 	loop->Get(tagmhits);
-	loop->Get(tagfhits);
+	loop->Get(taghhits);
 	
 	// Count inner and outer BCAL hits
 	unsigned int Nbcalhits_inner = 0;
@@ -309,13 +309,13 @@ jerror_t JEventProcessor_event_size::evnt(JEventLoop *loop, int eventnumber)
 
 		Ntagmhits++;
 	}
-	unsigned int Ntagfhits = 0;
-	for(unsigned int i=0; i<tagfhits.size(); i++){
+	unsigned int Ntaghhits = 0;
+	for(unsigned int i=0; i<taghhits.size(); i++){
 		// Apply time window
-		if(tagfhits[i]->t < tmin_tagger)continue;
-		if(tagfhits[i]->t > tmax_tagger)continue;
+		if(taghhits[i]->t < tmin_tagger)continue;
+		if(taghhits[i]->t > tmax_tagger)continue;
 
-		Ntagfhits++;
+		Ntaghhits++;
 	}
 
 	// Lock mutex while we fill in Event tree
@@ -339,7 +339,7 @@ jerror_t JEventProcessor_event_size::evnt(JEventLoop *loop, int eventnumber)
 	evt->Ntofhits = Ntofhits;
 	evt->Nschits = Nschits;
 	evt->Ntagmhits = Ntagmhits;
-	evt->Ntagfhits = Ntagfhits;
+	evt->Ntaghhits = Ntaghhits;
 
 	evt->Ndigitized_values = 0;
 	evt->Ndigitized_values += 3*evt->Nbcalhits_inner;    // fADC and TDC
@@ -352,7 +352,7 @@ jerror_t JEventProcessor_event_size::evnt(JEventLoop *loop, int eventnumber)
 	evt->Ndigitized_values += 3*evt->Ntofhits;           // fADC and TDC
 	evt->Ndigitized_values += 3*evt->Nschits;            // fADC and TDC
 	evt->Ndigitized_values += 3*evt->Ntagmhits;          // fADC and TDC
-	evt->Ndigitized_values += 3*evt->Ntagfhits;          // fADC and TDC
+	evt->Ndigitized_values += 3*evt->Ntaghhits;          // fADC and TDC
 
 	// Fill event tree
 	evt_tree->Fill();
