@@ -14,6 +14,7 @@ jerror_t START_COUNTER_init(JEventLoop *loop)
 	loop->AddFactory(new JFactory<DSCDigiHit>());
 	loop->AddFactory(new JFactory<DSCTDCDigiHit>());
 	loop->AddFactory(new DSCHit_factory());
+	loop->AddFactory(new JFactory<DSCHit>("TRUTH"));
 	loop->AddFactory(new JFactory<DSCTruthHit>());
 
 	return NOERROR;
