@@ -211,6 +211,28 @@ jerror_t DEventSourceHDDM::GetObjects(JEvent &event, JFactory_base *factory)
       }
    }
 
+	//Get target center
+		//multiple reader threads can access this object: need lock
+	bool locNewRunNumber = false;
+	unsigned int locRunNumber = event.GetRunNumber();
+	LockRead();
+	{
+		locNewRunNumber = (bTargetCenterZMap.find(locRunNumber) == bTargetCenterZMap.end());
+	}
+	UnlockRead();
+	if(locNewRunNumber)
+	{
+		DApplication* dapp = dynamic_cast<DApplication*>(loop->GetJApplication());
+		DGeometry* locGeometry = dapp->GetDGeometry(loop->GetJEvent().GetRunNumber());
+		double locTargetCenterZ = 0.0;
+		locGeometry->GetTargetZ(locTargetCenterZ);
+		LockRead();
+		{
+			bTargetCenterZMap[locRunNumber] = locTargetCenterZ;
+		}
+		UnlockRead();
+	}
+
    // Get name of data class we're trying to extract
    string dataClassName = factory->GetDataClassName();
 
@@ -867,14 +889,19 @@ jerror_t DEventSourceHDDM::Extract_DMCReaction(hddm_s::HDDM *record,
    if (tag != "")
       return OBJECT_NOT_AVAILABLE;
 
-   JFactory_base* fac = loop->GetFactory("DBeamPhoton", "MCGEN");
-   JFactory<DBeamPhoton> *factory2 = dynamic_cast<JFactory<DBeamPhoton>*> (fac);
-   
-   if (factory == NULL || factory2 == NULL)
+   if (factory == NULL)
       return OBJECT_NOT_AVAILABLE;
    
+	double locTargetCenterZ = 0.0;
+	int locRunNumber = loop->GetJEvent().GetRunNumber();
+	LockRead();
+	{
+		locTargetCenterZ = bTargetCenterZMap[locRunNumber];
+	}
+	UnlockRead();
+	DVector3 locPosition(0.0, 0.0, locTargetCenterZ);
+
    vector<DMCReaction*> dmcreactions;
-   vector<DBeamPhoton*> dbeam_photons;
 
    const hddm_s::ReactionList &reacts = record->getReactions();
    hddm_s::ReactionList::iterator iter;
@@ -887,11 +914,10 @@ jerror_t DEventSourceHDDM::Extract_DMCReaction(hddm_s::HDDM *record,
       const hddm_s::BeamList &beams = record->getBeams();
       if (beams.size() > 0) {
          hddm_s::Beam &beam = iter->getBeam();
-         DVector3 pos(0.0, 0.0, 65.0);
          DVector3 mom(beam.getMomentum().getPx(),
                       beam.getMomentum().getPy(),
                       beam.getMomentum().getPz());
-         mcreaction->beam.setPosition(pos);
+         mcreaction->beam.setPosition(locPosition);
          mcreaction->beam.setMomentum(mom);
          mcreaction->beam.setPID(Gamma);
          mcreaction->beam.setMass(beam.getProperties().getMass());
@@ -900,34 +926,31 @@ jerror_t DEventSourceHDDM::Extract_DMCReaction(hddm_s::HDDM *record,
                                            mcreaction->beam.mass()));
          mcreaction->beam.clearErrorMatrix();
          mcreaction->beam.setT0(0, 0, SYS_NULL);
+         mcreaction->beam.setT1(0, 0, SYS_NULL);
          mcreaction->beam.setTime(0.0);
-
-         DBeamPhoton *beamphoton = new DBeamPhoton;
-         *(DKinematicData*)beamphoton = mcreaction->beam;
-         dbeam_photons.push_back(beamphoton);
       }
       else {
          // fake values for DMCReaction
-         DVector3 pos(0.0, 0.0, 65.0);
          DVector3 mom(0.0, 0.0, 0.0);
-         mcreaction->beam.setPosition(pos);
+         mcreaction->beam.setPosition(locPosition);
          mcreaction->beam.setMomentum(mom);
          mcreaction->beam.setPID(Gamma);
          mcreaction->beam.setMass(0.0);
          mcreaction->beam.setCharge(0.0);
          mcreaction->beam.clearErrorMatrix();
          mcreaction->beam.setT0(0, 0, SYS_NULL);
+         mcreaction->beam.setT1(0, 0, SYS_NULL);
+         mcreaction->beam.setTime(0.0);
       }
 
       const hddm_s::TargetList &targets = record->getTargets();
       if (targets.size() > 0) {
          hddm_s::Target &target = iter->getTarget();
          DKinematicData target_kd;
-         DVector3 pos(0.0, 0.0, 65.0);
          DVector3 mom(target.getMomentum().getPx(),
                       target.getMomentum().getPy(),
                       target.getMomentum().getPz());
-         mcreaction->target.setPosition(pos);
+         mcreaction->target.setPosition(locPosition);
          mcreaction->target.setMomentum(mom);
          mcreaction->target.setMass(target.getProperties().getMass());
          mcreaction->target.setCharge(target.getProperties().getCharge());
@@ -935,32 +958,32 @@ jerror_t DEventSourceHDDM::Extract_DMCReaction(hddm_s::HDDM *record,
                                            mcreaction->target.mass()));
          mcreaction->target.clearErrorMatrix();
          mcreaction->target.setT0(0, 0, SYS_NULL);
+         mcreaction->target.setT1(0, 0, SYS_NULL);
          mcreaction->target.setTime(0.0);
       }
       else {
          // fake values for DMCReaction
-         DVector3 pos(0.0, 0.0, 65.0);
          DVector3 mom(0.0, 0.0, 0.0);
-         mcreaction->target.setPosition(pos);
+         mcreaction->target.setPosition(locPosition);
          mcreaction->target.setMomentum(mom);
          mcreaction->target.setPID(Unknown);
          mcreaction->target.setMass(0.0);
          mcreaction->target.setCharge(0.0);
          mcreaction->target.clearErrorMatrix();
          mcreaction->target.setT0(0, 0, SYS_NULL);
+         mcreaction->target.setT1(0, 0, SYS_NULL);
          mcreaction->target.setTime(0.0);
       }
    }
    
    // Copy into factories
    //_DBG_<<"Creating "<<dmcreactions.size()<<" DMCReaction objects"<<endl;
-   //_DBG_<<"Creating "<<dbeam_photons.size()<<" DBeamPhoton objects"<<endl;
 
    factory->CopyTo(dmcreactions);
-   factory2->CopyTo(dbeam_photons);
 
    return NOERROR;
 }
+
 
 //------------------
 // Extract_DBeamPhoton
@@ -971,53 +994,24 @@ jerror_t DEventSourceHDDM::Extract_DBeamPhoton(hddm_s::HDDM *record,
 {
    /// If tag="MCGEN" then defer to the Extract_DMCReaction method which
    /// extracts both the DMCReaction and DBeamPhoton objects at the same time.
-   /// Otherwise, generate new DBeamPhoton objects from hits in the tagger
-   /// microscope and hodoscope counters.
 
-   if (factory == NULL)
+   if (factory==NULL)
       return OBJECT_NOT_AVAILABLE;
-   if (tag == "MCGEN") {
-      JFactory_base* factory2 = loop->GetFactory("DMCReaction", "");
-      return Extract_DMCReaction(record, 
-                     dynamic_cast<JFactory<DMCReaction>*>(factory2),
-                     tag, loop);
-   }
-   else if (tag != "" && tag != "TRUTH")
-      return OBJECT_NOT_AVAILABLE;
+   if (tag != "MCGEN")
+		return OBJECT_NOT_AVAILABLE;
+
+   vector<const DMCReaction*> dmcreactions;
+	loop->Get(dmcreactions);
 
    vector<DBeamPhoton*> dbeam_photons;
+	for(size_t loc_i = 0; loc_i < dmcreactions.size(); ++loc_i)
+	{
+      DBeamPhoton *beamphoton = new DBeamPhoton;
+      *(DKinematicData*)beamphoton = dmcreactions[loc_i]->beam;
+      dbeam_photons.push_back(beamphoton);
+	}
 
-   vector<const DTAGMHit*> tagm_hits;
-   loop->Get(tagm_hits,tag.c_str());
-   for (unsigned int ih=0; ih < tagm_hits.size(); ++ih) {
-      DVector3 pos(0.0, 0.0, 65.0);
-      DVector3 mom(0.0, 0.0, tagm_hits[ih]->E);
-      DBeamPhoton *gamma = new DBeamPhoton;
-      gamma->setMomentum(mom);
-      gamma->setPosition(pos);
-      gamma->setCharge(0);
-      gamma->setMass(0);
-      gamma->setTime(tagm_hits[ih]->t);
-      gamma->setT0(tagm_hits[ih]->t, 0.200, SYS_TAGM);
-      dbeam_photons.push_back(gamma);
-   }
-
-   vector<const DTAGHHit*> tagh_hits;
-   loop->Get(tagh_hits,tag.c_str());
-   for (unsigned int ih=0; ih < tagh_hits.size(); ++ih) {
-      DVector3 pos(0.0, 0.0, 65.0);
-      DVector3 mom(0.0, 0.0, tagh_hits[ih]->E);
-      DBeamPhoton *gamma = new DBeamPhoton;
-      gamma->setMomentum(mom);
-      gamma->setPosition(pos);
-      gamma->setCharge(0);
-      gamma->setMass(0);
-      gamma->setTime(tagh_hits[ih]->t);
-      gamma->setT0(tagh_hits[ih]->t, 0.350, SYS_TAGH);
-      dbeam_photons.push_back(gamma);
-   }
-
-   // Copy into factory
+   // Copy into factories
    factory->CopyTo(dbeam_photons);
 
    return NOERROR;

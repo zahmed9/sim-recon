@@ -31,6 +31,7 @@
 #include <START_COUNTER/DSCHit.h>
 #include <TOF/DTOFPoint.h>
 #include <TRIGGER/DMCTrigger.h>
+#include <DANA/DApplication.h>
 
 #include <DMatrix.h>
 #include <TMath.h>
@@ -52,7 +53,7 @@ class DEventSourceREST:public JEventSource
    jerror_t GetObjects(JEvent &event, JFactory_base *factory);
 		
    jerror_t Extract_DMCReaction(hddm_r::HDDM *record,
-                    JFactory<DMCReaction> *factory);
+                    JFactory<DMCReaction> *factory, JEventLoop* locEventLoop);
    jerror_t Extract_DBeamPhoton(hddm_r::HDDM *record,
                     JFactory<DBeamPhoton> *factory,
                     JEventLoop *eventLoop);
@@ -87,6 +88,8 @@ class DEventSourceREST:public JEventSource
  private:
    // Warning: Class JEventSource methods must be re-entrant, so do not
    // store any data here that might change from event to event.
+
+	map<unsigned int, double> bTargetCenterZMap; //unsigned int is run number
 
    std::ifstream *ifs;		// input hddm file ifstream
    hddm_r::istream *fin;	// provides hddm layer on top of ifstream

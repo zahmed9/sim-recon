@@ -57,6 +57,7 @@ using namespace std;
 #include <CERE/DCereHit.h>
 #include <RICH/DRichHit.h>
 #include <RICH/DRichTruthHit.h>
+#include <DANA/DApplication.h>
 
 class DEventSourceHDDM:public JEventSource
 {
@@ -133,6 +134,8 @@ class DEventSourceHDDM:public JEventSource
       pthread_mutex_t rt_mutex;
       map<hddm_s::HDDM*, vector<DReferenceTrajectory*> > rt_by_event;
       list<DReferenceTrajectory*> rt_pool;
+
+		map<unsigned int, double> bTargetCenterZMap; //unsigned int is run number
 
       JCalibration *jcalib;
       float uscale[192],vscale[192];

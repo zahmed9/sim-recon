@@ -1244,7 +1244,7 @@ bool DHistogramAction_ThrownParticleKinematics::Perform_Action(JEventLoop* locEv
 	const DMCThrown* locMCThrown;
 
 	vector<const DBeamPhoton*> locBeamPhotons;
-	locEventLoop->Get(locBeamPhotons);
+	locEventLoop->Get(locBeamPhotons, "MCGEN");
 	japp->RootWriteLock();
 	{
 		for(size_t loc_i = 0; loc_i < locBeamPhotons.size(); ++loc_i)
