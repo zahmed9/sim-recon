@@ -62,7 +62,7 @@ static TH1F *fcalEnergies;
 static TH1F *bcalEnergies;
 static TH1F *stEnergies;
 static TH1F *tagmEnergies;
-static TH1F *tagfEnergies;
+static TH1F *taghEnergies;
 
 static TH1F *fdcCharges;
 static TH1F *cdcCharges;
@@ -74,7 +74,7 @@ static TH1F *fcalTimes;
 static TH1F *bcalTimes;
 static TH1F *stTimes;
 static TH1F *tagmTimes;
-static TH1F *tagfTimes;
+static TH1F *taghTimes;
 
 
 //  is this thread-safe?
@@ -313,7 +313,7 @@ jerror_t JEventProcessor_rawevent::init(void) {
     fcalEnergies = new TH1F("fcale", "FCAL energies in keV",1000,0.,500000.);
     bcalEnergies = new TH1F("bcale", "BCAL energies in keV",1000,0.,1000000.);
     tagmEnergies = new TH1F("tagme", "Tagger microscope energies in keV",1000,0.,40000.);
-    tagfEnergies = new TH1F("tagfe", "Tagger fixed array energies in keV",1000,0.,40000.);
+    taghEnergies = new TH1F("taghe", "Tagger hodoscope array energies in keV",1000,0.,40000.);
 
     fdcCharges   = new TH1F("fdcq",  "FDC charges in fC",1000,0.,1500.);
     cdcCharges   = new TH1F("cdcq",  "CDC charges in fC",1000,0.,25000.);
@@ -325,7 +325,7 @@ jerror_t JEventProcessor_rawevent::init(void) {
     bcalTimes    = new TH1F("bcalt", "BCAL times in nsec",1000,0.,200.-tMin/1000);
     fcalTimes    = new TH1F("fcalt", "FCAL times in nsec",1000,0.,200.-tMin/1000);
     tagmTimes    = new TH1F("tagmt", "Tagger microscope times in nsec",1000,0.,250.-tMin/1000);
-    tagfTimes    = new TH1F("tagft", "Tagger fixed array times in nsec",1000,0.,250.-tMin/1000);
+    taghTimes    = new TH1F("tahft", "Tagger hodoscope times in nsec",1000,0.,250.-tMin/1000);
   }
 
   return NOERROR;
@@ -460,12 +460,29 @@ jerror_t JEventProcessor_rawevent::brun(JEventLoop *eventLoop, int runnumber) {
   }
 
   static bool compareDTAGMHits(const DTAGMHit* h1, const DTAGMHit* h2) {
-    if(h1->row!=h2->row) {
-      return(h1->row<h2->row);
-    } else if(h1->column!=h2->column) {
-      return(h1->column<h2->column);
-    } else {
-      return(h1->t<h2->t);
+    if (h1->column != h2->column) {
+      return (h1->column < h2->column);
+    }
+    else if (h1->row != h2->row) {
+      return (h1->row < h2->row);
+    }
+    else if (h1->t != h2->t) {
+      return (h1->t <h2->t);
+    }
+    else {
+      return (h1->time_fadc < h2->time_fadc);
+    }
+  }
+
+  static bool compareDTAGHHits(const DTAGHHit* h1, const DTAGHHit* h2) {
+    if (h1->counter_id != h2->counter_id) {
+      return (h1->counter_id < h2->counter_id);
+    }
+    else if (h1->t != h2->t) {
+      return (h1->t < h2->t);
+    }
+    else {
+      return (h1->time_fadc < h2->time_fadc);
     }
   }
 
@@ -1069,117 +1086,221 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
   sort(dtagmhits.begin(),dtagmhits.end(),compareDTAGMHits);
 
   hc=0;
-  for(i=0; i<dtagmhits.size(); i++) {
-    if((dtagmhits[i]->E>0)&&((dtagmhits[i]->t*1000.)>tMin)&&(dtagmhits[i]->t*1000.<trigTime)) {
+  for (i=0; i < dtagmhits.size(); i++) {
+    if (dtagmhits[i]->npix_fadc > 0 && 
+        ((dtagmhits[i]->t*1000 > tMin && dtagmhits[i]->t*1000 < trigTime) ||
+         (dtagmhits[i]->time_fadc*1000 > tMin &&
+          dtagmhits[i]->time_fadc*1000 < trigTime)) )
+    {
+      uint32_t pA = dtagmhits[i]->npix_fadc + 2500;       // in SiPM pixels
+      uint32_t t = dtagmhits[i]->t*1000 - tMin;           // in ps
+      uint32_t tA = dtagmhits[i]->time_fadc*1000 - tMin;  // in ps
 
-      uint32_t E     = dtagmhits[i]->E*1000000.;    // in keV
-      uint32_t t     = dtagmhits[i]->t*1000.-tMin;  // in picoseconds
+      if (noroot == 0)
+        tagmEnergies->Fill(dtagmhits[i]->npix_fadc);
+      if (noroot == 0)
+        tagmTimes->Fill(dtagmhits[i]->time_fadc-tMin/1000);
 
-      if(noroot==0)tagmEnergies->Fill(dtagmhits[i]->E*1000000.);
-      if(noroot==0)tagmTimes->Fill(dtagmhits[i]->t-tMin/1000);
-
-      cscRef cscADC      = DTAGMTranslationADC(dtagmhits[i]);
-	  if(!(cscADC == CSCREF_NULL)){
-		  hc++;
-		  hitCount++;
-		  nhits=1;
-		  hit[0].hit_id      = hitCount;
-		  hit[0].det_id      = detID;
-		  hit[0].crate_id    = cscADC.crate;
-		  hit[0].slot_id     = cscADC.slot;
-		  hit[0].chan_id     = cscADC.channel;
-		  hit[0].module_id   = FADC250;
-		  hit[0].module_mode = FADC250_MODE_IP;
-		  hit[0].nwords      = 2;
-		  hit[0].hdata       = mcData;
-		  hit[0].hdata[0]    = E/1000;  // in MeV
-		  hit[0].hdata[1]    = static_cast<double>(t)/FADC250tick;
-		  if(E/1000>0x7ffff)cerr << "E too large for Tagger: " << E << endl;
-		  
-		  if(dumphits>1) {
-			jout << endl;
-			jout << " Tagger microscope ADC row,column are " 
-                             << dtagmhits[i]->row << ", " << dtagmhits[i]->column<< endl;
-			jout << " c,s,c are " << cscADC.crate << ", " << cscADC.slot << ", " << cscADC.channel << endl;
-			jout << " hdata is: " << hit[0].hdata[0] << ", " << hit[0].hdata[1] << endl;
-			jout << " E,t are " << E << ", " << t << endl;
-			jout << endl;
-		  }
-		  
-		  if(nomc2coda==0) {
-			stat = mc2codaWrite(eventID,nhits,(struct coda_hit_info *)&hit[0]);
-			if(stat!=nhits) {
-			  jerr << "?error return from mc2codaWrite() for TAGGER ADC: " << stat << endl << endl;
-			  exit(EXIT_FAILURE);
-			}
-		  }
+      cscRef cscADC = DTAGMHitTranslationADC(dtagmhits[i]);
+      if (! (cscADC == CSCREF_NULL)) {
+        hc++;
+        hitCount++;
+        nhits=1;
+        hit[0].hit_id      = hitCount;
+        hit[0].det_id      = detID;
+        hit[0].crate_id    = cscADC.crate;
+        hit[0].slot_id     = cscADC.slot;
+        hit[0].chan_id     = cscADC.channel;
+        hit[0].module_id   = FADC250;
+        hit[0].module_mode = FADC250_MODE_IP;
+        hit[0].nwords      = 2;
+        hit[0].hdata       = mcData;
+        hit[0].hdata[0]    = pA;   // in SiPM pixels
+        hit[0].hdata[1]    = static_cast<double>(tA)/FADC250tick;
+        if (pA > 0x7ffff)
+          cerr << "pA too large for tagger microscope: " << pA << endl;
+  
+        if (dumphits > 1) {
+	  jout << endl;
+	  jout << " Tagger microscope ADC row,column are " 
+               << dtagmhits[i]->row << ", " << dtagmhits[i]->column << endl;
+	  jout << " c,s,c are " << cscADC.crate << ", " << cscADC.slot << ", "
+               << cscADC.channel << endl;
+	  jout << " hdata is: " << hit[0].hdata[0] << ", " << hit[0].hdata[1]
+               << endl;
+	  jout << " pA,tA are " << pA << ", " << tA << endl;
+	  jout << endl;
+        }
+ 
+        if (nomc2coda == 0) {
+	  stat = mc2codaWrite(eventID,nhits,(struct coda_hit_info *)&hit[0]);
+	  if (stat != nhits) {
+	    jerr << "?error return from mc2codaWrite() for TAGGER ADC: " 
+                 << stat << endl << endl;
+	    exit(EXIT_FAILURE);
 	  }
+        }
+      }
 
-      cscRef cscTDC      = DTAGMTranslationTDC(dtagmhits[i]);
-	  if(!(cscADC == CSCREF_NULL)){
-		  hitCount++;
-		  nhits=1;
-		  hit[0].hit_id      = hitCount;
-		  hit[0].det_id      = detID;
-		  hit[0].crate_id    = cscTDC.crate;
-		  hit[0].slot_id     = cscTDC.slot;
-		  hit[0].chan_id     = cscTDC.channel;
-		  hit[0].module_id   = F1TDC32;
-		  hit[0].module_mode = 0;
-		  hit[0].nwords      = 1;
-		  hit[0].hdata       = mcData;
-		  hit[0].hdata[0]    = static_cast<double>(t)/F1TDC32tick;
-		  
-		  if(dumphits>1) {
-			jout << endl;
-			jout << " Tagger microscope TDC row,column are " 
-                             << dtagmhits[i]->row << ", " << dtagmhits[i]->column << endl;
-			jout << " c,s,c are " << cscTDC.crate << ", " << cscTDC.slot << ", " << cscTDC.channel << endl;
-			jout << " hdata is: " << hit[0].hdata[0] << endl;
-			jout << " E,t are " << E << ", " << t << endl;
-			jout << endl;
-		  }
-		  
-		  if(nomc2coda==0) {
-			stat = mc2codaWrite(eventID,nhits,(struct coda_hit_info *)&hit[0]);
-			if(stat!=nhits) {
-			  jerr << "?error return from mc2codaWrite() for Tagger TDC: " << stat << endl << endl;
-			  exit(EXIT_FAILURE);
-			}
-		  }
-		}
+      cscRef cscTDC = DTAGMHitTranslationTDC(dtagmhits[i]);
+      if (! (cscADC == CSCREF_NULL)) {
+        hitCount++;
+        nhits=1;
+        hit[0].hit_id      = hitCount;
+        hit[0].det_id      = detID;
+        hit[0].crate_id    = cscTDC.crate;
+        hit[0].slot_id     = cscTDC.slot;
+        hit[0].chan_id     = cscTDC.channel;
+        hit[0].module_id   = F1TDC32;
+        hit[0].module_mode = 0;
+        hit[0].nwords      = 1;
+        hit[0].hdata       = mcData;
+        hit[0].hdata[0]    = static_cast<double>(t)/F1TDC32tick;
+ 
+        if (dumphits > 1) {
+	  jout << endl;
+	  jout << " Tagger microscope TDC row,column are " 
+               << dtagmhits[i]->row << ", " << dtagmhits[i]->column << endl;
+	  jout << " c,s,c are " << cscTDC.crate << ", " << cscTDC.slot 
+               << ", " << cscTDC.channel << endl;
+	  jout << " hdata is: " << hit[0].hdata[0] << endl;
+	  jout << " t is " << t << endl;
+	  jout << endl;
+        }
+  
+        if (nomc2coda == 0) {
+	  stat = mc2codaWrite(eventID,nhits,(struct coda_hit_info *)&hit[0]);
+	  if (stat != nhits) {
+	    jerr << "?error return from mc2codaWrite() for Tagger TDC: " 
+                 << stat << endl << endl;
+	    exit(EXIT_FAILURE);
+	  }
+        }
+      }
     }
   }
-  if((dumphits>=1)&&(hc>0)) {
+  if ((dumphits >= 1) && (hc > 0)) {
     jout << endl << "Tagger microscope hits: " << hc << endl << endl;
   }
 
+  // DTAGH - FADC250 and F1TDC32 (60 ps)
+  vector<const DTAGHHit*> dtaghhits;
+  eventLoop->Get(dtaghhits);
+  sort(dtaghhits.begin(),dtaghhits.end(),compareDTAGHHits);
 
+  hc=0;
+  for (i=0; i < dtaghhits.size(); i++) {
+    if (dtaghhits[i]->npix_fadc > 0 && 
+        ((dtaghhits[i]->t*1000 > tMin && dtaghhits[i]->t*1000 < trigTime) ||
+         (dtaghhits[i]->time_fadc*1000 > tMin &&
+          dtaghhits[i]->time_fadc*1000 < trigTime)) )
+    {
+      uint32_t pA = dtaghhits[i]->npix_fadc + 2500;       // in SiPM pixels
+      uint32_t t = dtaghhits[i]->t*1000 - tMin;           // in ps
+      uint32_t tA = dtaghhits[i]->time_fadc*1000 - tMin;  // in ps
+
+      if (noroot == 0)
+        taghEnergies->Fill(dtaghhits[i]->npix_fadc);
+      if (noroot == 0)
+        taghTimes->Fill(dtaghhits[i]->time_fadc-tMin/1000);
+
+      cscRef cscADC = DTAGHHitTranslationADC(dtaghhits[i]);
+      if (! (cscADC == CSCREF_NULL)) {
+        hc++;
+        hitCount++;
+        nhits=1;
+        hit[0].hit_id      = hitCount;
+        hit[0].det_id      = detID;
+        hit[0].crate_id    = cscADC.crate;
+        hit[0].slot_id     = cscADC.slot;
+        hit[0].chan_id     = cscADC.channel;
+        hit[0].module_id   = FADC250;
+        hit[0].module_mode = FADC250_MODE_IP;
+        hit[0].nwords      = 2;
+        hit[0].hdata       = mcData;
+        hit[0].hdata[0]    = pA;   // in SiPM pixels
+        hit[0].hdata[1]    = static_cast<double>(tA)/FADC250tick;
+        if (pA > 0x7ffff)
+          cerr << "pA too large for tagger hodoscope: " << pA << endl;
+  
+        if (dumphits > 1) {
+	  jout << endl;
+	  jout << " Tagger hodoscope ADC counter_id is " 
+               << dtaghhits[i]->counter_id << endl;
+	  jout << " c,s,c are " << cscADC.crate << ", " << cscADC.slot << ", "
+               << cscADC.channel << endl;
+	  jout << " hdata is: " << hit[0].hdata[0] << ", " << hit[0].hdata[1]
+               << endl;
+	  jout << " pA,tA are " << pA << ", " << tA << endl;
+	  jout << endl;
+        }
+ 
+        if (nomc2coda == 0) {
+	  stat = mc2codaWrite(eventID,nhits,(struct coda_hit_info *)&hit[0]);
+	  if (stat != nhits) {
+	    jerr << "?error return from mc2codaWrite() for TAGGER ADC: " 
+                 << stat << endl << endl;
+	    exit(EXIT_FAILURE);
+	  }
+        }
+      }
+
+      cscRef cscTDC = DTAGHHitTranslationTDC(dtaghhits[i]);
+      if (! (cscADC == CSCREF_NULL)) {
+        hitCount++;
+        nhits=1;
+        hit[0].hit_id      = hitCount;
+        hit[0].det_id      = detID;
+        hit[0].crate_id    = cscTDC.crate;
+        hit[0].slot_id     = cscTDC.slot;
+        hit[0].chan_id     = cscTDC.channel;
+        hit[0].module_id   = F1TDC32;
+        hit[0].module_mode = 0;
+        hit[0].nwords      = 1;
+        hit[0].hdata       = mcData;
+        hit[0].hdata[0]    = static_cast<double>(t)/F1TDC32tick;
+ 
+        if (dumphits > 1) {
+	  jout << endl;
+	  jout << " Tagger hodoscope TDC counter_id is " 
+               << dtaghhits[i]->counter_id << endl;
+	  jout << " c,s,c are " << cscTDC.crate << ", " << cscTDC.slot 
+               << ", " << cscTDC.channel << endl;
+	  jout << " hdata is: " << hit[0].hdata[0] << endl;
+	  jout << " t is " << t << endl;
+	  jout << endl;
+        }
+  
+        if (nomc2coda == 0) {
+	  stat = mc2codaWrite(eventID,nhits,(struct coda_hit_info *)&hit[0]);
+	  if (stat != nhits) {
+	    jerr << "?error return from mc2codaWrite() for Tagger TDC: " 
+                 << stat << endl << endl;
+	    exit(EXIT_FAILURE);
+	  }
+        }
+      }
+    }
+  }
+  if ((dumphits >= 1) && (hc > 0)) {
+    jout << endl << "Tagger hodoscope hits: " << hc << endl << endl;
+  }
 
   // close event
-  if(nomc2coda==0) {
+  if (nomc2coda == 0) {
     int nwords = mc2codaCloseEvent(eventID);
     if(nwords<0) {
-      jerr << "?error return from mc2codaCloseEVent(): " << nwords << endl << endl;
+      jerr << "?error return from mc2codaCloseEVent(): " << nwords 
+           << endl << endl;
       exit(EXIT_FAILURE);
     }
   }
-
 
   // write event
   pthread_mutex_lock(&rawMutex);
   chan->write(eventID->evbuf);
   pthread_mutex_unlock(&rawMutex);
 
-
-  // not needed, using reset instead
-  // free event
-  // if(nomc2coda==0) {
-  //   mc2codaFreeEvent(eventID);
-  // }
-
-
-  // done
   return NOERROR;
 }
 
@@ -1790,14 +1911,12 @@ cscRef JEventProcessor_rawevent::DSTHitTranslationTDC(const DSCHit* hit) const {
 
 
 cscRef JEventProcessor_rawevent::DTAGMHitTranslationTDC(const DTAGMHit* hit) const {
-  // HDGeant always puts 0 for "row". Translation table has values 1-5 with summed columns being 1.
-  // Add 1 to row for now to make it 1 corresponding to the one value the simulation produces.
-  // Also, the HDGeant simulation of tagger hits uses an old design with 128 columns.
-  // We force those in range here by placing them all in column 100.
-  if( hit->column > 100) return CSCREF_NULL;
-  string s = "tagmtdc::" + lexical_cast(hit->row+1) +":" + lexical_cast(hit->column);
-  if(cscMap.count(s)<=0)jerr << "?unknown map entry " << s << endl;
-  return(cscMap[s]);
+  if ( hit->column > 102)
+    return CSCREF_NULL;
+  string s = "tagmtdc::" + lexical_cast(hit->row) +":" + lexical_cast(hit->column);
+  if (cscMap.count(s) <= 0)
+    jerr << "?unknown map entry " << s << endl;
+  return cscMap[s];
 }
 
 
@@ -1805,12 +1924,38 @@ cscRef JEventProcessor_rawevent::DTAGMHitTranslationTDC(const DTAGMHit* hit) con
 
 
 cscRef JEventProcessor_rawevent::DTAGMHitTranslationADC(const DTAGMHit* hit) const {
-  // HDGeant always puts 0 for "row". Translation table has values 1-5 with summed columns being 1.
-  // Add 1 to row for now to make it 1 corresponding to the one value the simulation produces.
-  if( hit->column > 100) return CSCREF_NULL;
-  string s = "tagmadc::" + lexical_cast(hit->row+1) +":" + lexical_cast(hit->column);
-  if(cscMap.count(s)<=0)jerr << "?unknown map entry " << s << endl;
-  return(cscMap[s]);
+  if( hit->column > 102)
+    return CSCREF_NULL;
+  string s = "tagmadc::" + lexical_cast(hit->row) +":" + lexical_cast(hit->column);
+  if (cscMap.count(s) <= 0)
+    jerr << "?unknown map entry " << s << endl;
+  return cscMap[s];
+}
+
+
+//----------------------------------------------------------------------------
+
+
+cscRef JEventProcessor_rawevent::DTAGHHitTranslationTDC(const DTAGHHit* hit) const {
+  if ( hit->counter_id > 274)
+    return CSCREF_NULL;
+  string s = "taghtdc::" + lexical_cast(hit->counter_id);
+  if (cscMap.count(s) <= 0)
+    jerr << "?unknown map entry " << s << endl;
+  return cscMap[s];
+}
+
+
+//----------------------------------------------------------------------------
+
+
+cscRef JEventProcessor_rawevent::DTAGHHitTranslationADC(const DTAGHHit* hit) const {
+  if( hit->counter_id > 274)
+    return CSCREF_NULL;
+  string s = "tagmadc::" + lexical_cast(hit->counter_id);
+  if (cscMap.count(s) <= 0)
+    jerr << "?unknown map entry " << s << endl;
+  return cscMap[s];
 }
 
 

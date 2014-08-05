@@ -33,7 +33,7 @@
 #include <START_COUNTER/DSCHit.h>
 #include <TOF/DTOFHit.h>
 #include <TAGGER/DTAGMHit.h>
-#include <TAGGER/DTAGFHit.h>
+#include <TAGGER/DTAGHHit.h>
 
 
 using namespace std;
@@ -97,8 +97,8 @@ class JEventProcessor_rawevent : public jana::JEventProcessor {
                 cscRef DTAGMHitTranslationADC(const DTAGMHit* hit) const;
                 cscRef DTAGMHitTranslationTDC(const DTAGMHit* hit) const;
 
-                cscRef DTAGFHitTranslationADC(const DTAGFHit* hit) const;
-                cscRef DTAGFHitTranslationTDC(const DTAGFHit* hit) const;
+                cscRef DTAGHHitTranslationADC(const DTAGHHit* hit) const;
+                cscRef DTAGHHitTranslationTDC(const DTAGHHit* hit) const;
 };
 
 #endif // _JEventProcessor_rawevent_
