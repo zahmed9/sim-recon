@@ -26,6 +26,7 @@
 #include "START_COUNTER/DSCHit.h"
 #include "TRACKING/DTrackTimeBased.h"
 #include "TRIGGER/DMCTrigger.h"
+#include "PID/DRFTime.h"
 
 using namespace std;
 using namespace jana;

@@ -236,6 +236,10 @@ jerror_t DEventSourceHDDM::GetObjects(JEvent &event, JFactory_base *factory)
    // Get name of data class we're trying to extract
    string dataClassName = factory->GetDataClassName();
 
+   if (dataClassName == "DRFTime")
+      return Extract_DRFTime(record, 
+                     dynamic_cast<JFactory<DRFTime>*>(factory), loop);
+
    if (dataClassName == "DTAGMHit")
       return Extract_DTAGMHit(record, 
                      dynamic_cast<JFactory<DTAGMHit>*>(factory), tag);
@@ -367,6 +371,51 @@ jerror_t DEventSourceHDDM::GetObjects(JEvent &event, JFactory_base *factory)
    return OBJECT_NOT_AVAILABLE;
 }
 
+//------------------
+// Extract_DRFTime
+//------------------
+jerror_t DEventSourceHDDM::Extract_DRFTime(hddm_s::HDDM *record,
+                                   JFactory<DRFTime> *factory, JEventLoop* locEventLoop)
+{
+   if (factory==NULL)
+      return OBJECT_NOT_AVAILABLE;
+   string tag = (factory->Tag())? factory->Tag() : "";
+
+   vector<DRFTime*> locRFTimes;
+
+   // loop over RF-time records
+   const hddm_s::RFtimeList &rftimes = record->getRFtimes();
+   hddm_s::RFtimeList::iterator iter;
+   for (iter = rftimes.begin(); iter != rftimes.end(); ++iter)
+	{
+      if (iter->getJtag() != tag)
+         continue;
+      DRFTime *locRFTime = new DRFTime;
+		locRFTime->dTime = iter->getTsync();
+		locRFTime->dTimeVariance = 0.0015; //1.5ps
+		locRFTimes.push_back(locRFTime);
+	}
+
+	if(locRFTimes.empty())
+	{
+		//See if MC data. If so, generate the DRFTime object here (not in input file)
+		// https://halldweb1.jlab.org/wiki/index.php/How_HDGeant_defines_time-zero_for_physics_events
+		vector<const DMCThrown*> locMCThrowns;
+		locEventLoop->Get(locMCThrowns);
+		if(!locMCThrowns.empty())
+		{
+		   DRFTime *locRFTime = new DRFTime;
+			locRFTime->dTime = 0.0;
+			locRFTime->dTimeVariance = 0.0;
+			locRFTimes.push_back(locRFTime);
+		}
+	}
+
+   // Copy into factories
+   factory->CopyTo(locRFTimes);
+
+   return NOERROR;
+}
 
 //------------------
 // Extract_DMCTrackHit

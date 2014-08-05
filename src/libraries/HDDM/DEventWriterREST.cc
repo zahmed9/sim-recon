@@ -94,6 +94,15 @@ bool DEventWriterREST::Write_RESTEvent(JEventLoop* locEventLoop,
       }
    }
 
+   // push any DRFTime objects to the output record
+   std::vector<const DRFTime*> rftimes;
+   locEventLoop->Get(rftimes);
+   for (size_t i=0; i < rftimes.size(); i++)
+   {
+      hddm_r::RFtimeList rf = res().addRFtimes(1);
+      rf().setTsync(rftimes[i]->dTime);
+   }
+
    // push any DTAGMHit objects to the output record
    std::vector<const DTAGMHit*> microtags;
    locEventLoop->Get(microtags);

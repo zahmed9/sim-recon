@@ -32,6 +32,7 @@
 #include <TOF/DTOFPoint.h>
 #include <TRIGGER/DMCTrigger.h>
 #include <DANA/DApplication.h>
+#include <PID/DRFTime.h>
 
 #include <DMatrix.h>
 #include <TMath.h>
@@ -54,6 +55,8 @@ class DEventSourceREST:public JEventSource
 		
    jerror_t Extract_DMCReaction(hddm_r::HDDM *record,
                     JFactory<DMCReaction> *factory, JEventLoop* locEventLoop);
+   jerror_t Extract_DRFTime(hddm_r::HDDM *record,
+                    JFactory<DRFTime> *factory, JEventLoop* locEventLoop);
    jerror_t Extract_DBeamPhoton(hddm_r::HDDM *record,
                     JFactory<DBeamPhoton> *factory,
                     JEventLoop *eventLoop);

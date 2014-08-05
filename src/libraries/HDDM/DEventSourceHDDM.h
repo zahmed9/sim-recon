@@ -57,6 +57,7 @@ using namespace std;
 #include <CERE/DCereHit.h>
 #include <RICH/DRichHit.h>
 #include <RICH/DRichTruthHit.h>
+#include <PID/DRFTime.h>
 #include <DANA/DApplication.h>
 
 class DEventSourceHDDM:public JEventSource
@@ -81,6 +82,7 @@ class DEventSourceHDDM:public JEventSource
       jerror_t GetCCALTruthHits(hddm_s::HDDM *record, vector<DMCTrackHit*>& data);
       jerror_t GetSCTruthHits(hddm_s::HDDM *record, vector<DMCTrackHit*>& data);
 
+	   jerror_t Extract_DRFTime(hddm_s::HDDM *record, JFactory<DRFTime> *factory, JEventLoop* locEventLoop);
       jerror_t Extract_DBCALTruthShower(hddm_s::HDDM *record, JFactory<DBCALTruthShower> *factory, string tag);
       jerror_t Extract_DBCALTruthCell(hddm_s::HDDM *record, JFactory<DBCALTruthCell> *factory, string tag);
       jerror_t Extract_DBCALSiPMHit(hddm_s::HDDM *record, JFactory<DBCALSiPMHit> *factory, string tag);

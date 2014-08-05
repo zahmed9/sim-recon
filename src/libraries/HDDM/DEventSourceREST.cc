@@ -165,6 +165,10 @@ jerror_t DEventSourceREST::GetObjects(JEvent &event, JFactory_base *factory)
       return Extract_DMCReaction(record,
                      dynamic_cast<JFactory<DMCReaction>*>(factory), locEventLoop);
    }
+   if (dataClassName =="DRFTime") {
+      return Extract_DRFTime(record,
+                     dynamic_cast<JFactory<DRFTime>*>(factory), locEventLoop);
+   }
    if (dataClassName =="DBeamPhoton") {
       return Extract_DBeamPhoton(record,
                      dynamic_cast<JFactory<DBeamPhoton>*>(factory),
@@ -212,13 +216,6 @@ jerror_t DEventSourceREST::GetObjects(JEvent &event, JFactory_base *factory)
       return Extract_DDetectorMatches(locEventLoop, record,
                      dynamic_cast<JFactory<DDetectorMatches>*>(factory));
    }
-#if 0
-   // one day we will need a class to hold RF timing information
-   if (dataClassName =="DRFTime") {
-      return Extract_DRFTime(record,
-                     dynamic_cast<JFactory<DRFTime>*>(factory));
-   }
-#endif
 
    return OBJECT_NOT_AVAILABLE;
 }
@@ -284,6 +281,52 @@ jerror_t DEventSourceREST::Extract_DMCReaction(hddm_r::HDDM *record,
    
    // Copy into factories
    factory->CopyTo(dmcreactions);
+
+   return NOERROR;
+}
+
+//------------------
+// Extract_DRFTime
+//------------------
+jerror_t DEventSourceREST::Extract_DRFTime(hddm_r::HDDM *record,
+                                   JFactory<DRFTime> *factory, JEventLoop* locEventLoop)
+{
+   if (factory==NULL)
+      return OBJECT_NOT_AVAILABLE;
+   string tag = (factory->Tag())? factory->Tag() : "";
+
+   vector<DRFTime*> locRFTimes;
+
+   // loop over RF-time records
+   const hddm_r::RFtimeList &rftimes = record->getRFtimes();
+   hddm_r::RFtimeList::iterator iter;
+   for (iter = rftimes.begin(); iter != rftimes.end(); ++iter)
+	{
+      if (iter->getJtag() != tag)
+         continue;
+      DRFTime *locRFTime = new DRFTime;
+		locRFTime->dTime = iter->getTsync();
+		locRFTime->dTimeVariance = 0.0015; //1.5ps
+		locRFTimes.push_back(locRFTime);
+	}
+
+	if(locRFTimes.empty())
+	{
+		//See if MC data. If so, generate the DRFTime object here (not in input file)
+		// https://halldweb1.jlab.org/wiki/index.php/How_HDGeant_defines_time-zero_for_physics_events
+		vector<const DMCThrown*> locMCThrowns;
+		locEventLoop->Get(locMCThrowns);
+		if(!locMCThrowns.empty())
+		{
+		   DRFTime *locRFTime = new DRFTime;
+			locRFTime->dTime = 0.0;
+			locRFTime->dTimeVariance = 0.0;
+			locRFTimes.push_back(locRFTime);
+		}
+	}
+
+   // Copy into factories
+   factory->CopyTo(locRFTimes);
 
    return NOERROR;
 }
