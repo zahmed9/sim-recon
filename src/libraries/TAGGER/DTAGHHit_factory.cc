@@ -30,7 +30,6 @@ const int DTAGHHit_factory::k_counter_noisy;
 jerror_t DTAGHHit_factory::init(void)
 {
    // initialize calibration constants
-   fadc_pulse_window_size = 1;
    fadc_a_scale = 0;
    fadc_t_scale = 0;
    tdc_t_scale = 0;
@@ -53,7 +52,6 @@ jerror_t DTAGHHit_factory::init(void)
 jerror_t DTAGHHit_factory::brun(jana::JEventLoop *eventLoop, int runnumber)
 {
    /// set the base conversion scales
-   fadc_pulse_window_size = 16;  // (tbd)
    fadc_a_scale    = 1.1;        // pixels per count
    fadc_t_scale    = 0.0625;     // ns per count
    tdc_t_scale     = 0.0600;     // ns per count
@@ -124,7 +122,7 @@ jerror_t DTAGHHit_factory::evnt(JEventLoop *loop, int eventnumber)
       // Apply calibration constants
       double A = digihit->pulse_integral;
       double T = digihit->pulse_time;
-      A -= pedestal * fadc_pulse_window_size;
+      A -= pedestal * digihit->nsamples_integral;
       hit->npix_fadc = A * fadc_a_scale * fadc_gains[counter];
       hit->time_fadc = T * fadc_t_scale - tdc_time_offsets[counter];
 
