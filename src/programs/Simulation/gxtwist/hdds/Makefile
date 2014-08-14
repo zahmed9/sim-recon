@@ -1,6 +1,6 @@
 OS_RELEASE = $(shell $(HALLD_HOME)/src/BMS/osrelease.pl)
 
-HDDS_GEANT = $(HDDS_HOME)/bin/$(OS_RELEASE)/hdds-geant
+HDDS_GEANT = $(HDDS_HOME)/$(OS_RELEASE)/bin/hdds-geant
 
 HDDS_SCHEMA = HDDS-1_0.xsd
 
