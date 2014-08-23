@@ -84,8 +84,68 @@ class XMLmaker
    ~XMLmaker() {};
 
    void writeXML(const XString& s);
-   void constructXML(xstream::xdr::istream& ifx, DOMElement* el,
+   void constructXML(xstream::xdr::istream *ifx, DOMElement* el,
                      int size, int depth);
+};
+
+class istreambuffer : public std::streambuf {
+ public:
+   istreambuffer(char* buffer, std::streamsize bufferLength) {
+      setg(buffer, buffer, buffer + bufferLength);
+   }
+
+   std::streampos tellg() {
+      return gptr() - eback();
+   }
+
+   void seekg(std::streampos pos) {
+      reset();
+      gbump(pos);
+   }
+
+   int size() {
+      return egptr() - gptr();
+   }
+
+   void reset() {
+      char *gbegin = eback();
+      char *gend = egptr();
+      setg(gbegin, gbegin, gend);
+   }
+
+   char *getbuf() {
+      return eback();
+   }
+};
+
+class ostreambuffer : public std::streambuf {
+ public:
+   ostreambuffer(char* buffer, std::streamsize bufferLength) {
+      setp(buffer, buffer + bufferLength);
+   }
+
+   std::streampos tellp() {
+      return pptr() - pbase();
+   }
+
+   void seekp(std::streampos pos) {
+      reset();
+      pbump(pos);
+   }
+
+   int size() {
+      return pptr() - pbase();
+   }
+
+   void reset() {
+      char *pbegin = pbase();
+      char *pend = epptr();
+      setp(pbegin, pend);
+   }
+
+   char *getbuf() {
+      return pbase();
+   }
 };
 
 void usage()
@@ -256,9 +316,8 @@ int main(int argC, char* argV[])
 
    int event_buffer_size;
    char *event_buffer = new char[event_buffer_size = 1000000];
-   std::istringstream iss;
-   iss.rdbuf()->pubsetbuf(event_buffer,event_buffer_size);
-   xstream::xdr::istream ifx(iss.rdbuf());
+   istreambuffer *isbuf = new istreambuffer(event_buffer,event_buffer_size);
+   xstream::xdr::istream *ifx = new xstream::xdr::istream(isbuf);
    int integrity_check_mode = 0;
    int compression_mode = 0;
    while (reqcount && ifs->good())
@@ -270,8 +329,8 @@ int main(int argC, char* argV[])
       if (ifs->eof()) {
          break;
       }
-      iss.seekg(0);
-      ifx >> tsize;
+      isbuf->reset();
+      *ifx >> tsize;
 #ifdef VERBOSE_HDDM_LOGGING
       XString tnameS(rootEl->getTagName());
       std::cerr << "hddm-xml : tag " << S(tnameS)
@@ -285,9 +344,9 @@ int main(int argC, char* argV[])
       else if (tsize == 1) {
          int size, format, flags;
          ifs->read(event_buffer+4,4);
-         ifx >> size;
+         *ifx >> size;
          ifs->read(event_buffer+8,size);
-         ifx >> format >> flags;
+         *ifx >> format >> flags;
          int compression_flags = flags & 0xf0;
          int integrity_flags = flags & 0x0f;
          if (size == 8 && format == 0 && compression_flags == 0x00) {
@@ -347,11 +406,13 @@ int main(int argC, char* argV[])
          continue;
       }
       else if (tsize+4 > event_buffer_size) {
+         delete ifx;
+         delete isbuf;
          char *new_buffer = new char[event_buffer_size = tsize+1000];
-         iss.rdbuf()->pubsetbuf(new_buffer,event_buffer_size);
+         isbuf = new istreambuffer(new_buffer,event_buffer_size);
+         ifx = new xstream::xdr::istream(isbuf);
          memcpy(new_buffer,event_buffer,4);
-         iss.seekg(0);
-         ifx >> tsize;
+         *ifx >> tsize;
          delete event_buffer;
          event_buffer = new_buffer;
       }
@@ -360,9 +421,8 @@ int main(int argC, char* argV[])
 
       if (integrity_check_mode == 1) {
          char crcbuf[10];
-         std::istringstream sstr;
-         xstream::xdr::istream xstr(sstr);
-         sstr.rdbuf()->pubsetbuf(crcbuf,10);
+         istreambuffer sbuf(crcbuf,10);
+         xstream::xdr::istream xstr(&sbuf);
          unsigned int recorded_crc;
          ifs->read(crcbuf,4);
          xstr >> recorded_crc;
@@ -386,7 +446,7 @@ int main(int argC, char* argV[])
          {
             DOMElement* contEl = (DOMElement*) cont;
             int size;
-            ifx >> size;
+            *ifx >> size;
 #ifdef VERBOSE_HDDM_LOGGING
             XString cnameS(contEl->getTagName());
             std::cerr << "hddm-xml : top-level tag " << S(cnameS)
@@ -445,7 +505,7 @@ void XMLmaker::writeXML(const XString& s)
  * at entry the buffer pointer bp points the the word after the word count
  */
 
-void XMLmaker::constructXML(xstream::xdr::istream& ifx,
+void XMLmaker::constructXML(xstream::xdr::istream *ifx,
                             DOMElement* el, int size, int depth)
 {
    XString tagS(el->getTagName());
@@ -455,7 +515,7 @@ void XMLmaker::constructXML(xstream::xdr::istream& ifx,
              atoi(S(repS));
    if (explicit_repeat_count && rep > 1)
    {
-      ifx >> rep;
+      *ifx >> rep;
       size -= 4;
    }
 
@@ -478,49 +538,49 @@ void XMLmaker::constructXML(xstream::xdr::istream& ifx,
          if (typeS == "int")
          {
             int32_t value;
-	    ifx >> value;
+	    *ifx >> value;
             size -= 4;
             attrStr << " " << nameS << "=\"" << value << "\"";
          }
 	 else if (typeS == "long")
          {
             int64_t value;
-            ifx >> value;
+            *ifx >> value;
             size -= 8;
             attrStr << " " << nameS << "=\"" << value << "\"";
          }
          else if (typeS == "float")
          {
             float value;
-            ifx >> value;
+            *ifx >> value;
             size -= 4;
             attrStr << " " << nameS << "=\"" << value << "\"";
          }
          else if (typeS == "double")
          {
             double value;
-            ifx >> value;
+            *ifx >> value;
             size -= 8;
             attrStr << " " << nameS << "=\"" << value << "\"";
          }
          else if (typeS == "boolean")
          {
             bool_t value;
-            ifx >> value;
+            *ifx >> value;
             size -= 4;
             attrStr << " " << nameS << "=\"" << value << "\"";
          }
          else if (typeS == "Particle_t")
          {
             int32_t value;
-            ifx >> value;
+            *ifx >> value;
             size -= 4;
             attrStr << " " << nameS << "=\"" << ParticleType((Particle_t)value) << "\"";
          }
          else if (typeS == "string" || typeS == "anyURI")
          {
             std::string value;
-            ifx >> value;
+            *ifx >> value;
             int strsize = value.size();
             size -= strsize + 4 + ((strsize % 4)? 4-(strsize % 4) : 0);
             attrStr << " " << nameS << "=\"" << value << "\"";
@@ -555,7 +615,7 @@ void XMLmaker::constructXML(xstream::xdr::istream& ifx,
          {
             DOMElement* contEl = (DOMElement*) cont;
             int csize;
-            ifx >> csize;
+            *ifx >> csize;
             size -= 4;
 #ifdef VERBOSE_HDDM_LOGGING
             XString cnameS(contEl->getTagName());
