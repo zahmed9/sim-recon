@@ -877,6 +877,17 @@ jerror_t JEventSource_EVIO::GetObjects(JEvent &event, JFactory_base *factory)
 		JObject *hit_obj = hit_objs[i];
 		hit_objs_by_type[hit_obj->className()].push_back(hit_obj);
 	}
+	
+	// In order for the janadot plugin to properly display the callgraph, we need to
+	// make entries for each of the object types that we generated from data in the file.
+	// Actually, we need to do it for all of the data objects we supply, but if any objects
+	// are emulated (e.g. Df250PulseIntegral) they need to be added differently so the correct
+	// dependence is shown. The first step is to add entries for all of the hit objects we
+	// actually did find in the file. Do that here.
+	map<string, vector<JObject*> >::iterator hoiter;
+	for(hoiter=hit_objs_by_type.begin(); hoiter!=hit_objs_by_type.end(); hoiter++){
+		AddSourceObjectsToCallStack(loop, hoiter->first); 
+	}
 
 	// Optionally generate Df250PulseIntegral and Df250PulseTime objects from Df250WindowRawData objects. 
 	if(EMULATE_PULSE_INTEGRAL_MODE && (hit_objs_by_type["Df250PulseIntegral"].size()==0)){
@@ -887,8 +898,13 @@ jerror_t JEventSource_EVIO::GetObjects(JEvent &event, JFactory_base *factory)
 		if(pp_objs.size() != 0) hit_objs_by_type["Df250PulsePedestal"] = pp_objs;
 
 		vector<JObject*> pi_objs;
-		EmulateDf250PulseIntergral(hit_objs_by_type["Df250WindowRawData"], pi_objs);
+		EmulateDf250PulseIntegral(hit_objs_by_type["Df250WindowRawData"], pi_objs);
 		if(pi_objs.size() != 0) hit_objs_by_type["Df250PulseIntegral"] = pi_objs;
+		
+		// Add entries to JANA's callstack to indicate correct relationship of emulated objects
+		if(pt_objs.size() != 0) AddEmulatedObjectsToCallStack(loop, "Df250PulseTime", "Df250WindowRawData");
+		if(pp_objs.size() != 0) AddEmulatedObjectsToCallStack(loop, "Df250PulsePedestal", "Df250WindowRawData");
+		if(pi_objs.size() != 0) AddEmulatedObjectsToCallStack(loop, "Df250PulseIntegral", "Df250WindowRawData");
 
 		// Make PulseTime, PulseIntegral, and PulsePedestal objects associated objects of one another
 		// We need to cast the pointers as DDAQAddress types for the LinkAssociationsWithPulseNumber
@@ -913,9 +929,14 @@ jerror_t JEventSource_EVIO::GetObjects(JEvent &event, JFactory_base *factory)
 		if(pp_objs.size() != 0) hit_objs_by_type["Df125PulsePedestal"] = pp_objs;
 
 		vector<JObject*> pi_objs;
-		EmulateDf125PulseIntergral(hit_objs_by_type["Df125WindowRawData"], pi_objs);
+		EmulateDf125PulseIntegral(hit_objs_by_type["Df125WindowRawData"], pi_objs);
 		if(pi_objs.size() != 0) hit_objs_by_type["Df125PulseIntegral"] = pi_objs;	
 		
+		// Add entries to JANA's callstack to indicate correct relationship of emulated objects
+		if(pt_objs.size() != 0) AddEmulatedObjectsToCallStack(loop, "Df125PulseTime", "Df125WindowRawData");
+		if(pp_objs.size() != 0) AddEmulatedObjectsToCallStack(loop, "Df125PulsePedestal", "Df125WindowRawData");
+		if(pi_objs.size() != 0) AddEmulatedObjectsToCallStack(loop, "Df125PulseIntegral", "Df125WindowRawData");
+
 		// Make PulseTime and PulseIntegral objects associated objects of one another
 		// We need to cast the pointers as DDAQAddress types for the LinkAssociationsWithPulseNumber
 		// tmeplated method to work.
@@ -928,6 +949,16 @@ jerror_t JEventSource_EVIO::GetObjects(JEvent &event, JFactory_base *factory)
 		LinkAssociations(da_pt_objs, da_pi_objs);
 		LinkAssociations(da_pt_objs, da_pp_objs);
 		LinkAssociations(da_pi_objs, da_pp_objs);
+	}
+	
+	// Now, add data objects to call stack for the classes we can provide, but for which
+	// there are no objects for this event. Again, this is so janadot will display things
+	// properly.
+	set<string>::iterator siter;
+	for(siter=event_source_data_types.begin(); siter!=event_source_data_types.end(); siter++){
+		if(hit_objs_by_type.find(*siter) == hit_objs_by_type.end()){
+			AddSourceObjectsToCallStack(loop, *siter);
+		}
 	}
 		
 	// Initially, the F250, F125 firmware does not include the
@@ -1011,6 +1042,7 @@ jerror_t JEventSource_EVIO::GetObjects(JEvent &event, JFactory_base *factory)
 			else if(dataClassName == "Df125WindowRawData")    checkSourceFirst = ((JFactory<Df125WindowRawData   >*)fac)->GetCheckSourceFirst();
 			else if(dataClassName == "DF1TDCHit")             checkSourceFirst = ((JFactory<DF1TDCHit            >*)fac)->GetCheckSourceFirst();
 			else if(dataClassName == "DF1TDCTriggerTime")     checkSourceFirst = ((JFactory<DF1TDCTriggerTime    >*)fac)->GetCheckSourceFirst();
+			else if(dataClassName == "DCAEN1290TDCHit")       checkSourceFirst = ((JFactory<DCAEN1290TDCHit      >*)fac)->GetCheckSourceFirst();
 
 			if(checkSourceFirst) {
 				fac->Set_evnt_called();
@@ -1049,9 +1081,54 @@ jerror_t JEventSource_EVIO::GetObjects(JEvent &event, JFactory_base *factory)
 }
 
 //----------------
-// EmulateDf250PulseIntergral
+// AddSourceObjectsToCallStack
 //----------------
-void JEventSource_EVIO::EmulateDf250PulseIntergral(vector<JObject*> &wrd_objs, vector<JObject*> &pi_objs)
+void JEventSource_EVIO::AddSourceObjectsToCallStack(JEventLoop *loop, string className)
+{
+	/// This is used to give information to JANA regarding the origin of objects
+	/// that *should* come from the source. We add them in explicitly because
+	/// the file may not have any, but factories may ask for them. We want those
+	/// links to indicate that the "0" objects in the factory came from the source
+	/// so that janadot draws these objects correctly.
+
+	JEventLoop::call_stack_t cs;
+	cs.caller_name = "<ignore>"; // tells janadot this object wasn't actually requested by anybody
+	cs.caller_tag = "";
+	cs.callee_name = className;
+	cs.callee_tag = "";
+	cs.start_time = 0.0;
+	cs.end_time = 0.0;
+	cs.data_source = JEventLoop::DATA_FROM_SOURCE;
+//*	loop->AddToCallStack(cs);
+}
+
+//----------------
+// AddEmulatedObjectsToCallStack
+//----------------
+void JEventSource_EVIO::AddEmulatedObjectsToCallStack(JEventLoop *loop, string caller, string callee)
+{
+	/// This is used to give information to JANA regarding the relationship and
+	/// origin of some of these data objects. This is really just needed so that
+	/// the janadot program can be used to produce the correct callgraph. Because
+	/// of how this plugin works, JANA can't record the correct call stack (at
+	/// least not easily!) Therefore, we have to give it a little help here.
+
+	JEventLoop::call_stack_t cs;
+	cs.caller_name = caller;
+	cs.callee_name = callee;
+	cs.data_source = JEventLoop::DATA_FROM_SOURCE;
+//*	loop->AddToCallStack(cs);
+	cs.callee_name = cs.caller_name;
+	cs.caller_name = "<ignore>";
+	cs.data_source = JEventLoop::DATA_FROM_FACTORY;
+//*	loop->AddToCallStack(cs);
+}
+
+
+//----------------
+// EmulateDf250PulseIntegral
+//----------------
+void JEventSource_EVIO::EmulateDf250PulseIntegral(vector<JObject*> &wrd_objs, vector<JObject*> &pi_objs)
 {
 	uint32_t pulse_number = 0;
 	uint32_t quality_factor = 0;
@@ -1073,14 +1150,14 @@ void JEventSource_EVIO::EmulateDf250PulseIntergral(vector<JObject*> &wrd_objs, v
 			if (samplesvector[c_samp] > F250_THRESHOLD) {
 				first_sample_over_threshold = c_samp;
 				sample_height = samplesvector[c_samp];
-				if(VERBOSE>4) evioout << " EmulateDf250PulseIntergral: object " << i << "  found value over " << F250_THRESHOLD << " at samp " 
+				if(VERBOSE>4) evioout << " EmulateDf250PulseIntegral: object " << i << "  found value over " << F250_THRESHOLD << " at samp " 
 						      << c_samp << " with value " << samplesvector[c_samp] <<endl;
 				break;
 			}
 		}
 		// if no threshold crossing, don't process further
 		if (first_sample_over_threshold == 0) {
-		  	if(VERBOSE>4) evioout << " EmulateDf250PulseIntergral: object " << i << " found no values over " << F250_THRESHOLD <<endl;
+		  	if(VERBOSE>4) evioout << " EmulateDf250PulseIntegral: object " << i << " found no values over " << F250_THRESHOLD <<endl;
 			continue;
 		}
 
@@ -1094,7 +1171,7 @@ void JEventSource_EVIO::EmulateDf250PulseIntergral(vector<JObject*> &wrd_objs, v
 		// calculate integral from relevant samples
 		uint32_t start_sample = first_sample_over_threshold - F250_NSB;
 		uint32_t end_sample = first_sample_over_threshold + F250_NSA - 1;
-		if (start_sample < 0) start_sample=0;
+		if (F250_NSB > first_sample_over_threshold) start_sample=0;
 		if (end_sample > nsamples) end_sample=nsamples;
 		for (uint32_t c_samp=start_sample; c_samp<end_sample; c_samp++) {
 			signalsum += samplesvector[c_samp];
@@ -1119,9 +1196,9 @@ void JEventSource_EVIO::EmulateDf250PulseIntergral(vector<JObject*> &wrd_objs, v
 }
 
 //----------------
-// EmulateDf125PulseIntergral
+// EmulateDf125PulseIntegral
 //----------------
-void JEventSource_EVIO::EmulateDf125PulseIntergral(vector<JObject*> &wrd_objs, vector<JObject*> &pi_objs)
+void JEventSource_EVIO::EmulateDf125PulseIntegral(vector<JObject*> &wrd_objs, vector<JObject*> &pi_objs)
 {
 	uint16_t ped_samples=20;
 	uint32_t pulse_number = 0;
@@ -1232,6 +1309,7 @@ void JEventSource_EVIO::EmulateDf250PulseTime(vector<JObject*> &wrd_objs, vector
 		// find the adjacent samples that straddle the VMID crossing
 		for (uint32_t c_samp=0; c_samp<nsamples; c_samp++) {
 			if (samplesvector[c_samp] > VMID) {
+				if(c_samp==0) c_samp++; // prevent indexing array out of bounds
 				VN2 = samplesvector[c_samp];
 				VN1 = samplesvector[c_samp-1];
 				mid_sample = c_samp-1;
@@ -2499,7 +2577,7 @@ void JEventSource_EVIO::ParseF1TDCBank(int32_t rocid, const uint32_t* &iptr, con
 	/// This code is based on the document F1TDC_V2_V3_4_29_14.pdf obtained from:
 	/// https://coda.jlab.org/wiki/index.php/JLab_Module_Manuals
 
-	if(VERBOSE>0) evioout << "  Entering ParseF1TDCBank" << endl;
+	if(VERBOSE>0) evioout << "  Entering ParseF1TDCBank (rocid=" << rocid << ")" << endl;
 
 	const uint32_t *istart = iptr;
 	
@@ -2588,7 +2666,7 @@ void JEventSource_EVIO::ParseF1TDCBank(int32_t rocid, const uint32_t* &iptr, con
 					itrigger_f1header     = ((*iptr)>>16) & 0x3F;
 					trig_time_f1header    = ((*iptr)>> 7) & 0x1FF;
 					if(VERBOSE>5) evioout << "      Found F1 header: chip=" << chip_f1header << " chan=" << chan_on_chip_f1header << " itrig=" << itrigger_f1header << " trig_time=" << trig_time_f1header << endl;
-					if( itrigger_f1header != (itrigger & 0x3F)) throw JException("Trigger number in F1 header word does not match Event header word!");
+					//if( itrigger_f1header != (itrigger & 0x3F)) throw JException("Trigger number in F1 header word does not match Event header word!");
 					break;
 				case 0xB8000000: // F1 Data
 					chip         = (*iptr>>19) & 0x07;
