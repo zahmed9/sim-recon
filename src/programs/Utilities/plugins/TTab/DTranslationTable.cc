@@ -194,6 +194,14 @@ void DTranslationTable::ApplyTranslationTable(JEventLoop *loop) const
 
 	if(VERBOSE>0) ttout << "Entering ApplyTranslationTable:" << endl;
 	
+	// If the JANA call stack is being recorded, then temporarily disable it
+	// so calls we make to loop->Get() here are ignored. The reason we do this
+	// is because this routine is called while already in a loop->Get() call
+	// so JANA will treat all other loop->Get() calls we make as being dependencies
+	// of the loop->Get() call that we are already in. (Confusing eh?) 
+//*	bool record_call_stack = loop->GetCallStackRecordingStatus();
+//*	if(record_call_stack) loop->DisableCallStackRecording();
+	
 	// Containers to hold all of the detector-specific "Digi"
 	// objects. Once filled, these will be copied to the
 	// respective factories at the end of this method.
@@ -411,6 +419,25 @@ void DTranslationTable::ApplyTranslationTable(JEventLoop *loop) const
 	CopyToFactory(loop, vtagh);
 	CopyToFactory(loop, vtaghtdc);
 
+	// Add to JANA's call stack some entries to make janadot draw something reasonable
+	// Unfortunately, this is just us telling JANA the relationship as defined here.
+	// It is not derived from the above code which would guarantee the declared relationsips
+	// are correct. That would just be too complicated given how that code works.
+//*	if(record_call_stack){
+		// re-enable call stack recording
+//*		loop->EnableCallStackRecording();
+
+		AddToCallStack(loop, "DBCALDigiHit"      , "Df250PulseIntegral");
+		AddToCallStack(loop, "DBCALTDCDigiHit"   , "DF1TDCHit");
+		AddToCallStack(loop, "DCDCDigiHit"       , "Df125PulseIntegral");
+		AddToCallStack(loop, "DFCALDigiHit"      , "Df250PulseIntegral");
+		AddToCallStack(loop, "DFDCCathodeDigiHit", "Df125PulseIntegral");
+		AddToCallStack(loop, "DFDCWireDigiHit"   , "DF1TDCHit");
+		AddToCallStack(loop, "DSCDigiHit"        , "Df250PulseIntegral");
+		AddToCallStack(loop, "DSCTDCDigiHit"     , "DF1TDCHit");
+		AddToCallStack(loop, "DTOFDigiHit"       , "Df250PulseIntegral");
+		AddToCallStack(loop, "DTOFTDCDigiHit"    , "DCAEN1290TDCHit");		
+//*	}
 }
 
 //---------------------------------
@@ -615,6 +642,180 @@ DTOFTDCDigiHit*  DTranslationTable::MakeTOFTDCDigiHit(const TOFIndex_t &idx, con
 	h->end   = idx.end;
 
 	return h;
+}
+
+//---------------------------------
+// GetDetectorIndex
+//---------------------------------
+const DTranslationTable::DChannelInfo &DTranslationTable::GetDetectorIndex(const csc_t &in_daq_index) const
+{
+    map<DTranslationTable::csc_t, DTranslationTable::DChannelInfo>::const_iterator detector_index_itr = TT.find(in_daq_index);
+    if(detector_index_itr == TT.end()) { 
+	stringstream ss_err;
+	ss_err << "Could not find detector channel in Translaton Table: "
+	       << "rocid = " << in_daq_index.rocid
+	       << "slot = " << in_daq_index.slot
+	       << "channel = " << in_daq_index.channel;
+	throw JException(ss_err.str());
+    } 
+
+    return detector_index_itr->second;
+}
+
+//---------------------------------
+// GetDAQIndex
+//---------------------------------
+const DTranslationTable::csc_t &DTranslationTable::GetDAQIndex(const DChannelInfo &in_channel) const
+{
+    map<DTranslationTable::csc_t, DTranslationTable::DChannelInfo>::const_iterator tt_itr = TT.begin();
+
+    // search through the whole Table to find the key that corresponds to our detector channel
+    // this is not terribly efficient - linear in the size of the table
+    bool found = false;
+    for(; tt_itr != TT.end(); tt_itr++) {
+	const DTranslationTable::DChannelInfo &det_channel = tt_itr->second;
+	if( det_channel.det_sys == in_channel.det_sys ) {
+	    switch( in_channel.det_sys ) {
+	    case DTranslationTable::BCAL:
+		if( det_channel.bcal == in_channel.bcal ) 
+		    found = true;
+		break;
+	    case DTranslationTable::CDC:
+		if( det_channel.cdc == in_channel.cdc ) 
+		    found = true;
+		break;
+	    case DTranslationTable::FCAL:
+		if( det_channel.fcal == in_channel.fcal ) 
+		    found = true;
+		break;
+	    case DTranslationTable::FDC_CATHODES:
+		if( det_channel.fdc_cathodes == in_channel.fdc_cathodes ) 
+		    found = true;
+		break;
+	    case DTranslationTable::FDC_WIRES:
+		if( det_channel.fdc_wires == in_channel.fdc_wires ) 
+		    found = true;
+		break;
+	    case DTranslationTable::PS:
+		if( det_channel.ps == in_channel.ps ) 
+		    found = true;
+		break;
+	    case DTranslationTable::PSC:
+		if( det_channel.psc == in_channel.psc )
+		    found = true;
+		break;
+	    case DTranslationTable::SC:
+		if( det_channel.sc == in_channel.sc )
+		    found = true;
+		break;
+	    case DTranslationTable::TAGH:
+		if( det_channel.tagh == in_channel.tagh )
+		    found = true;
+		break;
+	    case DTranslationTable::TAGM:
+		if( det_channel.tagm == in_channel.tagm )
+		    found = true;
+		break;
+	    case DTranslationTable::TOF:
+		if( det_channel.tof == in_channel.tof )
+		    found = true;
+		break;
+	    default:
+		jerr << "DTranslationTable::GetDAQIndex(): Invalid detector type = " << in_channel.det_sys << endl;
+	    }
+	}
+
+	if(found)
+	    break;
+    }
+    
+    if(tt_itr == TT.end()) { 
+	stringstream ss_err;
+	ss_err << "Could not find DAQ channel in Translaton Table:  "
+	       << Channel2Str(in_channel) << endl;
+	throw JException(ss_err.str());
+    }
+
+    return tt_itr->first;
+}
+
+//----------------
+// Channel2Str
+//----------------
+string DTranslationTable::Channel2Str(const DChannelInfo &in_channel) const
+{
+    stringstream ss;
+    
+    switch( in_channel.det_sys ) {
+    case DTranslationTable::BCAL:
+	    ss << "module = " << in_channel.bcal.module << " layer = " << in_channel.bcal.layer 
+	       << " sector = " << in_channel.bcal.sector << " end = " << in_channel.bcal.end;
+	    break;
+    case DTranslationTable::CDC:
+	    ss << "ring = " << in_channel.cdc.ring << " straw = " << in_channel.cdc.straw;
+	    break;
+    case DTranslationTable::FCAL:
+	    ss << "row = " << in_channel.fcal.row << " column = " << in_channel.fcal.col;
+	    break;
+    case DTranslationTable::FDC_CATHODES:
+	    ss << "package = " << in_channel.fdc_cathodes.package
+	       << " chamber = " << in_channel.fdc_cathodes.chamber
+	       << " view = " << in_channel.fdc_cathodes.view
+	       << " strip = " << in_channel.fdc_cathodes.strip 
+	       << " strip type = " << in_channel.fdc_cathodes.strip_type;
+	    break;
+    case DTranslationTable::FDC_WIRES:
+	    ss << "package = " << in_channel.fdc_wires.package
+	       << " chamber = " << in_channel.fdc_wires.chamber
+	       << " wire = " << in_channel.fdc_wires.wire;
+	    break;
+    case DTranslationTable::PS:
+	    ss << "side = " << in_channel.ps.side << " id = " << in_channel.ps.id;
+	    break;
+    case DTranslationTable::PSC:
+	    ss << "id = " << in_channel.psc.id;
+	    break;
+    case DTranslationTable::SC:
+	    ss << "sector = " << in_channel.sc.sector;
+	    break;
+    case DTranslationTable::TAGH:
+	    ss << "id = " << in_channel.tagh.id;
+	    break;
+    case DTranslationTable::TAGM:
+	    ss << "row = " << in_channel.tagm.row << " column = " << in_channel.tagm.col;
+	    break;
+    case DTranslationTable::TOF:
+	    ss << "plane = " << in_channel.tof.plane << " bar = " << in_channel.tof.bar
+	       << " end = " << in_channel.tof.end;
+	    break;
+    default:
+	    ss << "Unknown detector type" << endl;
+    }   
+
+    return ss.str();
+}
+
+//----------------
+// AddToCallStack
+//----------------
+void DTranslationTable::AddToCallStack(JEventLoop *loop, string caller, string callee) const
+{
+	/// This is used to give information to JANA regarding the relationship and
+	/// origin of some of these data objects. This is really just needed so that
+	/// the janadot program can be used to produce the correct callgraph. Because
+	/// of how this plugin works, JANA can't record the correct call stack (at
+	/// least not easily!) Therefore, we have to give it a little help here.
+
+	JEventLoop::call_stack_t cs;
+	cs.start_time = cs.end_time = 0.0;
+	cs.caller_name = caller;
+	cs.callee_name = callee;
+	cs.data_source = JEventLoop::DATA_FROM_CACHE;
+//*	loop->AddToCallStack(cs);
+	cs.callee_name = cs.caller_name;
+	cs.caller_name = "<ignore>";
+	cs.data_source = JEventLoop::DATA_FROM_FACTORY;
+//*	loop->AddToCallStack(cs);
 }
 
 //----------------------------------------------------------------------------
@@ -978,6 +1179,7 @@ void EndElement(void *userData, const char *xmlname) {
 
 
 //--------------------------------------------------------------------------
+
 
 
 
