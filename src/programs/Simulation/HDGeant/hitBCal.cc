@@ -86,8 +86,8 @@ extern float BGGATE1;
 extern float BGGATE2;
 
 
-static float THRESH_MEV        = 1.;
-static float TWO_HIT_RESOL   = 50.;
+static float THRESH_MEV       = 1.;
+static float TWO_HIT_RESOL    = 50.;
 static int   MAX_HITS         = 100;
 
 binTree_t* barrelEMcalTree = 0;
@@ -99,7 +99,7 @@ static int initialized = 0;
 static double ATTEN_LENGTH = 300.0;
 static double C_EFFECTIVE = 16.75;
 static double SiPM_tbin_width = 0.100;
-static double atten_full_length = exp(-390.0/ATTEN_LENGTH); // attenuation factor for length of full BCAL module
+static double atten_full_length = exp(-390.0/ATTEN_LENGTH);
 static double THRESH_ATTENUATED_GEV = (THRESH_MEV/1000.0)*atten_full_length;
 static int NHISTO_BINS = 0; 
 
@@ -108,7 +108,8 @@ extern s_HDDM_t* thisInputEvent;
 // Prevent name mangling so these routines keep their
 // C-style names in the object
 extern "C"{
-   void recordbcalentry_(int *mech, int *itra, int*istak, int *ipart, float *vect, float *getot);
+   void recordbcalentry_(int *mech, int *itra, int *istak,
+                         int *ipart, float *vect, float *getot);
    void hitBarrelEMcal (float xin[4], float xout[4],
                         float pin[5], float pout[5], float dEsum,
                         int track, int stack, int history, int ipart);
@@ -130,8 +131,17 @@ class bcal_index{
          kDown
       };
       
-      bcal_index(unsigned int module, unsigned int layer, unsigned int sector, unsigned int incident_id, EndType end):
-         module(module),layer(layer),sector(sector),incident_id(incident_id),end(end){}
+      bcal_index(unsigned int module, 
+                 unsigned int layer,
+                 unsigned int sector,
+                 unsigned int incident_id,
+                 EndType end)
+      : module(module),
+        layer(layer),
+        sector(sector),
+        incident_id(incident_id),
+        end(end)
+      {}
    
       unsigned int module;
       unsigned int layer;
@@ -140,22 +150,32 @@ class bcal_index{
       EndType end;
       
       bool operator<(const bcal_index &idx) const{
-         if(module<idx.module)return true;
-         if(module>idx.module)return false;
-         if(layer<idx.layer)return true;
-         if(layer>idx.layer)return false;
-         if(sector<idx.sector)return true;
-         if(sector>idx.sector)return false;
-         if(incident_id<idx.incident_id)return true;
-         if(incident_id>idx.incident_id)return false;
-         if((end==kUp) && (idx.end==kDown))return true;
+         if (module < idx.module)
+            return true;
+         if (module > idx.module)
+            return false;
+         if (layer < idx.layer)
+            return true;
+         if (layer > idx.layer)
+            return false;
+         if (sector < idx.sector)
+            return true;
+         if (sector > idx.sector)
+            return false;
+         if (incident_id < idx.incident_id)
+            return true;
+         if (incident_id > idx.incident_id)
+            return false;
+         if ((end == kUp) && (idx.end == kDown))
+            return true;
          return false;
       }
 
       // For debugging
       string ToString(void) const {
          stringstream ss;
-         ss << "module:"<<module<<" layer:"<<layer<<" sector:"<<sector<<" incident_id:"<<incident_id;
+         ss << "module:" << module << " layer:" << layer
+            << " sector:" << sector << " incident_id:" << incident_id;
          return ss.str();
       }
 };
@@ -191,14 +211,28 @@ map<bcal_index, double> E_CellTruth;
 // written with each SiPM spectrum.
 class IncidentParticle_t{
    public:
-      IncidentParticle_t(const float *v, const float getot, int ptype, int track):x(v[0]),y(v[1]),z(v[2]),px(v[3]*v[6]),py(v[4]*v[6]),pz(v[5]*v[6]),E(getot),ptype(ptype),track(track){}
+      IncidentParticle_t(const float *v, const float getot,
+                         int ptype, int track)
+       : x(v[0]), y(v[1]), z(v[2]),
+         px(v[3]*v[6]),py(v[4]*v[6]),pz(v[5]*v[6]),
+         E(getot),ptype(ptype),track(track)
+      {}
       float x,y,z;
       float px, py, pz;
       float E;
       int ptype, track;
-      float dPhi(const IncidentParticle_t &pos){float a=(pos.x*x + pos.y*y)/sqrt((x*x + y*y)*(pos.x*pos.x+pos.y*pos.y)); return a<1.0 ? fabs(acos(a)):0.0;}
-      float dZ(const IncidentParticle_t &pos){return fabs(pos.z-z);}
+      float dPhi(const IncidentParticle_t &pos)
+      {
+         float a=(pos.x*x + pos.y*y)/sqrt((x*x + y*y) *
+                 (pos.x*pos.x + pos.y*pos.y));
+         return (a < 1.0)? fabs(acos(a)) : 0.0;
+      }
+      float dZ(const IncidentParticle_t &pos)
+      {
+         return fabs(pos.z-z);
+      }
 };
+
 #define MAX_INCIDENT_PARTICLES 100
 vector<IncidentParticle_t> BCAL_INCIDENT_PARTICLES;
 int BCAL_INCIDENT_PARTICLE_COUNT = 0;
@@ -219,15 +253,17 @@ DHistogram* GetSiPMHistogram(const bcal_index &idx)
    map<bcal_index, DHistogram*>::iterator iter = SiPMspectra.find(idx);
 
    // If we found it, return immediately
-   if(iter != SiPMspectra.end()) return iter->second;
+   if (iter != SiPMspectra.end())
+      return iter->second;
 
    // If we didn't find it, try getting one from the pool
    DHistogram *h;
-   if(histo_pool.size()>0){
+   if (histo_pool.size() > 0) {
       // Pool has one, take it out to use it
       h = histo_pool.back();
       histo_pool.pop_back();
-   }else{
+   }
+   else {
       // Pool does not have one. Create a new one. This
       // will be pushed onto the pool at the end of the
       // event.
@@ -254,54 +290,62 @@ void initializeBarrelEMcal(void)
    int status = GetConstants("BCAL/bcal_parms", &nvalues, values, strings);    
    if (!status) {
      int ncounter = 0;
-     for (int i=0;i<(int)nvalues;i++){
-       if (!strcmp(strings[i].str,"BCAL_THRESH_MEV")) {
+     for (int i=0; i < (int)nvalues; i++) {
+       if (! strcmp(strings[i].str,"BCAL_THRESH_MEV")) {
          THRESH_MEV  = values[i];
          ncounter++;
        }
-       if (!strcmp(strings[i].str,"BCAL_TWO_HIT_RESOL")) {
+       if (! strcmp(strings[i].str,"BCAL_TWO_HIT_RESOL")) {
          TWO_HIT_RESOL  = values[i];
          ncounter++;
        }
-       if (!strcmp(strings[i].str,"BCAL_MAX_HITS")) {
+       if (! strcmp(strings[i].str,"BCAL_MAX_HITS")) {
          MAX_HITS  = (int)values[i];
          ncounter++;
        }
      }
-     if (ncounter==3){
+     if (ncounter == 3){
        printf("BCAL/bcal_parms: ALL parameters loaded from Data Base\n");
-     } else if (ncounter<3){
-       printf("BCAL/bcal_parms: NOT ALL necessary parameters found in Data Base %d out of 3\n",ncounter);
-     } else {
-       printf("BCAL/bcal_parms: SOME parameters found more than once in Data Base\n");
+     }
+     else if (ncounter < 3) {
+       printf("BCAL/bcal_parms: NOT ALL necessary parameters found in "
+              "Data Base %d out of 3\n",ncounter);
+     }
+     else {
+       printf("BCAL/bcal_parms: SOME parameters found more than once"
+              " in Data Base\n");
      }
    }
 
    // Get parameters from BCAL/mc_parms
    nvalues = 50;
    status = GetConstants("BCAL/mc_parms", &nvalues, values, strings);
-   if (!status) {
+   if (! status) {
      int ncounter = 0;
-     for (int i=0;i<(int)nvalues;i++){
-       if (!strcmp(strings[i].str,"ATTEN_LENGTH")) {
+     for (int i=0; i < (int)nvalues;i ++){
+       if (! strcmp(strings[i].str,"ATTEN_LENGTH")) {
          ATTEN_LENGTH  = values[i];
          ncounter++;
        }
-       if (!strcmp(strings[i].str,"C_EFFECTIVE")) {
+       if (! strcmp(strings[i].str,"C_EFFECTIVE")) {
          C_EFFECTIVE  = values[i];
          ncounter++;
        }
-       if (!strcmp(strings[i].str,"SiPM_tbin_width")) {
+       if (! strcmp(strings[i].str,"SiPM_tbin_width")) {
          SiPM_tbin_width  = values[i];
          ncounter++;
        }
      }
-     if (ncounter==3){
+     if (ncounter == 3){
        printf("BCAL/mc_parms: ALL parameters loaded from Data Base\n");
-     } else if (ncounter<3){
-       printf("BCAL/mc_parms: NOT ALL necessary parameters found in Data Base %d out of 3\n",ncounter);
-     } else {
-       printf("BCAL/mc_parms: SOME parameters found more than once in Data Base\n");
+     } 
+     else if (ncounter < 3) {
+       printf("BCAL/mc_parms: NOT ALL necessary parameters found in "
+              "Data Base %d out of 3\n",ncounter);
+     }
+     else {
+       printf("BCAL/mc_parms: SOME parameters found more than once "
+              "in Data Base\n");
      }
    }
 
@@ -322,19 +366,19 @@ void initializeBarrelEMcal(void)
    // NOTE: We change the values of BGGATE1 and BGGATE2 here, but
    // these are copies of the values used by the FORTRAN code. 
    // Changing them here doesn't change the values used by FORTRAN.
-   if(BGGATE2<=BGGATE1){
+   if (BGGATE2 <= BGGATE1) {
      BGGATE1 = -200.0;
      BGGATE2 = +200.0;
    }
    NHISTO_BINS = (int)floor(0.5 + (BGGATE2 - BGGATE1)/SiPM_tbin_width);
    BGGATE2 = BGGATE1 + SiPM_tbin_width*(double)NHISTO_BINS;
    
-   for(unsigned int imodule=1; imodule<=48; imodule++){
-     for(unsigned int ilayer=1; ilayer<=10; ilayer++){
-         for(unsigned int isector=1; isector<=4; isector++){
-            for(unsigned int incident_id=1; incident_id<=MAX_INCIDENT_PARTICLES; incident_id++){
-              bcal_index idxUp(imodule, ilayer, isector, incident_id, bcal_index::kUp);
-              bcal_index idxDn(imodule, ilayer, isector, incident_id, bcal_index::kDown);
+   for (unsigned int imodule=1; imodule <= 48; imodule++){
+     for (unsigned int ilayer=1; ilayer <= 10; ilayer++){
+         for (unsigned int isector=1; isector <= 4; isector++){
+            for (unsigned int inc=1; inc <= MAX_INCIDENT_PARTICLES; inc++) {
+              bcal_index idxUp(imodule, ilayer, isector, inc, bcal_index::kUp);
+              bcal_index idxDn(imodule, ilayer, isector, inc, bcal_index::kDown);
 
               E_CellTruth[idxUp] = 0.0;
               E_CellTruth[idxDn] = 0.0;
@@ -369,17 +413,17 @@ void recordbcalentry_(int *mech, int *itra, int*istak, int *ipart, float *vect, 
    
    bool add_to_list = true;
    float dPhi, dZ;
-   for(unsigned int i=0; i<BCAL_INCIDENT_PARTICLES.size(); i++){
+   for (unsigned int i=0; i < BCAL_INCIDENT_PARTICLES.size(); i++) {
       
       // Only keep photons and betas 
-      //if(*ipart>3)add_to_list = false;
+      //if (*ipart > 3) add_to_list = false;
       
       dPhi = 1000.0*mypart.dPhi(BCAL_INCIDENT_PARTICLES[i]);
       dZ = mypart.dZ(BCAL_INCIDENT_PARTICLES[i]);
       // if this is within 200 mrad and 30cm of a previously recorded
       // particle entering BCAL, assume it is part of the same shower
       // Also, ignore particles with less than 10MeV total energy.
-      if(dPhi<200.0 && dZ<30.0){
+      if (dPhi < 200.0 && dZ < 30.0) {
          add_to_list = false;
          
          // If this particle has larger total energy than the one
@@ -387,38 +431,54 @@ void recordbcalentry_(int *mech, int *itra, int*istak, int *ipart, float *vect, 
          // would be for the case when a shower sprays from something
          // like the FDC frame so many particles enter the same area
          // but are too close together to be considered separate showers.
-         if(mypart.E>BCAL_INCIDENT_PARTICLES[i].E){
+         if (mypart.E > BCAL_INCIDENT_PARTICLES[i].E) {
             BCAL_INCIDENT_PARTICLES[i] = mypart;
          }
       }
-      if(*getot<0.100)add_to_list = false;
-      if(!add_to_list)break;
+      if (*getot < 0.100)
+         add_to_list = false;
+      if (! add_to_list)
+         break;
    }
-   if(add_to_list){
+   if (add_to_list) {
       BCAL_INCIDENT_PARTICLE_COUNT++;
-//_DBG_<<"*itra = "<<*itra<<"  dPhi="<<dPhi<<" dZ="<<dZ<<endl;
-      if(BCAL_INCIDENT_PARTICLES.size()>=MAX_INCIDENT_PARTICLES){
-         if(!SHOWED_INCIDENT_PARTICLE_LONG_WARNING){
-            cerr<<endl;
-            cerr<<"WARNING: The BCAL records information about certain"<<endl;
-            cerr<<"particles entering it so that information can be used"<<endl;
-            cerr<<"later in mcsmear to properly smear the signals. For"<<endl;
-            cerr<<"this event, more than the maximum number of incident"<<endl;
-            cerr<<"particles has occurred ("<<MAX_INCIDENT_PARTICLES<<") so the list is"<<endl;
-            cerr<<"being truncated to the first "<<MAX_INCIDENT_PARTICLES<<"."<<endl;
-            cerr<<"All of the signal in the BCAL is still being recorded,"<<endl;
-            cerr<<"but the smearing may be off by a few percent for this"<<endl;
-            cerr<<"event. It is probably nothing to worry about. This long"<<endl;
-            cerr<<"message will only appear once and the following line just"<<endl;
-            cerr<<"once per event whenever this occurs."<<endl;
-            cerr<<endl;
+//_DBG_ << "*itra = " << *itra << "  dPhi=" << dPhi << " dZ=" << dZ << endl;
+      if (BCAL_INCIDENT_PARTICLES.size()>=MAX_INCIDENT_PARTICLES) {
+         if (! SHOWED_INCIDENT_PARTICLE_LONG_WARNING) {
+            cerr << endl;
+            cerr << "WARNING: The BCAL records information about certain" 
+                 << endl;
+            cerr << "particles entering it so that information can be used" 
+                 << endl;
+            cerr << "later in mcsmear to properly smear the signals. For" 
+                 << endl;
+            cerr << "this event, more than the maximum number of incident" 
+                 << endl;
+            cerr << "particles has occurred (" << MAX_INCIDENT_PARTICLES 
+                 << ") so the list is" << endl;
+            cerr << "being truncated to the first " << MAX_INCIDENT_PARTICLES
+                 << "." << endl;
+            cerr << "All of the signal in the BCAL is still being recorded,"
+                 << endl;
+            cerr << "but the smearing may be off by a few percent for this"
+                 << endl;
+            cerr << "event. It is probably nothing to worry about. This long" 
+                 << endl;
+            cerr << "message will only appear once and the following line just" 
+                 << endl;
+            cerr << "once per event whenever this occurs." 
+                 << endl << endl;
             SHOWED_INCIDENT_PARTICLE_LONG_WARNING = true;
          }
-         if(!SHOWED_INCIDENT_PARTICLE_SHORT_WARNING){
-            cerr<<__FILE__<<":"<<__LINE__<<" too many particles entering BCAL! Some information will be lost."<<endl;
+         if (! SHOWED_INCIDENT_PARTICLE_SHORT_WARNING){
+            cerr << __FILE__ << ":" << __LINE__ 
+                 << " too many particles entering BCAL! "
+                 << "Some information will be lost."
+                 << endl;
             SHOWED_INCIDENT_PARTICLE_SHORT_WARNING = true;
          }
-      }else{
+      }
+      else {
          BCAL_INCIDENT_PARTICLES.push_back(mypart);
       }
    }
@@ -445,12 +505,12 @@ unsigned int find_incident_id(float *x)
 
    unsigned int closest_id=0;
    float closest_dist2 = 1.0E6;
-   for(unsigned int i=0; i<BCAL_INCIDENT_PARTICLES.size(); i++){
+   for (unsigned int i=0; i<BCAL_INCIDENT_PARTICLES.size(); i++) {
       float dx = x[0] - BCAL_INCIDENT_PARTICLES[i].x;
       float dy = x[1] - BCAL_INCIDENT_PARTICLES[i].y;
       float dz = x[2] - BCAL_INCIDENT_PARTICLES[i].z;
       float dist2 = dx*dx + dy*dy + dz*dz;
-      if(dist2 < closest_dist2){
+      if (dist2 < closest_dist2) {
          closest_dist2 = dist2;
          closest_id = i+1;
       }
@@ -473,7 +533,8 @@ void hitBarrelEMcal (float xin[4], float xout[4],
    float xbcal[3];
    float xHat[] = {1,0,0};
   
-   if(!initialized)initializeBarrelEMcal();
+   if (!initialized)
+      initializeBarrelEMcal();
   
    x[0] = (xin[0] + xout[0])/2;
    x[1] = (xin[1] + xout[1])/2;
@@ -482,14 +543,15 @@ void hitBarrelEMcal (float xin[4], float xout[4],
    transformCoord(x,"global",xlocal,"BCAL");
    transformCoord(xHat,"local",xbcal,"BCAL");
 
-//cout<<"track:"<<track<<" stack:"<<stack<<" history:"<<history<<" ipart:"<<ipart<<endl;
+//cout << "track:" << track << " stack:" << stack << " history:" 
+//     << history << " ipart:" << ipart << endl;
 
    /* Under certain conditions the time in xout[3] will
      be invalid (unusually large). Check for this and
      use only the in time in these cases
    */
-   if(xout[3] > 1.0){
-    t = xin[3] * 1e9;
+   if (xout[3] > 1.0) {
+     t = xin[3] * 1e9;
    }
   
    /* post the hit to the truth tree */
@@ -606,6 +668,7 @@ void hitBarrelEMcal (float xin[4], float xout[4],
    // The data is copied (sparsely) into the HDDM structures in
    // pickBarrelEMcal below (as they are for other the cell hit and
    // truth structures).
+ 
    if (dEsum > 0)
    {
       // We need the incident particle id associated with the current
@@ -622,9 +685,11 @@ void hitBarrelEMcal (float xin[4], float xout[4],
       // start from 1 so if we access the map
 
       // Guarantee a value exists at INCIDENT_ID[track]
-      if(track>=(int)INCIDENT_ID.size())INCIDENT_ID.resize(track+1, 0);
+      if (track >= (int)INCIDENT_ID.size())
+         INCIDENT_ID.resize(track+1, 0);
       int incident_id = INCIDENT_ID[track];
-      if(incident_id==0)incident_id = INCIDENT_ID[track] = find_incident_id(x);
+      if (incident_id == 0)
+         incident_id = INCIDENT_ID[track] = find_incident_id(x);
    
       // Get map index based on layer and sector
       unsigned int sector = getsector_wrapper_();
@@ -682,7 +747,7 @@ s_BarrelEMcal_t* pickBarrelEMcal ()
 #endif
 
    // Return quickly if nothing in BCAL
-   if ((cellCount == 0) && (showerCount == 0) && (spectraCount==0))
+   if (cellCount == 0 && showerCount == 0 && spectraCount == 0)
    {
       return (s_BarrelEMcal_t*)HDDM_NULL;
    }
@@ -715,7 +780,7 @@ s_BarrelEMcal_t* pickBarrelEMcal ()
             if (hits->in[i].E >= THRESH_MEV/1e3)
             {
 #if TESTING_CAL_CONTAINMENT
-  Etotal += hits->in[i].E;
+               Etotal += hits->in[i].E;
 #endif
                if (iok < i)
                {
@@ -770,7 +835,7 @@ s_BarrelEMcal_t* pickBarrelEMcal ()
    box->bcalTruthIncidentParticles = 
              make_s_BcalTruthIncidentParticles(BCAL_INCIDENT_PARTICLES.size());
    box->bcalTruthIncidentParticles->mult = 0;
-   for(unsigned int i=0; i<BCAL_INCIDENT_PARTICLES.size(); i++){
+   for (unsigned int i=0; i < BCAL_INCIDENT_PARTICLES.size(); i++) {
       s_BcalTruthIncidentParticle_t *iphddm = 
                     &box->bcalTruthIncidentParticles->in
                           [box->bcalTruthIncidentParticles->mult++];
@@ -787,7 +852,7 @@ s_BarrelEMcal_t* pickBarrelEMcal ()
 
    // Sparsely copy timing spectra from local variables into HDDM structure
    map<bcal_index, DHistogram*>::iterator iter;
-   for (iter=SiPMspectra.begin(); iter!=SiPMspectra.end(); iter++) {
+   for (iter = SiPMspectra.begin(); iter != SiPMspectra.end(); iter++) {
       const bcal_index &idx = iter->first;
       int module = idx.module;
       int layer = idx.layer;
@@ -828,30 +893,32 @@ s_BarrelEMcal_t* pickBarrelEMcal ()
       if (bin_end >= bin_start && bin_end > 0){
          specs->in[ispec].tstart = h->GetBinLowEdge(bin_start);
          specs->in[ispec].bin_width = h->GetBinWidth();
-         specs->in[ispec].end = (idx.end==bcal_index::kUp ? 0:1);
+         specs->in[ispec].end = (idx.end == bcal_index::kUp)? 0 : 1;
          s_BcalSiPMTruth_t* truth = make_s_BcalSiPMTruth();
          specs->in[ispec].bcalSiPMTruth = truth;
          truth->incident_id = idx.incident_id;
          truth->E = E_CellTruth[idx];
          string vals = "";
          double E_atten_sum = 0.0;
-         for (int ibin=bin_start; ibin<=bin_end; ibin++) {
+         for (int ibin = bin_start; ibin <= bin_end; ibin++) {
             char str[256];
             double dE = h->GetBinContent(ibin);
             E_atten_sum += dE;
             if (dE != 0.0) {
-               sprintf(str, "%3.3f", dE*1000.0); // store in MeV since that cuts down on leading zeros
+               // store in MeV since that cuts down on leading zeros
+               sprintf(str, "%3.3f", dE*1000.0);
                vals += str;
             }
             else {
-               vals += "0"; // lots of zeros are written and this saves space
+               // lots of zeros are written and this saves space
+               vals += "0";
             }
             vals += " ";
          }
 
          if (E_atten_sum >= THRESH_ATTENUATED_GEV) {
             specs->in[ispec].vals = strdup(vals.c_str());
-            box->bcalCells->in[icell].bcalSiPMSpectrums->mult = 1;
+            box->bcalCells->in[icell].bcalSiPMSpectrums->mult = ispec+1;
          }
       }
 
