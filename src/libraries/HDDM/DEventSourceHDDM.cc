@@ -1405,21 +1405,17 @@ jerror_t DEventSourceHDDM::Extract_DBCALTruthCell(hddm_s::HDDM *record,
 
    vector<DBCALTruthCell*> data;
 
-   const hddm_s::BcalCellList &cells = record->getBcalCells();
-   hddm_s::BcalCellList::iterator iter;
-   for (iter = cells.begin(); iter != cells.end(); ++iter) {
-      const hddm_s::BcalTruthHitList &hits = record->getBcalTruthHits();
-      hddm_s::BcalTruthHitList::iterator hiter;
-      for (hiter = hits.begin(); hiter != hits.end(); ++hiter) {
-         DBCALTruthCell *truthcell = new DBCALTruthCell();
-         truthcell->module = hiter->getModule();
-         truthcell->layer  = hiter->getLayer();
-         truthcell->sector = hiter->getSector();
-         truthcell->E      = hiter->getE();
-         truthcell->t      = hiter->getT();
-         truthcell->zLocal = hiter->getZLocal();
-         data.push_back(truthcell);
-      }
+   const hddm_s::BcalTruthHitList &hits = record->getBcalTruthHits();
+   hddm_s::BcalTruthHitList::iterator hiter;
+   for (hiter = hits.begin(); hiter != hits.end(); ++hiter) {
+      DBCALTruthCell *truthcell = new DBCALTruthCell();
+      truthcell->module = hiter->getModule();
+      truthcell->layer  = hiter->getLayer();
+      truthcell->sector = hiter->getSector();
+      truthcell->E      = hiter->getE();
+      truthcell->t      = hiter->getT();
+      truthcell->zLocal = hiter->getZLocal();
+      data.push_back(truthcell);
    }
 
    // Copy into factory
