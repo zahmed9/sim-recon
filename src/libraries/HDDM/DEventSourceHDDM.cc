@@ -1269,7 +1269,7 @@ jerror_t DEventSourceHDDM::Extract_DFDCHit(hddm_s::HDDM *record,
       const hddm_s::FdcCathodeTruthHitList &cths = 
                                            record->getFdcCathodeTruthHits();
       hddm_s::FdcCathodeTruthHitList::iterator ctiter;
-      for (ctiter = cths.begin(); ctiter != cths.end(); ++atiter) {
+      for (ctiter = cths.begin(); ctiter != cths.end(); ++ctiter) {
          DFDCHit* newHit = new DFDCHit();
          newHit->layer   = ctiter->getLayer();
          newHit->module  = ctiter->getModule();
