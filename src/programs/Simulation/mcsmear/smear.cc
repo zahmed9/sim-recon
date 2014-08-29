@@ -147,6 +147,12 @@ extern double STC_PADDLE_THRESHOLD;
 extern double TAGM_TSIGMA;
 extern double TAGH_TSIGMA;
 
+// Tagging counter fADC responses
+extern double TAGM_FADC_TSIGMA;
+extern double TAGH_FADC_TSIGMA;
+extern double TAGM_NPE_PER_GEV;
+extern double TAGH_NPE_PER_GEV;
+
 // Photon-statistics factor for smearing hit energy (from Criss's MC)
 // (copied from DFCALMCResponse_factory.cc 7/2/2009 DL)
 extern double FCAL_PHOT_STAT_COEF;
@@ -826,8 +832,12 @@ void SmearTAGM(hddm_s::HDDM *record)
       for (titer = thits.begin(); titer != thits.end(); ++titer) {
          // smear the time
          double t = titer->getT() + SampleGaussian(TAGM_TSIGMA);
+         double tADC = titer->getT() + SampleGaussian(TAGM_FADC_TSIGMA);
+         double npe = SamplePoisson(titer->getDE() * TAGM_NPE_PER_GEV);
          hddm_s::TaggerHitList hits = iter->addTaggerHits();
          hits().setT(t);
+         hits().setTADC(tADC);
+         hits().setNpe(npe);
       }
 
       if (DROP_TRUTH_HITS)
@@ -849,8 +859,12 @@ void SmearTAGH(hddm_s::HDDM *record)
       for (titer = thits.begin(); titer != thits.end(); ++titer) {
          // smear the time
          double t = titer->getT() + SampleGaussian(TAGH_TSIGMA);
+         double tADC = titer->getT() + SampleGaussian(TAGH_FADC_TSIGMA);
+         double npe = SamplePoisson(titer->getDE() * TAGH_NPE_PER_GEV);
          hddm_s::TaggerHitList hits = iter->addTaggerHits();
          hits().setT(t);
+         hits().setTADC(tADC);
+         hits().setNpe(npe);
       }
 
       if (DROP_TRUTH_HITS)
