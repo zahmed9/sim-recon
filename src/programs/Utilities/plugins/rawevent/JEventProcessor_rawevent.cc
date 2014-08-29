@@ -701,10 +701,10 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
   for(i=0; i<dbcalhits.size(); i++) {
     if((dbcalhits[i]->E>0)&&((dbcalhits[i]->t*1000.)>tMin)&&(dbcalhits[i]->t*1000.<trigTime)) {
 
-      uint32_t E     = dbcalhits[i]->E*(10.0);  // (each fADC count ~ 100keV) (max ~2.5E4)
+      uint32_t E     = dbcalhits[i]->E*(10000.);    // (each fADC count ~ 100keV) (max ~2.5E4)
       uint32_t t     = dbcalhits[i]->t*1000.-tMin;  // in picoseconds
 
-      if(noroot==0)bcalEnergies->Fill(dbcalhits[i]->E*1000.);
+      if(noroot==0)bcalEnergies->Fill(dbcalhits[i]->E*1000000.);
       if(noroot==0)bcalTimes->Fill(dbcalhits[i]->t-tMin/1000);
 
       cscRef cscADC      = DBCALHitTranslationADC(dbcalhits[i]);
@@ -1190,17 +1190,17 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
 
   hc=0;
   for (i=0; i < dtaghhits.size(); i++) {
-    if (dtaghhits[i]->npix_fadc > 0 && 
+    if (dtaghhits[i]->npe_fadc > 0 && 
         ((dtaghhits[i]->t*1000 > tMin && dtaghhits[i]->t*1000 < trigTime) ||
          (dtaghhits[i]->time_fadc*1000 > tMin &&
           dtaghhits[i]->time_fadc*1000 < trigTime)) )
     {
-      uint32_t pA = dtaghhits[i]->npix_fadc + 2500;       // in SiPM pixels
+      uint32_t pA = dtaghhits[i]->npe_fadc + 2500;       // in SiPM pixels
       uint32_t t = dtaghhits[i]->t*1000 - tMin;           // in ps
       uint32_t tA = dtaghhits[i]->time_fadc*1000 - tMin;  // in ps
 
       if (noroot == 0)
-        taghEnergies->Fill(dtaghhits[i]->npix_fadc);
+        taghEnergies->Fill(dtaghhits[i]->npe_fadc);
       if (noroot == 0)
         taghTimes->Fill(dtaghhits[i]->time_fadc-tMin/1000);
 
@@ -1469,7 +1469,7 @@ void JEventProcessor_rawevent::StartElement(void *userData, const char *xmlname,
   int channel = 0;
   string Detector;
   string end;
-  string row,column,module,sector,layer,chan;
+  string id,row,column,module,sector,layer,chan;
   string ring,straw,plane,bar,gPlane,element;
   string package,chamber,view,strip,wire;
 
@@ -1538,6 +1538,8 @@ void JEventProcessor_rawevent::StartElement(void *userData, const char *xmlname,
         channel = atoi(atts[i+1]);
       } else if(strcasecmp(atts[i],"detector")==0) {
         Detector = string(atts[i+1]);
+      } else if(strcasecmp(atts[i],"id")==0) {
+        id = string(atts[i+1]);
       } else if(strcasecmp(atts[i],"row")==0) {
         row = string(atts[i+1]);
       } else if(strcasecmp(atts[i],"column")==0) {
@@ -1699,7 +1701,7 @@ void JEventProcessor_rawevent::StartElement(void *userData, const char *xmlname,
         s = "unknownTagger::";
         jerr << endl << endl << "?startElement...illegal type for TAGH: " << Type << endl << endl;
       }
-      s += row + ":" + column;
+      s += id;
       cscMap[s] = csc;
 
     } else if(detector=="tagm") {
@@ -1717,9 +1719,9 @@ void JEventProcessor_rawevent::StartElement(void *userData, const char *xmlname,
       
     } else if(detector=="psc") {
       if(type=="f1tdcv2") {
-        s = "psctdc::";
+        s = "psctdc::" + id;
       } else if (type=="fadc250") {
-        s = "pscadc::";
+        s = "pscadc::" + id;
       } else {
         s = "unknownPSC::";
         jerr << endl << endl << "?startElement...illegal type for PSC: " << Type << endl << endl;
@@ -1729,7 +1731,7 @@ void JEventProcessor_rawevent::StartElement(void *userData, const char *xmlname,
 
    } else if(detector=="ps") {
       if (type=="fadc250") {
-        s = "psadc::";
+        s = "psadc::" + id;
       } else {
         s = "unknownPS::";
         jerr << endl << endl << "?startElement...illegal type for PS: " << Type << endl << endl;
@@ -1768,7 +1770,7 @@ void JEventProcessor_rawevent::StartElement(void *userData, const char *xmlname,
   }
 
 }
-    
+
 
 //--------------------------------------------------------------------------
 
@@ -1912,9 +1914,9 @@ cscRef JEventProcessor_rawevent::DSTHitTranslationTDC(const DSCHit* hit) const {
 
 
 cscRef JEventProcessor_rawevent::DTAGMHitTranslationTDC(const DTAGMHit* hit) const {
-  if ( hit->column > 102)
+  if ( hit->column > 100)
     return CSCREF_NULL;
-  string s = "tagmtdc::" + lexical_cast(hit->row) +":" + lexical_cast(hit->column);
+  string s = "tagmtdc::" + lexical_cast(hit->row) + ":" + lexical_cast(hit->column);
   if (cscMap.count(s) <= 0)
     jerr << "?unknown map entry " << s << endl;
   return cscMap[s];
@@ -1925,9 +1927,9 @@ cscRef JEventProcessor_rawevent::DTAGMHitTranslationTDC(const DTAGMHit* hit) con
 
 
 cscRef JEventProcessor_rawevent::DTAGMHitTranslationADC(const DTAGMHit* hit) const {
-  if( hit->column > 102)
+  if( hit->column > 100)
     return CSCREF_NULL;
-  string s = "tagmadc::" + lexical_cast(hit->row) +":" + lexical_cast(hit->column);
+  string s = "tagmadc::" + lexical_cast(hit->row) + ":" + lexical_cast(hit->column);
   if (cscMap.count(s) <= 0)
     jerr << "?unknown map entry " << s << endl;
   return cscMap[s];
@@ -1953,7 +1955,7 @@ cscRef JEventProcessor_rawevent::DTAGHHitTranslationTDC(const DTAGHHit* hit) con
 cscRef JEventProcessor_rawevent::DTAGHHitTranslationADC(const DTAGHHit* hit) const {
   if( hit->counter_id > 274)
     return CSCREF_NULL;
-  string s = "tagmadc::" + lexical_cast(hit->counter_id);
+  string s = "taghadc::" + lexical_cast(hit->counter_id);
   if (cscMap.count(s) <= 0)
     jerr << "?unknown map entry " << s << endl;
   return cscMap[s];
