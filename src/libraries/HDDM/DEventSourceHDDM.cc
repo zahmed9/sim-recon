@@ -211,27 +211,27 @@ jerror_t DEventSourceHDDM::GetObjects(JEvent &event, JFactory_base *factory)
       }
    }
 
-	//Get target center
-		//multiple reader threads can access this object: need lock
-	bool locNewRunNumber = false;
-	unsigned int locRunNumber = event.GetRunNumber();
-	LockRead();
-	{
-		locNewRunNumber = (bTargetCenterZMap.find(locRunNumber) == bTargetCenterZMap.end());
-	}
-	UnlockRead();
-	if(locNewRunNumber)
-	{
-		DApplication* dapp = dynamic_cast<DApplication*>(loop->GetJApplication());
-		DGeometry* locGeometry = dapp->GetDGeometry(loop->GetJEvent().GetRunNumber());
-		double locTargetCenterZ = 0.0;
-		locGeometry->GetTargetZ(locTargetCenterZ);
-		LockRead();
-		{
-			bTargetCenterZMap[locRunNumber] = locTargetCenterZ;
-		}
-		UnlockRead();
-	}
+   //Get target center
+      //multiple reader threads can access this object: need lock
+   bool locNewRunNumber = false;
+   unsigned int locRunNumber = event.GetRunNumber();
+   LockRead();
+   {
+      locNewRunNumber = (bTargetCenterZMap.find(locRunNumber) == bTargetCenterZMap.end());
+   }
+   UnlockRead();
+   if(locNewRunNumber)
+   {
+      DApplication* dapp = dynamic_cast<DApplication*>(loop->GetJApplication());
+      DGeometry* locGeometry = dapp->GetDGeometry(loop->GetJEvent().GetRunNumber());
+      double locTargetCenterZ = 0.0;
+      locGeometry->GetTargetZ(locTargetCenterZ);
+      LockRead();
+      {
+         bTargetCenterZMap[locRunNumber] = locTargetCenterZ;
+      }
+      UnlockRead();
+   }
 
    // Get name of data class we're trying to extract
    string dataClassName = factory->GetDataClassName();
@@ -387,29 +387,29 @@ jerror_t DEventSourceHDDM::Extract_DRFTime(hddm_s::HDDM *record,
    const hddm_s::RFtimeList &rftimes = record->getRFtimes();
    hddm_s::RFtimeList::iterator iter;
    for (iter = rftimes.begin(); iter != rftimes.end(); ++iter)
-	{
+   {
       if (iter->getJtag() != tag)
          continue;
       DRFTime *locRFTime = new DRFTime;
-		locRFTime->dTime = iter->getTsync();
-		locRFTime->dTimeVariance = 0.0015; //1.5ps
-		locRFTimes.push_back(locRFTime);
-	}
+      locRFTime->dTime = iter->getTsync();
+      locRFTime->dTimeVariance = 0.0015; //1.5ps
+      locRFTimes.push_back(locRFTime);
+   }
 
-	if(locRFTimes.empty())
-	{
-		//See if MC data. If so, generate the DRFTime object here (not in input file)
-		// https://halldweb1.jlab.org/wiki/index.php/How_HDGeant_defines_time-zero_for_physics_events
-		vector<const DMCThrown*> locMCThrowns;
-		locEventLoop->Get(locMCThrowns);
-		if(!locMCThrowns.empty())
-		{
-		   DRFTime *locRFTime = new DRFTime;
-			locRFTime->dTime = 0.0;
-			locRFTime->dTimeVariance = 0.0;
-			locRFTimes.push_back(locRFTime);
-		}
-	}
+   if(locRFTimes.empty())
+   {
+      //See if MC data. If so, generate the DRFTime object here (not in input file)
+      // https://halldweb1.jlab.org/wiki/index.php/How_HDGeant_defines_time-zero_for_physics_events
+      vector<const DMCThrown*> locMCThrowns;
+      locEventLoop->Get(locMCThrowns);
+      if(!locMCThrowns.empty())
+      {
+         DRFTime *locRFTime = new DRFTime;
+         locRFTime->dTime = 0.0;
+         locRFTime->dTimeVariance = 0.0;
+         locRFTimes.push_back(locRFTime);
+      }
+   }
 
    // Copy into factories
    factory->CopyTo(locRFTimes);
@@ -941,14 +941,14 @@ jerror_t DEventSourceHDDM::Extract_DMCReaction(hddm_s::HDDM *record,
    if (factory == NULL)
       return OBJECT_NOT_AVAILABLE;
    
-	double locTargetCenterZ = 0.0;
-	int locRunNumber = loop->GetJEvent().GetRunNumber();
-	LockRead();
-	{
-		locTargetCenterZ = bTargetCenterZMap[locRunNumber];
-	}
-	UnlockRead();
-	DVector3 locPosition(0.0, 0.0, locTargetCenterZ);
+   double locTargetCenterZ = 0.0;
+   int locRunNumber = loop->GetJEvent().GetRunNumber();
+   LockRead();
+   {
+      locTargetCenterZ = bTargetCenterZMap[locRunNumber];
+   }
+   UnlockRead();
+   DVector3 locPosition(0.0, 0.0, locTargetCenterZ);
 
    vector<DMCReaction*> dmcreactions;
 
@@ -959,7 +959,10 @@ jerror_t DEventSourceHDDM::Extract_DMCReaction(hddm_s::HDDM *record,
       dmcreactions.push_back(mcreaction);
       mcreaction->type = iter->getType();
       mcreaction->weight = iter->getWeight();
-
+      hddm_s::Origin &origin = iter->getVertex().getOrigin();
+      double torig = origin.getT();
+      double zorig = origin.getVz();
+      
       const hddm_s::BeamList &beams = record->getBeams();
       if (beams.size() > 0) {
          hddm_s::Beam &beam = iter->getBeam();
@@ -974,9 +977,7 @@ jerror_t DEventSourceHDDM::Extract_DMCReaction(hddm_s::HDDM *record,
          mcreaction->target.setPID(IDTrack(mcreaction->beam.charge(),
                                            mcreaction->beam.mass()));
          mcreaction->beam.clearErrorMatrix();
-         mcreaction->beam.setT0(0, 0, SYS_NULL);
-         mcreaction->beam.setT1(0, 0, SYS_NULL);
-         mcreaction->beam.setTime(0.0);
+         mcreaction->beam.setTime(torig - (zorig - locTargetCenterZ)/30.0);
       }
       else {
          // fake values for DMCReaction
@@ -987,8 +988,6 @@ jerror_t DEventSourceHDDM::Extract_DMCReaction(hddm_s::HDDM *record,
          mcreaction->beam.setMass(0.0);
          mcreaction->beam.setCharge(0.0);
          mcreaction->beam.clearErrorMatrix();
-         mcreaction->beam.setT0(0, 0, SYS_NULL);
-         mcreaction->beam.setT1(0, 0, SYS_NULL);
          mcreaction->beam.setTime(0.0);
       }
 
@@ -1006,8 +1005,6 @@ jerror_t DEventSourceHDDM::Extract_DMCReaction(hddm_s::HDDM *record,
          mcreaction->target.setPID(IDTrack(mcreaction->target.charge(),
                                            mcreaction->target.mass()));
          mcreaction->target.clearErrorMatrix();
-         mcreaction->target.setT0(0, 0, SYS_NULL);
-         mcreaction->target.setT1(0, 0, SYS_NULL);
          mcreaction->target.setTime(0.0);
       }
       else {
@@ -1019,8 +1016,6 @@ jerror_t DEventSourceHDDM::Extract_DMCReaction(hddm_s::HDDM *record,
          mcreaction->target.setMass(0.0);
          mcreaction->target.setCharge(0.0);
          mcreaction->target.clearErrorMatrix();
-         mcreaction->target.setT0(0, 0, SYS_NULL);
-         mcreaction->target.setT1(0, 0, SYS_NULL);
          mcreaction->target.setTime(0.0);
       }
    }
@@ -1047,18 +1042,18 @@ jerror_t DEventSourceHDDM::Extract_DBeamPhoton(hddm_s::HDDM *record,
    if (factory==NULL)
       return OBJECT_NOT_AVAILABLE;
    if (tag != "MCGEN")
-		return OBJECT_NOT_AVAILABLE;
+      return OBJECT_NOT_AVAILABLE;
 
    vector<const DMCReaction*> dmcreactions;
-	loop->Get(dmcreactions);
+   loop->Get(dmcreactions);
 
    vector<DBeamPhoton*> dbeam_photons;
-	for(size_t loc_i = 0; loc_i < dmcreactions.size(); ++loc_i)
-	{
+   for(size_t loc_i = 0; loc_i < dmcreactions.size(); ++loc_i)
+   {
       DBeamPhoton *beamphoton = new DBeamPhoton;
       *(DKinematicData*)beamphoton = dmcreactions[loc_i]->beam;
       dbeam_photons.push_back(beamphoton);
-	}
+   }
 
    // Copy into factories
    factory->CopyTo(dbeam_photons);
@@ -1114,7 +1109,6 @@ jerror_t DEventSourceHDDM::Extract_DMCThrown(hddm_s::HDDM *record,
          mcthrown->setMass(mass);
          mcthrown->setMomentum(DVector3(px, py, pz));
          mcthrown->setPosition(DVector3(vertex[1], vertex[2], vertex[3]));
-         mcthrown->setT0(vertex[0], 0, SYS_NULL);
          mcthrown->setTime(vertex[0]);
          mcthrown->setCharge(ParticleCharge(piter->getType()));
          data.push_back(mcthrown);
@@ -2160,6 +2154,8 @@ jerror_t DEventSourceHDDM::Extract_DTAGMHit(hddm_s::HDDM *record,
             DTAGMHit *taghit = new DTAGMHit();
             taghit->E = hiter->getE();
             taghit->t = hiter->getT();
+            taghit->npix_fadc = hiter->getNpe();
+            taghit->time_fadc = hiter->getTADC();
             taghit->column = hiter->getColumn();
             taghit->row = hiter->getRow();
             data.push_back(taghit);
@@ -2172,6 +2168,8 @@ jerror_t DEventSourceHDDM::Extract_DTAGMHit(hddm_s::HDDM *record,
             DTAGMHit *taghit = new DTAGMHit();
             taghit->E = hiter->getE();
             taghit->t = hiter->getT();
+            taghit->npix_fadc = hiter->getDE() * 1e5; // ~1e5 pixels/GeV
+            taghit->time_fadc = hiter->getT();
             taghit->column = hiter->getColumn();
             taghit->row = hiter->getRow();
             data.push_back(taghit);
@@ -2214,6 +2212,8 @@ jerror_t DEventSourceHDDM::Extract_DTAGHHit( hddm_s::HDDM *record,
             DTAGHHit *taghit = new DTAGHHit();
             taghit->E = hiter->getE();
             taghit->t = hiter->getT();
+            taghit->npe_fadc = hiter->getNpe();
+            taghit->time_fadc = hiter->getTADC();
             taghit->counter_id = hiter->getCounterId();
             data.push_back(taghit);
          }
@@ -2225,6 +2225,8 @@ jerror_t DEventSourceHDDM::Extract_DTAGHHit( hddm_s::HDDM *record,
             DTAGHHit *taghit = new DTAGHHit();
             taghit->E = hiter->getE();
             taghit->t = hiter->getT();
+            taghit->npe_fadc = hiter->getDE() * 5e5; // ~5e5 pe/GeV
+            taghit->time_fadc = hiter->getT();
             taghit->counter_id = hiter->getCounterId();
             data.push_back(taghit);
          }
