@@ -55,6 +55,8 @@
 #define TAG_T_MAX_NS            +20
 
 float endpoint_energy_GeV = 0;
+float micro_limits_Erange[2];
+float hodo_limits_Erange[2];
 static int micro_nchannels = 102;
 float* micro_channel_Erange = 0;
 static int hodo_nchannels = 274;
@@ -110,10 +112,18 @@ void hitTagger (float xin[4], float xout[4],
       }
       else {
          int i;
+         micro_limits_Erange[0] = 0;
+         micro_limits_Erange[1] = 1;
          for (i=0; i < micro_nchannels; ++i) {
+            if (micro_limits_Erange[0] < micro_channel_Erange[3*i+1])
+               micro_limits_Erange[0] = micro_channel_Erange[3*i+1];
+            if (micro_limits_Erange[1] > micro_channel_Erange[3*i+2])
+               micro_limits_Erange[1] = micro_channel_Erange[3*i+2];
             micro_channel_Erange[3*i+1] *= endpoint_energy_GeV;
             micro_channel_Erange[3*i+2] *= endpoint_energy_GeV;
          }
+         micro_limits_Erange[0] *= endpoint_energy_GeV;
+         micro_limits_Erange[1] *= endpoint_energy_GeV;
       }
    }
  
@@ -137,10 +147,18 @@ void hitTagger (float xin[4], float xout[4],
       }
       else {
          int i;
+         hodo_limits_Erange[0] = 0;
+         hodo_limits_Erange[1] = 1;
          for (i=0; i < hodo_nchannels; ++i) {
+            if (hodo_limits_Erange[0] < hodo_channel_Erange[3*i+1])
+               hodo_limits_Erange[0] = hodo_channel_Erange[3*i+1];
+            if (hodo_limits_Erange[1] > hodo_channel_Erange[3*i+2])
+               hodo_limits_Erange[1] = hodo_channel_Erange[3*i+2];
             hodo_channel_Erange[3*i+1] *= endpoint_energy_GeV;
             hodo_channel_Erange[3*i+2] *= endpoint_energy_GeV;
          }
+         hodo_limits_Erange[0] *= endpoint_energy_GeV;
+         hodo_limits_Erange[1] *= endpoint_energy_GeV;
       }
    }
 
@@ -150,8 +168,9 @@ void hitTagger (float xin[4], float xout[4],
    }
 
    /* look up hit tagger channel, if any */
+   hodo_chan = -1;
    micro_chan = -1;
-   if (E < endpoint_energy_GeV) {
+   if (E < micro_limits_Erange[0] && E > micro_limits_Erange[1]) {
       int i;
       for (i=0; i < micro_nchannels; ++i) {
          if ( E < micro_channel_Erange[3*i+1] &&
@@ -164,8 +183,7 @@ void hitTagger (float xin[4], float xout[4],
          }
       }
    }
-   hodo_chan = -1;
-   if (micro_chan == -1) {
+   else if (E < hodo_limits_Erange[0] && E > hodo_limits_Erange[1]) {
       int i;
       for (i=0; i < hodo_nchannels; ++i) {
          if ( E < hodo_channel_Erange[3*i+1] &&
@@ -223,6 +241,7 @@ void hitTagger (float xin[4], float xout[4],
             hits->in[nhit].bg = track;
             hits->in[nhit].t = t;
             hits->in[nhit].E = E;
+            hits->in[nhit].dE += 3.5e-3; // GeV in SciFi
             hits->mult++;
          }
          else
@@ -277,6 +296,7 @@ void hitTagger (float xin[4], float xout[4],
             hits->in[nhit].bg = track;
             hits->in[nhit].t = t;
             hits->in[nhit].E = E;
+            hits->in[nhit].dE += 5.5e-4; // GeV in hodo scint.
             hits->mult++;
          }
          else
