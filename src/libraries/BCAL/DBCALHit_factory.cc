@@ -24,6 +24,7 @@ jerror_t DBCALHit_factory::init(void)
 {
         a_scale = 0.;
         t_scale = 0.;
+        t_min = 0.;
        
         return NOERROR;
 }
@@ -40,6 +41,7 @@ jerror_t DBCALHit_factory::brun(jana::JEventLoop *eventLoop, int runnumber)
 	//    which corresponds to approximately 22 MeV.  Thus, the factor is 0.1 to get MeV
 	//a_pedestal = 10000;  // default pedestal of 100 ADC units over 100 samples 
 	t_scale    = 0.0625;   // There are 62.5 ps/count from the fADC
+        t_min      = -100.;
 
 	/// Read in calibration constants
 	vector<double> raw_gains;
@@ -104,8 +106,8 @@ jerror_t DBCALHit_factory::evnt(JEventLoop *loop, int eventnumber)
 			E = a_scale * gain * (A - (pedestalpersample * digihit->nsamples_integral));
 		}
 
-		hit->E = E;
-		hit->t = t_scale * (T - GetConstant(time_offsets,digihit));
+		hit->E = E/1000.; // hit->E is in GeV
+		hit->t = t_scale * (T - GetConstant(time_offsets,digihit)) + t_min;
 		
 		hit->AddAssociatedObject(digihit);
 		

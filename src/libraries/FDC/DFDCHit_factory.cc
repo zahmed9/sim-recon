@@ -24,6 +24,7 @@ jerror_t DFDCHit_factory::init(void)
 {
         a_scale = 0.;
 	t_scale = 0.;
+        t_min = 0.;
 	tdc_scale = 0.;
 
   	return NOERROR;
@@ -37,6 +38,7 @@ jerror_t DFDCHit_factory::brun(jana::JEventLoop *eventLoop, int runnumber)
 	/// set the base conversion scales
 	a_scale      = 2.4E4/1.3E5;  // cathodes
 	t_scale      = 8.0/10.0;     // 8 ns/count and integer time is in 1/10th of sample
+        t_min        = -100.;        // ns
 	tdc_scale    = 0.115;        // 115 ps/count
 
 	// reset constants tables
@@ -146,7 +148,7 @@ jerror_t DFDCHit_factory::evnt(JEventLoop *loop, int eventnumber)
 
 		hit->q = a_scale * a_gains[hit->gPlane-1][hit->element-1] 
 		    * (A - a_pedestals[hit->gPlane-1][hit->element-1] );
-		hit->t = t_scale * (T - timing_offsets[hit->gPlane-1][hit->element-1]);
+		hit->t = t_scale * (T - timing_offsets[hit->gPlane-1][hit->element-1]) + t_min;
 		
 		//cerr << "FDC hitL  plane = " << hit->gPlane << "  element = " << hit->element << endl;
 		
@@ -203,7 +205,7 @@ jerror_t DFDCHit_factory::evnt(JEventLoop *loop, int eventnumber)
 
 		// Apply calibration constants here
 		double T = (double)digihit->time;
-		T = tdc_scale * (T - timing_offsets[hit->gPlane-1][hit->element-1]);
+		T = tdc_scale * (T - timing_offsets[hit->gPlane-1][hit->element-1]) + t_min;
 		hit->q = 0.0; // no charge measured for wires in FDC
 		hit->t = T;
 		

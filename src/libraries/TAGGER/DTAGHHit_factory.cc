@@ -22,7 +22,7 @@ const int DTAGHHit_factory::k_counter_good;
 const int DTAGHHit_factory::k_counter_bad;
 const int DTAGHHit_factory::k_counter_noisy;
 
-#define DELTA_T_ADC_TDC_MATCH_NS 4.0
+#define DELTA_T_ADC_TDC_MATCH_NS 10.0
 
 //------------------
 // init
@@ -33,6 +33,7 @@ jerror_t DTAGHHit_factory::init(void)
    fadc_a_scale = 0;
    fadc_t_scale = 0;
    tdc_t_scale = 0;
+   t_min = 0;
 
    // calibration constants stored by counter index
    for (int counter = 0; counter <= TAGH_MAX_COUNTER; ++counter) {
@@ -55,6 +56,7 @@ jerror_t DTAGHHit_factory::brun(jana::JEventLoop *eventLoop, int runnumber)
    fadc_a_scale    = 1.1;        // pixels per count
    fadc_t_scale    = 0.0625;     // ns per count
    tdc_t_scale     = 0.0600;     // ns per count
+   t_min           = -100.;      // ns
 
    jout << "In DTAGHHit_factory, loading constants..." << std::endl;
 
@@ -123,8 +125,8 @@ jerror_t DTAGHHit_factory::evnt(JEventLoop *loop, int eventnumber)
       double A = digihit->pulse_integral;
       double T = digihit->pulse_time;
       A -= pedestal * digihit->nsamples_integral;
-      hit->npix_fadc = A * fadc_a_scale * fadc_gains[counter];
-      hit->time_fadc = T * fadc_t_scale - tdc_time_offsets[counter];
+      hit->npe_fadc = A * fadc_a_scale * fadc_gains[counter];
+      hit->time_fadc = T * fadc_t_scale - tdc_time_offsets[counter] + t_min;
 
       hit->AddAssociatedObject(digihit);
       _data.push_back(hit);
@@ -141,14 +143,14 @@ jerror_t DTAGHHit_factory::evnt(JEventLoop *loop, int eventnumber)
       // Apply calibration constants here
       int counter = digihit->counter_id;
       double T = (double)digihit->time;
-      T = T * tdc_t_scale - tdc_time_offsets[counter];
+      T = T * tdc_t_scale - tdc_time_offsets[counter] + t_min;
 
       // Look for existing hits to see if there is a match
       // or create new one if there is no match
       DTAGHHit *hit = 0;
       for (unsigned int j=0; j < _data.size(); ++j) {
          if (_data[j]->counter_id == counter &&
-             fabs(T - _data[j]->t) < DELTA_T_ADC_TDC_MATCH_NS)
+             fabs(T - _data[j]->time_fadc) < DELTA_T_ADC_TDC_MATCH_NS)
          {
             hit = _data[j];
          }
@@ -160,7 +162,7 @@ jerror_t DTAGHHit_factory::evnt(JEventLoop *loop, int eventnumber)
          double Ehigh = taghGeom.getEhigh(counter);
          hit->E = (Elow + Ehigh)/2;
          hit->time_fadc = 0;
-         hit->npix_fadc = 0;
+         hit->npe_fadc = 0;
          _data.push_back(hit);
       }      
       hit->t = T;

@@ -42,6 +42,7 @@ jerror_t DFCALHit_factory::init(void)
 	// default values
 	a_scale = 0.;
 	t_scale = 0.;
+        t_min = 0;
     
 	return NOERROR;
 }
@@ -60,6 +61,7 @@ jerror_t DFCALHit_factory::brun(jana::JEventLoop *eventLoop, int runnumber)
 	/// set the base conversion scales
 	a_scale    = 4.0E1/2.5E5; 
 	t_scale    = 0.0625;   // 62.5 ps/count
+	t_min      = -100.;    // ns
 
 	/// Read in calibration constants
 	vector< double > raw_gains;
@@ -142,7 +144,7 @@ jerror_t DFCALHit_factory::evnt(JEventLoop *loop, int eventnumber)
 		double A = (double)digihit->pulse_integral;
 		double T = (double)digihit->pulse_time;
 		hit->E = a_scale * gains[hit->row][hit->column] * (A - pedestal);
-		hit->t = t_scale * (T - time_offsets[hit->row][hit->column]);
+		hit->t = t_scale * (T - time_offsets[hit->row][hit->column]) + t_min;
 
 		// Get position of blocks on front face. (This should really come from
 		// hdgeant directly so the poisitions can be shifted in mcsmear.)

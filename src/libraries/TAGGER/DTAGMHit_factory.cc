@@ -21,7 +21,7 @@ const int DTAGMHit_factory::k_fiber_good;
 const int DTAGMHit_factory::k_fiber_bad;
 const int DTAGMHit_factory::k_fiber_noisy;
 
-#define DELTA_T_ADC_TDC_MATCH_NS 4.0
+#define DELTA_T_ADC_TDC_MATCH_NS 10.0
 
 //------------------
 // init
@@ -32,6 +32,7 @@ jerror_t DTAGMHit_factory::init(void)
    fadc_a_scale = 0;
    fadc_t_scale = 0;
    tdc_t_scale = 0;
+   t_min = 0;
 
    // calibration constants stored in row, column format
    for (int row = 0; row <= TAGM_MAX_ROW; ++row) {
@@ -56,6 +57,7 @@ jerror_t DTAGMHit_factory::brun(jana::JEventLoop *eventLoop, int runnumber)
    fadc_a_scale    = 1.1;        // pixels per count
    fadc_t_scale    = 0.0625;     // ns per count
    tdc_t_scale     = 0.0600;     // ns per count
+   t_min           = -100.;      // ns
 
    jout << "In DTAGMHit_factory, loading constants..." << std::endl;
 
@@ -127,7 +129,7 @@ jerror_t DTAGMHit_factory::evnt(JEventLoop *loop, int eventnumber)
       double T = digihit->pulse_time;
       A -= pedestal * digihit->nsamples_integral;
       hit->npix_fadc = A * fadc_a_scale * fadc_gains[row][column];
-      hit->time_fadc = T * fadc_t_scale - tdc_time_offsets[row][column];
+      hit->time_fadc = T * fadc_t_scale - tdc_time_offsets[row][column] + t_min;
 
       hit->AddAssociatedObject(digihit);
       _data.push_back(hit);
@@ -145,14 +147,14 @@ jerror_t DTAGMHit_factory::evnt(JEventLoop *loop, int eventnumber)
       int row = digihit->row;
       int column = digihit->column;
       double T = (double)digihit->time;
-      T = T * tdc_t_scale - tdc_time_offsets[row][column];
+      T = T * tdc_t_scale - tdc_time_offsets[row][column] + t_min;
 
       // Look for existing hits to see if there is a match
       // or create new one if there is no match
       DTAGMHit *hit = 0;
       for (unsigned int j=0; j < _data.size(); ++j) {
          if (_data[j]->row == row && _data[j]->column == column &&
-             fabs(T - _data[j]->t) < DELTA_T_ADC_TDC_MATCH_NS)
+             fabs(T - _data[j]->time_fadc) < DELTA_T_ADC_TDC_MATCH_NS)
          {
             hit = _data[j];
          }

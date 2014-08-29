@@ -26,6 +26,7 @@ jerror_t DSCHit_factory::init(void)
 
 	a_scale    = 0.;
 	t_scale    = 0.;
+        t_min      = 0.;
 	tdc_scale  = 0.;
 
 	return NOERROR;
@@ -39,6 +40,7 @@ jerror_t DSCHit_factory::brun(jana::JEventLoop *eventLoop, int runnumber)
 	/// set the base conversion scales
 	a_scale    = 2.0E-2/5.2E-5; 
 	t_scale    = 0.0625;   // 62.5 ps/count
+        t_min      = -100.;    // ns
 	tdc_scale  = 0.060;    // 60 ps/count
 
 	/// Read in calibration constants
@@ -116,7 +118,7 @@ jerror_t DSCHit_factory::evnt(JEventLoop *loop, int eventnumber)
 		double T = (double)digihit->pulse_time;
 		// Sectors are numbered from 1-30
 		hit->dE = a_scale * a_gains[hit->sector-1] * (A - a_pedestals[hit->sector-1]);
-		hit->t = t_scale * (T - adc_time_offsets[hit->sector-1]);
+		hit->t = t_scale * (T - adc_time_offsets[hit->sector-1]) + t_min;
 		hit->sigma_t = 4.0;    // ns (what is the fADC time resolution?)
 		hit->has_fADC = true;
 		hit->has_TDC  = false; // will get set to true below if appropriate
@@ -146,7 +148,7 @@ jerror_t DSCHit_factory::evnt(JEventLoop *loop, int eventnumber)
 
 		// Apply calibration constants here
 		double T = (double)digihit->time;
-		T = tdc_scale * (T - tdc_time_offsets[digihit->sector-1]);
+		T = tdc_scale * (T - tdc_time_offsets[digihit->sector-1]) + t_min;
 
 		// Look for existing hits to see if there is a match
 		// or create new one if there is no match

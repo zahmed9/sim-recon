@@ -29,6 +29,7 @@ jerror_t DCDCHit_factory::init(void)
 	Nrings = 0;
 	a_scale = 0.;
 	t_scale = 0.;
+	t_min = 0.;
 
 	// Set default number of number of detector channels
 	maxChannels = 3522;
@@ -48,6 +49,7 @@ jerror_t DCDCHit_factory::brun(jana::JEventLoop *eventLoop, int runnumber)
 	/// set the base conversion scales
 	a_scale    = 4.0E3/1.0E2; 
 	t_scale    = 8.0/10.0;    // 8 ns/count and integer time is in 1/10th of sample
+        t_min      = -100.;       // ns
 
 	/// Read in calibration constants
         vector<double> raw_gains;
@@ -152,7 +154,7 @@ jerror_t DCDCHit_factory::evnt(JEventLoop *loop, int eventnumber)
 		double T = (double)digihit->pulse_time;
 		
 		double q = a_scale * gains[ring-1][straw-1] * (A - pedestal);
-		double t = t_scale * (T - time_offsets[ring-1][straw-1]);
+		double t = t_scale * (T - time_offsets[ring-1][straw-1]) + t_min;
 
 		if( q < DIGI_THRESHOLD) continue;
 

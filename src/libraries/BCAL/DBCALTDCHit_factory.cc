@@ -32,7 +32,7 @@ jerror_t DBCALTDCHit_factory::brun(jana::JEventLoop *eventLoop, int runnumber)
 {
 	/// set the base conversion scale
 	t_scale    = 0.060;    // 60 ps/count
-	//t_offset   = 0;
+        t_min      = -100.;    // ns
 
 	/// Read in calibration constants
 	vector<double> raw_time_offsets;
@@ -74,7 +74,7 @@ jerror_t DBCALTDCHit_factory::evnt(JEventLoop *loop, int eventnumber)
 
 		// Apply calibration constants here
 		double T = (double)digihit->time;
-		hit->t = t_scale * (T - GetConstant(time_offsets,digihit));
+		hit->t = t_scale * (T - GetConstant(time_offsets,digihit)) + t_min;
 /*
 		cout << "BCAL TDC Hit: ( " << digihit->module << ", " << digihit->layer << ", "
 		     << digihit->sector << ", " << digihit->end << " )  ->  "
