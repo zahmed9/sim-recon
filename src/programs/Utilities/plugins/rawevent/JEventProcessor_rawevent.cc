@@ -21,7 +21,7 @@
 //  mc2coda expects time in natural units of the readout module: 
 //       25 ps/count for CAENTDC
 //       60 ps/count for F1TDC32
-//      120 ps/count for F1TDC48
+//      115 ps/count for F1TDC48
 //        4 ns/count for FADC250
 //        8 ns/count for FADC125
 //
@@ -161,7 +161,7 @@ static float tMin            = -100000.;    // minimum hit time in picoseconds
 static double trigtick          = 4000;    // in picoseconds
 static double CAENTDCtick       = 25;      // in picoseconds
 static double F1TDC32tick       = 60.;     // in picoseconds
-static double F1TDC48tick       = 120.;    // in picoseconds
+static double F1TDC48tick       = 115.;    // in picoseconds
 static double FADC250tick       = 62.5;    // in picoseconds
 static double FADC125tick       = 800.;    // in picoseconds
 
@@ -560,7 +560,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
   // FADC250   pulse_integral = 19 bits or about 5.2E5
   //           pulse_time     = 16 bits or about 6.5E4
   //
-  // F21TDC    time           = 7.8 us for 120ps resolution
+  // F21TDC    time           = 7.8 us for 115ps resolution
   //                          = 3.9 us for  60ps resolution
 
 
