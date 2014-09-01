@@ -155,15 +155,35 @@ static int detID[MAXCRATE][MAXSLOT];
 
 
 // misc
-static uint64_t trigTime     = 32000000;    // in picoseconds
-static float tMin            = -100000.;    // minimum hit time in picoseconds
+static uint64_t trigTime    = 32000000;    // in picoseconds
+static float tMin           = -100000.;    // minimum hit time in picoseconds
 
-static double trigtick          = 4000;    // in picoseconds
-static double CAENTDCtick       = 25;      // in picoseconds
-static double F1TDC32tick       = 60.;     // in picoseconds
-static double F1TDC48tick       = 115.;    // in picoseconds
-static double FADC250tick       = 62.5;    // in picoseconds
-static double FADC125tick       = 800.;    // in picoseconds
+// default time steps
+static double trigtick      = 4000;    // in picoseconds
+static double CAENTDCtick   = 25.;      // in picoseconds
+static double F1TDC32tick   = 60.;     // in picoseconds
+static double F1TDC48tick   = 115.;    // in picoseconds
+static double FADC250tick   = 62.5;    // in picoseconds
+static double FADC125tick   = 800.;    // in picoseconds
+
+static double CDC_ADCscale  = 0.25E5/1.0E6;
+static double FDC_ADCscale  = 1.3E5/2.4E4;
+static double FCAL_ADCscale = 2.5E5/4.0E1;
+static double BCAL_ADCscale = 10000.;
+static double TOF_ADCscale  = 5.2E5/0.2;
+static double SC_ADCscale   = 5.2E-5/2.0E-2 ;
+
+static double CDC_ADCtick = FADC125tick;
+static double FDC_ADCtick = FADC125tick;
+static double FCAL_ADCtick = FADC250tick;
+static double BCAL_ADCtick = FADC250tick;
+static double TOF_ADCtick = FADC250tick;
+static double SC_ADCtick = FADC250tick;
+
+static double FDC_TDCtick = F1TDC48tick;
+static double BCAL_TDCtick = F1TDC32tick;
+static double TOF_TDCtick = CAENTDCtick;
+static double SC_TDCtick = F1TDC32tick;
 
 
 // debug
@@ -380,6 +400,112 @@ jerror_t JEventProcessor_rawevent::brun(JEventLoop *eventLoop, int runnumber) {
   chan->open();
   jout << std::endl << "   opening output file:   " << outputFileName << std::endl << std::endl << std::endl;
 
+  
+  // load scale factors for converting from physical units into detector hit units
+  // the converstion factors are set to reasonable default values when they are defined
+  // but try to load them from the CCDB so that we are using the same factors to create
+  // the EVIO files as are used to read them in
+  jout << "Loading ADC/TDC scale factors..." << endl;
+
+  map<string,double> scale_factors;
+  if(eventLoop->GetCalib("/CDC/digi_scales", scale_factors))
+	  jout << "Error loading /CDC/digi_scales !" << endl;
+  if( scale_factors.find("CDC_ADC_ASCALE") != scale_factors.end() ) {
+	  CDC_ADCscale = 1. / scale_factors["CDC_ADC_ASCALE"];
+  } else {
+	  jerr << "Unable to get CDC_ADC_ASCALE from /CDC/digi_scales !" << endl;
+  }
+  if( scale_factors.find("CDC_ADC_TSCALE") != scale_factors.end() ) {
+	  CDC_ADCtick = 1000. * scale_factors["CDC_ADC_TSCALE"];
+  } else {
+	  jerr << "Unable to get CDC_ADC_TSCALE from /CDC/digi_scales !" << endl;
+  }
+
+  if(eventLoop->GetCalib("/FDC/digi_scales", scale_factors))
+	  jout << "Error loading /FDC/digi_scales !" << endl;
+  if( scale_factors.find("FDC_ADC_ASCALE") != scale_factors.end() ) {
+	  FDC_ADCscale = 1. / scale_factors["FDC_ADC_ASCALE"];
+  } else {
+	  jerr << "Unable to get FDC_ADC_ASCALE from /FDC/digi_scales !" << endl;
+  }
+  if( scale_factors.find("FDC_ADC_TSCALE") != scale_factors.end() ) {
+	  FDC_ADCtick = 1000. * scale_factors["FDC_ADC_TSCALE"];
+  } else {
+	  jerr << "Unable to get FDC_ADC_TSCALE from /FDC/digi_scales !" << endl;
+  }
+  if( scale_factors.find("FDC_TDC_SCALE") != scale_factors.end() ) {
+	  FDC_TDCtick = 1000. * scale_factors["FDC_TDC_SCALE"];
+  } else {
+	  jerr << "Unable to get FDC_TDC_SCALE from /FDC/digi_scales !" << endl;
+  }
+
+  if(eventLoop->GetCalib("/FCAL/digi_scales", scale_factors))
+	  jout << "Error loading /FCAL/digi_scales !" << endl;
+  if( scale_factors.find("FCAL_ADC_ASCALE") != scale_factors.end() ) {
+	  FCAL_ADCscale = 1. / scale_factors["FCAL_ADC_ASCALE"];
+  } else {
+	  jerr << "Unable to get FCAL_ADC_ASCALE from /FCAL/digi_scales !" << endl;
+  }
+  if( scale_factors.find("FCAL_ADC_TSCALE") != scale_factors.end() ) {
+	  FCAL_ADCtick = 1000. * scale_factors["FCAL_ADC_TSCALE"];
+  } else {
+	  jerr << "Unable to get FCAL_ADC_TSCALE from /FCAL/digi_scales !" << endl;
+  }
+
+  if(eventLoop->GetCalib("/BCAL/digi_scales", scale_factors))
+	  jout << "Error loading /BCAL/digi_scales !" << endl;
+  if( scale_factors.find("BCAL_ADC_ASCALE") != scale_factors.end() ) {
+	  BCAL_ADCscale = 1. / scale_factors["BCAL_ADC_ASCALE"];
+  } else {
+	  jerr << "Unable to get BCAL_ADC_ASCALE from /BCAL/digi_scales !" << endl;
+  }
+  if( scale_factors.find("BCAL_ADC_TSCALE") != scale_factors.end() ) {
+	  BCAL_ADCtick = 1000. * scale_factors["BCAL_ADC_TSCALE"];
+  } else {
+	  jerr << "Unable to get BCAL_ADC_TSCALE from /BCAL/digi_scales !" << endl;
+  }
+  if( scale_factors.find("BCAL_TDC_SCALE") != scale_factors.end() ) {
+	  BCAL_TDCtick = 1000. * scale_factors["BCAL_TDC_SCALE"];
+  } else {
+	  jerr << "Unable to get BCAL_TDC_SCALE from /BCAL/digi_scales !" << endl;
+  }
+
+  if(eventLoop->GetCalib("/TOF/digi_scales", scale_factors))
+	  jout << "Error loading /TOF/digi_scales !" << endl;
+  if( scale_factors.find("TOF_ADC_ASCALE") != scale_factors.end() ) {
+	  TOF_ADCscale = 1. / scale_factors["TOF_ADC_ASCALE"];
+  } else {
+	  jerr << "Unable to get TOF_ADC_ASCALE from /TOF/digi_scales !" << endl;
+  }
+  if( scale_factors.find("TOF_ADC_TSCALE") != scale_factors.end() ) {
+	  TOF_ADCtick = 1000. * scale_factors["TOF_ADC_TSCALE"];
+  } else {
+	  jerr << "Unable to get TOF_ADC_TSCALE from /TOF/digi_scales !" << endl;
+  }
+  if( scale_factors.find("TOF_TDC_SCALE") != scale_factors.end() ) {
+	  TOF_TDCtick = 1000. * scale_factors["TOF_TDC_SCALE"];
+  } else {
+	  jerr << "Unable to get TOF_TDC_SCALE from /TOF/digi_scales !" << endl;
+  }
+
+  if(eventLoop->GetCalib("/START_COUNTER/digi_scales", scale_factors))
+	  jout << "Error loading /START_COUNTER/digi_scales !" << endl;
+  if( scale_factors.find("SC_ADC_ASCALE") != scale_factors.end() ) {
+	  SC_ADCscale = 1. / scale_factors["SC_ADC_ASCALE"];
+  } else {
+	  jerr << "Unable to get SC_ADC_ASCALE from /START_COUNTER/digi_scales !" << endl;
+  }
+  if( scale_factors.find("SC_ADC_TSCALE") != scale_factors.end() ) {
+	  SC_ADCtick = 1000. * scale_factors["SC_ADC_TSCALE"];
+  } else {
+	  jerr << "Unable to get SC_ADC_TSCALE from /START_COUNTER/digi_scales !" << endl;
+  }
+  if( scale_factors.find("SC_TDC_SCALE") != scale_factors.end() ) {
+	  SC_TDCtick = 1000. * scale_factors["SC_TDC_SCALE"];
+  } else {
+	  jerr << "Unable to get SC_TDC_SCALE from /START_COUNTER/digi_scales !" << endl;
+  }
+
 
   // add header event if required
   // ...
@@ -574,7 +700,8 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
     if ((dcdchits[i]->q > 0) && ((dcdchits[i]->t*1000.) > tMin) &&
         (dcdchits[i]->t*1000. < trigTime))
     {
-      uint32_t q     = dcdchits[i]->q * (1./5.18) * (1.3E5/1.0E6); // q is in femtoCoulombs (max is ~1E6) 
+      //uint32_t q     = dcdchits[i]->q * (1./5.18) * (1.3E5/1.0E6); // q is in femtoCoulombs (max is ~1E6) 
+      uint32_t q     = dcdchits[i]->q * CDC_ADCscale; // q is in femtoCoulombs (max is ~1E6) 
       uint32_t t     = dcdchits[i]->t*1000.0 -tMin;    // t is in nanoseconds (max is ~900ns)
       
       if (noroot == 0)
@@ -598,7 +725,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
       hit[0].nwords      = 2;
       hit[0].hdata       = mcData;
       hit[0].hdata[0]    = q;  // in fADC counts
-      hit[0].hdata[1]    = static_cast<double>(t)/FADC125tick;
+      hit[0].hdata[1]    = static_cast<double>(t)/CDC_ADCtick;
       //if (q > 0x7ffff) std::cerr << "q too large for CDC: " << q << std::endl;
       
       if (dumphits > 1) {
@@ -628,7 +755,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
   }
 
 
-  // DTOFHit - FADC250 and F1TDC32 (60 ps)
+  // DTOFHit - FADC250 and CAEN TDC (25 ps)
   vector<const DTOFHit*> dtofrawhits; 
   eventLoop->Get(dtofrawhits);
   sort(dtofrawhits.begin(),dtofrawhits.end(),compareDTOFHits);
@@ -638,7 +765,8 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
     if ((dtofrawhits[i]->dE > 0) && ((dtofrawhits[i]->t*1000.) > tMin) &&
         (dtofrawhits[i]->t*1000. < trigTime))
     {
-      uint32_t E  = dtofrawhits[i]->dE*(5.2E5/0.2);   // E is GeV (max ~0.1)
+	//uint32_t E  = dtofrawhits[i]->dE*(5.2E5/0.2);   // E is GeV (max ~0.1)
+      uint32_t E  = dtofrawhits[i]->dE*TOF_ADCscale;   // E is GeV (max ~0.1)
       uint32_t t  = dtofrawhits[i]->t*1000.-tMin;  // in picoseconds
     
       if (noroot == 0)
@@ -660,7 +788,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
       hit[0].nwords      = 2;
       hit[0].hdata       = mcData;
       hit[0].hdata[0]    = E;  // in fADC counts
-      hit[0].hdata[1]    = static_cast<double>(t)/FADC250tick;
+      hit[0].hdata[1]    = static_cast<double>(t)/TOF_ADCtick;
       if (E > 0x7ffff)
          std::cerr << "E too large for TOF: " << E << std::endl;
       
@@ -694,7 +822,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
       hit[0].module_mode = 0;
       hit[0].nwords      = 1;
       hit[0].hdata       = mcData;
-      hit[0].hdata[0]    = static_cast<double>(t)/CAENTDCtick;
+      hit[0].hdata[0]    = static_cast<double>(t)/TOF_TDCtick;
       
       if (dumphits > 1) {
         jout << std::endl;
@@ -726,12 +854,13 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
   sort(dbcalhits.begin(),dbcalhits.end(),compareDBCALHits);
 
   hc=0;
-  for (i=0; i<dbcalhits.size(); i++) {
+  for (i=0; i < dbcalhits.size(); i++) {
     if ((dbcalhits[i]->E > 0) && ((dbcalhits[i]->t*1000.) > tMin) &&
         (dbcalhits[i]->t*1000. < trigTime))
     {
-      uint32_t E     = dbcalhits[i]->E*(10000.);    // (each fADC count ~ 100keV) (max ~2.5E4)
-      uint32_t t     = dbcalhits[i]->t*1000.-tMin;  // in picoseconds
+      // uint32_t E = dbcalhits[i]->E*(10000.);    // (each fADC count ~ 100keV) (max ~2.5E4)
+      uint32_t E = dbcalhits[i]->E*BCAL_ADCscale;  // (each fADC count ~ 100keV) (max ~2.5E4)
+      uint32_t t = dbcalhits[i]->t*1000.-tMin;  // in picoseconds
 
       if (noroot == 0)
          bcalEnergies->Fill(dbcalhits[i]->E*1000000.);
@@ -754,7 +883,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
       hit[0].nwords      = 2;
       hit[0].hdata       = mcData;
       hit[0].hdata[0]    = E;
-      hit[0].hdata[1]    = static_cast<double>(t)/FADC250tick;
+      hit[0].hdata[1]    = static_cast<double>(t)/BCAL_ADCtick;
       if (E/10 > 0x7ffff)
          std::cerr << "E too large for BCAL: " << E << std::endl;
       
@@ -821,7 +950,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
   }
 
 
-  // BCAL TDC hits are handled in separate objections
+  // BCAL TDC hits are handled in separate objects
   vector<const DBCALTDCHit*> dbcaltdchits;
   eventLoop->Get(dbcaltdchits);
   sort(dbcaltdchits.begin(),dbcaltdchits.end(),compareDBCALTDCHits);
@@ -853,7 +982,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
       hit[0].module_mode = 0;
       hit[0].nwords      = 1;
       hit[0].hdata       = mcData;
-      hit[0].hdata[0]    = static_cast<double>(t)/F1TDC32tick;
+      hit[0].hdata[0]    = static_cast<double>(t)/BCAL_TDCtick;
       
       if (dumphits > 1) {
         jout << std::endl;
@@ -893,7 +1022,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
     if ((dfcalhits[i]->E > 0) && ((dfcalhits[i]->t*1000.) > tMin) &&
         (dfcalhits[i]->t*1000. < trigTime))
     {
-      uint32_t E     = dfcalhits[i]->E*(2.5E5/4.0E1);  // E in GeV (max ~4)
+      uint32_t E     = dfcalhits[i]->E*FCAL_ADCscale;  // E in GeV (max ~4)
       uint32_t t     = dfcalhits[i]->t*1000.-tMin;  // in picoseconds
       
       if (noroot == 0)
@@ -915,7 +1044,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
       hit[0].nwords      = 2;
       hit[0].hdata       = mcData;
       hit[0].hdata[0]    = E; 
-      hit[0].hdata[1]    = static_cast<double>(t)/FADC250tick;
+      hit[0].hdata[1]    = static_cast<double>(t)/FCAL_ADCtick;
       if (E/10 > 0x7ffff)
          std::cerr << "E too large for FCAL: " << E << std::endl;
       
@@ -956,7 +1085,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
     if ((dfdchits[i]->q > 0) && ((dfdchits[i]->t*1000.) > tMin) &&
         (dfdchits[i]->t*1000. < trigTime))
     {
-      uint32_t q = dfdchits[i]->q*(1.3E5/2.4E4); // for cathodes
+      uint32_t q = dfdchits[i]->q*FDC_ADCscale; // for cathodes
       if (dfdchits[i]->type == 0)
          q = 0.0; // No amplitude read for wires 
       uint32_t t = dfdchits[i]->t*1000.-tMin; // in picoseconds
@@ -982,7 +1111,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
         hit[0].nwords      = 2;
         hit[0].hdata       = mcData;
         hit[0].hdata[0]    = q; 
-        hit[0].hdata[1]    = static_cast<double>(t)/FADC125tick;
+        hit[0].hdata[1]    = static_cast<double>(t)/FDC_ADCtick;
         if (q > 0x7ffff)
            std::cerr << "q too large for FDC: " << q << std::endl;
         
@@ -1023,7 +1152,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
         hit[0].module_mode = 0;
         hit[0].nwords      = 1;
         hit[0].hdata       = mcData;
-        hit[0].hdata[0]    = static_cast<double>(t)/F1TDC48tick;
+        hit[0].hdata[0]    = static_cast<double>(t)/FDC_TDCtick;
         
         if (dumphits > 2) {
           jout << std::endl;
@@ -1063,7 +1192,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
     if ((dsthits[i]->dE > 0) && ((dsthits[i]->t*1000.) > tMin) &&
         (dsthits[i]->t*1000. < trigTime))
     {
-      uint32_t E     = dsthits[i]->dE*(5.2E-5/2.0E-2);   // dE in GeV (max ~2E-2)
+      uint32_t E     = dsthits[i]->dE*SC_ADCscale;   // dE in GeV (max ~2E-2)
       uint32_t t     = dsthits[i]->t*1000.-tMin;  // in picoseconds
 
       if (noroot == 0)
@@ -1085,7 +1214,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
       hit[0].nwords      = 2;
       hit[0].hdata       = mcData;
       hit[0].hdata[0]    = E; 
-      hit[0].hdata[1]    = static_cast<double>(t)/FADC250tick;
+      hit[0].hdata[1]    = static_cast<double>(t)/SC_ADCtick;
       if (E > 0x7ffff)
          std::cerr << "E too large for ST: " << E << std::endl;
       
@@ -1121,7 +1250,7 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
       hit[0].module_mode = 0;
       hit[0].nwords      = 1;
       hit[0].hdata       = mcData;
-      hit[0].hdata[0]    = static_cast<double>(t)/F1TDC32tick;
+      hit[0].hdata[0]    = static_cast<double>(t)/SC_TDCtick;
       
       if (dumphits > 1) {
         jout << std::endl;
