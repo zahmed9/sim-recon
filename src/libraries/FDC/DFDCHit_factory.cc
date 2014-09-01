@@ -112,21 +112,21 @@ jerror_t DFDCHit_factory::evnt(JEventLoop *loop, int eventnumber)
 		// The FDCHit class has 6 indexes which are derived
 		// from these and contain some redundancy. They are:
 		// ---------------------------------------------------
-		// layer   : 1(V), 2(X), or 3(U)
+		// plane   : 1(V), 2(X), or 3(U)
+		// layer   : 1 (phi=0), 2 (phi=+60), 3 (phi=-60)
 		// module  : 1 through 8, 1 module = 3 detection layers
 		// element : wire or strip number
-		// plane   : for cathodes only: u(3) or v(1) plane, u@+45,v@-45 
 		// gPlane  : 1 through 72
 		// gLayer  : 1 through 24
 		
 		DFDCHit *hit = new DFDCHit;
-		hit->layer   = digihit->view;
 		hit->gLayer  = digihit->chamber + 6*(digihit->package - 1);
-		hit->gPlane  = hit->layer + 3*(hit->gLayer - 1);
 		hit->module  = 1 + (hit->gLayer-1)/3;
+		hit->layer   = hit->gLayer - (hit->module-1)*3;
+		hit->plane   = digihit->view;
+		hit->gPlane  = hit->plane + 3*(hit->gLayer - 1);
 		hit->element = digihit->strip;
-		hit->plane   = digihit->view; // "plane" is apparently the same as "layer"
-		hit->r       = DFDCGeometry::getWireR(hit);
+		hit->r       = DFDCGeometry::getStripR(hit);
 		hit->d       = 0.0; // MC data only
 		hit->type    = digihit->strip_type; // n.b. DEventSourceHDDM hardwires this as "1" for cathodes!
 		hit->itrack  = -1; // MC data only
@@ -173,7 +173,8 @@ jerror_t DFDCHit_factory::evnt(JEventLoop *loop, int eventnumber)
 		// The FDCHit class has 6 indexes which are derived
 		// from these and contain some redundancy. They are:
 		// ---------------------------------------------------
-		// layer   : 1(V), 2(X), or 3(U)
+		// plane   : 1(V), 2(X), or 3(U)
+		// layer   : 1 (phi=0), 2 (phi=+60), 3 (phi=-60)
 		// module  : 1 through 8, 1 module = 3 detection layers
 		// element : wire or strip number
 		// plane   : for cathodes only: u(3) or v(1) plane, u@+45,v@-45 
@@ -181,12 +182,12 @@ jerror_t DFDCHit_factory::evnt(JEventLoop *loop, int eventnumber)
 		// gLayer  : 1 through 24
 		
 		DFDCHit *hit = new DFDCHit;
-		hit->layer   = 2;                  // wire is always in "X" layer
 		hit->gLayer  = digihit->chamber + 6*(digihit->package - 1);
-		hit->gPlane  = hit->layer + 3*(hit->gLayer - 1);
 		hit->module  = 1 + (hit->gLayer-1)/3;
+		hit->layer   = hit->gLayer - (hit->module-1)*3;
+		hit->plane   = 2;                  // wire is always in "X" layer
+		hit->gPlane  = hit->plane + 3*(hit->gLayer - 1);
 		hit->element = digihit->wire;
-		hit->plane   = hit->layer;         // "plane" is apparently the same as "layer"
 		hit->r       = DFDCGeometry::getWireR(hit);
 		hit->d       = 0.0;                // MC data only
 		hit->type    = DFDCHit::AnodeWire; // n.b. DEventSourceHDDM hardwires this as "0" for anodes!
