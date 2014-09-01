@@ -150,7 +150,7 @@ extern double TAGH_TSIGMA;
 // Tagging counter fADC responses
 extern double TAGM_FADC_TSIGMA;
 extern double TAGH_FADC_TSIGMA;
-extern double TAGM_NPE_PER_GEV;
+extern double TAGM_NPIX_PER_GEV;
 extern double TAGH_NPE_PER_GEV;
 
 // Photon-statistics factor for smearing hit energy (from Criss's MC)
@@ -833,7 +833,7 @@ void SmearTAGM(hddm_s::HDDM *record)
          // smear the time
          double t = titer->getT() + SampleGaussian(TAGM_TSIGMA);
          double tADC = titer->getT() + SampleGaussian(TAGM_FADC_TSIGMA);
-         double npe = SamplePoisson(titer->getDE() * TAGM_NPE_PER_GEV);
+         double npe = SamplePoisson(titer->getDE() * TAGM_NPIX_PER_GEV);
          hddm_s::TaggerHitList hits = iter->addTaggerHits();
          hits().setT(t);
          hits().setTADC(tADC);

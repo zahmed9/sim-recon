@@ -89,11 +89,11 @@ bool BCAL_DEBUG_HISTS = false;
 double FTOF_BAR_THRESHOLD    = 0.0;
 double STC_PADDLE_THRESHOLD  = 0.0;
 
-double TAGM_TSIGMA = 0.200;
-double TAGH_TSIGMA = 0.350;
-double TAGM_FADC_TSIGMA = 0.350;
-double TAGH_FADC_TSIGMA = 0.450;
-double TAGM_NPE_PER_GEV = 1.e5;
+double TAGM_TSIGMA = 0.200;        // ns
+double TAGH_TSIGMA = 0.350;        // ns
+double TAGM_FADC_TSIGMA = 0.350;   // ns
+double TAGH_FADC_TSIGMA = 0.450;   // ns
+double TAGM_NPIX_PER_GEV = 1.e5;
 double TAGH_NPE_PER_GEV = 5.e5;
 
 double FCAL_PHOT_STAT_COEF   = 0.0; //0.035;
