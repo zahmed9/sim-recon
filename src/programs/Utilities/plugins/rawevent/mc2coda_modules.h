@@ -404,7 +404,7 @@ f1tdc32_write_data (CODA_EVENT_INFO *event, int roc, int slot, int mode)
 #define F1TDC48_FILLER(slot) {*dabufp++ = 0xF8000000 | (slot << 22); }
 
 #define F1TDC48_CHIP_NUM(chan) (chan >> 3)
-#define F1TDC48_CHAN_ON_CHIP(chan) (chan & 0x03)
+#define F1TDC48_CHAN_ON_CHIP(chan) (chan & 0x07)
 
 
 int
