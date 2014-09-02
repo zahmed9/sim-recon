@@ -23,7 +23,9 @@ static double DIGI_THRESHOLD = -1000000.0;
 //------------------
 jerror_t DCDCHit_factory::init(void)
 {
-        gPARMS->SetDefaultParameter("CDC:DIGI_THRESHOLD",DIGI_THRESHOLD, "Do not convert CDC digitized hits into DCDCHit objects that would have q less than this");
+   gPARMS->SetDefaultParameter("CDC:DIGI_THRESHOLD",DIGI_THRESHOLD,
+           "Do not convert CDC digitized hits into DCDCHit objects"
+           " that would have q less than this");
 
    // default values
    Nrings = 0;
@@ -34,6 +36,11 @@ jerror_t DCDCHit_factory::init(void)
    // Set default number of number of detector channels
    maxChannels = 3522;
 
+   /// set the base conversion scales
+   a_scale = 4.0E3/1.0E2; 
+   t_scale = 8.0/10.0;    // 8 ns/count and integer time is in 1/10th of sample
+   t_min   = -100.;       // ns
+
    return NOERROR;
 }
 
@@ -42,28 +49,37 @@ jerror_t DCDCHit_factory::init(void)
 //------------------
 jerror_t DCDCHit_factory::brun(jana::JEventLoop *eventLoop, int runnumber)
 {
-        // calculate the number of straws in each ring
-    CalcNstraws(eventLoop, runnumber, Nstraws);
+   // calculate the number of straws in each ring
+   CalcNstraws(eventLoop, runnumber, Nstraws);
    Nrings = Nstraws.size();
 
-   /// set the base conversion scales
-   a_scale    = 4.0E3/1.0E2; 
-   t_scale    = 8.0/10.0;    // 8 ns/count and integer time is in 1/10th of sample
-        t_min      = -100.;       // ns
-
    /// Read in calibration constants
-        vector<double> raw_gains;
-        vector<double> raw_pedestals;
-        vector<double> raw_time_offsets;
+   vector<double> raw_gains;
+   vector<double> raw_pedestals;
+   vector<double> raw_time_offsets;
 
    jout << "In DFCALHit_factory, loading constants..." << std::endl;
 
+   // load scale factors
+   map<string,double> scale_factors;
+   if (eventLoop->GetCalib("/CDC/digi_scales", scale_factors))
+      jout << "Error loading /CDC/digi_scales !" << endl;
+   if (scale_factors.find("CDC_ADC_ASCALE") != scale_factors.end())
+      a_scale = scale_factors["CDC_ADC_ASCALE"];
+   else
+      jerr << "Unable to get CDC_ADC_ASCALE from /CDC/digi_scales !" << endl;
+
+   if (scale_factors.find("CDC_ADC_TSCALE") != scale_factors.end())
+      t_scale = scale_factors["CDC_ADC_TSCALE"];
+   else
+      jerr << "Unable to get CDC_ADC_TSCALE from /CDC/digi_scales !" << endl;
+
    if (eventLoop->GetCalib("/CDC/wire_gains", raw_gains))
-      jout << "Error loading /CDC/wire_gains !" << std::endl;
+      jout << "Error loading /CDC/wire_gains !" << endl;
    if (eventLoop->GetCalib("/CDC/pedestals", raw_pedestals))
-      jout << "Error loading /CDC/pedestals !" << std::endl;
+      jout << "Error loading /CDC/pedestals !" << endl;
    if (eventLoop->GetCalib("/CDC/timing_offsets", raw_time_offsets))
-      jout << "Error loading /CDC/timing_offsets !" << std::endl;
+      jout << "Error loading /CDC/timing_offsets !" << endl;
 
    // fill the tables
    FillCalibTable(gains, raw_gains, Nstraws);
