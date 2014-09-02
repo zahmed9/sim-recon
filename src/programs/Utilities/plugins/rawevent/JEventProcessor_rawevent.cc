@@ -169,7 +169,7 @@ static double FADC125tick   = 800.;    // in picoseconds
 static double CDC_ADCscale  = 0.25E5/1.0E6;
 static double FDC_ADCscale  = 1.3E5/2.4E4;
 static double FCAL_ADCscale = 2.5E5/4.0E1;
-static double BCAL_ADCscale = 10000.;
+static double BCAL_ADCscale = 10.;
 static double TOF_ADCscale  = 5.2E5/0.2;
 static double SC_ADCscale   = 5.2E-5/2.0E-2 ;
 
@@ -408,99 +408,99 @@ jerror_t JEventProcessor_rawevent::brun(JEventLoop *eventLoop, int runnumber) {
   jout << "Loading ADC/TDC scale factors..." << endl;
 
   map<string,double> scale_factors;
-  if(eventLoop->GetCalib("/CDC/digi_scales", scale_factors))
+  if (eventLoop->GetCalib("/CDC/digi_scales", scale_factors))
 	  jout << "Error loading /CDC/digi_scales !" << endl;
-  if( scale_factors.find("CDC_ADC_ASCALE") != scale_factors.end() ) {
+  if ( scale_factors.find("CDC_ADC_ASCALE") != scale_factors.end() ) {
 	  CDC_ADCscale = 1. / scale_factors["CDC_ADC_ASCALE"];
   } else {
 	  jerr << "Unable to get CDC_ADC_ASCALE from /CDC/digi_scales !" << endl;
   }
-  if( scale_factors.find("CDC_ADC_TSCALE") != scale_factors.end() ) {
+  if ( scale_factors.find("CDC_ADC_TSCALE") != scale_factors.end() ) {
 	  CDC_ADCtick = 1000. * scale_factors["CDC_ADC_TSCALE"];
   } else {
 	  jerr << "Unable to get CDC_ADC_TSCALE from /CDC/digi_scales !" << endl;
   }
 
-  if(eventLoop->GetCalib("/FDC/digi_scales", scale_factors))
+  if (eventLoop->GetCalib("/FDC/digi_scales", scale_factors))
 	  jout << "Error loading /FDC/digi_scales !" << endl;
-  if( scale_factors.find("FDC_ADC_ASCALE") != scale_factors.end() ) {
+  if ( scale_factors.find("FDC_ADC_ASCALE") != scale_factors.end() ) {
 	  FDC_ADCscale = 1. / scale_factors["FDC_ADC_ASCALE"];
   } else {
 	  jerr << "Unable to get FDC_ADC_ASCALE from /FDC/digi_scales !" << endl;
   }
-  if( scale_factors.find("FDC_ADC_TSCALE") != scale_factors.end() ) {
+  if ( scale_factors.find("FDC_ADC_TSCALE") != scale_factors.end() ) {
 	  FDC_ADCtick = 1000. * scale_factors["FDC_ADC_TSCALE"];
   } else {
 	  jerr << "Unable to get FDC_ADC_TSCALE from /FDC/digi_scales !" << endl;
   }
-  if( scale_factors.find("FDC_TDC_SCALE") != scale_factors.end() ) {
+  if ( scale_factors.find("FDC_TDC_SCALE") != scale_factors.end() ) {
 	  FDC_TDCtick = 1000. * scale_factors["FDC_TDC_SCALE"];
   } else {
 	  jerr << "Unable to get FDC_TDC_SCALE from /FDC/digi_scales !" << endl;
   }
 
-  if(eventLoop->GetCalib("/FCAL/digi_scales", scale_factors))
+  if (eventLoop->GetCalib("/FCAL/digi_scales", scale_factors))
 	  jout << "Error loading /FCAL/digi_scales !" << endl;
-  if( scale_factors.find("FCAL_ADC_ASCALE") != scale_factors.end() ) {
+  if ( scale_factors.find("FCAL_ADC_ASCALE") != scale_factors.end() ) {
 	  FCAL_ADCscale = 1. / scale_factors["FCAL_ADC_ASCALE"];
   } else {
 	  jerr << "Unable to get FCAL_ADC_ASCALE from /FCAL/digi_scales !" << endl;
   }
-  if( scale_factors.find("FCAL_ADC_TSCALE") != scale_factors.end() ) {
+  if ( scale_factors.find("FCAL_ADC_TSCALE") != scale_factors.end() ) {
 	  FCAL_ADCtick = 1000. * scale_factors["FCAL_ADC_TSCALE"];
   } else {
 	  jerr << "Unable to get FCAL_ADC_TSCALE from /FCAL/digi_scales !" << endl;
   }
 
-  if(eventLoop->GetCalib("/BCAL/digi_scales", scale_factors))
+  if (eventLoop->GetCalib("/BCAL/digi_scales", scale_factors))
 	  jout << "Error loading /BCAL/digi_scales !" << endl;
-  if( scale_factors.find("BCAL_ADC_ASCALE") != scale_factors.end() ) {
+  if ( scale_factors.find("BCAL_ADC_ASCALE") != scale_factors.end() ) {
 	  BCAL_ADCscale = 1. / scale_factors["BCAL_ADC_ASCALE"];
   } else {
 	  jerr << "Unable to get BCAL_ADC_ASCALE from /BCAL/digi_scales !" << endl;
   }
-  if( scale_factors.find("BCAL_ADC_TSCALE") != scale_factors.end() ) {
+  if ( scale_factors.find("BCAL_ADC_TSCALE") != scale_factors.end() ) {
 	  BCAL_ADCtick = 1000. * scale_factors["BCAL_ADC_TSCALE"];
   } else {
 	  jerr << "Unable to get BCAL_ADC_TSCALE from /BCAL/digi_scales !" << endl;
   }
-  if( scale_factors.find("BCAL_TDC_SCALE") != scale_factors.end() ) {
+  if ( scale_factors.find("BCAL_TDC_SCALE") != scale_factors.end() ) {
 	  BCAL_TDCtick = 1000. * scale_factors["BCAL_TDC_SCALE"];
   } else {
 	  jerr << "Unable to get BCAL_TDC_SCALE from /BCAL/digi_scales !" << endl;
   }
 
-  if(eventLoop->GetCalib("/TOF/digi_scales", scale_factors))
+  if (eventLoop->GetCalib("/TOF/digi_scales", scale_factors))
 	  jout << "Error loading /TOF/digi_scales !" << endl;
-  if( scale_factors.find("TOF_ADC_ASCALE") != scale_factors.end() ) {
+  if ( scale_factors.find("TOF_ADC_ASCALE") != scale_factors.end() ) {
 	  TOF_ADCscale = 1. / scale_factors["TOF_ADC_ASCALE"];
   } else {
 	  jerr << "Unable to get TOF_ADC_ASCALE from /TOF/digi_scales !" << endl;
   }
-  if( scale_factors.find("TOF_ADC_TSCALE") != scale_factors.end() ) {
+  if ( scale_factors.find("TOF_ADC_TSCALE") != scale_factors.end() ) {
 	  TOF_ADCtick = 1000. * scale_factors["TOF_ADC_TSCALE"];
   } else {
 	  jerr << "Unable to get TOF_ADC_TSCALE from /TOF/digi_scales !" << endl;
   }
-  if( scale_factors.find("TOF_TDC_SCALE") != scale_factors.end() ) {
+  if ( scale_factors.find("TOF_TDC_SCALE") != scale_factors.end() ) {
 	  TOF_TDCtick = 1000. * scale_factors["TOF_TDC_SCALE"];
   } else {
 	  jerr << "Unable to get TOF_TDC_SCALE from /TOF/digi_scales !" << endl;
   }
 
-  if(eventLoop->GetCalib("/START_COUNTER/digi_scales", scale_factors))
+  if (eventLoop->GetCalib("/START_COUNTER/digi_scales", scale_factors))
 	  jout << "Error loading /START_COUNTER/digi_scales !" << endl;
-  if( scale_factors.find("SC_ADC_ASCALE") != scale_factors.end() ) {
+  if ( scale_factors.find("SC_ADC_ASCALE") != scale_factors.end() ) {
 	  SC_ADCscale = 1. / scale_factors["SC_ADC_ASCALE"];
   } else {
 	  jerr << "Unable to get SC_ADC_ASCALE from /START_COUNTER/digi_scales !" << endl;
   }
-  if( scale_factors.find("SC_ADC_TSCALE") != scale_factors.end() ) {
+  if ( scale_factors.find("SC_ADC_TSCALE") != scale_factors.end() ) {
 	  SC_ADCtick = 1000. * scale_factors["SC_ADC_TSCALE"];
   } else {
 	  jerr << "Unable to get SC_ADC_TSCALE from /START_COUNTER/digi_scales !" << endl;
   }
-  if( scale_factors.find("SC_TDC_SCALE") != scale_factors.end() ) {
+  if ( scale_factors.find("SC_TDC_SCALE") != scale_factors.end() ) {
 	  SC_TDCtick = 1000. * scale_factors["SC_TDC_SCALE"];
   } else {
 	  jerr << "Unable to get SC_TDC_SCALE from /START_COUNTER/digi_scales !" << endl;
@@ -858,12 +858,13 @@ jerror_t JEventProcessor_rawevent::evnt(JEventLoop *eventLoop, int eventnumber) 
     if ((dbcalhits[i]->E > 0) && ((dbcalhits[i]->t*1000.) > tMin) &&
         (dbcalhits[i]->t*1000. < trigTime))
     {
-      // uint32_t E = dbcalhits[i]->E*(10000.);    // (each fADC count ~ 100keV) (max ~2.5E4)
-      uint32_t E = dbcalhits[i]->E*BCAL_ADCscale;  // (each fADC count ~ 100keV) (max ~2.5E4)
-      uint32_t t = dbcalhits[i]->t*1000.-tMin;  // in picoseconds
+      // All calorimeter hits have E in GeV, but BCAL_ADCscale assumes MeV
+      // so fix that here by converting E to MeV first, then apply scale factor.
+      uint32_t E = dbcalhits[i]->E*1000.*BCAL_ADCscale;  // (each fADC count ~ 100keV) (max ~2.5E4)
+      uint32_t t = dbcalhits[i]->t*1000.-tMin;     // in picoseconds
 
       if (noroot == 0)
-         bcalEnergies->Fill(dbcalhits[i]->E*1000000.);
+         bcalEnergies->Fill(dbcalhits[i]->E*1000.);
       if (noroot == 0)
          bcalTimes->Fill(dbcalhits[i]->t-tMin/1000);
 
