@@ -48,24 +48,22 @@ jerror_t DBCALHit_factory::brun(jana::JEventLoop *eventLoop, int runnumber)
    
    // load scale factors
    map<string,double> scale_factors;
-   if(eventLoop->GetCalib("/BCAL/digi_scales", scale_factors))
+   if (eventLoop->GetCalib("/BCAL/digi_scales", scale_factors))
        jout << "Error loading /BCAL/digi_scales !" << endl;
-   if( scale_factors.find("BCAL_ADC_ASCALE") != scale_factors.end() ) {
+   if (scale_factors.find("BCAL_ADC_ASCALE") != scale_factors.end())
        a_scale = scale_factors["BCAL_ADC_ASCALE"];
-   } else {
+   else
        jerr << "Unable to get BCAL_ADC_ASCALE from /BCAL/digi_scales !" << endl;
-   }
-   if( scale_factors.find("BCAL_ADC_TSCALE") != scale_factors.end() ) {
+   if (scale_factors.find("BCAL_ADC_TSCALE") != scale_factors.end())
        t_scale = scale_factors["BCAL_ADC_TSCALE"];
-   } else {
+   else
        jerr << "Unable to get BCAL_ADC_TSCALE from /BCAL/digi_scales !" << endl;
-   }
 
-   if(eventLoop->GetCalib("/BCAL/ADC_gains", raw_gains))
+   if (eventLoop->GetCalib("/BCAL/ADC_gains", raw_gains))
        jout << "Error loading /BCAL/ADC_gains !" << endl;
-   if(eventLoop->GetCalib("/BCAL/ADC_pedestals", raw_pedestals))
+   if (eventLoop->GetCalib("/BCAL/ADC_pedestals", raw_pedestals))
        jout << "Error loading /BCAL/ADC_pedestals !" << endl;
-   if(eventLoop->GetCalib("/BCAL/ADC_timing_offsets", raw_time_offsets))
+   if (eventLoop->GetCalib("/BCAL/ADC_timing_offsets", raw_time_offsets))
        jout << "Error loading /BCAL/ADC_timing_offsets !" << endl;
 
    FillCalibTable(gains, raw_gains);
@@ -99,7 +97,8 @@ jerror_t DBCALHit_factory::evnt(JEventLoop *loop, int eventnumber)
       double pedestalpersample = GetConstant(pedestals,digihit);
       if (digihit->nsamples_pedestal > 0)
          pedestalpersample = digihit->pedestal / digihit->nsamples_pedestal;
-      else pedestalpersample = digihit->pedestal;
+      else
+         pedestalpersample = digihit->pedestal;
 
       DBCALHit *hit = new DBCALHit;
       hit->module = digihit->module;
@@ -117,7 +116,7 @@ jerror_t DBCALHit_factory::evnt(JEventLoop *loop, int eventnumber)
          E = a_scale * gain * (A - (pedestalpersample * digihit->nsamples_integral));
       }
 
-      hit->E = E/1000.; // hit->E is in GeV
+      hit->E = E/1000.;  // all calorimeter hits have E in GeV
       hit->t = t_scale * (T - GetConstant(time_offsets,digihit)) + t_min;
       
       hit->AddAssociatedObject(digihit);
@@ -157,31 +156,33 @@ void DBCALHit_factory::FillCalibTable( map<int,cell_calib_t> &table,
     // reset the table before filling it
     table.clear();
 
-    for(int module=1; module<=BCAL_NUM_MODULES; module++) {
-   for(int layer=1; layer<=BCAL_NUM_LAYERS; layer++) {
-       for(int sector=1; sector<=BCAL_NUM_SECTORS; sector++) {
-      if( (channel > BCAL_MAX_CHANNELS) || (channel+1 > BCAL_MAX_CHANNELS) ) {  // sanity check
-          sprintf(str, "Too many channels for BCAL table! channel=%d (should be %d)", 
-             channel, BCAL_MAX_CHANNELS);
-          cerr << str << endl;
-          throw JException(str);
-      }
-      
-      int cell_id = DBCALGeometry::cellId(module,layer,sector);
-      
-      table[cell_id] = cell_calib_t(raw_table[channel],raw_table[channel+1]);
+    for (int module=1; module<=BCAL_NUM_MODULES; module++) {
+       for (int layer=1; layer<=BCAL_NUM_LAYERS; layer++) {
+          for (int sector=1; sector<=BCAL_NUM_SECTORS; sector++) {
+             if ((channel > BCAL_MAX_CHANNELS) || (channel+1 > BCAL_MAX_CHANNELS)) {  // sanity check
+                sprintf(str, "Too many channels for BCAL table!"
+                             " channel=%d (should be %d)", 
+                        channel, BCAL_MAX_CHANNELS);
+                cerr << str << endl;
+                throw JException(str);
+             }
 
-      channel += 2;
+             int cell_id = DBCALGeometry::cellId(module,layer,sector);
+
+             table[cell_id] = cell_calib_t(raw_table[channel],raw_table[channel+1]);
+
+             channel += 2;
+          }
        }
-   }
     }
 
     // check to make sure that we loaded enough channels
-    if(channel != BCAL_MAX_CHANNELS) { 
-   sprintf(str, "Not enough channels for BCAL table! channel=%d (should be %d)", 
-      channel, BCAL_MAX_CHANNELS);
-   cerr << str << endl;
-   throw JException(str);
+    if (channel != BCAL_MAX_CHANNELS) { 
+       sprintf(str, "Not enough channels for BCAL table!"
+                    " channel=%d (should be %d)", 
+               channel, BCAL_MAX_CHANNELS);
+       cerr << str << endl;
+       throw JException(str);
     }
 }
 
@@ -189,38 +190,42 @@ void DBCALHit_factory::FillCalibTable( map<int,cell_calib_t> &table,
 // GetConstant
 //   Allow a few different interfaces
 //------------------------------------
-const double DBCALHit_factory::GetConstant( const bcal_digi_constants_t &the_table, 
-                   const int in_module, const int in_layer,
-                   const int in_sector, const int in_end) const
+const double DBCALHit_factory::GetConstant(const bcal_digi_constants_t &the_table, 
+                                           const int in_module, 
+                                           const int in_layer,
+                                           const int in_sector,
+                                           const int in_end) const
 {
-       char str[256];
+   char str[256];
    
-   if( (in_module <= 0) || (in_module > BCAL_NUM_MODULES)) {
-      sprintf(str, "Bad module # requested in DBCALHit_factory::GetConstant()! requested=%d , should be 1-%d", in_module, BCAL_NUM_MODULES);
+   if ( (in_module <= 0) || (in_module > BCAL_NUM_MODULES)) {
+      sprintf(str, "Bad module # requested in DBCALHit_factory::GetConstant()!"
+                   " requested=%d , should be 1-%d", in_module, BCAL_NUM_MODULES);
       cerr << str << endl;
       throw JException(str);
    }
-   if( (in_layer <= 0) || (in_layer > BCAL_NUM_LAYERS)) {
-      sprintf(str, "Bad layer # requested in DBCALHit_factory::GetConstant()! requested=%d , should be 1-%d", in_layer, BCAL_NUM_LAYERS);
+   if ( (in_layer <= 0) || (in_layer > BCAL_NUM_LAYERS)) {
+      sprintf(str, "Bad layer # requested in DBCALHit_factory::GetConstant()!"
+                   " requested=%d , should be 1-%d", in_layer, BCAL_NUM_LAYERS);
       cerr << str << endl;
       throw JException(str);
    }
-   if( (in_sector <= 0) || (in_sector > BCAL_NUM_SECTORS)) {
-      sprintf(str, "Bad sector # requested in DBCALHit_factory::GetConstant()! requested=%d , should be 1-%d", in_sector, BCAL_NUM_SECTORS);
+   if ( (in_sector <= 0) || (in_sector > BCAL_NUM_SECTORS)) {
+      sprintf(str, "Bad sector # requested in DBCALHit_factory::GetConstant()!"
+                   " requested=%d , should be 1-%d", in_sector, BCAL_NUM_SECTORS);
       cerr << str << endl;
       throw JException(str);
    }
-   if( (in_end != DBCALGeometry::kUpstream) && (in_end != DBCALGeometry::kDownstream) ) {
-      sprintf(str, "Bad end # requested in DBCALHit_factory::GetConstant()! requested=%d , should be 0-1", in_end);
+   if ( (in_end != DBCALGeometry::kUpstream) && (in_end != DBCALGeometry::kDownstream) ) {
+      sprintf(str, "Bad end # requested in DBCALHit_factory::GetConstant()!"
+                   " requested=%d , should be 0-1", in_end);
       cerr << str << endl;
       throw JException(str);
    }
 
-   const int the_cell = DBCALGeometry::cellId( in_module,
-                      in_layer,
-                      in_sector);
+   const int the_cell = DBCALGeometry::cellId( in_module, in_layer, in_sector);
    
-   if(in_end == DBCALGeometry::kUpstream) {
+   if (in_end == DBCALGeometry::kUpstream) {
        // handle the upstream end
        return the_table.at(the_cell).first;
    } else {
@@ -233,34 +238,40 @@ const double DBCALHit_factory::GetConstant( const bcal_digi_constants_t &the_tab
 const double DBCALHit_factory::GetConstant( const bcal_digi_constants_t &the_table, 
                    const DBCALHit *in_hit) const
 {
-       char str[256];
+   char str[256];
    
-   if( (in_hit->module <= 0) || (in_hit->module > BCAL_NUM_MODULES)) {
-      sprintf(str, "Bad module # requested in DBCALHit_factory::GetConstant()! requested=%d , should be 1-%d", in_hit->module, BCAL_NUM_MODULES);
+   if ( (in_hit->module <= 0) || (in_hit->module > BCAL_NUM_MODULES)) {
+      sprintf(str, "Bad module # requested in DBCALHit_factory::GetConstant()!"
+                   " requested=%d , should be 1-%d", in_hit->module, BCAL_NUM_MODULES);
       cerr << str << endl;
       throw JException(str);
    }
-   if( (in_hit->layer <= 0) || (in_hit->layer > BCAL_NUM_LAYERS)) {
-      sprintf(str, "Bad layer # requested in DBCALHit_factory::GetConstant()! requested=%d , should be 1-%d", in_hit->layer, BCAL_NUM_LAYERS);
+   if ( (in_hit->layer <= 0) || (in_hit->layer > BCAL_NUM_LAYERS)) {
+      sprintf(str, "Bad layer # requested in DBCALHit_factory::GetConstant()!"
+                   " requested=%d , should be 1-%d", in_hit->layer, BCAL_NUM_LAYERS);
       cerr << str << endl;
       throw JException(str);
    }
-   if( (in_hit->sector <= 0) || (in_hit->sector > BCAL_NUM_SECTORS)) {
-      sprintf(str, "Bad sector # requested in DBCALHit_factory::GetConstant()! requested=%d , should be 1-%d", in_hit->sector, BCAL_NUM_SECTORS);
+   if ( (in_hit->sector <= 0) || (in_hit->sector > BCAL_NUM_SECTORS)) {
+      sprintf(str, "Bad sector # requested in DBCALHit_factory::GetConstant()!"
+                   " requested=%d , should be 1-%d", in_hit->sector, BCAL_NUM_SECTORS);
       cerr << str << endl;
       throw JException(str);
    }
-   if( (in_hit->end != DBCALGeometry::kUpstream) && (in_hit->end != DBCALGeometry::kDownstream) ) {
-      sprintf(str, "Bad end # requested in DBCALHit_factory::GetConstant()! requested=%d , should be 0-1", in_hit->end);
+   if ( (in_hit->end != DBCALGeometry::kUpstream) && 
+        (in_hit->end != DBCALGeometry::kDownstream) )
+   {
+      sprintf(str, "Bad end # requested in DBCALHit_factory::GetConstant()!"
+                   " requested=%d , should be 0-1", in_hit->end);
       cerr << str << endl;
       throw JException(str);
    }
 
    const int the_cell = DBCALGeometry::cellId(in_hit->module,
-                     in_hit->layer,
-                     in_hit->sector);
+                                              in_hit->layer,
+                                              in_hit->sector);
    
-   if(in_hit->end == DBCALGeometry::kUpstream) {
+   if (in_hit->end == DBCALGeometry::kUpstream) {
        // handle the upstream end
        return the_table.at(the_cell).first;
        //return the_table[the_cell].first;
@@ -272,37 +283,46 @@ const double DBCALHit_factory::GetConstant( const bcal_digi_constants_t &the_tab
 
 }
 
-const double DBCALHit_factory::GetConstant( const bcal_digi_constants_t &the_table, 
-                   const DBCALDigiHit *in_digihit) const
+const double DBCALHit_factory::GetConstant(const bcal_digi_constants_t &the_table, 
+                                           const DBCALDigiHit *in_digihit) const
 {
-       char str[256];
+   char str[256];
    
-   if( (in_digihit->module <= 0) || (in_digihit->module > BCAL_NUM_MODULES)) {
-      sprintf(str, "Bad module # requested in DBCALHit_factory::GetConstant()! requested=%d , should be 1-%d", in_digihit->module, BCAL_NUM_MODULES);
+   if ( (in_digihit->module <= 0) || (in_digihit->module > BCAL_NUM_MODULES)) {
+      sprintf(str, "Bad module # requested in DBCALHit_factory::GetConstant()!"
+                   " requested=%d , should be 1-%d", 
+              in_digihit->module, BCAL_NUM_MODULES);
       cerr << str << endl;
       throw JException(str);
    }
-   if( (in_digihit->layer <= 0) || (in_digihit->layer > BCAL_NUM_LAYERS)) {
-      sprintf(str, "Bad layer # requested in DBCALHit_factory::GetConstant()! requested=%d , should be 1-%d", in_digihit->layer, BCAL_NUM_LAYERS);
+   if ( (in_digihit->layer <= 0) || (in_digihit->layer > BCAL_NUM_LAYERS)) {
+      sprintf(str, "Bad layer # requested in DBCALHit_factory::GetConstant()!"
+                   " requested=%d , should be 1-%d",
+              in_digihit->layer, BCAL_NUM_LAYERS);
       cerr << str << endl;
       throw JException(str);
    }
-   if( (in_digihit->sector <= 0) || (in_digihit->sector > BCAL_NUM_SECTORS)) {
-      sprintf(str, "Bad sector # requested in DBCALHit_factory::GetConstant()! requested=%d , should be 1-%d", in_digihit->sector, BCAL_NUM_SECTORS);
+   if ( (in_digihit->sector <= 0) || (in_digihit->sector > BCAL_NUM_SECTORS)) {
+      sprintf(str, "Bad sector # requested in DBCALHit_factory::GetConstant()!"
+                   " requested=%d , should be 1-%d", 
+              in_digihit->sector, BCAL_NUM_SECTORS);
       cerr << str << endl;
       throw JException(str);
    }
-   if( (in_digihit->end != DBCALGeometry::kUpstream) && (in_digihit->end != DBCALGeometry::kDownstream) ) {
-      sprintf(str, "Bad end # requested in DBCALHit_factory::GetConstant()! requested=%d , should be 0-1", in_digihit->end);
+   if ( (in_digihit->end != DBCALGeometry::kUpstream) &&
+        (in_digihit->end != DBCALGeometry::kDownstream) )
+   {
+      sprintf(str, "Bad end # requested in DBCALHit_factory::GetConstant()!"
+                   " requested=%d , should be 0-1", in_digihit->end);
       cerr << str << endl;
       throw JException(str);
    }
 
    const int the_cell = DBCALGeometry::cellId(in_digihit->module,
-                     in_digihit->layer,
-                     in_digihit->sector);
+                                              in_digihit->layer,
+                                              in_digihit->sector);
    
-   if(in_digihit->end == DBCALGeometry::kUpstream) {
+   if (in_digihit->end == DBCALGeometry::kUpstream) {
        // handle the upstream end
        return the_table.at(the_cell).first;
    } else {
@@ -312,45 +332,55 @@ const double DBCALHit_factory::GetConstant( const bcal_digi_constants_t &the_tab
 
 }
 /*
-const double DBCALHit_factory::GetConstant( const bcal_digi_constants_t &the_table,
-                   const DTranslationTable *ttab,
-                   const int in_rocid, const int in_slot, const int in_channel) const {
-    
+const double DBCALHit_factory::GetConstant(const bcal_digi_constants_t &the_table,
+                                           const DTranslationTable *ttab,
+                                           const int in_rocid,
+                                           const int in_slot,
+                                           const int in_channel) const
+{
    char str[256];
    
    DTranslationTable::csc_t daq_index = { in_rocid, in_slot, in_channel };
    DTranslationTable::DChannelInfo channel_info = ttab->GetDetectorIndex(daq_index);
    
-   if( (channel_info.bcal.module <= 0) 
-       || (channel_info.bcal.module > static_cast<unsigned int>(BCAL_NUM_MODULES))) {
-      sprintf(str, "Bad module # requested in DBCALHit_factory::GetConstant()! requested=%d , should be 1-%d", channel_info.bcal.module, BCAL_NUM_MODULES);
+   if ( (channel_info.bcal.module <= 0) 
+       || (channel_info.bcal.module > static_cast<unsigned int>(BCAL_NUM_MODULES)))
+   {
+      sprintf(str, "Bad module # requested in DBCALHit_factory::GetConstant()!"
+                   " requested=%d , should be 1-%d", channel_info.bcal.module, BCAL_NUM_MODULES);
       cerr << str << endl;
       throw JException(str);
    }
-   if( (channel_info.bcal.layer <= 0) 
-       || (channel_info.bcal.layer > static_cast<unsigned int>(BCAL_NUM_LAYERS))) {
-      sprintf(str, "Bad layer # requested in DBCALHit_factory::GetConstant()! requested=%d , should be 1-%d", channel_info.bcal.layer, BCAL_NUM_LAYERS);
+   if ( (channel_info.bcal.layer <= 0) 
+       || (channel_info.bcal.layer > static_cast<unsigned int>(BCAL_NUM_LAYERS)))
+   {
+      sprintf(str, "Bad layer # requested in DBCALHit_factory::GetConstant()!"
+                   " requested=%d , should be 1-%d", channel_info.bcal.layer, BCAL_NUM_LAYERS);
       cerr << str << endl;
       throw JException(str);
    }
-   if( (channel_info.bcal.sector <= 0) 
-       || (channel_info.bcal.sector > static_cast<unsigned int>(BCAL_NUM_SECTORS))) {
-      sprintf(str, "Bad sector # requested in DBCALHit_factory::GetConstant()! requested=%d , should be 1-%d", channel_info.bcal.sector, BCAL_NUM_SECTORS);
+   if ( (channel_info.bcal.sector <= 0) 
+       || (channel_info.bcal.sector > static_cast<unsigned int>(BCAL_NUM_SECTORS)))
+   {
+      sprintf(str, "Bad sector # requested in DBCALHit_factory::GetConstant()!"
+                   " requested=%d , should be 1-%d", channel_info.bcal.sector, BCAL_NUM_SECTORS);
       cerr << str << endl;
       throw JException(str);
    }
-   if( (channel_info.bcal.end != DBCALGeometry::kUpstream) 
-       && (channel_info.bcal.end != DBCALGeometry::kDownstream) ) {
-      sprintf(str, "Bad end # requested in DBCALHit_factory::GetConstant()! requested=%d , should be 0-1", channel_info.bcal.end);
+   if ( (channel_info.bcal.end != DBCALGeometry::kUpstream) 
+       && (channel_info.bcal.end != DBCALGeometry::kDownstream) )
+   {
+      sprintf(str, "Bad end # requested in DBCALHit_factory::GetConstant()!"
+                   " requested=%d , should be 0-1", channel_info.bcal.end);
       cerr << str << endl;
       throw JException(str);
    }
 
    int the_cell = DBCALGeometry::cellId(channel_info.bcal.module,
-                    channel_info.bcal.layer,
-                    channel_info.bcal.sector);
+                                        channel_info.bcal.layer,
+                                        channel_info.bcal.sector);
    
-   if(channel_info.bcal.end == DBCALGeometry::kUpstream) {
+   if (channel_info.bcal.end == DBCALGeometry::kUpstream) {
        // handle the upstream end
        return the_table.at(the_cell).first;
    } else {
