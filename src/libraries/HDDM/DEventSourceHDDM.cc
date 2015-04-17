@@ -967,7 +967,7 @@ jerror_t DEventSourceHDDM::Extract_DBCALSiPMSpectrum(hddm_s::HDDM *record,
 		      t += bin_width;
 	      }
       }
-	      
+
       data.push_back(dana_spectrum);
    }
 
